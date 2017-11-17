@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: e-evaluation
+  data:
+    cassandra:
+      contact-points: 127.0.0.1
+      keyspace-name: ocds
+      port: 9042
+      username: cassandra
+      password: cassandra
+
+ocds.prefix: ocds-t1s2t3
