@@ -1,0 +1,25 @@
+{
+  "ocid":"ocds-213czf-000-00001",
+  "--rationale":"rationale",
+  "awards":
+  {
+    "id": "a1",
+    "date": "2017-10-25T15:00:01.23Z",
+    "status": "",
+    "statusDetails":"",
+    "relatedLots":[""],
+    "relatedBid":"",
+    "suppliers":
+    [{
+      "id":"",
+      "name":""
+    }],
+    "--documents":
+  [{
+    "id":"",
+    "title":"",
+    "url":"",
+    "documentType":""
+  }]
+  }
+}

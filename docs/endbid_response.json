@@ -1,0 +1,27 @@
+{
+  "ocid":"ocds-213czf-000-00001",
+  "awards":
+  [{
+    "id": "a1",
+    "date": "2017-10-25T15:00:01.23Z",
+    "status": "pending",
+    "relatedLots":["l4"],
+    "--relatedBid":"b1",
+    "--suppliers":
+    [{
+      "id":"string",
+      "name":"string"
+    }],
+    "--documents":
+    [{
+      "id":"string",
+      "title":"string",
+      "url":"http://www.example.com",
+      "documentType":"tenderNotice"
+    }]
+  }],
+  "lots":
+  [{
+    "id":"l1"
+  }]
+}
