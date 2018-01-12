@@ -3,16 +3,21 @@
   "--rationale":"rationale",
   "awards":
   {
-    "id": "a1",
+    "id": "7090f794-f13c-11e7-84e3-a5c30d98d0e0",
     "date": "2017-10-25T15:00:01.23Z",
-    "status": "",
-    "statusDetails":"",
-    "relatedLots":[""],
-    "relatedBid":"",
+    "status": "consideration",
+    "statusDetails":"active",
+    "relatedLots":["l4"],
+    "relatedBid":"b5",
+    "value":
+    {
+      "amount":"",
+      "currency":""
+    },
     "suppliers":
     [{
-      "id":"",
-      "name":""
+      "id":"string",
+      "name":"string"
     }],
     "--documents":
   [{

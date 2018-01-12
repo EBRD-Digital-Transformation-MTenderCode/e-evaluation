@@ -17,6 +17,7 @@ import lombok.Getter;
     "ocid",
     "country",
     "stage",
+    "awardCriteria",
     "procurementMethodDetails",
     "lots",
     "bids"
@@ -36,6 +37,10 @@ public class SelectionsRequestDto {
     @JsonProperty("stage")
     @NotNull
     private final String stage;
+
+    @JsonProperty("awardCriteria")
+    @NotNull
+    private final String awardCriteria;
 
     @JsonProperty("procurementMethodDetails")
     @JsonPropertyDescription("Additional detail on the procurement method used. This field may be used to provide the" +
@@ -63,12 +68,14 @@ public class SelectionsRequestDto {
     public SelectionsRequestDto(@JsonProperty("ocid") final String ocid,
                                 @JsonProperty("country") final String country,
                                 @JsonProperty("stage") final String stage,
+                                @JsonProperty("awardCriteria") final String awardCriteria,
                                 @JsonProperty("procurementMethodDetails") final String procurementMethodDetails,
                                 @JsonProperty("lots") final List<LotDto> lots,
                                 @JsonProperty("bids") final List<SelectionsRequestBidDto> bids) {
         this.ocid = ocid;
         this.country = country;
         this.stage = stage;
+        this.awardCriteria = awardCriteria;
         this.procurementMethodDetails = procurementMethodDetails;
         this.lots = lots;
         this.bids = bids;

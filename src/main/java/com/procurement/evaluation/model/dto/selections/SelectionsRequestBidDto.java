@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.procurement.evaluation.databinding.LocalDateTimeDeserializer;
 import com.procurement.evaluation.databinding.LocalDateTimeSerializer;
 import com.procurement.evaluation.model.dto.OrganizationReferenceDto;
+import com.procurement.evaluation.model.dto.Value;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.Valid;
@@ -25,6 +26,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
     "date",
     "pendingDate",
     "createdDate",
+    "value",
     "tenderers"
 })
 public class SelectionsRequestBidDto {
@@ -55,6 +57,11 @@ public class SelectionsRequestBidDto {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private final LocalDateTime createdDate;
 
+    @JsonProperty("value")
+    @NotNull
+    @Valid
+    private final Value value;
+
     @JsonProperty("tenderers")
     @JsonPropertyDescription("The party, or parties, responsible for this bid. This should provide a name and " +
         "identifier, cross-referenced to an entry in the parties array at the top level of the release.")
@@ -71,6 +78,7 @@ public class SelectionsRequestBidDto {
                                    @JsonProperty("pendingDate") final LocalDateTime pendingDate,
                                    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
                                    @JsonProperty("createdDate") final LocalDateTime createdDate,
+                                   @JsonProperty("value") final Value value,
                                    @JsonProperty("tenderers") final List<OrganizationReferenceDto> tenderers
     ) {
         this.id = id;
@@ -78,6 +86,7 @@ public class SelectionsRequestBidDto {
         this.date = date;
         this.pendingDate = pendingDate;
         this.createdDate = createdDate;
+        this.value = value;
         this.tenderers = tenderers;
     }
 
@@ -88,6 +97,7 @@ public class SelectionsRequestBidDto {
                                     .append(date)
                                     .append(pendingDate)
                                     .append(createdDate)
+                                    .append(value)
                                     .append(tenderers)
                                     .toHashCode();
     }
@@ -106,6 +116,7 @@ public class SelectionsRequestBidDto {
                                   .append(date, rhs.date)
                                   .append(pendingDate, rhs.pendingDate)
                                   .append(createdDate, rhs.createdDate)
+                                  .append(value,rhs.value)
                                   .append(tenderers, rhs.tenderers)
                                   .isEquals();
     }

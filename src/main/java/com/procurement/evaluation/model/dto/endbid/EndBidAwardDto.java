@@ -4,15 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.procurement.evaluation.databinding.LocalDateTimeDeserializer;
 import com.procurement.evaluation.model.dto.DocumentDto;
 import com.procurement.evaluation.model.dto.OrganizationReferenceDto;
+import com.procurement.evaluation.model.dto.Status;
+import com.procurement.evaluation.model.dto.Value;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -30,6 +29,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
     "statusDetails",
     "relatedLots",
     "relatedBid",
+    "value",
     "suppliers",
     "documents"
 })
@@ -52,6 +52,9 @@ public class EndBidAwardDto {
     @JsonProperty("relatedBid")
     private final String relatedBid;
 
+    @JsonProperty("value")
+    private final Value value;
+
     @JsonProperty("suppliers")
     private final List<OrganizationReferenceDto> suppliers;
 
@@ -72,6 +75,9 @@ public class EndBidAwardDto {
                           @NotEmpty @JsonProperty("relatedLots") final List<String> relatedLots,
                           @JsonInclude(JsonInclude.Include.NON_NULL)
                           @JsonProperty("relatedBid") final String relatedBid,
+                          @JsonProperty("value")
+                          @JsonInclude(JsonInclude.Include.NON_NULL)
+                          @Valid final Value value,
                           @Valid
                           @JsonInclude(JsonInclude.Include.NON_NULL)
                           @JsonProperty("suppliers") final List<OrganizationReferenceDto> suppliers,
@@ -84,6 +90,7 @@ public class EndBidAwardDto {
         this.status = status;
         this.statusDetails = statusDetails;
         this.relatedBid = relatedBid;
+        this.value = value;
         this.suppliers = suppliers;
         this.documents = documents;
         this.relatedLots = relatedLots;
@@ -98,6 +105,7 @@ public class EndBidAwardDto {
                                     .append(documents)
                                     .append(relatedLots)
                                     .append(relatedBid)
+                                    .append(value)
                                     .toHashCode();
     }
 
@@ -117,46 +125,7 @@ public class EndBidAwardDto {
                                   .append(documents, rhs.documents)
                                   .append(relatedLots, rhs.relatedLots)
                                   .append(relatedBid, rhs.relatedBid)
+                                  .append(value,rhs.value)
                                   .isEquals();
-    }
-
-    public enum Status {
-        PENDING("pending"),
-        ACTIVE("active"),
-        UNSUCCESSFUL("unsuccessful");
-
-        private static final Map<String, Status> CONSTANTS = new HashMap<>();
-
-        static {
-            for (final Status c : values()) {
-                CONSTANTS.put(c.value, c);
-            }
-        }
-
-        private final String value;
-
-        Status(final String value) {
-            this.value = value;
-        }
-
-        @JsonCreator
-        public static Status fromValue(final String value) {
-            final Status constant = CONSTANTS.get(value);
-            if (constant == null) {
-                throw new IllegalArgumentException(value);
-            }
-            return constant;
-        }
-
-        @Override
-        public String toString() {
-            return this.value;
-        }
-
-        @JsonValue
-        public String value() {
-            return this.value;
-        }
-
     }
 }

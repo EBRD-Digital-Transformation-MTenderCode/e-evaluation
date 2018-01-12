@@ -8,33 +8,28 @@ import com.procurement.evaluation.model.dto.AwardPeriodDto;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 @JsonPropertyOrder({
     "ocid",
     "awardPeriod",
     "rationale",
     "awards"
 })
-public class AwardDto {
+public class AwardResponseDto {
     @JsonProperty("ocid")
-    @NotNull
-    private final String ocid;
+    private  String ocid;
     @JsonProperty("awardPeriod")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private final AwardPeriodDto awardPeriod;
-
+    private  AwardPeriodDto awardPeriod;
     @JsonProperty("awards")
-    @NotNull
-    @Valid
-    private final List<AwardBidDto> awards;
+    private  List<AwardBidDto> awards;
     @JsonProperty("rationale")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String rationale;
 
     @JsonCreator
-    public AwardDto(
+    public AwardResponseDto(
         @NotNull
         @JsonProperty("ocid") final String ocid,
         @NotNull
