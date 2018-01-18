@@ -1,9 +1,5 @@
 {
-  "ocid":"ocds-213czf-000-00001",
-  "country":"UA",
-  "stage":"string",
-  "awardCriteria":"",
-  "procurementMethodDetails":"micro",
+
   "lots": [
     {
       "id": "l1"

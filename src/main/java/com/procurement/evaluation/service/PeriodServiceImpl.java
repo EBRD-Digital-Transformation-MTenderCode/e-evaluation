@@ -28,7 +28,7 @@ public class PeriodServiceImpl implements PeriodService {
    /* @Override
     public PeriodResponseDto getAwards(final PeriodDto dataDto) {
 
-        final String ocId = dataDto.getOcid();
+        final String ocId = dataDto.getCpId();
 
         saveEndOfPeriod(ocId, dataDto.getTender()
                                      .getAwardPeriod()

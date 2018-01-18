@@ -11,7 +11,6 @@ import com.procurement.evaluation.model.dto.selections.SelectionsResponseDto;
 import com.procurement.evaluation.utils.DateUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -48,7 +47,7 @@ public class SelectionsServiceImpl implements SelectionsService {
 
         final int minNumberOfBids = getBidsRule(dataDto);
 
-        final String ocid = dataDto.getOcid();
+        final String ocid = dataDto.getCpId();
 
         final LocalDateTime addedDate = dateUtil.getNowUTC();
 
@@ -79,17 +78,15 @@ public class SelectionsServiceImpl implements SelectionsService {
 
         awards.addAll(getUnsuccessfulAwards(unsuccessfulLots));
 
-
-        final AwardPeriodDto periodDto = periodService.saveStartOfPeriod(dataDto.getOcid(), addedDate);
-
+        final AwardPeriodDto periodDto = periodService.saveStartOfPeriod(dataDto.getCpId(), addedDate);
 
         awardService.saveAwards(awards, ocid);
 
-        final SelectionsResponseDto responseDto = new SelectionsResponseDto(ocid,
-                                                                            "rationale",
-                                                                            periodDto,
-                                                                            awards,
-                                                                            fillLotDto(unsuccessfulLots));
+        final SelectionsResponseDto responseDto = new SelectionsResponseDto(
+            "rationale",
+            periodDto,
+            awards,
+            fillLotDto(unsuccessfulLots));
 
         return responseDto;
     }
@@ -177,9 +174,10 @@ public class SelectionsServiceImpl implements SelectionsService {
                     .toString();
     }
 
-    private void setAwardIds(List<SelectionsResponseAwardDto> awards){
+    private void setAwardIds(List<SelectionsResponseAwardDto> awards) {
         for (int i = 0; i < awards.size(); i++) {
-            awards.get(i).setId(generateAwardId());
+            awards.get(i)
+                  .setId(generateAwardId());
         }
     }
 
@@ -223,31 +221,31 @@ public class SelectionsServiceImpl implements SelectionsService {
         return awards;
     }
 
-    private void sortSuccessfulAwards(List<SelectionsResponseAwardDto> awards){
-        Collections.sort(awards,new SortedByValue());
+    private void sortSuccessfulAwards(List<SelectionsResponseAwardDto> awards) {
+        Collections.sort(awards, new SortedByValue());
     }
 
-    private void setStatusConsideration(List<SelectionsResponseAwardDto> awards){
-        awards.get(0).setStatus(Status.CONSIDERATION);
+    private void setStatusConsideration(List<SelectionsResponseAwardDto> awards) {
+        awards.get(0)
+              .setStatus(Status.CONSIDERATION);
     }
 
     private class SortedByValue implements Comparator<SelectionsResponseAwardDto> {
 
         public int compare(SelectionsResponseAwardDto obj1, SelectionsResponseAwardDto obj2) {
 
-            double val1 = obj1.getValue().getAmount();
-            double val2 = obj2.getValue().getAmount();
+            double val1 = obj1.getValue()
+                              .getAmount();
+            double val2 = obj2.getValue()
+                              .getAmount();
 
-            if(val1 > val2) {
+            if (val1 > val2) {
                 return 1;
-            }
-            else if(val1 < val2) {
+            } else if (val1 < val2) {
                 return -1;
-            }
-            else {
+            } else {
                 return 0;
             }
         }
     }
-
 }

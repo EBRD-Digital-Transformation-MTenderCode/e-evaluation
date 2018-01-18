@@ -15,16 +15,12 @@ import lombok.NonNull;
 
 @Data
 @JsonPropertyOrder({
-    "ocid",
     "rationale",
     "awardPeriod",
     "awards",
     "lots"
 })
 public class SelectionsResponseDto {
-
-    @JsonProperty("ocid")
-    private final String ocid;
 
     @JsonProperty("rationale")
     private final String rationale;
@@ -39,9 +35,7 @@ public class SelectionsResponseDto {
     private final List<LotDto> lots;
 
     @JsonCreator
-    public SelectionsResponseDto(@NotNull
-        @JsonProperty("ocid") final String ocid,
-                                 @JsonInclude(JsonInclude.Include.NON_NULL)
+    public SelectionsResponseDto(@JsonInclude(JsonInclude.Include.NON_NULL)
                                  @JsonProperty("rationale") final String rationale,
                                  @NotNull
                                  @Valid
@@ -51,7 +45,7 @@ public class SelectionsResponseDto {
                                  @JsonProperty("awards") final List<SelectionsResponseAwardDto> awards,
                                  @NotEmpty
                                  @JsonProperty("lots") final List<LotDto> lots) {
-        this.ocid = ocid;
+
         this.rationale = rationale;
         this.period = period;
         this.awards = awards;
