@@ -80,7 +80,7 @@ public class SelectionsServiceImpl implements SelectionsService {
 
         final AwardPeriodDto periodDto = periodService.saveStartOfPeriod(dataDto.getCpId(), addedDate);
 
-        awardService.saveAwards(awards, ocid);
+        awardService.saveAwards(awards, ocid, dataDto.getStage(), dataDto.getOwner());
 
         final SelectionsResponseDto responseDto = new SelectionsResponseDto(
             "rationale",
@@ -174,7 +174,7 @@ public class SelectionsServiceImpl implements SelectionsService {
                     .toString();
     }
 
-    private void setAwardIds(List<SelectionsResponseAwardDto> awards) {
+    private void setAwardIds(final List<SelectionsResponseAwardDto> awards) {
         for (int i = 0; i < awards.size(); i++) {
             awards.get(i)
                   .setId(generateAwardId());
@@ -221,22 +221,22 @@ public class SelectionsServiceImpl implements SelectionsService {
         return awards;
     }
 
-    private void sortSuccessfulAwards(List<SelectionsResponseAwardDto> awards) {
+    private void sortSuccessfulAwards(final List<SelectionsResponseAwardDto> awards) {
         Collections.sort(awards, new SortedByValue());
     }
 
-    private void setStatusConsideration(List<SelectionsResponseAwardDto> awards) {
+    private void setStatusConsideration(final List<SelectionsResponseAwardDto> awards) {
         awards.get(0)
               .setStatus(Status.CONSIDERATION);
     }
 
     private class SortedByValue implements Comparator<SelectionsResponseAwardDto> {
 
-        public int compare(SelectionsResponseAwardDto obj1, SelectionsResponseAwardDto obj2) {
+        public int compare(final SelectionsResponseAwardDto obj1, final SelectionsResponseAwardDto obj2) {
 
-            double val1 = obj1.getValue()
+            final double val1 = obj1.getValue()
                               .getAmount();
-            double val2 = obj2.getValue()
+            final double val2 = obj2.getValue()
                               .getAmount();
 
             if (val1 > val2) {

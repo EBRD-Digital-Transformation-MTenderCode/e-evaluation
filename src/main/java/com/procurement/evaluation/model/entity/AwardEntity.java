@@ -21,6 +21,15 @@ public class AwardEntity {
     @Column(value = "json_data")
     private String jsonData;
 
+    @Column(value = "award_status_details")
+    private String statusDetails;
+
     @Column(value = "award_status")
     private String status;
+
+    @Column(value = "stage")
+    private String stage;
+
+    @Column(value = "owner")
+    private String owner;
 }

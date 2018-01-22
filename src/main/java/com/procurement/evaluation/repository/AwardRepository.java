@@ -1,4 +1,5 @@
 package com.procurement.evaluation.repository;
+
 import com.procurement.evaluation.model.entity.AwardEntity;
 import java.util.List;
 import java.util.UUID;

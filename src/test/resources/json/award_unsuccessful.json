@@ -8,10 +8,9 @@
     "relatedLots": [
       "l4"
     ],
-    "value":
-    {
-      "amount":750.02,
-      "currency":"UAH"
+    "value": {
+      "amount": 750.02,
+      "currency": "UAH"
     },
     "relatedBid": "b5",
     "suppliers": [

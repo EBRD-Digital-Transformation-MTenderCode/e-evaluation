@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto.award;
+package com.procurement.evaluation.model.dto.endbid;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +28,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 @JsonPropertyOrder({
     "id",
     "date",
+    "description",
     "status",
     "statusDetails",
     "relatedLots",
@@ -36,29 +37,19 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
     "suppliers",
     "documents"
 })
-public class AwardBidDto {
+public class EndBidAwardRSDto {
     @JsonProperty("id")
     @NotNull
-    private String id;
+    private final String id;
 
     @JsonProperty("date")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @NotNull
     @Valid
     private final LocalDateTime startDate;
-
-    @JsonProperty("status")
-    @JsonPropertyDescription("The current status of the award drawn from the [awardStatus codelist](http://standard" +
-        ".open-contracting.org/latest/en/schema/codelists/#award-status)")
-    @NotNull
-    @Valid
-    private Status status;
-
-    @JsonProperty("statusDetails")
-    @NotNull
-    @Valid
-    private Status statusDetails;
-
+    @JsonProperty("description")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final String description;
     @JsonProperty("relatedLots")
     @JsonPropertyDescription("If this award relates to one or more specific lots, provide the identifier(s) of the " +
         "related lot(s) here.")
@@ -82,52 +73,66 @@ public class AwardBidDto {
     @Valid
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final List<DocumentDto> documents;
+    @JsonProperty("status")
+    @JsonPropertyDescription("The current status of the award drawn from the [awardStatus codelist](http://standard" +
+        ".open-contracting.org/latest/en/schema/codelists/#award-status)")
+    @NotNull
+    @Valid
+    private Status status;
+    @JsonProperty("statusDetails")
+    @JsonPropertyDescription("The current status of the award drawn from the [awardStatus codelist](http://standard" +
+        ".open-contracting.org/latest/en/schema/codelists/#award-status)")
+    @NotNull
+    @Valid
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Status statusDetails;
 
     @JsonCreator
-    public AwardBidDto(@NotNull @JsonProperty("id") final String id,
-                       @JsonProperty("date") @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-                       @NotNull
-                       @Valid final LocalDateTime startDate,
-                       @NotNull
-                       @Valid
-                       @JsonProperty("status") final Status status,
-                       @NotNull
-                       @Valid
-                       @JsonProperty("statusDetails") final Status statusDetails,
-                       @NotEmpty @JsonProperty("relatedLots") final List<String> relatedLots,
-                       @NotNull
-                       @JsonProperty("relatedBid") final String relatedBid,
-                       @JsonProperty("value")
-                       @NotNull
-                       @Valid final Value value,
-                       @Valid
-                       @NotEmpty
-                       @JsonProperty("suppliers") final List<OrganizationReferenceDto> suppliers,
-                       @JsonInclude(JsonInclude.Include.NON_NULL)
-                       @Valid
-                       @JsonProperty("documents") final List<DocumentDto> documents
+    public EndBidAwardRSDto(@NotNull @JsonProperty("id") final String id,
+                            @JsonProperty("date") @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+                            @NotNull
+                            @Valid final LocalDateTime startDate,
+                            @JsonInclude(JsonInclude.Include.NON_NULL)
+                            @JsonProperty("description") final String description,
+                            @NotNull
+                            @Valid
+                            @JsonProperty("status") final Status status,
+                            @JsonInclude(JsonInclude.Include.NON_NULL)
+                            @JsonProperty("statusDetails") final Status statusDetails,
+                            @NotEmpty @JsonProperty("relatedLots") final List<String> relatedLots,
+                            @NotNull
+                            @JsonProperty("relatedBid") final String relatedBid,
+                            @JsonProperty("value")
+                            @NotNull
+                            @Valid final Value value,
+                            @Valid
+                            @NotEmpty
+                            @JsonProperty("suppliers") final List<OrganizationReferenceDto> suppliers,
+                            @JsonInclude(JsonInclude.Include.NON_NULL)
+                            @Valid
+                            @JsonProperty("documents") final List<DocumentDto> documents
     ) {
         this.id = id;
         this.startDate = startDate;
         this.status = status;
-        this.statusDetails = statusDetails;
         this.relatedBid = relatedBid;
         this.value = value;
         this.suppliers = suppliers;
         this.documents = documents;
         this.relatedLots = relatedLots;
+        this.description = description;
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(id)
                                     .append(status)
-                                    .append(statusDetails)
                                     .append(suppliers)
                                     .append(documents)
                                     .append(relatedLots)
                                     .append(relatedBid)
                                     .append(value)
+                                    .append(description)
                                     .toHashCode();
     }
 
@@ -136,10 +141,10 @@ public class AwardBidDto {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof AwardBidDto)) {
+        if (!(other instanceof EndBidAwardRSDto)) {
             return false;
         }
-        final AwardBidDto rhs = (AwardBidDto) other;
+        final EndBidAwardRSDto rhs = (EndBidAwardRSDto) other;
         return new EqualsBuilder().append(id, rhs.id)
                                   .append(status, rhs.status)
                                   .append(statusDetails, rhs.statusDetails)
@@ -148,6 +153,7 @@ public class AwardBidDto {
                                   .append(relatedLots, rhs.relatedLots)
                                   .append(relatedBid, rhs.relatedBid)
                                   .append(value, rhs.value)
+                                  .append(description, rhs.description)
                                   .isEquals();
     }
 }

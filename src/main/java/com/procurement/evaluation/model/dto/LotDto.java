@@ -22,8 +22,7 @@ public class LotDto {
     @JsonCreator
     public LotDto(
         @NotEmpty
-        @JsonProperty("id")
-        final String id) {
+        @JsonProperty("id") final String id) {
         this.id = id;
     }
 

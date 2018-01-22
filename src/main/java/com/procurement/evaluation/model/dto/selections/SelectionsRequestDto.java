@@ -9,24 +9,19 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 @JsonPropertyOrder({
+    "owner",
     "lots",
     "bids"
 })
 public class SelectionsRequestDto {
 
-    private  String cpId;
-    private  String country;
-    private  String stage;
-    private  String awardCriteria;
-    private  String procurementMethodDetails;
-
+    @JsonProperty("owner")
+    @NotNull
+    private final String owner;
     @JsonProperty("lots")
     @JsonPropertyDescription("A tender process may be divided into lots, where bidders can bid on one or more lots. " +
         "Details of each lot can be provided here. Items, documents and other features can then reference the lot " +
@@ -37,15 +32,21 @@ public class SelectionsRequestDto {
     @Valid
     @NotEmpty
     private final List<LotDto> lots;
-
     @JsonProperty("bids")
     @NotEmpty
     @Valid
     private final List<SelectionsRequestBidDto> bids;
+    private String cpId;
+    private String country;
+    private String stage;
+    private String awardCriteria;
+    private String procurementMethodDetails;
 
     @JsonCreator
-    public SelectionsRequestDto(@JsonProperty("lots") final List<LotDto> lots,
+    public SelectionsRequestDto(@JsonProperty("owner") final String owner,
+                                @JsonProperty("lots") final List<LotDto> lots,
                                 @JsonProperty("bids") final List<SelectionsRequestBidDto> bids) {
+        this.owner = owner;
         this.lots = lots;
         this.bids = bids;
     }

@@ -1,5 +1,5 @@
 {
-
+  "owner": "123456",
   "lots": [
     {
       "id": "l1"
@@ -23,10 +23,9 @@
       "date": "2017-10-25T15:00:01.23Z",
       "pendingDate": "2017-10-25T15:00:01.23Z",
       "createdDate": "2017-10-25T15:00:01.23Z",
-      "value":
-      {
-        "amount":"1000",
-        "currency":"UAH"
+      "value": {
+        "amount": "1000",
+        "currency": "UAH"
       },
       "tenderers": [
         {
@@ -43,10 +42,9 @@
       "date": "2017-10-25T15:00:01.23Z",
       "pendingDate": "2017-10-25T15:00:01.23Z",
       "createdDate": "2017-10-25T15:00:01.23Z",
-      "value":
-      {
-        "amount":"2000",
-        "currency":"UAH"
+      "value": {
+        "amount": "2000",
+        "currency": "UAH"
       },
       "tenderers": [
         {
@@ -63,10 +61,9 @@
       "date": "2017-10-25T15:00:01.23Z",
       "pendingDate": "2017-10-25T15:00:01.23Z",
       "createdDate": "2017-10-25T15:00:01.23Z",
-      "value":
-      {
-        "amount":"3000",
-        "currency":"UAH"
+      "value": {
+        "amount": "3000",
+        "currency": "UAH"
       },
       "tenderers": [
         {
@@ -83,10 +80,9 @@
       "date": "2017-10-25T15:00:01.23Z",
       "pendingDate": "2017-10-25T15:00:01.23Z",
       "createdDate": "2017-10-25T15:00:01.23Z",
-      "value":
-      {
-        "amount":"750.02",
-        "currency":"UAH"
+      "value": {
+        "amount": "750.02",
+        "currency": "UAH"
       },
       "tenderers": [
         {
@@ -103,10 +99,9 @@
       "date": "2017-10-25T15:00:01.23Z",
       "pendingDate": "2017-10-25T15:00:01.23Z",
       "createdDate": "2017-10-25T15:00:01.23Z",
-      "value":
-      {
-        "amount":"750.01",
-        "currency":"UAH"
+      "value": {
+        "amount": "750.01",
+        "currency": "UAH"
       },
       "tenderers": [
         {
@@ -123,10 +118,9 @@
       "date": "2017-10-25T15:00:01.23Z",
       "pendingDate": "2017-10-25T15:00:01.23Z",
       "createdDate": "2017-10-25T15:00:01.23Z",
-      "value":
-      {
-        "amount":"650",
-        "currency":"UAH"
+      "value": {
+        "amount": "650",
+        "currency": "UAH"
       },
       "tenderers": [
         {
@@ -143,10 +137,9 @@
       "date": "2017-10-25T15:00:01.23Z",
       "pendingDate": "2017-10-25T15:00:01.23Z",
       "createdDate": "2017-10-25T15:00:01.23Z",
-      "value":
-      {
-        "amount":"550",
-        "currency":"UAH"
+      "value": {
+        "amount": "550",
+        "currency": "UAH"
       },
       "tenderers": [
         {

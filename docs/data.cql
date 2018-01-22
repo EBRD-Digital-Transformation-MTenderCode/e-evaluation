@@ -19,8 +19,11 @@ CREATE TABLE IF NOT EXISTS  ocds.evaluation_period (
 
 CREATE TABLE IF NOT EXISTS  ocds.evaluation_award (
     oc_id text,
+    owner text,
     award_id UUID,
-    json_data text,
+    stage text,
     award_status text,
+    award_status_details text,
+    json_data text,
     primary key(oc_id, award_id)
 );

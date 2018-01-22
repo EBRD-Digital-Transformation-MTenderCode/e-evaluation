@@ -1,24 +1,6 @@
 {
-  "ocid": "ocds-213czf-000-00001",
   "awards": {
-    "id": "b2469630-f22d-11e7-a64f-efe54c38eef2",
-    "date": "2017-10-25T15:00:01.23Z",
-    "status": "consideration",
-    "statusDetails": "active",
-    "relatedLots": [
-      "l4"
-    ],
-    "value":
-    {
-      "amount":750.01,
-      "currency":"UAH"
-    },
-    "relatedBid": "b5",
-    "suppliers": [
-      {
-        "id": "string",
-        "name": "string"
-      }
-    ]
+    "id": "8c46fda0-fd16-11e7-a3ba-0fa200ab6f3b",
+    "statusDetails": "active"
   }
 }

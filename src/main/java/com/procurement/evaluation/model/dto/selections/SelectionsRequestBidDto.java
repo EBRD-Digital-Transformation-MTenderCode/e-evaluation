@@ -116,7 +116,7 @@ public class SelectionsRequestBidDto {
                                   .append(date, rhs.date)
                                   .append(pendingDate, rhs.pendingDate)
                                   .append(createdDate, rhs.createdDate)
-                                  .append(value,rhs.value)
+                                  .append(value, rhs.value)
                                   .append(tenderers, rhs.tenderers)
                                   .isEquals();
     }

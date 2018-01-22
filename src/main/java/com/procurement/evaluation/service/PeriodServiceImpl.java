@@ -1,5 +1,9 @@
 package com.procurement.evaluation.service;
+
 import com.procurement.evaluation.model.dto.AwardPeriodDto;
+import com.procurement.evaluation.model.dto.Status;
+import com.procurement.evaluation.model.dto.bpe.ResponseDto;
+import com.procurement.evaluation.model.dto.endbid.EndBidAwardRSDto;
 import com.procurement.evaluation.model.entity.AwardEntity;
 import com.procurement.evaluation.model.entity.AwardPeriodEntity;
 import com.procurement.evaluation.repository.AwardRepository;
@@ -25,29 +29,6 @@ public class PeriodServiceImpl implements PeriodService {
         this.jsonUtil = jsonUtil;
     }
 
-   /* @Override
-    public PeriodResponseDto getAwards(final PeriodDto dataDto) {
-
-        final String ocId = dataDto.getCpId();
-
-        saveEndOfPeriod(ocId, dataDto.getTender()
-                                     .getAwardPeriod()
-                                     .getEndDate());
-
-        final AwardPeriodEntity awardPeriodEntity = periodRepository.getByOcId(ocId);
-
-        final AwardPeriodDto awardPeriodDto = new AwardPeriodDto(awardPeriodEntity.getStartDate(), awardPeriodEntity
-            .getEndDate());
-
-        final List<AwardEntity> awardPeriodEntities = awardRepository.selectAwardsEntityByOcid(ocId);
-
-        final List<AwardBidsResponseDto> awardBidsResponseDtos = getAwardsDtoFromEntity(awardPeriodEntities);
-
-        final PeriodResponseDto responseDto = new PeriodResponseDto(ocId, awardPeriodDto, awardBidsResponseDtos, null);
-
-        return responseDto;
-    }*/
-
     @Override
     public AwardPeriodDto saveStartOfPeriod(final String ocId, final LocalDateTime startDate) {
         AwardPeriodEntity periodEntity = new AwardPeriodEntity();
@@ -58,6 +39,7 @@ public class PeriodServiceImpl implements PeriodService {
                                                                  periodEntity.getEndDate());
         return awardPeriodDto;
     }
+
     @Override
     public AwardPeriodDto saveEndOfPeriod(final String ocId, final LocalDateTime endDate) {
         final AwardPeriodEntity periodEntity = periodRepository.getByOcId(ocId);
@@ -68,39 +50,42 @@ public class PeriodServiceImpl implements PeriodService {
         return awardPeriodDto;
     }
 
-    /*
-
-
-
     @Override
-    public boolean isAllAwardsAreValid(final List<AwardBidsResponseDto> awards) {
+    public ResponseDto endPeriod(final String cpId, final LocalDateTime endPeriod) {
+        final AwardPeriodEntity periodEntity = periodRepository.getByOcId(cpId);
+        periodEntity.setEndDate(endPeriod);
+        periodRepository.save(periodEntity);
 
-        for (int i = 0; i < awards.size(); i++) {
-            if (isAwardStatusDetailsOk(awards.get(i))) {
-                return false;
+        final List<AwardEntity> awardEntities = awardRepository.selectAwardsEntityByOcid(cpId);
+
+        for (int i = 0; i < awardEntities.size(); i++) {
+            if (awardEntities.get(i)
+                             .getStatusDetails() != null) {
+                awardEntities.get(i)
+                             .setStatus(awardEntities.get(i)
+                                                     .getStatusDetails());
+                awardRepository.save(awardEntities.get(i));
             }
+
+            final List<EndBidAwardRSDto> awardBidRSDtos = getAwardsDtoFromEntity(awardEntities);
+
+            return new ResponseDto(true, null, awardBidRSDtos);
         }
-        return true;
+        return null;
     }
 
-    @Override
-    public String getErrorMessageFromAwards(final List<AwardBidsResponseDto> awards) {
-        String message = "";
-        for (int i = 0; i < awards.size(); i++) {
-            if (isAwardStatusDetailsOk(awards.get(i))) {
-                message += awards.get(i)
-                                 .getId() + " without status details; ";
-            }
+    private List<EndBidAwardRSDto> getAwardsDtoFromEntity(final List<AwardEntity> awardEntities) {
+        final List<EndBidAwardRSDto> awardBidRSDtos = new ArrayList<>();
+        for (int i = 0; i < awardEntities.size(); i++) {
+            final EndBidAwardRSDto bidAwardRSDto = jsonUtil.toObject(EndBidAwardRSDto.class, awardEntities.get(i)
+                                                                                                          .getJsonData());
+            bidAwardRSDto.setStatus(Status.fromValue(awardEntities.get(i)
+                                                                  .getStatus()));
+            bidAwardRSDto.setStatusDetails(null);
+
+            awardBidRSDtos.add(bidAwardRSDto);
         }
-        return message;
+
+        return awardBidRSDtos;
     }
-
-    private boolean isAwardStatusDetailsOk(AwardBidsResponseDto awardBidsResponseDto){
-        if (awardBidsResponseDto.getStatus()!=AwardBidsResponseDto.Status.UNSUCCESSFUL &&
-            awardBidsResponseDto.getStatusDetails()==null){
-            return false;
-        }
-        return true;
-
-    }*/
 }

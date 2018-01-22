@@ -1,4 +1,5 @@
 package com.procurement.evaluation.repository;
+
 import com.procurement.evaluation.model.entity.RulesEntity;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
