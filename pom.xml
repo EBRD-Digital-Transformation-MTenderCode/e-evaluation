@@ -5,7 +5,7 @@
 
     <groupId>com.procurement</groupId>
     <artifactId>e-evaluation</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>17.12.1</version>
     <packaging>jar</packaging>
 
     <name>e-evaluation</name>
@@ -19,7 +19,8 @@
     </parent>
 
     <properties>
-        <project.service.port>8900</project.service.port>
+        <final-artifact-name>${project.artifactId}-${project.version}</final-artifact-name>
+        <project.service.port>8700</project.service.port>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -29,6 +30,8 @@
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>2.19</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>2.19</maven-failsafe-plugin.version>
+        <docker-maven-plugin.version>0.23.0</docker-maven-plugin.version>
+        <docker-registry>docker-registry.eprocurement.systems</docker-registry>
     </properties>
 
     <profiles>
@@ -263,6 +266,26 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker-maven-plugin.version}</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <registry>${docker-registry}</registry>
+                            <name>${docker-registry}/${project.artifactId}:${project.version}</name>
+                            <build>
+                                <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
+                                <nocache/>
+                                <assembly>
+                                    <descriptorRef>artifact</descriptorRef>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
