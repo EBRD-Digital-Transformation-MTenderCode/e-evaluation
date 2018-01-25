@@ -18,7 +18,7 @@ docker run -d --name=evaluation-1 \
   --env __PROP_spring_cloud_config_uri= \
   --env __PROP_spring_profiles_active= \
   --env __PROP_spring_cloud_config_label= \
-  --publish 8080:8080 \
+  --publish 9081:8080 \
   --network ocds-network \
   --dns 10.0.10.115 \
   docker-registry.eprocurement.systems/e-evaluation:17.12.1
