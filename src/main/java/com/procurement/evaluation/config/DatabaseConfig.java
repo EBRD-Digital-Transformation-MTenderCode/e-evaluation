@@ -8,6 +8,6 @@ import org.springframework.data.cassandra.repository.config.EnableCassandraRepos
 @Configuration
 @ComponentScan(basePackages = "com.procurement.evaluation.model.entity")
 @EnableCassandraRepositories(basePackages = "com.procurement.evaluation.repository")
-public class DatabaseMappingConfig {
+public class DatabaseConfig {
 
 }
