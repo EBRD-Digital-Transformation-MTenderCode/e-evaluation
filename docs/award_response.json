@@ -1,0 +1,35 @@
+{
+  "ocid":"ocds-213czf-000-00001",
+  "--rationale":"rationale",
+  "awardPeriod":
+  {
+    "startDate":"2017-10-25T15:00:01.23Z",
+    "--endDate":"2017-10-25T15:00:01.23Z"
+  },
+  "awards":
+  [{
+    "id": "a1",
+    "date": "2017-10-25T15:00:01.23Z",
+    "status": "pending",
+    "statusDetails":"pending",
+    "relatedLots":["l1"],
+    "relatedBid":"b1",
+    "value":
+    {
+      "amount":"",
+      "currency":""
+    },
+    "suppliers":
+    [{
+      "id": "string",
+      "name": "string"
+    }],
+    "--documents":
+    [{
+      "id":"string",
+      "title":"string",
+      "url":"http://www.example.com",
+      "documentType":"tenderNotice"
+    }]
+  }]
+}

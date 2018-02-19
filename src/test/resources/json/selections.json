@@ -1,0 +1,152 @@
+{
+  "owner": "123456",
+  "lots": [
+    {
+      "id": "l1"
+    },
+    {
+      "id": "l2"
+    },
+    {
+      "id": "l3"
+    },
+    {
+      "id": "l5"
+    }
+  ],
+  "bids": [
+    {
+      "id": "b1",
+      "relatedLots": [
+        "l4"
+      ],
+      "date": "2017-10-25T15:00:01.23Z",
+      "pendingDate": "2017-10-25T15:00:01.23Z",
+      "createdDate": "2017-10-25T15:00:01.23Z",
+      "value": {
+        "amount": "1000",
+        "currency": "UAH"
+      },
+      "tenderers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    },
+    {
+      "id": "b2",
+      "relatedLots": [
+        "l4"
+      ],
+      "date": "2017-10-25T15:00:01.23Z",
+      "pendingDate": "2017-10-25T15:00:01.23Z",
+      "createdDate": "2017-10-25T15:00:01.23Z",
+      "value": {
+        "amount": "2000",
+        "currency": "UAH"
+      },
+      "tenderers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    },
+    {
+      "id": "b3",
+      "relatedLots": [
+        "l4"
+      ],
+      "date": "2017-10-25T15:00:01.23Z",
+      "pendingDate": "2017-10-25T15:00:01.23Z",
+      "createdDate": "2017-10-25T15:00:01.23Z",
+      "value": {
+        "amount": "3000",
+        "currency": "UAH"
+      },
+      "tenderers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    },
+    {
+      "id": "b4",
+      "relatedLots": [
+        "l4"
+      ],
+      "date": "2017-10-25T15:00:01.23Z",
+      "pendingDate": "2017-10-25T15:00:01.23Z",
+      "createdDate": "2017-10-25T15:00:01.23Z",
+      "value": {
+        "amount": "750.02",
+        "currency": "UAH"
+      },
+      "tenderers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    },
+    {
+      "id": "b5",
+      "relatedLots": [
+        "l4"
+      ],
+      "date": "2017-10-25T15:00:01.23Z",
+      "pendingDate": "2017-10-25T15:00:01.23Z",
+      "createdDate": "2017-10-25T15:00:01.23Z",
+      "value": {
+        "amount": "750.01",
+        "currency": "UAH"
+      },
+      "tenderers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    },
+    {
+      "id": "b6",
+      "relatedLots": [
+        "l5"
+      ],
+      "date": "2017-10-25T15:00:01.23Z",
+      "pendingDate": "2017-10-25T15:00:01.23Z",
+      "createdDate": "2017-10-25T15:00:01.23Z",
+      "value": {
+        "amount": "650",
+        "currency": "UAH"
+      },
+      "tenderers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    },
+    {
+      "id": "b7",
+      "relatedLots": [
+        "l5"
+      ],
+      "date": "2017-10-25T15:00:01.23Z",
+      "pendingDate": "2017-10-25T15:00:01.23Z",
+      "createdDate": "2017-10-25T15:00:01.23Z",
+      "value": {
+        "amount": "550",
+        "currency": "UAH"
+      },
+      "tenderers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    }
+  ]
+}

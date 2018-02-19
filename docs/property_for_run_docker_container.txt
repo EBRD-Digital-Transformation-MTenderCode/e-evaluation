@@ -1,0 +1,3 @@
+# __PROP_spring_cloud_config_server_git_uri=
+# __PROP_spring_cloud_config_server_git_username=
+# __PROP_spring_cloud_config_server_git_password=

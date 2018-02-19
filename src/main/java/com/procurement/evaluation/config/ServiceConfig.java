@@ -15,13 +15,13 @@ public class ServiceConfig {
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        ObjectMapper jackson2ObjectMapper = new ObjectMapper();
+        final ObjectMapper jackson2ObjectMapper = new ObjectMapper();
         jackson2ObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return jackson2ObjectMapper;
     }
 
     @Bean
-    public JsonUtil jsonUtil(ObjectMapper objectMapper){
+    public JsonUtil jsonUtil(final ObjectMapper objectMapper) {
         return new JsonUtil(objectMapper);
     }
 }
