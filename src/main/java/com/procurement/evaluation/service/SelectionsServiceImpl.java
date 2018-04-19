@@ -4,6 +4,7 @@ import com.datastax.driver.core.utils.UUIDs;
 import com.procurement.evaluation.model.dto.AwardPeriodDto;
 import com.procurement.evaluation.model.dto.LotDto;
 import com.procurement.evaluation.model.dto.Status;
+import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestBidDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsResponseAwardDto;
@@ -43,7 +44,7 @@ public class SelectionsServiceImpl implements SelectionsService {
     }
 
     @Override
-    public SelectionsResponseDto getAwards(final SelectionsRequestDto dataDto) {
+    public ResponseDto getAwards(final SelectionsRequestDto dataDto) {
 
         final int minNumberOfBids = getBidsRule(dataDto);
 
@@ -88,15 +89,14 @@ public class SelectionsServiceImpl implements SelectionsService {
             awards,
             fillLotDto(unsuccessfulLots));
 
-        return responseDto;
+        return new ResponseDto<>(true, null, responseDto);
     }
 
     private List<String> getRelatedLotsIdFromBids(final SelectionsRequestDto dataDto) {
 
         return dataDto.getBids()
                       .stream()
-                      .flatMap(bidDto -> bidDto.getRelatedLots()
-                                               .stream())
+                      .flatMap(bidDto -> bidDto.getRelatedLots().stream())
                       .collect(Collectors.toList());
     }
 
@@ -248,4 +248,6 @@ public class SelectionsServiceImpl implements SelectionsService {
             }
         }
     }
+
+
 }

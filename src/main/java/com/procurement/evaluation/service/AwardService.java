@@ -15,7 +15,7 @@ public interface AwardService {
 
     void saveAwards(List<SelectionsResponseAwardDto> awards, String cpId, String stage, String owner);
 
-    AwardEntity updateAward(AwardBidRSDto awards, String cpId);
+    ResponseDto updateAward(AwardBidRSDto awards, String cpId);
 
-    List<AwardBidRSDto> getAwardsDtoFromEntity(List<AwardEntity> awardPeriodEntities);
+    ResponseDto getAwardsDtoFromEntity(List<AwardEntity> awardPeriodEntities);
 }
