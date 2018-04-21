@@ -5,7 +5,7 @@ import com.procurement.evaluation.model.dto.Status;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import com.procurement.evaluation.model.dto.endbid.EndBidAwardRSDto;
 import com.procurement.evaluation.model.entity.AwardEntity;
-import com.procurement.evaluation.model.entity.AwardPeriodEntity;
+import com.procurement.evaluation.model.entity.PeriodEntity;
 import com.procurement.evaluation.repository.AwardRepository;
 import com.procurement.evaluation.repository.PeriodRepository;
 import com.procurement.evaluation.utils.JsonUtil;
@@ -31,7 +31,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public AwardPeriodDto saveStartOfPeriod(final String ocId, final LocalDateTime startDate) {
-        AwardPeriodEntity periodEntity = new AwardPeriodEntity();
+        PeriodEntity periodEntity = new PeriodEntity();
         periodEntity.setOcId(ocId);
         periodEntity.setStartDate(startDate);
         periodEntity = periodRepository.save(periodEntity);
@@ -42,7 +42,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public AwardPeriodDto saveEndOfPeriod(final String ocId, final LocalDateTime endDate) {
-        final AwardPeriodEntity periodEntity = periodRepository.getByOcId(ocId);
+        final PeriodEntity periodEntity = periodRepository.getByOcId(ocId);
         periodEntity.setEndDate(endDate);
         periodRepository.save(periodEntity);
         final AwardPeriodDto awardPeriodDto = new AwardPeriodDto(periodEntity.getStartDate(),
@@ -52,7 +52,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public ResponseDto endPeriod(final String cpId, final LocalDateTime endPeriod) {
-        final AwardPeriodEntity periodEntity = periodRepository.getByOcId(cpId);
+        final PeriodEntity periodEntity = periodRepository.getByOcId(cpId);
         periodEntity.setEndDate(endPeriod);
         periodRepository.save(periodEntity);
 

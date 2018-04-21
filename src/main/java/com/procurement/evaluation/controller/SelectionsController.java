@@ -3,7 +3,6 @@ package com.procurement.evaluation.controller;
 import com.procurement.evaluation.model.dto.award.AwardRequestDto;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto;
-import com.procurement.evaluation.model.dto.selections.SelectionsResponseDto;
 import com.procurement.evaluation.service.AwardService;
 import com.procurement.evaluation.service.PeriodService;
 import com.procurement.evaluation.service.SelectionsService;
@@ -31,7 +30,7 @@ public class SelectionsController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDto> selections(@RequestParam(value = "identifier") final String cpid,
+    public ResponseEntity<ResponseDto> createAwards(@RequestParam(value = "identifier") final String cpid,
                                                   @RequestParam(value = "stage") final String stage,
                                                   @RequestParam(value = "country") final String country,
                                                   @RequestParam(value = "pmd") final String pmd,
@@ -43,7 +42,7 @@ public class SelectionsController {
         data.setStage(stage);
         data.setCountry(country);
         data.setProcurementMethodDetails(pmd);
-        return new ResponseEntity<>(selectionsService.getAwards(data), HttpStatus.OK);
+        return new ResponseEntity<>(selectionsService.createAwards(data), HttpStatus.OK);
     }
 
     @PutMapping(value = "/{cpid}")

@@ -11,10 +11,11 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Getter
 @Setter
 public class RulesEntity {
+
     @PrimaryKeyColumn(name = "country", type = PrimaryKeyType.PARTITIONED)
     private String country;
 
-    @PrimaryKeyColumn(name = "method", type = PrimaryKeyType.CLUSTERED)
+    @PrimaryKeyColumn(name = "pmd", type = PrimaryKeyType.CLUSTERED)
     private String method;
 
     @PrimaryKeyColumn(name = "parameter", type = PrimaryKeyType.CLUSTERED)

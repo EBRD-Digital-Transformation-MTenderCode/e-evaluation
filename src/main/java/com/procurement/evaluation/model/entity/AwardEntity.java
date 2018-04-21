@@ -12,24 +12,25 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Setter
 @Table("evaluation_award")
 public class AwardEntity {
-    @PrimaryKeyColumn(name = "oc_id", type = PrimaryKeyType.PARTITIONED)
-    private String ocId;
 
-    @PrimaryKeyColumn(name = "award_id", type = PrimaryKeyType.CLUSTERED)
-    private UUID awardId;
+    @PrimaryKeyColumn(name = "cp_id", type = PrimaryKeyType.PARTITIONED)
+    private String cpId;
 
-    @Column(value = "json_data")
-    private String jsonData;
+    @PrimaryKeyColumn(name = "stage", type = PrimaryKeyType.CLUSTERED)
+    private String stage;
 
-    @Column(value = "award_status_details")
-    private String statusDetails;
+    @PrimaryKeyColumn(value = "token_entity", type = PrimaryKeyType.CLUSTERED)
+    private UUID token;
 
-    @Column(value = "award_status")
+    @Column(value = "status")
     private String status;
 
-    @Column(value = "stage")
-    private String stage;
+    @Column(value = "status_details")
+    private String statusDetails;
 
     @Column(value = "owner")
     private String owner;
+
+    @Column(value = "json_data")
+    private String jsonData;
 }

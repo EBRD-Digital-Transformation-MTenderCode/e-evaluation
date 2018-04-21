@@ -8,5 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface SelectionsService {
 
-    ResponseDto getAwards(SelectionsRequestDto dataDto);
+    ResponseDto createAwards(SelectionsRequestDto dataDto);
 }

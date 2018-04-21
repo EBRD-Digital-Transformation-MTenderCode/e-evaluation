@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.procurement.evaluation.model.dto.AwardPeriodDto;
-import com.procurement.evaluation.model.dto.LotDto;
+import com.procurement.evaluation.model.dto.ocds.Lot;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -31,7 +31,7 @@ public class SelectionsResponseDto {
     private final List<SelectionsResponseAwardDto> awards;
 
     @JsonProperty("lots")
-    private final List<LotDto> lots;
+    private final List<Lot> lots;
 
     @JsonCreator
     public SelectionsResponseDto(@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -43,7 +43,7 @@ public class SelectionsResponseDto {
                                  @Valid
                                  @JsonProperty("awards") final List<SelectionsResponseAwardDto> awards,
                                  @NotEmpty
-                                 @JsonProperty("lots") final List<LotDto> lots) {
+                                 @JsonProperty("lots") final List<Lot> lots) {
 
         this.rationale = rationale;
         this.period = period;

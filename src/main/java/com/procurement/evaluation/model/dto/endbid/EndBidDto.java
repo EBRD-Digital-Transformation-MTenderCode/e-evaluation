@@ -3,7 +3,7 @@ package com.procurement.evaluation.model.dto.endbid;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.procurement.evaluation.model.dto.LotDto;
+import com.procurement.evaluation.model.dto.ocds.Lot;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -20,7 +20,7 @@ public class EndBidDto {
     private final List<EndBidAwardRSDto> awards;
 
     @JsonProperty("lots")
-    private final List<LotDto> lots;
+    private final List<Lot> lots;
 
     @JsonCreator
     public EndBidDto(
@@ -28,7 +28,7 @@ public class EndBidDto {
         @Valid
         @JsonProperty("awards") final List<EndBidAwardRSDto> awards,
         @NotEmpty
-        @JsonProperty("lots") final List<LotDto> lots) {
+        @JsonProperty("lots") final List<Lot> lots) {
         this.awards = awards;
         this.lots = lots;
     }

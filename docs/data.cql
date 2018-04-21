@@ -2,28 +2,30 @@ CREATE KEYSPACE IF NOT EXISTS ocds WITH replication = {'class':'SimpleStrategy',
 
 CREATE TABLE IF NOT EXISTS  ocds.evaluation_rules (
     country text,
-    method text,
+    pmd text,
     parameter text,
     value text,
-    primary key(country, method, parameter)
+    primary key(country, pmd, parameter)
 );
 
-INSERT INTO ocds.evaluation_rules (country, method, parameter, value)  VALUES ('UA', 'micro', 'minimumNumberOfBids', '5');
+INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'RT', 'minBids', '5');
+INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('TEST', 'TEST', 'minBids', '3');
 
 CREATE TABLE IF NOT EXISTS  ocds.evaluation_period (
-    oc_id text,
+    cp_id text,
+    stage text,
     start_date timestamp,
     end_date timestamp,
-    primary key(oc_id)
+    primary key(cp_id, stage)
 );
 
 CREATE TABLE IF NOT EXISTS  ocds.evaluation_award (
-    oc_id text,
-    owner text,
-    award_id UUID,
+    cp_id text,
     stage text,
-    award_status text,
-    award_status_details text,
+    token_entity uuid,
+    status text,
+    status_details text,
+    owner text,
     json_data text,
-    primary key(oc_id, award_id)
+    primary key(cp_id, stage, token_entity)
 );

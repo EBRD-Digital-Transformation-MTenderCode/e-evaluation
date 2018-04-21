@@ -2,10 +2,10 @@ package com.procurement.evaluation.service;
 
 import com.datastax.driver.core.utils.UUIDs;
 import com.procurement.evaluation.model.dto.AwardPeriodDto;
-import com.procurement.evaluation.model.dto.LotDto;
+import com.procurement.evaluation.model.dto.ocds.Lot;
 import com.procurement.evaluation.model.dto.Status;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
-import com.procurement.evaluation.model.dto.selections.SelectionsRequestBidDto;
+import com.procurement.evaluation.model.dto.ocds.Bid;
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsResponseAwardDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsResponseDto;
@@ -44,7 +44,7 @@ public class SelectionsServiceImpl implements SelectionsService {
     }
 
     @Override
-    public ResponseDto getAwards(final SelectionsRequestDto dataDto) {
+    public ResponseDto createAwards(final SelectionsRequestDto dataDto) {
 
         final int minNumberOfBids = getBidsRule(dataDto);
 
@@ -67,7 +67,7 @@ public class SelectionsServiceImpl implements SelectionsService {
                       .sorted()
                       .forEachOrdered(unsuccessfulLots::add);
 
-        final List<SelectionsRequestBidDto> successfulBids = getSuccessfulBids(dataDto, successfulLots);
+        final List<Bid> successfulBids = getSuccessfulBids(dataDto, successfulLots);
 
         final List<SelectionsResponseAwardDto> awards = getSuccessfulAwards(successfulBids);
 
@@ -104,7 +104,7 @@ public class SelectionsServiceImpl implements SelectionsService {
 
         return dataDto.getLots()
                       .stream()
-                      .map(LotDto::getId)
+                      .map(Lot::getId)
                       .collect(Collectors.toList());
     }
 
@@ -140,9 +140,9 @@ public class SelectionsServiceImpl implements SelectionsService {
         );
     }
 
-    private List<SelectionsRequestBidDto> getSuccessfulBids(final SelectionsRequestDto dataDto,
-                                                            final List<String> successfulLots) {
-        final List<SelectionsRequestBidDto> bids = new ArrayList<>();
+    private List<Bid> getSuccessfulBids(final SelectionsRequestDto dataDto,
+                                        final List<String> successfulLots) {
+        final List<Bid> bids = new ArrayList<>();
         for (int i = 0; i < dataDto.getBids()
                                    .size(); i++) {
             for (int j = 0; j < dataDto.getBids()
@@ -161,10 +161,10 @@ public class SelectionsServiceImpl implements SelectionsService {
         return bids;
     }
 
-    private List<LotDto> fillLotDto(final List<String> lots) {
-        final List<LotDto> lotsDto = new ArrayList<>();
+    private List<Lot> fillLotDto(final List<String> lots) {
+        final List<Lot> lotsDto = new ArrayList<>();
         for (int i = 0; i < lots.size(); i++) {
-            lotsDto.add(new LotDto(lots.get(i)));
+            lotsDto.add(new Lot(lots.get(i)));
         }
         return lotsDto;
     }
@@ -181,10 +181,10 @@ public class SelectionsServiceImpl implements SelectionsService {
         }
     }
 
-    private List<SelectionsResponseAwardDto> getSuccessfulAwards(final List<SelectionsRequestBidDto> successfulBids) {
+    private List<SelectionsResponseAwardDto> getSuccessfulAwards(final List<Bid> successfulBids) {
         final List<SelectionsResponseAwardDto> awards = new ArrayList<>();
         for (int i = 0; i < successfulBids.size(); i++) {
-            final SelectionsRequestBidDto bid = successfulBids.get(i);
+            final Bid bid = successfulBids.get(i);
             final SelectionsResponseAwardDto awardDto = new SelectionsResponseAwardDto(
                 null,
                 dateUtil.getNowUTC(),

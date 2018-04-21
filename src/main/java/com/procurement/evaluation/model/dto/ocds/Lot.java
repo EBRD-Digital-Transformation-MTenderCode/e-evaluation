@@ -1,10 +1,8 @@
-package com.procurement.evaluation.model.dto;
+package com.procurement.evaluation.model.dto.ocds;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -12,24 +10,21 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 @Getter
 @JsonPropertyOrder("id")
-public class LotDto {
-    @JsonProperty("id")
-    @JsonPropertyDescription("A local identifier for this lot, such as a lot number. This is used in relatedLot " +
-        "references at the item, document and award level.")
+public class Lot {
+
     @NotNull
+    @JsonProperty("id")
     private final String id;
 
     @JsonCreator
-    public LotDto(
-        @NotEmpty
-        @JsonProperty("id") final String id) {
+    public Lot(@JsonProperty("id") final String id) {
         this.id = id;
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(id)
-                                    .toHashCode();
+                .toHashCode();
     }
 
     @Override
@@ -37,11 +32,11 @@ public class LotDto {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof LotDto)) {
+        if (!(other instanceof Lot)) {
             return false;
         }
-        final LotDto rhs = (LotDto) other;
+        final Lot rhs = (Lot) other;
         return new EqualsBuilder().append(id, rhs.id)
-                                  .isEquals();
+                .isEquals();
     }
 }
