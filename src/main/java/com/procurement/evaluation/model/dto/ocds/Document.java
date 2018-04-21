@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto;
+package com.procurement.evaluation.model.dto.ocds;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +21,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
     "url",
     "documentType"
 })
-public class DocumentDto {
+public class Document {
     @JsonProperty("id")
     @JsonPropertyDescription("A local, unique identifier for this document. This field is used to keep track of " +
         "multiple revisions of a document through the compilation from release to record mechanism.")
@@ -46,10 +46,10 @@ public class DocumentDto {
     private final URI url;
 
     @JsonCreator
-    public DocumentDto(@JsonProperty("id") final String id,
-                       @JsonProperty("documentType") final DocumentType documentType,
-                       @JsonProperty("title") final String title,
-                       @JsonProperty("url") final URI url) {
+    public Document(@JsonProperty("id") final String id,
+                    @JsonProperty("documentType") final DocumentType documentType,
+                    @JsonProperty("title") final String title,
+                    @JsonProperty("url") final URI url) {
         this.id = id;
         this.documentType = documentType;
         this.title = title;
@@ -70,10 +70,10 @@ public class DocumentDto {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof DocumentDto)) {
+        if (!(other instanceof Document)) {
             return false;
         }
-        final DocumentDto rhs = (DocumentDto) other;
+        final Document rhs = (Document) other;
         return new EqualsBuilder().append(id, rhs.id)
                                   .append(documentType, rhs.documentType)
                                   .append(title, rhs.title)

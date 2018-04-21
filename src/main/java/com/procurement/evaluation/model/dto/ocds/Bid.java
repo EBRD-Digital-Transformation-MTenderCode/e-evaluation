@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.procurement.evaluation.databinding.LocalDateTimeDeserializer;
 import com.procurement.evaluation.databinding.LocalDateTimeSerializer;
-import com.procurement.evaluation.model.dto.OrganizationReferenceDto;
-import com.procurement.evaluation.model.dto.Value;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.Valid;
@@ -65,7 +63,7 @@ public class Bid {
     @JsonProperty("tenderers")
     @NotEmpty
     @Valid
-    private final List<OrganizationReferenceDto> tenderers;
+    private final List<OrganizationReference> tenderers;
 
     @JsonCreator
     public Bid(@JsonProperty("id") final String id,
@@ -74,7 +72,7 @@ public class Bid {
                @JsonProperty("pendingDate") final LocalDateTime pendingDate,
                @JsonProperty("createdDate") final LocalDateTime createdDate,
                @JsonProperty("value") final Value value,
-               @JsonProperty("tenderers") final List<OrganizationReferenceDto> tenderers
+               @JsonProperty("tenderers") final List<OrganizationReference> tenderers
     ) {
         this.id = id;
         this.relatedLots = relatedLots;

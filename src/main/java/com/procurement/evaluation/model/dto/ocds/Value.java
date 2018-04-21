@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto;
+package com.procurement.evaluation.model.dto.ocds;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -3,13 +3,17 @@ server:
 
 spring:
   application:
-    name: e-evaluation
+    name: e-qualification
   data:
     cassandra:
-      contact-points: 127.0.0.1
+      contact-points: 10.0.10.104,10.0.10.105,10.0.10.106
       keyspace-name: ocds
       port: 9042
-      username: cassandra
-      password: cassandra
+      username: caclient
+      password: brT4Kn27RQs
+
+eureka:
+  client:
+    enabled: false
 
 ocds.prefix: ocds-t1s2t3

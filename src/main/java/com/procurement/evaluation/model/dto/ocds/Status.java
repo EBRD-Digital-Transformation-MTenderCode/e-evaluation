@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto;
+package com.procurement.evaluation.model.dto.ocds;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -9,7 +9,8 @@ public enum Status {
     PENDING("pending"),
     ACTIVE("active"),
     UNSUCCESSFUL("unsuccessful"),
-    CONSIDERATION("consideration");
+    CONSIDERATION("consideration"),
+    EMPTY("empty");
 
     private static final Map<String, Status> CONSTANTS = new HashMap<>();
 

@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto;
+package com.procurement.evaluation.model.dto.ocds;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +15,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
     "id",
     "name"
 })
-public class OrganizationReferenceDto {
+public class OrganizationReference {
     @JsonProperty("id")
     @JsonPropertyDescription("The id of the party being referenced. This must match the id of an entry in the parties" +
         " section.")
@@ -30,8 +30,8 @@ public class OrganizationReferenceDto {
     private final String name;
 
     @JsonCreator
-    public OrganizationReferenceDto(@JsonProperty("name") final String name,
-                                    @JsonProperty("id") final String id) {
+    public OrganizationReference(@JsonProperty("name") final String name,
+                                 @JsonProperty("id") final String id) {
         this.id = id;
         this.name = name;
     }
@@ -48,10 +48,10 @@ public class OrganizationReferenceDto {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof OrganizationReferenceDto)) {
+        if (!(other instanceof OrganizationReference)) {
             return false;
         }
-        final OrganizationReferenceDto rhs = (OrganizationReferenceDto) other;
+        final OrganizationReference rhs = (OrganizationReference) other;
         return new EqualsBuilder().append(name, rhs.name)
                                   .append(id, rhs.id)
                                   .isEquals();

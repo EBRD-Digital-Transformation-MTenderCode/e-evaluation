@@ -14,4 +14,8 @@ public class DateUtil {
         return localDateTime.toInstant(ZoneOffset.UTC)
                             .toEpochMilli();
     }
+
+    public LocalDateTime localNowUTC() {
+        return LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    }
 }

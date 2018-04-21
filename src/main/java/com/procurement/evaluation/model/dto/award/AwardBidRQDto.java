@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.procurement.evaluation.model.dto.DocumentDto;
-import com.procurement.evaluation.model.dto.Status;
+import com.procurement.evaluation.model.dto.ocds.Document;
+import com.procurement.evaluation.model.dto.ocds.Status;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -33,7 +33,7 @@ public class AwardBidRQDto {
     @JsonPropertyDescription("All documents and attachments related to the award, including any notices.")
     @Valid
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private final List<DocumentDto> documents;
+    private final List<Document> documents;
     @JsonProperty("statusDetails")
     @NotNull
     @Valid
@@ -49,7 +49,7 @@ public class AwardBidRQDto {
                          @JsonProperty("statusDetails") final Status statusDetails,
                          @JsonInclude(JsonInclude.Include.NON_NULL)
                          @Valid
-                         @JsonProperty("documents") final List<DocumentDto> documents
+                         @JsonProperty("documents") final List<Document> documents
     ) {
         this.id = id;
         this.statusDetails = statusDetails;

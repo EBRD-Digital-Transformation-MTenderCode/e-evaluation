@@ -1,21 +1,16 @@
 package com.procurement.evaluation.service;
 
 import com.datastax.driver.core.utils.UUIDs;
-import com.procurement.evaluation.model.dto.AwardPeriodDto;
-import com.procurement.evaluation.model.dto.ocds.Lot;
-import com.procurement.evaluation.model.dto.Status;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
-import com.procurement.evaluation.model.dto.ocds.Bid;
+import com.procurement.evaluation.model.dto.ocds.*;
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto;
-import com.procurement.evaluation.model.dto.selections.SelectionsResponseAwardDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsResponseDto;
+import com.procurement.evaluation.model.entity.AwardEntity;
+import com.procurement.evaluation.repository.AwardRepository;
 import com.procurement.evaluation.utils.DateUtil;
+import com.procurement.evaluation.utils.JsonUtil;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -29,216 +24,177 @@ public class SelectionsServiceImpl implements SelectionsService {
 
     private final PeriodService periodService;
 
-    private final AwardService awardService;
+    private final AwardRepository awardRepository;
 
     private final DateUtil dateUtil;
 
+    private final JsonUtil jsonUtil;
+
     public SelectionsServiceImpl(final RulesService rulesService,
                                  final PeriodService periodService,
-                                 final AwardService awardService,
-                                 final DateUtil dateUtil) {
+                                 final AwardRepository awardRepository,
+                                 final DateUtil dateUtil,
+                                 final JsonUtil jsonUtil) {
         this.rulesService = rulesService;
         this.periodService = periodService;
-        this.awardService = awardService;
+        this.awardRepository = awardRepository;
         this.dateUtil = dateUtil;
+        this.jsonUtil = jsonUtil;
     }
 
     @Override
-    public ResponseDto createAwards(final SelectionsRequestDto dataDto) {
+    public ResponseDto createAwards(String cpId,
+                                    String stage,
+                                    String owner,
+                                    String country,
+                                    String pmd,
+                                    LocalDateTime startDate,
+                                    SelectionsRequestDto dataDto) {
 
-        final int minNumberOfBids = getBidsRule(dataDto);
-
-        final String ocid = dataDto.getCpId();
-
-        final LocalDateTime addedDate = dateUtil.getNowUTC();
-
+        final int minNumberOfBids = rulesService.getMinimumNumberOfBids(country, pmd);
         final List<String> relatedLotsFromBids = getRelatedLotsIdFromBids(dataDto);
-
         final List<String> lotsFromTender = getLotsFromTender(dataDto);
-
         final Map<String, Long> uniqueLots = getUniqueLots(relatedLotsFromBids);
-
         final List<String> successfulLots = getSuccessfulLots(uniqueLots, minNumberOfBids);
-
         final List<String> unsuccessfulLots = getUnsuccessfulLots(uniqueLots, minNumberOfBids);
-
-        lotsFromTender.stream()
-                      .filter(lotFromTender -> !unsuccessfulLots.contains(lotFromTender))
-                      .sorted()
-                      .forEachOrdered(unsuccessfulLots::add);
-
+        addUnsuccessfulLotsFromTender(successfulLots, unsuccessfulLots, lotsFromTender);
         final List<Bid> successfulBids = getSuccessfulBids(dataDto, successfulLots);
-
-        final List<SelectionsResponseAwardDto> awards = getSuccessfulAwards(successfulBids);
-
+        final List<Award> awards = getSuccessfulAwards(successfulBids);
         sortSuccessfulAwards(awards);
-
         setAwardIds(awards);
-
         setStatusConsideration(awards);
-
         awards.addAll(getUnsuccessfulAwards(unsuccessfulLots));
-
-        final AwardPeriodDto periodDto = periodService.saveStartOfPeriod(dataDto.getCpId(), addedDate);
-
-        awardService.saveAwards(awards, ocid, dataDto.getStage(), dataDto.getOwner());
-
-        final SelectionsResponseDto responseDto = new SelectionsResponseDto(
-            "rationale",
-            periodDto,
-            awards,
-            fillLotDto(unsuccessfulLots));
-
-        return new ResponseDto<>(true, null, responseDto);
+        /**save evaluation period*/
+        final Period periodDto = periodService.saveStartOfPeriod(cpId, stage, startDate);
+        /**save awards to DB*/
+        saveAwards(awards, cpId, owner, stage);
+        return new ResponseDto<>(true, null,
+                new SelectionsResponseDto(periodDto, awards, fillLotDto(unsuccessfulLots))
+        );
     }
+
+    private void addUnsuccessfulLotsFromTender(final List<String> successfulLots,
+                                               final List<String> unsuccessfulLots,
+                                               final List<String> lotsFromTender) {
+        lotsFromTender.stream()
+                .filter(lot -> !successfulLots.contains(lot) && !unsuccessfulLots.contains(lot))
+                .forEach(unsuccessfulLots::add);
+    }
+
 
     private List<String> getRelatedLotsIdFromBids(final SelectionsRequestDto dataDto) {
 
         return dataDto.getBids()
-                      .stream()
-                      .flatMap(bidDto -> bidDto.getRelatedLots().stream())
-                      .collect(Collectors.toList());
+                .stream()
+                .flatMap(bidDto -> bidDto.getRelatedLots().stream())
+                .collect(Collectors.toList());
     }
 
     private List<String> getLotsFromTender(final SelectionsRequestDto dataDto) {
 
         return dataDto.getLots()
-                      .stream()
-                      .map(Lot::getId)
-                      .collect(Collectors.toList());
+                .stream()
+                .map(Lot::getId)
+                .collect(Collectors.toList());
     }
 
-    private Map<String, Long> getUniqueLots(final List<String> bids) {
-        final Map<String, Long> uniqueLots = bids.stream()
-                                                 .collect(groupingBy(Function.identity(), Collectors.counting()));
-        return uniqueLots;
+    private Map<String, Long> getUniqueLots(final List<String> lots) {
+        return lots.stream()
+                .collect(groupingBy(Function.identity(), Collectors.counting()));
     }
 
     private List<String> getSuccessfulLots(final Map<String, Long> uniqueLots,
                                            final int minNumberOfBids) {
 
         return uniqueLots.entrySet()
-                         .stream()
-                         .filter(map -> map.getValue() >= minNumberOfBids)
-                         .map(map -> map.getKey())
-                         .collect(Collectors.toList());
+                .stream()
+                .filter(map -> map.getValue() >= minNumberOfBids)
+                .map(map -> map.getKey())
+                .collect(Collectors.toList());
     }
 
     private List<String> getUnsuccessfulLots(final Map<String, Long> uniqueLots,
                                              final int minNumberOfBids) {
 
         return uniqueLots.entrySet()
-                         .stream()
-                         .filter(map -> map.getValue() < minNumberOfBids)
-                         .map(map -> map.getKey())
-                         .collect(Collectors.toList());
-    }
-
-    private int getBidsRule(final SelectionsRequestDto dataDto) {
-        return rulesService.getMinimumNumberOfBids(dataDto.getCountry(),
-                                                   dataDto.getProcurementMethodDetails()
-        );
+                .stream()
+                .filter(map -> map.getValue() < minNumberOfBids)
+                .map(map -> map.getKey())
+                .collect(Collectors.toList());
     }
 
     private List<Bid> getSuccessfulBids(final SelectionsRequestDto dataDto,
                                         final List<String> successfulLots) {
         final List<Bid> bids = new ArrayList<>();
-        for (int i = 0; i < dataDto.getBids()
-                                   .size(); i++) {
-            for (int j = 0; j < dataDto.getBids()
-                                       .get(i)
-                                       .getRelatedLots()
-                                       .size(); j++) {
-                if (successfulLots.contains(dataDto.getBids()
-                                                   .get(i)
-                                                   .getRelatedLots()
-                                                   .get(j))) {
-                    bids.add(dataDto.getBids()
-                                    .get(i));
-                }
-            }
-        }
+        dataDto.getBids().forEach(bid ->
+                bid.getRelatedLots()
+                        .stream()
+                        .filter(successfulLots::contains)
+                        .map(lot -> bid)
+                        .forEach(bids::add));
         return bids;
     }
 
     private List<Lot> fillLotDto(final List<String> lots) {
-        final List<Lot> lotsDto = new ArrayList<>();
-        for (int i = 0; i < lots.size(); i++) {
-            lotsDto.add(new Lot(lots.get(i)));
-        }
-        return lotsDto;
+        return lots.stream().map(Lot::new).collect(Collectors.toList());
     }
 
     private String generateAwardId() {
-        return UUIDs.timeBased()
-                    .toString();
+        return UUIDs.timeBased().toString();
     }
 
-    private void setAwardIds(final List<SelectionsResponseAwardDto> awards) {
-        for (int i = 0; i < awards.size(); i++) {
-            awards.get(i)
-                  .setId(generateAwardId());
-        }
+    private void setAwardIds(final List<Award> awards) {
+        awards.forEach(award -> award.setId(generateAwardId()));
     }
 
-    private List<SelectionsResponseAwardDto> getSuccessfulAwards(final List<Bid> successfulBids) {
-        final List<SelectionsResponseAwardDto> awards = new ArrayList<>();
-        for (int i = 0; i < successfulBids.size(); i++) {
-            final Bid bid = successfulBids.get(i);
-            final SelectionsResponseAwardDto awardDto = new SelectionsResponseAwardDto(
-                null,
-                dateUtil.getNowUTC(),
-                Status.PENDING,
-                null,
-                bid.getRelatedLots(),
-                bid.getId(),
-                bid.getValue(),
-                bid.getTenderers(),
-                null
-            );
-            awards.add(awardDto);
-        }
-        return awards;
+    private List<Award> getSuccessfulAwards(final List<Bid> successfulBids) {
+        return successfulBids.stream().map(bid ->
+                new Award(
+                        UUIDs.timeBased().toString(),
+                        null,
+                        dateUtil.localNowUTC(),
+                        "",
+                        Status.PENDING,
+                        Status.EMPTY,
+                        bid.getValue(),
+                        bid.getRelatedLots(),
+                        bid.getId(),
+                        bid.getTenderers(),
+                        null
+                )
+        ).collect(Collectors.toList());
     }
 
-    private List<SelectionsResponseAwardDto> getUnsuccessfulAwards(final List<String> unSuccessfulLots) {
-        final List<SelectionsResponseAwardDto> awards = new ArrayList<>();
-        for (int i = 0; i < unSuccessfulLots.size(); i++) {
-            final List<String> relatedLots = new ArrayList<>();
-            relatedLots.add(unSuccessfulLots.get(i));
-            final SelectionsResponseAwardDto awardDto = new SelectionsResponseAwardDto(
-                generateAwardId(),
-                dateUtil.getNowUTC(),
-                Status.UNSUCCESSFUL,
-                null,
-                relatedLots,
-                null,
-                null,
-                null,
-                null);
-            awards.add(awardDto);
-        }
-        return awards;
+    private List<Award> getUnsuccessfulAwards(final List<String> unSuccessfulLots) {
+        return unSuccessfulLots.stream().map(lot ->
+                new Award(
+                        UUIDs.timeBased().toString(),
+                        null,
+                        dateUtil.localNowUTC(),
+                        "",
+                        Status.UNSUCCESSFUL,
+                        Status.EMPTY,
+                        null,
+                        Collections.singletonList(lot),
+                        null,
+                        null,
+                        null)
+        ).collect(Collectors.toList());
     }
 
-    private void sortSuccessfulAwards(final List<SelectionsResponseAwardDto> awards) {
-        Collections.sort(awards, new SortedByValue());
+    private void sortSuccessfulAwards(final List<Award> awards) {
+        awards.sort(new SortedByValue());
     }
 
-    private void setStatusConsideration(final List<SelectionsResponseAwardDto> awards) {
-        awards.get(0)
-              .setStatus(Status.CONSIDERATION);
+    private void setStatusConsideration(final List<Award> awards) {
+        awards.get(0).setStatus(Status.CONSIDERATION);
     }
 
-    private class SortedByValue implements Comparator<SelectionsResponseAwardDto> {
+    private class SortedByValue implements Comparator<Award> {
 
-        public int compare(final SelectionsResponseAwardDto obj1, final SelectionsResponseAwardDto obj2) {
-
-            final double val1 = obj1.getValue()
-                              .getAmount();
-            final double val2 = obj2.getValue()
-                              .getAmount();
-
+        public int compare(final Award obj1, final Award obj2) {
+            final double val1 = obj1.getValue().getAmount();
+            final double val2 = obj2.getValue().getAmount();
             if (val1 > val2) {
                 return 1;
             } else if (val1 < val2) {
@@ -249,5 +205,29 @@ public class SelectionsServiceImpl implements SelectionsService {
         }
     }
 
+    private void saveAwards(final List<Award> awards,
+                            final String ocId,
+                            final String owner,
+                            final String stage) {
+        awards.forEach(awardDto -> {
+            final AwardEntity entity = awardRepository.save(getEntity(awardDto, ocId, owner, stage));
+            awardDto.setToken(entity.getToken().toString());
+        });
+    }
+
+    private AwardEntity getEntity(final Award award,
+                                  final String cpId,
+                                  final String owner,
+                                  final String stage) {
+        final AwardEntity entity = new AwardEntity();
+        entity.setCpId(cpId);
+        entity.setStage(stage);
+        entity.setToken(UUIDs.random());
+        entity.setStatus(award.getStatus().value());
+        entity.setStatusDetails(award.getStatusDetails().value());
+        entity.setOwner(owner);
+        entity.setJsonData(jsonUtil.toJson(award));
+        return entity;
+    }
 
 }

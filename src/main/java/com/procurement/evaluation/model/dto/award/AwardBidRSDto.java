@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.procurement.evaluation.databinding.LocalDateTimeDeserializer;
 import com.procurement.evaluation.databinding.LocalDateTimeSerializer;
-import com.procurement.evaluation.model.dto.DocumentDto;
-import com.procurement.evaluation.model.dto.OrganizationReferenceDto;
-import com.procurement.evaluation.model.dto.Status;
-import com.procurement.evaluation.model.dto.Value;
+import com.procurement.evaluation.model.dto.ocds.Document;
+import com.procurement.evaluation.model.dto.ocds.OrganizationReference;
+import com.procurement.evaluation.model.dto.ocds.Status;
+import com.procurement.evaluation.model.dto.ocds.Value;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.Valid;
@@ -67,12 +67,12 @@ public class AwardBidRSDto {
         "items of values, these should be split into separate award blocks.")
     @Valid
     @NotEmpty
-    private final List<OrganizationReferenceDto> suppliers;
+    private final List<OrganizationReference> suppliers;
     @JsonProperty("documents")
     @JsonPropertyDescription("All documents and attachments related to the award, including any notices.")
     @Valid
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private final List<DocumentDto> documents;
+    private final List<Document> documents;
     @JsonProperty("status")
     @JsonPropertyDescription("The current status of the award drawn from the [awardStatus codelist](http://standard" +
         ".open-contracting.org/latest/en/schema/codelists/#award-status)")
@@ -105,10 +105,10 @@ public class AwardBidRSDto {
                          @Valid final Value value,
                          @Valid
                          @NotEmpty
-                         @JsonProperty("suppliers") final List<OrganizationReferenceDto> suppliers,
+                         @JsonProperty("suppliers") final List<OrganizationReference> suppliers,
                          @JsonInclude(JsonInclude.Include.NON_NULL)
                          @Valid
-                         @JsonProperty("documents") final List<DocumentDto> documents
+                         @JsonProperty("documents") final List<Document> documents
     ) {
         this.id = id;
         this.startDate = startDate;
