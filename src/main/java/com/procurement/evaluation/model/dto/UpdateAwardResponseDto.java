@@ -17,11 +17,15 @@ public class UpdateAwardResponseDto {
     @JsonProperty("bidId")
     private final String bidId;
 
-    @JsonProperty("bidId")
-    private final String bidId;
+    @JsonProperty("lotId")
+    private final String lotId;
 
     @JsonCreator
-    public UpdateAwardResponseDto(@JsonProperty("awards") final List<Award> awards) {
+    public UpdateAwardResponseDto(@JsonProperty("awards") final List<Award> awards,
+                                  @JsonProperty("bidId") final String bidId,
+                                  @JsonProperty("lotId") final String lotId) {
         this.awards = awards;
+        this.bidId = bidId;
+        this.lotId = lotId;
     }
 }
