@@ -22,3 +22,9 @@ docker run -d --name=evaluation-1 \
   --network ocds-network \
   --dns 10.0.10.115 \
   docker-registry.eprocurement.systems/e-evaluation:17.12.1
+
+  mvn clean package docker:build
+  docker login https://docker-registry.eprocurement.systems
+  Username: docker
+  Password: 3FFcKYtMxzmwFMa
+  docker push docker-registry.eprocurement.systems/e-evaluation:17.12.1
