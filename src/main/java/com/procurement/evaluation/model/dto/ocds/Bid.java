@@ -1,6 +1,7 @@
 package com.procurement.evaluation.model.dto.ocds;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -17,6 +18,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "id",
         "relatedLots",
@@ -37,32 +39,32 @@ public class Bid {
     @JsonProperty("relatedLots")
     private final List<String> relatedLots;
 
-    @JsonProperty("date")
+
+    @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @NotNull
+    @JsonProperty("date")
     private final LocalDateTime date;
 
-    @JsonProperty("pendingDate")
     @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonProperty("pendingDate")
     private final LocalDateTime pendingDate;
 
-    @JsonProperty("createdDate")
     @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonProperty("createdDate")
     private final LocalDateTime createdDate;
 
-    @JsonProperty("value")
-    @NotNull
     @Valid
+    @NotNull
     private final Value value;
 
-    @JsonProperty("tenderers")
-    @NotEmpty
     @Valid
+    @NotEmpty
+    @JsonProperty("tenderers")
     private final List<OrganizationReference> tenderers;
 
     @JsonCreator
@@ -72,8 +74,7 @@ public class Bid {
                @JsonProperty("pendingDate") final LocalDateTime pendingDate,
                @JsonProperty("createdDate") final LocalDateTime createdDate,
                @JsonProperty("value") final Value value,
-               @JsonProperty("tenderers") final List<OrganizationReference> tenderers
-    ) {
+               @JsonProperty("tenderers") final List<OrganizationReference> tenderers) {
         this.id = id;
         this.relatedLots = relatedLots;
         this.date = date;

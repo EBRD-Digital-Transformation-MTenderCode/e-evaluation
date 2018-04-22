@@ -1,7 +1,6 @@
 package com.procurement.evaluation.controller;
 
-import com.procurement.evaluation.model.dto.UpdateAwardDto;
-import com.procurement.evaluation.model.dto.award.AwardRequestDto;
+import com.procurement.evaluation.model.dto.UpdateAwardRequestDto;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto;
 import com.procurement.evaluation.service.AwardService;
@@ -49,7 +48,7 @@ public class EvaluationController {
                                                    @RequestParam("stage") final String stage,
                                                    @RequestParam("token") final String token,
                                                    @RequestParam("owner") final String owner,
-                                                   @Valid @RequestBody final UpdateAwardDto data) {
+                                                   @Valid @RequestBody final UpdateAwardRequestDto data) {
         return new ResponseEntity<>(
                 awardService.updateAward(cpId, stage, token, owner, data),
                 HttpStatus.OK);

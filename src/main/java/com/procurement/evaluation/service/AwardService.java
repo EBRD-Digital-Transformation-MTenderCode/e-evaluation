@@ -1,6 +1,6 @@
 package com.procurement.evaluation.service;
 
-import com.procurement.evaluation.model.dto.UpdateAwardDto;
+import com.procurement.evaluation.model.dto.UpdateAwardRequestDto;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +11,6 @@ public interface AwardService {
                             String stage,
                             String token,
                             String owner,
-                            UpdateAwardDto dataDto);
+                            UpdateAwardRequestDto dataDto);
 
 }

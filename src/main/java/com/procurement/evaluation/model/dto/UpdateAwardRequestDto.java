@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class UpdateAwardDto {
+public class UpdateAwardRequestDto {
 
     @Valid
     @NotNull
@@ -16,7 +16,7 @@ public class UpdateAwardDto {
     private final Award award;
 
     @JsonCreator
-    public UpdateAwardDto(@JsonProperty("award") final Award award) {
+    public UpdateAwardRequestDto(@JsonProperty("award") final Award award) {
         this.award = award;
     }
 }

@@ -16,17 +16,14 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
     "name"
 })
 public class OrganizationReference {
-    @JsonProperty("id")
-    @JsonPropertyDescription("The id of the party being referenced. This must match the id of an entry in the parties" +
-        " section.")
+
     @NotNull
+    @JsonProperty("id")
     private final String id;
 
-    @JsonProperty("name")
-    @JsonPropertyDescription("The name of the party being referenced. This must match the name of an entry in the " +
-        "parties section.")
-    @Size(min = 1)
     @NotNull
+    @Size(min = 1)
+    @JsonProperty("name")
     private final String name;
 
     @JsonCreator

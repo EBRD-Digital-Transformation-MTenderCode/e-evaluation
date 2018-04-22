@@ -1,68 +1,72 @@
 package com.procurement.evaluation.model.dto.ocds;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonValue;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.*;
+import com.procurement.evaluation.exception.EnumException;
+import java.util.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 @Getter
+@Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "id",
-    "title",
-    "url",
-    "documentType"
+        "id",
+        "documentType",
+        "title",
+        "description",
+        "language",
+        "relatedLots"
 })
 public class Document {
-    @JsonProperty("id")
-    @JsonPropertyDescription("A local, unique identifier for this document. This field is used to keep track of " +
-        "multiple revisions of a document through the compilation from release to record mechanism.")
-    @Size(min = 1)
     @NotNull
+    @JsonProperty("id")
     private final String id;
 
+    @NotNull
     @JsonProperty("documentType")
-    @JsonPropertyDescription("A classification of the document described taken from the [documentType codelist]" +
-        "(http://standard.open-contracting.org/latest/en/schema/codelists/#document-type). Values from the provided " +
-        "codelist should be used wherever possible, though extended values can be provided if the codelist does not " +
-        "have a relevant code.")
     private final DocumentType documentType;
 
     @JsonProperty("title")
-    @JsonPropertyDescription("The document title.")
     private final String title;
 
-    @JsonProperty("url")
-    @JsonPropertyDescription(" direct link to the document or attachment. The server providing access to this " +
-        "document should be configured to correctly report the document mime type.")
-    private final URI url;
+    @JsonProperty("description")
+    private final String description;
+
+    @NotNull
+    @JsonProperty("language")
+    private final String language;
+
+    @JsonProperty("relatedLots")
+    private Set<String> relatedLots;
 
     @JsonCreator
     public Document(@JsonProperty("id") final String id,
                     @JsonProperty("documentType") final DocumentType documentType,
                     @JsonProperty("title") final String title,
-                    @JsonProperty("url") final URI url) {
+                    @JsonProperty("description") final String description,
+                    @JsonProperty("language") final String language,
+                    @JsonProperty("relatedLots") final HashSet<String> relatedLots) {
         this.id = id;
         this.documentType = documentType;
         this.title = title;
-        this.url = url;
+        this.description = description;
+        this.language = language;
+        this.relatedLots = relatedLots;
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(id)
-                                    .append(documentType)
-                                    .append(title)
-                                    .append(url)
-                                    .toHashCode();
+        return new HashCodeBuilder()
+                .append(id)
+                .append(documentType)
+                .append(title)
+                .append(description)
+                .append(language)
+                .append(relatedLots)
+                .toHashCode();
     }
 
     @Override
@@ -74,14 +78,18 @@ public class Document {
             return false;
         }
         final Document rhs = (Document) other;
-        return new EqualsBuilder().append(id, rhs.id)
-                                  .append(documentType, rhs.documentType)
-                                  .append(title, rhs.title)
-                                  .append(url, rhs.url)
-                                  .isEquals();
+        return new EqualsBuilder()
+                .append(id, rhs.id)
+                .append(documentType, rhs.documentType)
+                .append(title, rhs.title)
+                .append(description, rhs.description)
+                .append(language, rhs.language)
+                .append(relatedLots, rhs.relatedLots)
+                .isEquals();
     }
 
     public enum DocumentType {
+
         TENDER_NOTICE("tenderNotice"),
         AWARD_NOTICE("awardNotice"),
         CONTRACT_NOTICE("contractNotice"),
@@ -124,14 +132,13 @@ public class Document {
         CANCELLATION_DETAILS("cancellationDetails");
 
         private static final Map<String, DocumentType> CONSTANTS = new HashMap<>();
+        private final String value;
 
         static {
             for (final DocumentType c : values()) {
                 CONSTANTS.put(c.value, c);
             }
         }
-
-        private final String value;
 
         DocumentType(final String value) {
             this.value = value;
@@ -141,7 +148,7 @@ public class Document {
         public static DocumentType fromValue(final String value) {
             final DocumentType constant = CONSTANTS.get(value);
             if (constant == null) {
-                throw new IllegalArgumentException(value);
+                throw new EnumException(DocumentType.class.getName(), value, Arrays.toString(values()));
             }
             return constant;
         }

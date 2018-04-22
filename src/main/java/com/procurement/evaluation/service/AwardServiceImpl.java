@@ -1,11 +1,8 @@
 package com.procurement.evaluation.service;
 
-import com.datastax.driver.core.utils.UUIDs;
 import com.procurement.evaluation.exception.ErrorException;
 import com.procurement.evaluation.exception.ErrorType;
-import com.procurement.evaluation.model.dto.UpdateAwardDto;
-import com.procurement.evaluation.model.dto.award.AwardBidRQDto;
-import com.procurement.evaluation.model.dto.award.AwardBidRSDto;
+import com.procurement.evaluation.model.dto.UpdateAwardRequestDto;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import com.procurement.evaluation.model.dto.ocds.Award;
 import com.procurement.evaluation.model.dto.ocds.Status;
@@ -13,7 +10,9 @@ import com.procurement.evaluation.model.entity.AwardEntity;
 import com.procurement.evaluation.repository.AwardRepository;
 import com.procurement.evaluation.utils.DateUtil;
 import com.procurement.evaluation.utils.JsonUtil;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,21 +38,24 @@ public class AwardServiceImpl implements AwardService {
                                    final String stage,
                                    final String token,
                                    final String owner,
-                                   final UpdateAwardDto dataDto) {
-
-        final AwardEntity awardEntity = Optional.ofNullable(
-                awardRepository.findAwardEntity(cpId, stage, UUID.fromString(token)))
-                .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
-        if (!awardEntity.getOwner().equals(owner)) throw new ErrorException(ErrorType.INVALID_OWNER);
+                                   final UpdateAwardRequestDto dataDto) {
         final Award awardDto = dataDto.getAward();
-        final Award award = jsonUtil.toObject(Award.class, awardEntity.getJsonData());
-        if (Objects.nonNull(awardDto.getDescription()))  award.setDescription(awardDto.getDescription());
-        if (Objects.nonNull(awardDto.getStatusDetails())) award.setStatusDetails(awardDto.getStatusDetails());
-        if (Objects.nonNull(awardDto.getDocuments())) award.setDocuments(awardDto.getDocuments());
-        award.setDate(dateUtil.localNowUTC());
-        awardEntity.setJsonData(jsonUtil.toJson(award));
-        awardRepository.save(awardEntity);
-        return new ResponseDto<>(true, null, new UpdateAwardDto(award));
+        /*active*/
+        if (awardDto.getStatusDetails().equals(Status.ACTIVE)) {
+            final AwardEntity awardEntity = Optional.ofNullable(awardRepository.findAwardEntity(cpId, stage, UUID.fromString(token)))
+                    .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
+            if (!awardEntity.getOwner().equals(owner)) throw new ErrorException(ErrorType.INVALID_OWNER);
+
+            final Award award = jsonUtil.toObject(Award.class, awardEntity.getJsonData());
+            if (Objects.nonNull(awardDto.getDescription())) award.setDescription(awardDto.getDescription());
+            if (Objects.nonNull(awardDto.getStatusDetails())) award.setStatusDetails(awardDto.getStatusDetails());
+            if (Objects.nonNull(awardDto.getDocuments())) award.setDocuments(awardDto.getDocuments());
+            award.setDate(dateUtil.localNowUTC());
+            awardEntity.setJsonData(jsonUtil.toJson(award));
+            awardRepository.save(awardEntity);
+            return new ResponseDto<>(true, null, new UpdateAwardRequestDto(award));
+        }
+
     }
 
 //    @Override
