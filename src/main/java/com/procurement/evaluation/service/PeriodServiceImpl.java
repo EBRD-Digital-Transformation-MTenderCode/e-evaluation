@@ -52,41 +52,4 @@ public class PeriodServiceImpl implements PeriodService {
         final Period period = new Period(periodEntity.getStartDate(), periodEntity.getEndDate());
         return period;
     }
-
-
-    @Override
-    public ResponseDto endPeriod(final String cpId, final LocalDateTime endPeriod) {
-//        final PeriodEntity periodEntity = periodRepository.getByOcId(cpId);
-//        periodEntity.setEndDate(endPeriod);
-//        periodRepository.save(periodEntity);
-//
-//        final List<AwardEntity> awardEntities = awardRepository.selectAwardsEntityByOcid(cpId);
-//
-//        for (int i = 0; i < awardEntities.size(); i++) {
-//            if (awardEntities.get(i).getStatusDetails() != null) {
-//                awardEntities.get(i).setStatus(awardEntities.get(i).getStatusDetails());
-//                awardRepository.save(awardEntities.get(i));
-//            }
-//
-//            final List<EndBidAwardRSDto> awardBidRSDtos = getAwardsDtoFromEntity(awardEntities);
-//
-//            return new ResponseDto(true, null, awardBidRSDtos);
-//        }
-        return null;
-    }
-
-    private List<EndBidAwardRSDto> getAwardsDtoFromEntity(final List<AwardEntity> awardEntities) {
-        final List<EndBidAwardRSDto> awardBidRSDtos = new ArrayList<>();
-        for (int i = 0; i < awardEntities.size(); i++) {
-            final EndBidAwardRSDto bidAwardRSDto = jsonUtil.toObject(EndBidAwardRSDto.class, awardEntities.get(i)
-                                                                                                          .getJsonData());
-            bidAwardRSDto.setStatus(Status.fromValue(awardEntities.get(i)
-                                                                  .getStatus()));
-            bidAwardRSDto.setStatusDetails(null);
-
-            awardBidRSDtos.add(bidAwardRSDto);
-        }
-
-        return awardBidRSDtos;
-    }
 }

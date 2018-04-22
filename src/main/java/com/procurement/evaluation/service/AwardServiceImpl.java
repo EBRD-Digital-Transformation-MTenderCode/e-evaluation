@@ -2,17 +2,25 @@ package com.procurement.evaluation.service;
 
 import com.procurement.evaluation.exception.ErrorException;
 import com.procurement.evaluation.exception.ErrorType;
+import com.procurement.evaluation.model.dto.AwardsResponseDto;
 import com.procurement.evaluation.model.dto.UpdateAwardRequestDto;
 import com.procurement.evaluation.model.dto.UpdateAwardResponseDto;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import com.procurement.evaluation.model.dto.ocds.Award;
+import com.procurement.evaluation.model.dto.ocds.Lot;
+import com.procurement.evaluation.model.dto.ocds.Period;
 import com.procurement.evaluation.model.dto.ocds.Status;
 import com.procurement.evaluation.model.entity.AwardEntity;
 import com.procurement.evaluation.repository.AwardRepository;
 import com.procurement.evaluation.utils.DateUtil;
 import com.procurement.evaluation.utils.JsonUtil;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class AwardServiceImpl implements AwardService {
@@ -56,7 +64,7 @@ public class AwardServiceImpl implements AwardService {
                 final List<AwardEntity> entities = Optional.ofNullable(awardRepository.getAllByCpidAndStage(cpId, stage))
                         .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
 
-                Map<Award, AwardEntity> awardsFromEntities = getAwardsFromEntities(entities);
+                Map<Award, AwardEntity> awardsFromEntities = getMapAwardsFromEntities(entities);
                 final List<Award> updatedAwards = new ArrayList<>();
                 // UNSUCCESSFUL AWARD
                 final Award updatableAward = Optional.of(
@@ -82,7 +90,7 @@ public class AwardServiceImpl implements AwardService {
                     nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
                     awardRepository.save(nextAwardByLotEntity);
                     updatedAwards.add(nextAwardByLot);
-                  }
+                }
                 return getResponseDtoForAwards(updatedAwards);
 
             default:
@@ -91,7 +99,86 @@ public class AwardServiceImpl implements AwardService {
 
     }
 
-    private Map<Award, AwardEntity> getAwardsFromEntities(final List<AwardEntity> awardEntities) {
+    @Override
+    public ResponseDto getAwards(final String cpId,
+                                 final String stage,
+                                 final String country,
+                                 final String pmd) {
+        final List<AwardEntity> awardEntities = Optional.ofNullable(awardRepository.getAllByCpidAndStage(cpId, stage))
+                .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
+        final List<Award> activeAwards = getActiveAwardsFromEntities(awardEntities);
+        return new ResponseDto<>(true, null, new AwardsResponseDto(activeAwards, null, null));
+    }
+
+    @Override
+    public ResponseDto endAwardPeriod(final String cpId,
+                                      final String stage,
+                                      final String country,
+                                      final String pmd,
+                                      final LocalDateTime endPeriod) {
+        final Period awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endPeriod);
+        final List<AwardEntity> awardEntities = awardRepository.getAllByCpidAndStage(cpId, stage);
+        if (awardEntities.isEmpty()) throw new ErrorException(ErrorType.DATA_NOT_FOUND);
+        final List<Award> awards = getAwardsFromEntities(awardEntities);
+        setAwardsStatusFromStatusDetails(awards, endPeriod);
+        final List<Lot> unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards, country, pmd);
+        return new ResponseDto<>(true, null, new AwardsResponseDto(awards, awardPeriod, unsuccessfulLots));
+    }
+
+    private List<Lot> getUnsuccessfulLotsFromAwards(final List<Award> awards,
+                                                    final String country,
+                                                    final String pmd) {
+        final List<String> unsuccessfulRelatedLotsFromAward = getUnsuccessfulRelatedLotsIdFromAwards(awards);
+        final Map<String, Long> uniqueLots = getUniqueLots(unsuccessfulRelatedLotsFromAward);
+        final List<String> unsuccessfulLots = getUnsuccessfulLots(uniqueLots);
+        return unsuccessfulLots.stream().map(Lot::new).collect(Collectors.toList());
+    }
+
+    private List<String> getUnsuccessfulRelatedLotsIdFromAwards(final List<Award> awards) {
+        return awards.stream()
+                .filter(award ->
+                        (award.getStatus().equals(Status.UNSUCCESSFUL) && award.getStatusDetails().equals(Status.EMPTY)))
+                .flatMap(award -> award.getRelatedLots().stream())
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Long> getUniqueLots(final List<String> lots) {
+        return lots.stream()
+                .collect(groupingBy(Function.identity(), Collectors.counting()));
+    }
+
+    private List<String> getUnsuccessfulLots(final Map<String, Long> uniqueLots) {
+        return uniqueLots.entrySet()
+                .stream()
+                .filter(map -> map.getValue() > 0)
+                .map(map -> map.getKey())
+                .collect(Collectors.toList());
+    }
+
+    private List<Award> getAwardsFromEntities(final List<AwardEntity> awardEntities) {
+        return awardEntities.stream()
+                .map(e -> jsonUtil.toObject(Award.class, e.getJsonData()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Award> getActiveAwardsFromEntities(final List<AwardEntity> awardEntities) {
+        return awardEntities.stream()
+                .map(e -> jsonUtil.toObject(Award.class, e.getJsonData()))
+                .filter(award -> (award.getStatus().equals(Status.ACTIVE) && award.getStatusDetails().equals(Status.EMPTY)))
+                .collect(Collectors.toList());
+    }
+
+    private void setAwardsStatusFromStatusDetails(final List<Award> awards, final LocalDateTime endPeriod) {
+        awards.forEach(a -> {
+            if (a.getStatusDetails() != Status.EMPTY) {
+                a.setDate(endPeriod);
+                a.setStatus(a.getStatusDetails());
+                a.setStatusDetails(Status.EMPTY);
+            }
+        });
+    }
+
+    private Map<Award, AwardEntity> getMapAwardsFromEntities(final List<AwardEntity> awardEntities) {
         final Map<Award, AwardEntity> awardsFromEntities = new HashMap<>();
         awardEntities.forEach(e -> {
             final Award award = jsonUtil.toObject(Award.class, e.getJsonData());
@@ -130,108 +217,4 @@ public class AwardServiceImpl implements AwardService {
             }
         }
     }
-
-//    @Override
-//    public List<AwardBidRSDto> getAwardsDtoFromEntity(final List<AwardEntity> awardPeriodEntities) {
-//        final List<AwardBidRSDto> awardBidsResponseDtos = new ArrayList<>();
-//
-//        for (int i = 0; i < awardPeriodEntities.size(); i++) {
-//
-//            final AwardBidRSDto periodResponseAwardDto = getAwardDtoFromEntity(awardPeriodEntities.get(i));
-//
-//            awardBidsResponseDtos.add(periodResponseAwardDto);
-//        }
-//
-//        return awardBidsResponseDtos;
-//    }
-//
-//    private AwardBidRSDto getAwardDtoFromEntity(final AwardEntity entity) {
-//        return jsonUtil.toObject(AwardBidRSDto.class, entity.getJsonData());
-//    }
-//
-//    private Optional<AwardEntity> updateEntityFromAward(final AwardEntity awardEntity,
-//                                                        final AwardBidRSDto awardDto
-//    ) {
-//        awardEntity.setStatusDetails(awardDto.getStatusDetails()
-//                .value());
-//        awardEntity.setJsonData(jsonUtil.toJson(awardDto));
-//        return Optional.ofNullable(awardEntity);
-//    }
-//
-//    private Optional<AwardEntity> getEntity(final Award awardDto,
-//                                            final String ocId,
-//                                            final String owner) {
-//        final AwardEntity awardEntity = new AwardEntity();
-//        awardEntity.setOcId(ocId);
-//        awardEntity.setAwardId(getUuid(awardDto));
-//        awardEntity.setStatus(awardDto.getStatus()
-//                .value());
-//        awardEntity.setOwner(owner);
-//        awardEntity.setJsonData(jsonUtil.toJson(awardDto));
-//        return Optional.ofNullable(awardEntity);
-//    }
-//
-//    private UUID getUuid(final Award awardDto) {
-//        final UUID awardId;
-//        if (Objects.isNull(awardDto.getId())) {
-//            awardId = UUIDs.timeBased();
-//            awardDto.setId(awardId.toString());
-//        } else {
-//            awardId = UUID.fromString(awardDto.getId());
-//        }
-//        return awardId;
-//    }
-//
-//    private boolean isValidStatusDetail(final Status awardStatusDetails) {
-//        final List<Status> validIncomingStatuses = new ArrayList<>();
-//        validIncomingStatuses.add(Status.ACTIVE);
-//        validIncomingStatuses.add(Status.UNSUCCESSFUL);
-//
-//        if (validIncomingStatuses.contains(awardStatusDetails)) {
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
-//
-//    private int isListAwardContainsOtherAwards(final List<AwardEntity> awardBidDtos) {
-//
-//        for (int i = 0; i < awardBidDtos.size() - 1; i++) {
-//            if (isNextAwardPendingAfterThisConsideration(awardBidDtos.get(i), awardBidDtos.get(i + 1))) {
-//                return i;
-//            }
-//        }
-//        return -1;
-//    }
-//
-//    private List<AwardEntity> getSurrentConsiderationAwardAndNextPendingAward(final List<AwardEntity> entities,
-//                                                                              final int index) {
-//        final List<AwardEntity> twoAwards = new ArrayList<>();
-//        twoAwards.add(entities.get(index));
-//        twoAwards.add(entities.get(index + 1));
-//        return twoAwards;
-//    }
-//
-//    private boolean isNextAwardPendingAfterThisConsideration(final AwardEntity current, final AwardEntity next) {
-//        if ((current.getStatus() == Status.CONSIDERATION.value() && current.getStatusDetails() != Status.UNSUCCESSFUL
-//                .value()) ||
-//                (current.getStatusDetails() == Status.CONSIDERATION.value()) && current.getStatus() == Status.PENDING
-//                        .value()) {
-//            if (next.getStatus() == Status.PENDING.value() && next.getStatusDetails() != Status.CONSIDERATION.value()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    private Boolean isTokenValid(final String cpId, final String owner, final AwardBidRQDto awardBidDto) {
-//        final AwardEntity awardEntity = awardRepository.findAwardEntity(cpId, UUID.fromString(awardBidDto.getId()));
-//
-//        if (!awardEntity.getOwner()
-//                .equals(owner)) {
-//            return false;
-//        }
-//
-//        return true;
-//    }
 }

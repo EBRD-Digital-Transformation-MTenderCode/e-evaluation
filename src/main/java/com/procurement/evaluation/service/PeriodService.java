@@ -12,6 +12,4 @@ public interface PeriodService {
     Period saveStartOfPeriod(String cpId, String stage, LocalDateTime startDate);
 
     Period saveEndOfPeriod(String cpId, String stage, LocalDateTime endDate);
-
-    ResponseDto endPeriod(String cpId, LocalDateTime endPeriod);
 }

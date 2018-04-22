@@ -54,13 +54,21 @@ public class EvaluationController {
                 HttpStatus.OK);
     }
 
-    @PostMapping(value = "/end_period/{cpid}")
-    public ResponseEntity<ResponseDto> finalAwards(@PathVariable(value = "cpid") final String cpid,
-                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                   @RequestParam(value = "endDate") final LocalDateTime endDate) {
+    @GetMapping
+    public ResponseEntity<ResponseDto> getAwards(@RequestParam("identifier") final String cpId,
+                                                    @RequestParam("stage") final String stage,
+                                                    @RequestParam("country") final String country,
+                                                    @RequestParam("pmd") final String pmd) {
+        return new ResponseEntity<>(awardService.getAwards(cpId, stage, country, pmd), HttpStatus.OK);
+    }
 
-        return new ResponseEntity<>(
-                periodService.endPeriod(cpid, endDate),
-                HttpStatus.OK);
+    @PostMapping(value = "/endAwardPeriod")
+    public ResponseEntity<ResponseDto> endAwardPeriod(@RequestParam("identifier") final String cpId,
+                                                      @RequestParam("stage") final String stage,
+                                                      @RequestParam("country") final String country,
+                                                      @RequestParam("pmd") final String pmd,
+                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                      @RequestParam("endPeriod") final LocalDateTime endPeriod) {
+        return new ResponseEntity<>(awardService.endAwardPeriod(cpId, stage, country, pmd, endPeriod), HttpStatus.OK);
     }
 }
