@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
+import static com.procurement.evaluation.model.dto.ocds.AwardCriteria.PRICE_ONLY;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
@@ -60,9 +61,8 @@ public class SelectionsServiceImpl implements SelectionsService {
         addUnsuccessfulLotsFromTender(successfulLots, unsuccessfulLots, lotsFromTender);
         final List<Bid> successfulBids = getSuccessfulBids(dataDto, successfulLots);
         final List<Award> awards = getSuccessfulAwards(successfulBids);
-        sortSuccessfulAwards(awards);
         setAwardIds(awards);
-        setStatusConsideration(awards);
+        sortSuccessfulAwards(awards, AwardCriteria.fromValue(dataDto.getAwardCriteria()));
         awards.addAll(getUnsuccessfulAwards(unsuccessfulLots));
         /**save evaluation period*/
         final Period periodDto = periodService.saveStartOfPeriod(cpId, stage, startDate);
@@ -182,12 +182,27 @@ public class SelectionsServiceImpl implements SelectionsService {
         ).collect(Collectors.toList());
     }
 
-    private void sortSuccessfulAwards(final List<Award> awards) {
-        awards.sort(new SortedByValue());
-    }
-
-    private void setStatusConsideration(final List<Award> awards) {
-        awards.get(0).setStatus(Status.CONSIDERATION);
+    private void sortSuccessfulAwards(final List<Award> awards, final AwardCriteria awardCriteria) {
+        switch(awardCriteria) {
+            case PRICE_ONLY:
+                awards.sort(new SortedByValue());
+                awards.get(0).setStatusDetails(Status.CONSIDERATION);
+                break;
+            case COST_ONLY:
+                break;
+            case QUALITY_ONLY:
+                break;
+            case RATED_CRITERIA:
+                break;
+            case LOWEST_COST:
+                break;
+            case BEST_PROPOSAL:
+                break;
+            case BEST_VALUE_TO_GOVERNMENT:
+                break;
+            case SINGLE_BID_ONLY:
+                break;
+        }
     }
 
     private class SortedByValue implements Comparator<Award> {

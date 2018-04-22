@@ -38,7 +38,6 @@ public class EvaluationController {
                                                     @RequestParam(value = "pmd") final String pmd,
                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                     @RequestParam(value = "date") final LocalDateTime startDate,
-                                                    @RequestParam(value = "awardCriteria") final String awardCriteria,
                                                     @Valid @RequestBody final SelectionsRequestDto data) {
         return new ResponseEntity<>(
                 selectionsService.createAwards(cpId, stage, owner, country, pmd, startDate, data),

@@ -12,6 +12,9 @@ import lombok.Getter;
 @Getter
 public class SelectionsRequestDto {
 
+    @JsonProperty(value = "awardCriteria")
+    private String awardCriteria;
+
     @Valid
     @NotNull
     @JsonProperty("lots")
