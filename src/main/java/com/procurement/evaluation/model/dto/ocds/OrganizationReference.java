@@ -2,7 +2,6 @@ package com.procurement.evaluation.model.dto.ocds;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -12,8 +11,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 @Getter
 @JsonPropertyOrder({
-    "id",
-    "name"
+        "id",
+        "name"
 })
 public class OrganizationReference {
 
@@ -36,8 +35,8 @@ public class OrganizationReference {
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(name)
-                                    .append(id)
-                                    .toHashCode();
+                .append(id)
+                .toHashCode();
     }
 
     @Override
@@ -50,7 +49,7 @@ public class OrganizationReference {
         }
         final OrganizationReference rhs = (OrganizationReference) other;
         return new EqualsBuilder().append(name, rhs.name)
-                                  .append(id, rhs.id)
-                                  .isEquals();
+                .append(id, rhs.id)
+                .isEquals();
     }
 }

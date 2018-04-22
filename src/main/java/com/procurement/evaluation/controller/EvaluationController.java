@@ -56,9 +56,9 @@ public class EvaluationController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAwards(@RequestParam("identifier") final String cpId,
-                                                    @RequestParam("stage") final String stage,
-                                                    @RequestParam("country") final String country,
-                                                    @RequestParam("pmd") final String pmd) {
+                                                 @RequestParam("stage") final String stage,
+                                                 @RequestParam("country") final String country,
+                                                 @RequestParam("pmd") final String pmd) {
         return new ResponseEntity<>(awardService.getAwards(cpId, stage, country, pmd), HttpStatus.OK);
     }
 

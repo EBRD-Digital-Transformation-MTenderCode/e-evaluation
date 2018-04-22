@@ -3,14 +3,10 @@ package com.procurement.evaluation.model.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.procurement.evaluation.model.dto.award.AwardBidRSDto;
 import com.procurement.evaluation.model.dto.ocds.Award;
 import com.procurement.evaluation.model.dto.ocds.Lot;
 import com.procurement.evaluation.model.dto.ocds.Period;
 import java.util.List;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data

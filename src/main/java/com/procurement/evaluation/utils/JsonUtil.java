@@ -63,11 +63,11 @@ public class JsonUtil {
 
     private String getPathFile(final String fileName) {
         return Optional.ofNullable(getClass().getClassLoader()
-                                             .getResource(fileName))
-                       .map(URL::getPath)
-                       .orElseThrow(() ->
-                                        new IllegalArgumentException(file + fileName + "' not found.")
-                       );
+                .getResource(fileName))
+                .map(URL::getPath)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(file + fileName + "' not found.")
+                );
     }
 
     private String read(final String pathToFile) {
@@ -90,7 +90,7 @@ public class JsonUtil {
             }
         }
         return out.getBuffer()
-                  .toString();
+                .toString();
     }
 
     public String merge(final String mainJson, final String updateJson) {

@@ -15,7 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
-import static com.procurement.evaluation.model.dto.ocds.AwardCriteria.PRICE_ONLY;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
@@ -183,7 +182,7 @@ public class SelectionsServiceImpl implements SelectionsService {
     }
 
     private void sortSuccessfulAwards(final List<Award> awards, final AwardCriteria awardCriteria) {
-        switch(awardCriteria) {
+        switch (awardCriteria) {
             case PRICE_ONLY:
                 awards.sort(new SortedByValue());
                 awards.get(0).setStatusDetails(Status.CONSIDERATION);

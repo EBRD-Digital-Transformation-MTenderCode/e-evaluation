@@ -3,17 +3,11 @@ package com.procurement.evaluation.service;
 import com.procurement.evaluation.exception.ErrorException;
 import com.procurement.evaluation.exception.ErrorType;
 import com.procurement.evaluation.model.dto.ocds.Period;
-import com.procurement.evaluation.model.dto.ocds.Status;
-import com.procurement.evaluation.model.dto.bpe.ResponseDto;
-import com.procurement.evaluation.model.dto.endbid.EndBidAwardRSDto;
-import com.procurement.evaluation.model.entity.AwardEntity;
 import com.procurement.evaluation.model.entity.PeriodEntity;
 import com.procurement.evaluation.repository.AwardRepository;
 import com.procurement.evaluation.repository.PeriodRepository;
 import com.procurement.evaluation.utils.JsonUtil;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
