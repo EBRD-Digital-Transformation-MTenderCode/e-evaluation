@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 public class AwardServiceImpl implements AwardService {
@@ -82,17 +83,26 @@ public class AwardServiceImpl implements AwardService {
                 updatedAwards.add(updatableAward);
 
                 // NEXT AWARD BY LOT
-                Award nextAwardByLot = awardsFromEntities.keySet().stream().filter(a -> a.getRelatedLots().equals(updatableAward
-                        .getRelatedLots())).sorted(new SortedByValue()).findFirst().get();
-                if (nextAwardByLot != null) {
-                    AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
-                    nextAwardByLot.setStatusDetails(Status.CONSIDERATION);
-                    nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
-                    awardRepository.save(nextAwardByLotEntity);
-                    updatedAwards.add(nextAwardByLot);
+                Set<Award> awards = awardsFromEntities.keySet().stream()
+                        .filter(a -> a.getRelatedLots().equals(updatableAward.getRelatedLots()))
+                        .sorted(new SortedByValue()).collect(toSet());
+                if (awards.size() > 1) {
+                    Award nextAwardByLot = null;
+                    for (Award a : awards) {
+                        if (a.getId() != updatableAward.getId()) {
+                            nextAwardByLot = a;
+                        }
+                    }
+                    if (nextAwardByLot != null) {
+                        AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
+                        nextAwardByLot.setStatusDetails(Status.CONSIDERATION);
+                        nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
+                        awardRepository.save(nextAwardByLotEntity);
+                        updatedAwards.add(nextAwardByLot);
+                    }
+
                 }
                 return getResponseDtoForAwards(updatedAwards);
-
             default:
                 throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         }

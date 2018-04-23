@@ -20,14 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class EvaluationController {
     private final SelectionsService selectionsService;
     private final AwardService awardService;
-    private final PeriodService periodService;
 
     public EvaluationController(final SelectionsService selectionsService,
-                                final AwardService awardService, final PeriodService periodService) {
+                                final AwardService awardService) {
         this.selectionsService = selectionsService;
         this.awardService = awardService;
-        this.periodService = periodService;
-    }
+     }
 
     @PostMapping
     public ResponseEntity<ResponseDto> createAwards(@RequestParam(value = "identifier") final String cpId,
