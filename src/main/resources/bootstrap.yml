@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: e-qualification
+    name: e-evaluation
   cloud:
     config:
       failFast: true
