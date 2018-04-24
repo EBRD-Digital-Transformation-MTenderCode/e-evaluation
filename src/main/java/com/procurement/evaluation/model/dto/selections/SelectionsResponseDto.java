@@ -23,13 +23,13 @@ public class SelectionsResponseDto {
     @JsonProperty("awards")
     private final List<Award> awards;
 
-    @JsonProperty("lots")
+    @JsonProperty("unsuccessfulLots")
     private final List<Lot> lots;
 
     @JsonCreator
     public SelectionsResponseDto(@JsonProperty("awardPeriod") final Period period,
                                  @JsonProperty("awards") final List<Award> awards,
-                                 @JsonProperty("lots") final List<Lot> lots) {
+                                 @JsonProperty("unsuccessfulLots") final List<Lot> lots) {
 
         this.period = period;
         this.awards = awards;
