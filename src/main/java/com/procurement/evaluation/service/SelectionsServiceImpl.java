@@ -49,7 +49,7 @@ public class SelectionsServiceImpl implements SelectionsService {
                                     String country,
                                     String pmd,
                                     String awardCriteria,
-                                    LocalDateTime startDate,
+                                    LocalDateTime dateTime,
                                     SelectionsRequestDto dataDto) {
 
         final int minNumberOfBids = rulesService.getMinimumNumberOfBids(country, pmd);
@@ -65,7 +65,7 @@ public class SelectionsServiceImpl implements SelectionsService {
         sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria));
         awards.addAll(getUnsuccessfulAwards(unsuccessfulLots));
         /**save evaluation period*/
-        final Period periodDto = periodService.saveStartOfPeriod(cpId, stage, startDate);
+        final Period periodDto = periodService.saveStartOfPeriod(cpId, stage, dateTime);
         /**save awards to DB*/
         saveAwards(awards, cpId, owner, stage);
         return new ResponseDto<>(true, null,

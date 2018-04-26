@@ -14,6 +14,6 @@ public interface SelectionsService {
                              String country,
                              String pmd,
                              String awardCriteria,
-                             LocalDateTime startDate,
+                             LocalDateTime dateTime,
                              SelectionsRequestDto dataDto);
 }

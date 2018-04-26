@@ -4,7 +4,6 @@ import com.procurement.evaluation.model.dto.UpdateAwardRequestDto;
 import com.procurement.evaluation.model.dto.bpe.ResponseDto;
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto;
 import com.procurement.evaluation.service.AwardService;
-import com.procurement.evaluation.service.PeriodService;
 import com.procurement.evaluation.service.SelectionsService;
 import java.time.LocalDateTime;
 import javax.validation.Valid;
@@ -25,7 +24,7 @@ public class EvaluationController {
                                 final AwardService awardService) {
         this.selectionsService = selectionsService;
         this.awardService = awardService;
-     }
+    }
 
     @PostMapping
     public ResponseEntity<ResponseDto> createAwards(@RequestParam(value = "identifier") final String cpId,
@@ -35,10 +34,10 @@ public class EvaluationController {
                                                     @RequestParam(value = "pmd") final String pmd,
                                                     @RequestParam(value = "awardCriteria") final String awardCriteria,
                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                    @RequestParam(value = "date") final LocalDateTime startDate,
+                                                    @RequestParam(value = "date") final LocalDateTime dateTime,
                                                     @Valid @RequestBody final SelectionsRequestDto data) {
         return new ResponseEntity<>(
-                selectionsService.createAwards(cpId, stage, owner, country, pmd, awardCriteria, startDate, data),
+                selectionsService.createAwards(cpId, stage, owner, country, pmd, awardCriteria, dateTime, data),
                 HttpStatus.CREATED);
     }
 
@@ -48,7 +47,7 @@ public class EvaluationController {
                                                    @RequestParam("token") final String token,
                                                    @RequestParam("owner") final String owner,
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                       @RequestParam(value = "date") final LocalDateTime dateTime,
+                                                   @RequestParam(value = "date") final LocalDateTime dateTime,
                                                    @Valid @RequestBody final UpdateAwardRequestDto data) {
         return new ResponseEntity<>(
                 awardService.updateAward(cpId, stage, token, owner, dateTime, data),
