@@ -215,15 +215,16 @@ public class AwardServiceImpl implements AwardService {
         return new ResponseDto<>(true, null,
                 new UpdateAwardResponseDto(
                         Collections.singletonList(award),
-                        award.getRelatedBid(), award
-                        .getRelatedLots().get(0))
+                        award.getRelatedBid(),
+                        award.getRelatedLots().get(0))
         );
     }
 
     private ResponseDto getResponseDtoForAwards(final List<Award> awards) {
         return new ResponseDto<>(true, null,
                 new UpdateAwardResponseDto(
-                        awards, awards.get(0).getRelatedBid(),
+                        awards,
+                        awards.get(0).getRelatedBid(),
                         awards.get(0).getRelatedLots().get(0)));
     }
 
