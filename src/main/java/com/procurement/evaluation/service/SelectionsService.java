@@ -13,6 +13,7 @@ public interface SelectionsService {
                              String owner,
                              String country,
                              String pmd,
+                             String awardCriteria,
                              LocalDateTime startDate,
                              SelectionsRequestDto dataDto);
 }

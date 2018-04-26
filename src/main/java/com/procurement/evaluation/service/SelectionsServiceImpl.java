@@ -48,6 +48,7 @@ public class SelectionsServiceImpl implements SelectionsService {
                                     String owner,
                                     String country,
                                     String pmd,
+                                    String awardCriteria,
                                     LocalDateTime startDate,
                                     SelectionsRequestDto dataDto) {
 
@@ -61,7 +62,7 @@ public class SelectionsServiceImpl implements SelectionsService {
         final List<Bid> successfulBids = getSuccessfulBids(dataDto, successfulLots);
         final List<Award> awards = getSuccessfulAwards(successfulBids);
         setAwardIds(awards);
-        sortSuccessfulAwards(awards, AwardCriteria.fromValue(dataDto.getAwardCriteria()));
+        sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria));
         awards.addAll(getUnsuccessfulAwards(unsuccessfulLots));
         /**save evaluation period*/
         final Period periodDto = periodService.saveStartOfPeriod(cpId, stage, startDate);

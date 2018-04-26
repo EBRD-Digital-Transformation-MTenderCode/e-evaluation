@@ -1,4 +1,0 @@
--Dspring.config.location=file:"path to file 'application.yml'"
-
-example
--Dspring.config.location=file:/home/user/IdeaProjects/OCDS/e-qualification/src/main/resources/application.yml

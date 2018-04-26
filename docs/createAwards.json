@@ -1,0 +1,197 @@
+{
+  "bids": [
+    {
+      "id": "0ea1f4c0-4926-11e8-8127-9b7779a939ff",
+      "date": "2018-04-26T08:21:10Z",
+      "status": "pending",
+      "statusDetails": "empty",
+      "tenderers": [
+        {
+          "id": "UA-EDR-298-85-2830",
+          "name": "Campbell Ltd",
+          "identifier": {
+            "id": "298-85-2830",
+            "scheme": "UA-EDR",
+            "legalName": "Campbell Ltd Group",
+            "uri": "http://spence.com/home.asp"
+          },
+          "address": {
+            "streetAddress": "1784 Chen Shoal",
+            "locality": "South Christinehaven",
+            "region": "Utah",
+            "postalCode": "75990",
+            "countryName": "Qatar"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "571-66-1881",
+              "scheme": "UA-EDR",
+              "legalName": "Campbell Ltd Ltd",
+              "uri": "https://www.mccormick.com/tag/posts/wp-content/post.htm"
+            }
+          ],
+          "contactPoint": {
+            "name": "Lauren Valencia",
+            "email": "jsantos@yahoo.com",
+            "telephone": "04255399180",
+            "faxNumber": "1-478-248-3338",
+            "url": "http://rodriguez-hernandez.com/"
+          }
+        }
+      ],
+      "value": {
+        "amount": 0.123,
+        "currency": "UAH"
+      },
+      "relatedLots": [
+        "9b5c1181-4925-11e8-8e46-3774229333d2"
+      ]
+    },
+    {
+      "id": "0eef7880-4926-11e8-8127-9b7779a939ff",
+      "date": "2018-04-26T08:21:10Z",
+      "status": "pending",
+      "statusDetails": "empty",
+      "tenderers": [
+        {
+          "id": "UA-EDR-661-99-7256",
+          "name": "Williamson, Herman and Garza",
+          "identifier": {
+            "id": "661-99-7256",
+            "scheme": "UA-EDR",
+            "legalName": "Williamson, Herman and Garza LLC",
+            "uri": "https://www.miller-steele.org/about.htm"
+          },
+          "address": {
+            "streetAddress": "325 Cohen Falls",
+            "locality": "Lindsayshire",
+            "region": "Alabama",
+            "postalCode": "99315-2901",
+            "countryName": "Brazil"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "864-43-7189",
+              "scheme": "UA-EDR",
+              "legalName": "Williamson, Herman and Garza PLC",
+              "uri": "http://carroll-martinez.com/terms/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Melinda Moody",
+            "email": "smithheather@hotmail.com",
+            "telephone": "380-453-8274",
+            "faxNumber": "683.045.5981x2549",
+            "url": "https://robinson.com/"
+          }
+        }
+      ],
+      "value": {
+        "amount": 123.456789,
+        "currency": "UAH"
+      },
+      "relatedLots": [
+        "9b5c1181-4925-11e8-8e46-3774229333d2"
+      ]
+    },
+    {
+      "id": "0f44c470-4926-11e8-8127-9b7779a939ff",
+      "date": "2018-04-26T08:21:10Z",
+      "status": "pending",
+      "statusDetails": "empty",
+      "tenderers": [
+        {
+          "id": "UA-EDR-751-63-9729",
+          "name": "Clarke-Zhang",
+          "identifier": {
+            "id": "751-63-9729",
+            "scheme": "UA-EDR",
+            "legalName": "Clarke-Zhang PLC",
+            "uri": "https://www.mendez-rogers.info/tag/login/"
+          },
+          "address": {
+            "streetAddress": "53045 Wood Plains",
+            "locality": "West Christopherstad",
+            "region": "West Virginia",
+            "postalCode": "50945-1745",
+            "countryName": "United States Virgin Islands"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "271-57-7784",
+              "scheme": "UA-EDR",
+              "legalName": "Clarke-Zhang PLC",
+              "uri": "https://www.vazquez.com/categories/terms/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Tiffany Walker",
+            "email": "oortiz@yahoo.com",
+            "telephone": "1-255-768-0958x3517",
+            "faxNumber": "(931)030-2283x258",
+            "url": "https://bryan-brown.com/home.jsp"
+          }
+        }
+      ],
+      "value": {
+        "amount": 123.456789,
+        "currency": "UAH"
+      },
+      "relatedLots": [
+        "9b5c1181-4925-11e8-8e46-3774229333d2"
+      ]
+    },
+    {
+      "id": "10f66c10-4926-11e8-8127-9b7779a939ff",
+      "date": "2018-04-26T08:21:10Z",
+      "status": "pending",
+      "statusDetails": "empty",
+      "tenderers": [
+        {
+          "id": "UA-EDR-234-83-2781",
+          "name": "Torres PLC",
+          "identifier": {
+            "id": "234-83-2781",
+            "scheme": "UA-EDR",
+            "legalName": "Torres PLC Ltd",
+            "uri": "https://maldonado.info/author/"
+          },
+          "address": {
+            "streetAddress": "314 Krista Wall",
+            "locality": "West Michaelport",
+            "region": "Illinois",
+            "postalCode": "25604",
+            "countryName": "Singapore"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "780-18-5924",
+              "scheme": "UA-EDR",
+              "legalName": "Torres PLC Inc",
+              "uri": "https://travis.info/main.htm"
+            }
+          ],
+          "contactPoint": {
+            "name": "April Pittman",
+            "email": "xdaniels@hotmail.com",
+            "telephone": "+84(2)3107452131",
+            "faxNumber": "534.244.1177",
+            "url": "https://harris-stark.com/app/login.html"
+          }
+        }
+      ],
+      "value": {
+        "amount": 123.0,
+        "currency": "UAH"
+      },
+      "relatedLots": [
+        "9b5c1181-4925-11e8-8e46-3774229333d2"
+      ]
+    }
+  ],
+  "lots": [
+    {
+      "id": "9b5c1181-4925-11e8-8e46-3774229333d2"
+    }
+  ]
+}

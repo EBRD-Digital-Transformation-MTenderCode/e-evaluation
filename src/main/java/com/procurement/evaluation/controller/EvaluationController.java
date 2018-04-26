@@ -33,11 +33,12 @@ public class EvaluationController {
                                                     @RequestParam(value = "owner") final String owner,
                                                     @RequestParam(value = "country") final String country,
                                                     @RequestParam(value = "pmd") final String pmd,
+                                                    @RequestParam(value = "awardCriteria") final String awardCriteria,
                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                     @RequestParam(value = "date") final LocalDateTime startDate,
                                                     @Valid @RequestBody final SelectionsRequestDto data) {
         return new ResponseEntity<>(
-                selectionsService.createAwards(cpId, stage, owner, country, pmd, startDate, data),
+                selectionsService.createAwards(cpId, stage, owner, country, pmd, awardCriteria, startDate, data),
                 HttpStatus.CREATED);
     }
 

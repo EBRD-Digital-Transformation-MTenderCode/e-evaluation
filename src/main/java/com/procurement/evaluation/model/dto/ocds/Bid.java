@@ -46,13 +46,11 @@ public class Bid {
     @JsonProperty("date")
     private final LocalDateTime date;
 
-    @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonProperty("pendingDate")
     private final LocalDateTime pendingDate;
 
-    @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonProperty("createdDate")
