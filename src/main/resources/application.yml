@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: e-qualification
+    name: e-evaluation
   data:
     cassandra:
       contact-points: 10.0.10.104,10.0.10.105,10.0.10.106
