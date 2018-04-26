@@ -46,9 +46,11 @@ public class EvaluationController {
                                                    @RequestParam("stage") final String stage,
                                                    @RequestParam("token") final String token,
                                                    @RequestParam("owner") final String owner,
+                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                       @RequestParam(value = "date") final LocalDateTime dateTime,
                                                    @Valid @RequestBody final UpdateAwardRequestDto data) {
         return new ResponseEntity<>(
-                awardService.updateAward(cpId, stage, token, owner, data),
+                awardService.updateAward(cpId, stage, token, owner, dateTime, data),
                 HttpStatus.OK);
     }
 

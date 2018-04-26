@@ -12,6 +12,7 @@ public interface AwardService {
                             String stage,
                             String token,
                             String owner,
+                            LocalDateTime dateTime,
                             UpdateAwardRequestDto dataDto);
 
     ResponseDto getAwards(String cpId,

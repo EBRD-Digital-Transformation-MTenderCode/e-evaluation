@@ -28,21 +28,19 @@ public class AwardServiceImpl implements AwardService {
 
     private final AwardRepository awardRepository;
     private final JsonUtil jsonUtil;
-    private final DateUtil dateUtil;
     private final PeriodService periodService;
 
     public AwardServiceImpl(final AwardRepository awardRepository,
                             final JsonUtil jsonUtil,
-                            final DateUtil dateUtil,
                             final PeriodService periodService) {
         this.awardRepository = awardRepository;
         this.jsonUtil = jsonUtil;
-        this.dateUtil = dateUtil;
         this.periodService = periodService;
     }
 
     private List<Award> updateUnsuccessfulAward(final Award awardDto,
-                                                final Map<Award, AwardEntity> awardsFromEntities) {
+                                                final Map<Award, AwardEntity> awardsFromEntities,
+                                                final LocalDateTime dateTime) {
         final List<Award> updatedAwards = new ArrayList<>();
         // unsuccessful Award
         final Award updatableAward = Optional.of(
@@ -57,6 +55,7 @@ public class AwardServiceImpl implements AwardService {
         if (awardDto.getDescription() != null) updatableAward.setDescription(awardDto.getDescription());
         if (awardDto.getStatusDetails() != null) updatableAward.setStatusDetails(awardDto.getStatusDetails());
         if (awardDto.getDocuments() != null) updatableAward.setDocuments(awardDto.getDocuments());
+        updatableAward.setDate(dateTime);
         updatedAwardEntity.setJsonData(jsonUtil.toJson(updatableAward));
         awardRepository.save(updatedAwardEntity);
         updatedAwards.add(updatableAward);
@@ -67,13 +66,14 @@ public class AwardServiceImpl implements AwardService {
         if (awards.size() > 1) {
             Award nextAwardByLot = null;
             for (Award a : awards) {
-                if (a.getId() != updatableAward.getId()) {
+                if (!a.getId().equals(updatableAward.getId())) {
                     nextAwardByLot = a;
                 }
             }
             if (nextAwardByLot != null) {
                 AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
                 nextAwardByLot.setStatusDetails(Status.CONSIDERATION);
+                nextAwardByLot.setDate(dateTime);
                 nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
                 awardRepository.save(nextAwardByLotEntity);
                 updatedAwards.add(nextAwardByLot);
@@ -83,13 +83,14 @@ public class AwardServiceImpl implements AwardService {
     }
 
     private void updateActiveAward(final Award award,
-                                   final Award awardDto) {
+                                   final Award awardDto,
+                                   final LocalDateTime dateTime) {
         if (!award.getStatusDetails().equals(Status.CONSIDERATION))
             throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         if (Objects.nonNull(awardDto.getDescription())) award.setDescription(awardDto.getDescription());
         if (Objects.nonNull(awardDto.getStatusDetails())) award.setStatusDetails(awardDto.getStatusDetails());
         if (Objects.nonNull(awardDto.getDocuments())) award.setDocuments(awardDto.getDocuments());
-        award.setDate(dateUtil.localNowUTC());
+        award.setDate(dateTime);
     }
 
     @Override
@@ -97,6 +98,7 @@ public class AwardServiceImpl implements AwardService {
                                    final String stage,
                                    final String token,
                                    final String owner,
+                                   final LocalDateTime dateTime,
                                    final UpdateAwardRequestDto dataDto) {
         final Award awardDto = dataDto.getAward();
         switch (awardDto.getStatusDetails()) {
@@ -105,7 +107,7 @@ public class AwardServiceImpl implements AwardService {
                         .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
                 if (!entity.getOwner().equals(owner)) throw new ErrorException(ErrorType.INVALID_OWNER);
                 final Award award = jsonUtil.toObject(Award.class, entity.getJsonData());
-                updateActiveAward(award, awardDto);
+                updateActiveAward(award, awardDto, dateTime);
                 entity.setJsonData(jsonUtil.toJson(award));
                 awardRepository.save(entity);
                 return getResponseDtoForAward(award);
@@ -113,7 +115,7 @@ public class AwardServiceImpl implements AwardService {
                 final List<AwardEntity> entities = Optional.ofNullable(awardRepository.getAllByCpidAndStage(cpId, stage))
                         .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
                 Map<Award, AwardEntity> awardsFromEntities = getMapAwardsFromEntities(entities);
-                final List<Award> updatedAwards = updateUnsuccessfulAward(awardDto, awardsFromEntities);
+                final List<Award> updatedAwards = updateUnsuccessfulAward(awardDto, awardsFromEntities, dateTime);
                 return getResponseDtoForAwards(updatedAwards);
             default:
                 throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
