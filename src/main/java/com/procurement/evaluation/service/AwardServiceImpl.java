@@ -12,7 +12,6 @@ import com.procurement.evaluation.model.dto.ocds.Period;
 import com.procurement.evaluation.model.dto.ocds.Status;
 import com.procurement.evaluation.model.entity.AwardEntity;
 import com.procurement.evaluation.repository.AwardRepository;
-import com.procurement.evaluation.utils.DateUtil;
 import com.procurement.evaluation.utils.JsonUtil;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,61 +35,6 @@ public class AwardServiceImpl implements AwardService {
         this.awardRepository = awardRepository;
         this.jsonUtil = jsonUtil;
         this.periodService = periodService;
-    }
-
-    private List<Award> updateUnsuccessfulAward(final Award awardDto,
-                                                final Map<Award, AwardEntity> awardsFromEntities,
-                                                final LocalDateTime dateTime) {
-        final List<Award> updatedAwards = new ArrayList<>();
-        // unsuccessful Award
-        final Award updatableAward = Optional.of(
-                awardsFromEntities.keySet().stream()
-                        .filter(a -> a.getId().equals(awardDto.getId()))
-                        .findFirst()
-                        .get())
-                .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
-        if (!updatableAward.getStatusDetails().equals(Status.CONSIDERATION)) throw new ErrorException
-                (ErrorType.INVALID_STATUS_DETAILS);
-        AwardEntity updatedAwardEntity = awardsFromEntities.get(updatableAward);
-        if (awardDto.getDescription() != null) updatableAward.setDescription(awardDto.getDescription());
-        if (awardDto.getStatusDetails() != null) updatableAward.setStatusDetails(awardDto.getStatusDetails());
-        if (awardDto.getDocuments() != null) updatableAward.setDocuments(awardDto.getDocuments());
-        updatableAward.setDate(dateTime);
-        updatedAwardEntity.setJsonData(jsonUtil.toJson(updatableAward));
-        awardRepository.save(updatedAwardEntity);
-        updatedAwards.add(updatableAward);
-        // next Award
-        Set<Award> awards = awardsFromEntities.keySet().stream()
-                .filter(a -> a.getRelatedLots().equals(updatableAward.getRelatedLots()))
-                .sorted(new SortedByValue()).collect(toSet());
-        if (awards.size() > 1) {
-            Award nextAwardByLot = null;
-            for (Award a : awards) {
-                if (!a.getId().equals(updatableAward.getId())) {
-                    nextAwardByLot = a;
-                }
-            }
-            if (nextAwardByLot != null) {
-                AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
-                nextAwardByLot.setStatusDetails(Status.CONSIDERATION);
-                nextAwardByLot.setDate(dateTime);
-                nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
-                awardRepository.save(nextAwardByLotEntity);
-                updatedAwards.add(nextAwardByLot);
-            }
-        }
-        return updatedAwards;
-    }
-
-    private void updateActiveAward(final Award award,
-                                   final Award awardDto,
-                                   final LocalDateTime dateTime) {
-        if (!award.getStatusDetails().equals(Status.CONSIDERATION))
-            throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
-        if (Objects.nonNull(awardDto.getDescription())) award.setDescription(awardDto.getDescription());
-        if (Objects.nonNull(awardDto.getStatusDetails())) award.setStatusDetails(awardDto.getStatusDetails());
-        if (Objects.nonNull(awardDto.getDocuments())) award.setDocuments(awardDto.getDocuments());
-        award.setDate(dateTime);
     }
 
     @Override
@@ -146,6 +90,55 @@ public class AwardServiceImpl implements AwardService {
         setAwardsStatusFromStatusDetails(awards, endPeriod);
         final List<Lot> unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards, country, pmd);
         return new ResponseDto<>(true, null, new AwardsResponseDto(awards, awardPeriod, unsuccessfulLots));
+    }
+
+    private List<Award> updateUnsuccessfulAward(final Award awardDto,
+                                                final Map<Award, AwardEntity> awardsFromEntities,
+                                                final LocalDateTime dateTime) {
+        final List<Award> updatedAwards = new ArrayList<>();
+        // unsuccessful Award
+        final Award updatableAward = awardsFromEntities.keySet().stream()
+                .filter(a -> a.getId().equals(awardDto.getId())).findFirst()
+                .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
+        if (!updatableAward.getStatusDetails().equals(Status.CONSIDERATION))
+            throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
+        AwardEntity updatedAwardEntity = awardsFromEntities.get(updatableAward);
+        if (awardDto.getDescription() != null) updatableAward.setDescription(awardDto.getDescription());
+        if (awardDto.getStatusDetails() != null) updatableAward.setStatusDetails(awardDto.getStatusDetails());
+        if (awardDto.getDocuments() != null) updatableAward.setDocuments(awardDto.getDocuments());
+        updatableAward.setDate(dateTime);
+        updatedAwardEntity.setJsonData(jsonUtil.toJson(updatableAward));
+        awardRepository.save(updatedAwardEntity);
+        updatedAwards.add(updatableAward);
+        // next Award
+        Set<Award> awards = awardsFromEntities.keySet().stream()
+                .filter(a -> a.getRelatedLots().equals(updatableAward.getRelatedLots()))
+                .sorted(new SortedByValue()).collect(toSet());
+        if (awards.size() > 1) {
+            Award nextAwardByLot = awards.stream()
+                    .filter(a->!a.getId().equals(updatableAward.getId()))
+                    .findFirst().orElse(null);
+            if (nextAwardByLot != null) {
+                AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
+                nextAwardByLot.setStatusDetails(Status.CONSIDERATION);
+                nextAwardByLot.setDate(dateTime);
+                nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
+                awardRepository.save(nextAwardByLotEntity);
+                updatedAwards.add(nextAwardByLot);
+            }
+        }
+        return updatedAwards;
+    }
+
+    private void updateActiveAward(final Award award,
+                                   final Award awardDto,
+                                   final LocalDateTime dateTime) {
+        if (!award.getStatusDetails().equals(Status.CONSIDERATION))
+            throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
+        if (Objects.nonNull(awardDto.getDescription())) award.setDescription(awardDto.getDescription());
+        if (Objects.nonNull(awardDto.getStatusDetails())) award.setStatusDetails(awardDto.getStatusDetails());
+        if (Objects.nonNull(awardDto.getDocuments())) award.setDocuments(awardDto.getDocuments());
+        award.setDate(dateTime);
     }
 
     private List<Lot> getUnsuccessfulLotsFromAwards(final List<Award> awards,
