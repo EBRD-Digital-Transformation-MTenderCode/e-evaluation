@@ -120,7 +120,6 @@ public class AwardServiceImpl implements AwardService {
             default:
                 throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         }
-
     }
 
     @Override
