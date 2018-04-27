@@ -224,9 +224,9 @@ public class SelectionsServiceImpl implements SelectionsService {
                             final String ocId,
                             final String owner,
                             final String stage) {
-        awards.forEach(awardDto -> {
-            final AwardEntity entity = awardRepository.save(getEntity(awardDto, ocId, owner, stage));
-            awardDto.setToken(entity.getToken().toString());
+        awards.forEach(award -> {
+            final AwardEntity entity = awardRepository.save(getEntity(award, ocId, owner, stage));
+            award.setToken(entity.getToken().toString());
         });
     }
 
