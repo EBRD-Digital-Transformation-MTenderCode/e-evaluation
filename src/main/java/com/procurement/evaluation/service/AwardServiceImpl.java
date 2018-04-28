@@ -52,6 +52,7 @@ public class AwardServiceImpl implements AwardService {
                 if (!entity.getOwner().equals(owner)) throw new ErrorException(ErrorType.INVALID_OWNER);
                 final Award award = jsonUtil.toObject(Award.class, entity.getJsonData());
                 updateActiveAward(award, awardDto, dateTime);
+                entity.setStatusDetails(award.getStatusDetails().value());
                 entity.setJsonData(jsonUtil.toJson(award));
                 awardRepository.save(entity);
                 return getResponseDtoForActiveAward(award);
@@ -105,6 +106,7 @@ public class AwardServiceImpl implements AwardService {
         if (awardDto.getStatusDetails() != null) updatableAward.setStatusDetails(awardDto.getStatusDetails());
         if (awardDto.getDocuments() != null) updatableAward.setDocuments(awardDto.getDocuments());
         updatableAward.setDate(dateTime);
+        updatedAwardEntity.setStatusDetails(updatableAward.getStatusDetails().value());
         updatedAwardEntity.setJsonData(jsonUtil.toJson(updatableAward));
         awardRepository.save(updatedAwardEntity);
         // next Award
