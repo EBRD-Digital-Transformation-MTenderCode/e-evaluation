@@ -54,13 +54,13 @@ public class AwardServiceImpl implements AwardService {
                 updateActiveAward(award, awardDto, dateTime);
                 entity.setJsonData(jsonUtil.toJson(award));
                 awardRepository.save(entity);
-                return getResponseDtoForAward(award);
+                return getResponseDtoForActiveAward(award);
             case UNSUCCESSFUL:
                 final List<AwardEntity> entities = Optional.ofNullable(awardRepository.getAllByCpidAndStage(cpId, stage))
                         .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
                 Map<Award, AwardEntity> awardsFromEntities = getMapAwardsFromEntities(entities);
                 final List<Award> updatedAwards = updateUnsuccessfulAward(awardDto, awardsFromEntities, dateTime);
-                return getResponseDtoForAwards(updatedAwards);
+                return getResponseDtoForUnsuccessfulAward(updatedAwards);
             default:
                 throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         }
@@ -116,7 +116,7 @@ public class AwardServiceImpl implements AwardService {
                 .sorted(new SortedByValue()).collect(toSet());
         if (awards.size() > 1) {
             Award nextAwardByLot = awards.stream()
-                    .filter(a->!a.getId().equals(updatableAward.getId()))
+                    .filter(a -> !a.getId().equals(updatableAward.getId()))
                     .findFirst().orElse(null);
             if (nextAwardByLot != null) {
                 AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
@@ -204,7 +204,7 @@ public class AwardServiceImpl implements AwardService {
         return awardsFromEntities;
     }
 
-    private ResponseDto getResponseDtoForAward(final Award award) {
+    private ResponseDto getResponseDtoForActiveAward(final Award award) {
         return new ResponseDto<>(true, null,
                 new UpdateAwardResponseDto(
                         Collections.singletonList(award),
@@ -213,12 +213,13 @@ public class AwardServiceImpl implements AwardService {
         );
     }
 
-    private ResponseDto getResponseDtoForAwards(final List<Award> awards) {
+    private ResponseDto getResponseDtoForUnsuccessfulAward(final List<Award> awards) {
         return new ResponseDto<>(true, null,
                 new UpdateAwardResponseDto(
                         awards,
                         awards.get(0).getRelatedBid(),
-                        awards.get(0).getRelatedLots().get(0)));
+                        null
+                ));
     }
 
     private class SortedByValue implements Comparator<Award> {
