@@ -15,20 +15,10 @@ public class UpdateAwardResponseDto {
     @JsonProperty("nextAward")
     private final Award nextAward;
 
-    @JsonProperty("bidId")
-    private final String bidId;
-
-    @JsonProperty("lotId")
-    private final String lotId;
-
     @JsonCreator
     public UpdateAwardResponseDto(@JsonProperty("award") final Award award,
-                                  @JsonProperty("nextAward") final Award nextAward,
-                                  @JsonProperty("bidId") final String bidId,
-                                  @JsonProperty("lotId") final String lotId) {
+                                  @JsonProperty("nextAward") final Award nextAward) {
         this.award = award;
         this.nextAward = nextAward;
-        this.bidId = bidId;
-        this.lotId = lotId;
     }
 }

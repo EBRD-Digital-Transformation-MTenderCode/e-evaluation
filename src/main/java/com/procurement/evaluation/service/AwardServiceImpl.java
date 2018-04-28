@@ -125,12 +125,7 @@ public class AwardServiceImpl implements AwardService {
                 awardRepository.save(nextAwardByLotEntity);
             }
         }
-        return new ResponseDto<>(true, null,
-                new UpdateAwardResponseDto(
-                        updatableAward,
-                        nextAwardByLot,
-                        updatableAward.getRelatedBid(),
-                        null));
+        return new ResponseDto<>(true, null, new UpdateAwardResponseDto(updatableAward, nextAwardByLot));
     }
 
     private void updateActiveAward(final Award award,
@@ -210,9 +205,7 @@ public class AwardServiceImpl implements AwardService {
         return new ResponseDto<>(true, null,
                 new UpdateAwardResponseDto(
                         award,
-                        null,
-                        award.getRelatedBid(),
-                        award.getRelatedLots().get(0))
+                        null)
         );
     }
 
