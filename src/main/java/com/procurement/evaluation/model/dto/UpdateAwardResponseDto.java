@@ -9,8 +9,11 @@ import lombok.Getter;
 @Getter
 public class UpdateAwardResponseDto {
 
-    @JsonProperty("awards")
-    private final List<Award> awards;
+    @JsonProperty("award")
+    private final Award award;
+
+    @JsonProperty("nextAward")
+    private final Award nextAward;
 
     @JsonProperty("bidId")
     private final String bidId;
@@ -19,10 +22,12 @@ public class UpdateAwardResponseDto {
     private final String lotId;
 
     @JsonCreator
-    public UpdateAwardResponseDto(@JsonProperty("awards") final List<Award> awards,
+    public UpdateAwardResponseDto(@JsonProperty("award") final Award award,
+                                  @JsonProperty("nextAward") final Award nextAward,
                                   @JsonProperty("bidId") final String bidId,
                                   @JsonProperty("lotId") final String lotId) {
-        this.awards = awards;
+        this.award = award;
+        this.nextAward = nextAward;
         this.bidId = bidId;
         this.lotId = lotId;
     }

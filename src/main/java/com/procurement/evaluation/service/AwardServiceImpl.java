@@ -59,8 +59,7 @@ public class AwardServiceImpl implements AwardService {
                 final List<AwardEntity> entities = Optional.ofNullable(awardRepository.getAllByCpidAndStage(cpId, stage))
                         .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
                 Map<Award, AwardEntity> awardsFromEntities = getMapAwardsFromEntities(entities);
-                final List<Award> updatedAwards = updateUnsuccessfulAward(awardDto, awardsFromEntities, dateTime);
-                return getResponseDtoForUnsuccessfulAward(updatedAwards);
+                return updateUnsuccessfulAward(awardDto, awardsFromEntities, dateTime);
             default:
                 throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         }
@@ -92,10 +91,9 @@ public class AwardServiceImpl implements AwardService {
         return new ResponseDto<>(true, null, new AwardsResponseDto(awards, awardPeriod, unsuccessfulLots));
     }
 
-    private List<Award> updateUnsuccessfulAward(final Award awardDto,
+    private ResponseDto updateUnsuccessfulAward(final Award awardDto,
                                                 final Map<Award, AwardEntity> awardsFromEntities,
                                                 final LocalDateTime dateTime) {
-        final List<Award> updatedAwards = new ArrayList<>();
         // unsuccessful Award
         final Award updatableAward = awardsFromEntities.keySet().stream()
                 .filter(a -> a.getId().equals(awardDto.getId())).findFirst()
@@ -109,13 +107,13 @@ public class AwardServiceImpl implements AwardService {
         updatableAward.setDate(dateTime);
         updatedAwardEntity.setJsonData(jsonUtil.toJson(updatableAward));
         awardRepository.save(updatedAwardEntity);
-        updatedAwards.add(updatableAward);
         // next Award
+        Award nextAwardByLot = null;
         Set<Award> awards = awardsFromEntities.keySet().stream()
                 .filter(a -> a.getRelatedLots().equals(updatableAward.getRelatedLots()))
                 .sorted(new SortedByValue()).collect(toSet());
         if (awards.size() > 1) {
-            Award nextAwardByLot = awards.stream()
+            nextAwardByLot = awards.stream()
                     .filter(a -> !a.getId().equals(updatableAward.getId()))
                     .findFirst().orElse(null);
             if (nextAwardByLot != null) {
@@ -125,10 +123,14 @@ public class AwardServiceImpl implements AwardService {
                 nextAwardByLotEntity.setStatusDetails(nextAwardByLot.getStatusDetails().value());
                 nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
                 awardRepository.save(nextAwardByLotEntity);
-                updatedAwards.add(nextAwardByLot);
             }
         }
-        return updatedAwards;
+        return new ResponseDto<>(true, null,
+                new UpdateAwardResponseDto(
+                        updatableAward,
+                        nextAwardByLot,
+                        updatableAward.getRelatedBid(),
+                        null));
     }
 
     private void updateActiveAward(final Award award,
@@ -207,19 +209,11 @@ public class AwardServiceImpl implements AwardService {
     private ResponseDto getResponseDtoForActiveAward(final Award award) {
         return new ResponseDto<>(true, null,
                 new UpdateAwardResponseDto(
-                        Collections.singletonList(award),
+                        award,
+                        null,
                         award.getRelatedBid(),
                         award.getRelatedLots().get(0))
         );
-    }
-
-    private ResponseDto getResponseDtoForUnsuccessfulAward(final List<Award> awards) {
-        return new ResponseDto<>(true, null,
-                new UpdateAwardResponseDto(
-                        awards,
-                        awards.get(0).getRelatedBid(),
-                        null
-                ));
     }
 
     private class SortedByValue implements Comparator<Award> {
