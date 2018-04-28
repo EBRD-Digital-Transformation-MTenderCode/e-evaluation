@@ -180,7 +180,8 @@ public class AwardServiceImpl implements AwardService {
     private List<Award> getActiveAwardsFromEntities(final List<AwardEntity> awardEntities) {
         return awardEntities.stream()
                 .map(e -> jsonUtil.toObject(Award.class, e.getJsonData()))
-                .filter(award -> (award.getStatus().equals(Status.ACTIVE) && award.getStatusDetails().equals(Status.EMPTY)))
+                .filter(award -> (award.getStatus().equals(Status.PENDING)
+                        && award.getStatusDetails().equals(Status.ACTIVE)))
                 .collect(Collectors.toList());
     }
 
