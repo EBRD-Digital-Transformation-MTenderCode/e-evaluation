@@ -122,6 +122,7 @@ public class AwardServiceImpl implements AwardService {
                 AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
                 nextAwardByLot.setStatusDetails(Status.CONSIDERATION);
                 nextAwardByLot.setDate(dateTime);
+                nextAwardByLotEntity.setStatusDetails(nextAwardByLot.getStatusDetails().value());
                 nextAwardByLotEntity.setJsonData(jsonUtil.toJson(updatableAward));
                 awardRepository.save(nextAwardByLotEntity);
                 updatedAwards.add(nextAwardByLot);
