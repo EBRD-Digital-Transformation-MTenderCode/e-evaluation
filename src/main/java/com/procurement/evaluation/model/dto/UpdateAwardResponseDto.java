@@ -1,12 +1,14 @@
 package com.procurement.evaluation.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.procurement.evaluation.model.dto.ocds.Award;
 import java.util.List;
 import lombok.Getter;
 
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UpdateAwardResponseDto {
 
     @JsonProperty("award")
