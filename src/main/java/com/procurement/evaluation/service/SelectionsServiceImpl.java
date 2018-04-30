@@ -185,8 +185,13 @@ public class SelectionsServiceImpl implements SelectionsService {
     private void sortSuccessfulAwards(final List<Award> awards, final AwardCriteria awardCriteria) {
         switch (awardCriteria) {
             case PRICE_ONLY:
-                awards.sort(new SortedByValue());
-                awards.get(0).setStatusDetails(Status.CONSIDERATION);
+                Set<String> lotIds = awards.stream().flatMap(a -> a.getRelatedLots().stream()).collect(Collectors.toSet());
+                for (String lotId : lotIds) {
+                    Award award = awards.stream()
+                            .filter(a -> a.getRelatedLots().contains(lotId)).sorted(new SortedByValue())
+                            .findFirst().orElse(null);
+                    if (award != null) award.setStatusDetails(Status.CONSIDERATION);
+                }
                 break;
             case COST_ONLY:
                 break;
@@ -202,21 +207,6 @@ public class SelectionsServiceImpl implements SelectionsService {
                 break;
             case SINGLE_BID_ONLY:
                 break;
-        }
-    }
-
-    private class SortedByValue implements Comparator<Award> {
-
-        public int compare(final Award obj1, final Award obj2) {
-            final double val1 = obj1.getValue().getAmount();
-            final double val2 = obj2.getValue().getAmount();
-            if (val1 > val2) {
-                return 1;
-            } else if (val1 < val2) {
-                return -1;
-            } else {
-                return 0;
-            }
         }
     }
 
@@ -243,6 +233,21 @@ public class SelectionsServiceImpl implements SelectionsService {
         entity.setOwner(owner);
         entity.setJsonData(jsonUtil.toJson(award));
         return entity;
+    }
+
+    private class SortedByValue implements Comparator<Award> {
+
+        public int compare(final Award obj1, final Award obj2) {
+            final double val1 = obj1.getValue().getAmount();
+            final double val2 = obj2.getValue().getAmount();
+            if (val1 > val2) {
+                return 1;
+            } else if (val1 < val2) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
     }
 
 }
