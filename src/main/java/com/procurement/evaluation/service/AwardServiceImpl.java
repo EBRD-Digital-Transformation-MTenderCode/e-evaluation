@@ -187,10 +187,14 @@ public class AwardServiceImpl implements AwardService {
 
     private void setAwardsStatusFromStatusDetails(final List<Award> awards, final LocalDateTime endPeriod) {
         awards.forEach(a -> {
-            if (a.getStatusDetails() != Status.EMPTY) {
+            if (!a.getStatusDetails().equals(Status.EMPTY)) {
                 a.setDate(endPeriod);
                 a.setStatus(a.getStatusDetails());
                 a.setStatusDetails(Status.EMPTY);
+            }
+            if (a.getStatus().equals(Status.PENDING) && a.getStatusDetails().equals(Status.EMPTY)) {
+                a.setDate(endPeriod);
+                a.setStatus(Status.UNSUCCESSFUL);
             }
         });
     }
