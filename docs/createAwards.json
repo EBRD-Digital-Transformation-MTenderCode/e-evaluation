@@ -1,306 +1,106 @@
 {
-  "bids": [
-    {
-      "id": "5858b320-4966-11e8-be72-957885a61a7f",
-      "date": "2018-04-26T16:31:44Z",
-      "status": "pending",
-      "statusDetails": "empty",
-      "tenderers": [
-        {
-          "id": "UA-EDR-846-96-0832",
-          "name": "Mitchell, Pugh and Wilkins",
-          "identifier": {
-            "id": "846-96-0832",
-            "scheme": "UA-EDR",
-            "legalName": "Mitchell, Pugh and Wilkins PLC",
-            "uri": "http://www.mccoy.com/about/"
-          },
-          "address": {
-            "streetAddress": "963 Berg Locks Suite 784",
-            "locality": "New Michael",
-            "region": "Minnesota",
-            "postalCode": "67704-1713",
-            "countryName": "Micronesia"
-          },
-          "additionalIdentifiers": [
-            {
-              "id": "425-86-2592",
-              "scheme": "UA-EDR",
-              "legalName": "Mitchell, Pugh and Wilkins Group",
-              "uri": "https://taylor-singleton.com/category/categories/explore/faq.html"
-            }
-          ],
-          "contactPoint": {
-            "name": "Joseph Ramos",
-            "email": "raymond98@yahoo.com",
-            "telephone": "648-886-4876x268",
-            "faxNumber": "921.940.9081x7141",
-            "url": "https://www.williams.org/categories/app/tag/about/"
-          }
-        }
-      ],
-      "value": {
-        "amount": 456.123,
-        "currency": "UAH"
-      },
-      "relatedLots": [
-        "e99b6541-4965-11e8-8e46-3774229333d2"
-      ]
-    },
-    {
-      "id": "58beef00-4966-11e8-be72-957885a61a7f",
-      "date": "2018-04-26T16:31:44Z",
-      "status": "pending",
-      "statusDetails": "empty",
-      "tenderers": [
-        {
-          "id": "UA-EDR-603-22-5436",
-          "name": "Figueroa-Olson",
-          "identifier": {
-            "id": "603-22-5436",
-            "scheme": "UA-EDR",
-            "legalName": "Figueroa-Olson LLC",
-            "uri": "https://www.jones.com/"
-          },
-          "address": {
-            "streetAddress": "2596 Klein Route",
-            "locality": "West Jeffery",
-            "region": "Kansas",
-            "postalCode": "33430-1655",
-            "countryName": "Tunisia"
-          },
-          "additionalIdentifiers": [
-            {
-              "id": "558-36-1394",
-              "scheme": "UA-EDR",
-              "legalName": "Figueroa-Olson and Sons",
-              "uri": "http://www.roman.com/"
-            }
-          ],
-          "contactPoint": {
-            "name": "Mario Herrera",
-            "email": "ganderson@gmail.com",
-            "telephone": "129.250.4348",
-            "faxNumber": "(714)779-3198x99649",
-            "url": "http://www.singh-martin.com/"
-          }
-        }
-      ],
-      "value": {
-        "amount": 0.123,
-        "currency": "UAH"
-      },
-      "relatedLots": [
-        "e99b6541-4965-11e8-8e46-3774229333d2"
-      ]
-    },
-    {
-      "id": "5916fa10-4966-11e8-be72-957885a61a7f",
-      "date": "2018-04-26T16:31:44Z",
-      "status": "pending",
-      "statusDetails": "empty",
-      "tenderers": [
-        {
-          "id": "UA-EDR-527-06-1244",
-          "name": "Carter PLC",
-          "identifier": {
-            "id": "527-06-1244",
-            "scheme": "UA-EDR",
-            "legalName": "Carter PLC LLC",
-            "uri": "https://porter.com/app/app/homepage/"
-          },
-          "address": {
-            "streetAddress": "743 Richard Corners Apt. 510",
-            "locality": "Lake Ashleyville",
-            "region": "New York",
-            "postalCode": "32035-9164",
-            "countryName": "Grenada"
-          },
-          "additionalIdentifiers": [
-            {
-              "id": "589-51-8388",
-              "scheme": "UA-EDR",
-              "legalName": "Carter PLC Ltd",
-              "uri": "http://cohen.com/faq/"
-            }
-          ],
-          "contactPoint": {
-            "name": "Roberta Martin",
-            "email": "loganray@hotmail.com",
-            "telephone": "1-526-201-6880x3254",
-            "faxNumber": "1-982-946-0704",
-            "url": "https://www.shelton.biz/categories/category/blog/terms.htm"
-          }
-        }
-      ],
-      "value": {
-        "amount": 0.123,
-        "currency": "UAH"
-      },
-      "relatedLots": [
-        "e99b6541-4965-11e8-8e46-3774229333d2"
-      ]
-    }
-  ],
-  "lots": [
-    {
-      "id": "e99b6541-4965-11e8-8e46-3774229333d2"
-    }
-  ],
-  "awardPeriod": {
-    "startDate": "2018-04-26T16:40:01Z"
+  "standstillPeriod": {
+    "startDate": "2018-05-02T10:36:03Z",
+    "endDate": "2018-05-02T10:36:09Z"
   },
   "awards": [
     {
-      "id": "7757d5d4-4970-11e8-a63a-9dc6b7f90895",
-      "token": "7b7aafe1-3e18-41e7-98c5-a20149d537ef",
-      "date": "2018-04-26T16:40:02Z",
-      "description": "",
+      "id": "9b8ae459-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:02Z",
+      "description": "Award description",
       "status": "pending",
-      "statusDetails": "consideration",
+      "statusDetails": "active",
       "value": {
-        "amount": 0.123,
-        "currency": "UAH"
+        "amount": 2958.38,
+        "currency": "UGX"
       },
       "relatedLots": [
-        "e99b6541-4965-11e8-8e46-3774229333d2"
+        "30206af8-4df4-11e8-b26f-ab16840b3aaa"
       ],
-      "relatedBid": "58beef00-4966-11e8-be72-957885a61a7f",
+      "relatedBid": "30db5680-4df4-11e8-a00f-8d0b0d0e321f",
       "suppliers": [
         {
-          "id": "UA-EDR-603-22-5436",
-          "name": "Figueroa-Olson",
+          "id": "UA-EDR-722-09-8248",
+          "name": "Pratt LLC",
           "identifier": {
-            "id": "603-22-5436",
+            "id": "722-09-8248",
             "scheme": "UA-EDR",
-            "legalName": "Figueroa-Olson LLC",
-            "uri": "https://www.jones.com/"
+            "legalName": "Pratt LLC LLC",
+            "uri": "https://www.daniels.biz/index/"
           },
           "address": {
-            "streetAddress": "2596 Klein Route",
-            "locality": "West Jeffery",
-            "region": "Kansas",
-            "postalCode": "33430-1655",
-            "countryName": "Tunisia"
+            "streetAddress": "8735 Huerta Fields",
+            "locality": "East Daniel",
+            "region": "Virginia",
+            "postalCode": "13703",
+            "countryName": "Timor-Leste"
           },
           "additionalIdentifiers": [
             {
-              "id": "558-36-1394",
+              "id": "370-63-5287",
               "scheme": "UA-EDR",
-              "legalName": "Figueroa-Olson and Sons",
-              "uri": "http://www.roman.com/"
+              "legalName": "Pratt LLC Ltd",
+              "uri": "https://www.burns.com/posts/blog/home/"
             }
           ],
           "contactPoint": {
-            "name": "Mario Herrera",
-            "email": "ganderson@gmail.com",
-            "telephone": "129.250.4348",
-            "faxNumber": "(714)779-3198x99649",
-            "url": "http://www.singh-martin.com/"
+            "name": "Jimmy Weber",
+            "email": "scottchandler@hotmail.com",
+            "telephone": "337.661.1873x3900",
+            "faxNumber": "+93(8)6677657741",
+            "url": "https://www.church.net/main/app/categories/category/"
           }
         }
       ]
     },
     {
-      "id": "7757d5d5-4970-11e8-a63a-9dc6b7f90895",
-      "token": "411104a5-9806-4e9c-8ded-f5e6315914a8",
-      "date": "2018-04-26T16:40:02Z",
-      "description": "",
+      "id": "9b8ae45a-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:02Z",
+      "description": "Award description",
       "status": "pending",
-      "statusDetails": "empty",
+      "statusDetails": "active",
       "value": {
-        "amount": 0.123,
-        "currency": "UAH"
+        "amount": 516512.51,
+        "currency": "UGX"
       },
       "relatedLots": [
-        "e99b6541-4965-11e8-8e46-3774229333d2"
+        "30206af7-4df4-11e8-b26f-ab16840b3aaa"
       ],
-      "relatedBid": "5916fa10-4966-11e8-be72-957885a61a7f",
+      "relatedBid": "31950990-4df4-11e8-a00f-8d0b0d0e321f",
       "suppliers": [
         {
-          "id": "UA-EDR-527-06-1244",
-          "name": "Carter PLC",
+          "id": "UA-EDR-702-23-3412",
+          "name": "Phelps-Carroll",
           "identifier": {
-            "id": "527-06-1244",
+            "id": "702-23-3412",
             "scheme": "UA-EDR",
-            "legalName": "Carter PLC LLC",
-            "uri": "https://porter.com/app/app/homepage/"
+            "legalName": "Phelps-Carroll and Sons",
+            "uri": "https://smith.com/blog/search/register/"
           },
           "address": {
-            "streetAddress": "743 Richard Corners Apt. 510",
-            "locality": "Lake Ashleyville",
-            "region": "New York",
-            "postalCode": "32035-9164",
-            "countryName": "Grenada"
+            "streetAddress": "51772 Tanner Stream Suite 809",
+            "locality": "Woodsville",
+            "region": "Nebraska",
+            "postalCode": "31518-7395",
+            "countryName": "Armenia"
           },
           "additionalIdentifiers": [
             {
-              "id": "589-51-8388",
+              "id": "173-79-1882",
               "scheme": "UA-EDR",
-              "legalName": "Carter PLC Ltd",
-              "uri": "http://cohen.com/faq/"
+              "legalName": "Phelps-Carroll Inc",
+              "uri": "https://www.rodriguez.com/tags/author.asp"
             }
           ],
           "contactPoint": {
-            "name": "Roberta Martin",
-            "email": "loganray@hotmail.com",
-            "telephone": "1-526-201-6880x3254",
-            "faxNumber": "1-982-946-0704",
-            "url": "https://www.shelton.biz/categories/category/blog/terms.htm"
-          }
-        }
-      ]
-    },
-    {
-      "id": "7757d5d3-4970-11e8-a63a-9dc6b7f90895",
-      "token": "849b44eb-4129-4bd5-a7d1-80d879b47272",
-      "date": "2018-04-26T16:40:02Z",
-      "description": "",
-      "status": "pending",
-      "statusDetails": "empty",
-      "value": {
-        "amount": 456.123,
-        "currency": "UAH"
-      },
-      "relatedLots": [
-        "e99b6541-4965-11e8-8e46-3774229333d2"
-      ],
-      "relatedBid": "5858b320-4966-11e8-be72-957885a61a7f",
-      "suppliers": [
-        {
-          "id": "UA-EDR-846-96-0832",
-          "name": "Mitchell, Pugh and Wilkins",
-          "identifier": {
-            "id": "846-96-0832",
-            "scheme": "UA-EDR",
-            "legalName": "Mitchell, Pugh and Wilkins PLC",
-            "uri": "http://www.mccoy.com/about/"
-          },
-          "address": {
-            "streetAddress": "963 Berg Locks Suite 784",
-            "locality": "New Michael",
-            "region": "Minnesota",
-            "postalCode": "67704-1713",
-            "countryName": "Micronesia"
-          },
-          "additionalIdentifiers": [
-            {
-              "id": "425-86-2592",
-              "scheme": "UA-EDR",
-              "legalName": "Mitchell, Pugh and Wilkins Group",
-              "uri": "https://taylor-singleton.com/category/categories/explore/faq.html"
-            }
-          ],
-          "contactPoint": {
-            "name": "Joseph Ramos",
-            "email": "raymond98@yahoo.com",
-            "telephone": "648-886-4876x268",
-            "faxNumber": "921.940.9081x7141",
-            "url": "https://www.williams.org/categories/app/tag/about/"
+            "name": "Michael Hunt",
+            "email": "mackenziejimenez@yahoo.com",
+            "telephone": "1-005-497-8994x648",
+            "faxNumber": "06560028141",
+            "url": "http://www.hill.com/posts/search.html"
           }
         }
       ]
     }
-  ],
-  "unsuccessfulLots": []
+  ]
 }

@@ -88,7 +88,7 @@ public class AwardServiceImpl implements AwardService {
         if (awardEntities.isEmpty()) throw new ErrorException(ErrorType.DATA_NOT_FOUND);
         final List<Award> awards = getAwardsFromEntities(awardEntities);
         setAwardsStatusFromStatusDetails(awards, endPeriod);
-        final List<Lot> unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards, country, pmd);
+        final List<Lot> unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards);
         return new ResponseDto<>(true, null, new AwardsResponseDto(awards, awardPeriod, unsuccessfulLots));
     }
 
@@ -141,34 +141,17 @@ public class AwardServiceImpl implements AwardService {
         award.setDate(dateTime);
     }
 
-    private List<Lot> getUnsuccessfulLotsFromAwards(final List<Award> awards,
-                                                    final String country,
-                                                    final String pmd) {
-        final List<String> unsuccessfulRelatedLotsFromAward = getUnsuccessfulRelatedLotsIdFromAwards(awards);
-        final Map<String, Long> uniqueLots = getUniqueLots(unsuccessfulRelatedLotsFromAward);
-        final List<String> unsuccessfulLots = getUnsuccessfulLots(uniqueLots);
-        return unsuccessfulLots.stream().map(Lot::new).collect(Collectors.toList());
-    }
-
-    private List<String> getUnsuccessfulRelatedLotsIdFromAwards(final List<Award> awards) {
-        return awards.stream()
-                .filter(award ->
-                        (award.getStatus().equals(Status.UNSUCCESSFUL) && award.getStatusDetails().equals(Status.EMPTY)))
+    private List<Lot> getUnsuccessfulLotsFromAwards(final List<Award> awards) {
+        final Set<String> successfulLots = awards.stream()
+                .filter(award -> (award.getStatus().equals(Status.ACTIVE)))
                 .flatMap(award -> award.getRelatedLots().stream())
-                .collect(Collectors.toList());
-    }
-
-    private Map<String, Long> getUniqueLots(final List<String> lots) {
-        return lots.stream()
-                .collect(groupingBy(Function.identity(), Collectors.counting()));
-    }
-
-    private List<String> getUnsuccessfulLots(final Map<String, Long> uniqueLots) {
-        return uniqueLots.entrySet()
-                .stream()
-                .filter(map -> map.getValue() > 0)
-                .map(map -> map.getKey())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+         final Set<String> unsuccessfulLots = awards.stream()
+                .filter(award -> (award.getStatus().equals(Status.UNSUCCESSFUL)))
+                .flatMap(award -> award.getRelatedLots().stream())
+                .filter(lot -> !successfulLots.contains(lot))
+                .collect(Collectors.toSet());
+        return unsuccessfulLots.stream().map(Lot::new).collect(Collectors.toList());
     }
 
     private List<Award> getAwardsFromEntities(final List<AwardEntity> awardEntities) {

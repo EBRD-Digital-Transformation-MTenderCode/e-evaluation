@@ -1,0 +1,421 @@
+{
+  "awards": [
+    {
+      "id": "9b8ae460-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:01Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "relatedLots": [
+        "30206af6-4df4-11e8-b26f-ab16840b3aaa"
+      ]
+    },
+    {
+      "id": "9b8ae459-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "Award description",
+      "status": "active",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 2958.38,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af8-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "30db5680-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-722-09-8248",
+          "name": "Pratt LLC",
+          "identifier": {
+            "id": "722-09-8248",
+            "scheme": "UA-EDR",
+            "legalName": "Pratt LLC LLC",
+            "uri": "https://www.daniels.biz/index/"
+          },
+          "address": {
+            "streetAddress": "8735 Huerta Fields",
+            "locality": "East Daniel",
+            "region": "Virginia",
+            "postalCode": "13703",
+            "countryName": "Timor-Leste"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "370-63-5287",
+              "scheme": "UA-EDR",
+              "legalName": "Pratt LLC Ltd",
+              "uri": "https://www.burns.com/posts/blog/home/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Jimmy Weber",
+            "email": "scottchandler@hotmail.com",
+            "telephone": "337.661.1873x3900",
+            "faxNumber": "+93(8)6677657741",
+            "url": "https://www.church.net/main/app/categories/category/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b8ae45b-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 5.52387198289531E12,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af8-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "31d769c0-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-863-37-0914",
+          "name": "Smith-Carter",
+          "identifier": {
+            "id": "863-37-0914",
+            "scheme": "UA-EDR",
+            "legalName": "Smith-Carter LLC",
+            "uri": "https://www.baker-horton.biz/posts/categories/tags/home/"
+          },
+          "address": {
+            "streetAddress": "2199 Jones Haven",
+            "locality": "Swansonville",
+            "region": "Illinois",
+            "postalCode": "16891-4610",
+            "countryName": "Bangladesh"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "147-21-5267",
+              "scheme": "UA-EDR",
+              "legalName": "Smith-Carter PLC",
+              "uri": "http://brown.com/register/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Kathryn Costa",
+            "email": "codymyers@gmail.com",
+            "telephone": "013-153-7401",
+            "faxNumber": "(462)623-6042x81602",
+            "url": "http://www.alexander.com/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b8ae45c-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 7.593638882046419E14,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af7-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "32685f20-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-099-15-4150",
+          "name": "Ray-Gutierrez",
+          "identifier": {
+            "id": "099-15-4150",
+            "scheme": "UA-EDR",
+            "legalName": "Ray-Gutierrez LLC",
+            "uri": "http://willis.com/terms.asp"
+          },
+          "address": {
+            "streetAddress": "684 Valdez Corners Apt. 307",
+            "locality": "Christinaside",
+            "region": "Maine",
+            "postalCode": "06114-4864",
+            "countryName": "French Polynesia"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "352-82-6194",
+              "scheme": "UA-EDR",
+              "legalName": "Ray-Gutierrez Ltd",
+              "uri": "http://wilson.net/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Michael Lawrence",
+            "email": "jobooker@gmail.com",
+            "telephone": "507-159-6344",
+            "faxNumber": "1-895-321-7915",
+            "url": "https://james.com/app/category/main/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b8ae45a-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "Award description",
+      "status": "active",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 516512.51,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af7-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "31950990-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-702-23-3412",
+          "name": "Phelps-Carroll",
+          "identifier": {
+            "id": "702-23-3412",
+            "scheme": "UA-EDR",
+            "legalName": "Phelps-Carroll and Sons",
+            "uri": "https://smith.com/blog/search/register/"
+          },
+          "address": {
+            "streetAddress": "51772 Tanner Stream Suite 809",
+            "locality": "Woodsville",
+            "region": "Nebraska",
+            "postalCode": "31518-7395",
+            "countryName": "Armenia"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "173-79-1882",
+              "scheme": "UA-EDR",
+              "legalName": "Phelps-Carroll Inc",
+              "uri": "https://www.rodriguez.com/tags/author.asp"
+            }
+          ],
+          "contactPoint": {
+            "name": "Michael Hunt",
+            "email": "mackenziejimenez@yahoo.com",
+            "telephone": "1-005-497-8994x648",
+            "faxNumber": "06560028141",
+            "url": "http://www.hill.com/posts/search.html"
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b8ae45d-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 8062.63,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af8-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "32b76980-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-252-46-2173",
+          "name": "Vaughan Inc",
+          "identifier": {
+            "id": "252-46-2173",
+            "scheme": "UA-EDR",
+            "legalName": "Vaughan Inc and Sons",
+            "uri": "https://brown.com/homepage.php"
+          },
+          "address": {
+            "streetAddress": "78739 Lopez Creek Suite 672",
+            "locality": "Deborahburgh",
+            "region": "Tennessee",
+            "postalCode": "55928-3750",
+            "countryName": "Saudi Arabia"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "637-85-1482",
+              "scheme": "UA-EDR",
+              "legalName": "Vaughan Inc LLC",
+              "uri": "https://nielsen.biz/wp-content/faq/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Crystal Reynolds",
+            "email": "valerie71@hotmail.com",
+            "telephone": "+14(7)8408964097",
+            "faxNumber": "02190002977",
+            "url": "http://www.campbell-rodriguez.com/privacy.html"
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b8ae45f-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 3.44093552847159E12,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af8-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "33323ed0-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-198-15-6521",
+          "name": "Vasquez Group",
+          "identifier": {
+            "id": "198-15-6521",
+            "scheme": "UA-EDR",
+            "legalName": "Vasquez Group Ltd",
+            "uri": "https://rasmussen-pratt.com/about.htm"
+          },
+          "address": {
+            "streetAddress": "340 Walter Parkway",
+            "locality": "New Ericland",
+            "region": "Florida",
+            "postalCode": "78595-9002",
+            "countryName": "Afghanistan"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "839-82-5104",
+              "scheme": "UA-EDR",
+              "legalName": "Vasquez Group LLC",
+              "uri": "http://www.burgess.net/index/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Tina Henderson",
+            "email": "robertasantana@gmail.com",
+            "telephone": "(365)135-0250",
+            "faxNumber": "(403)461-6831x3731",
+            "url": "http://www.chapman.com/app/post.asp"
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b8ae458-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 4.681564821E8,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af7-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "309c9fd0-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-591-23-3689",
+          "name": "Rojas-Hardy",
+          "identifier": {
+            "id": "591-23-3689",
+            "scheme": "UA-EDR",
+            "legalName": "Rojas-Hardy Inc",
+            "uri": "https://www.mathis-shelton.com/author/"
+          },
+          "address": {
+            "streetAddress": "8880 Danielle Field Suite 530",
+            "locality": "Scottbury",
+            "region": "Alaska",
+            "postalCode": "44551-2591",
+            "countryName": "Dominican Republic"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "417-78-9221",
+              "scheme": "UA-EDR",
+              "legalName": "Rojas-Hardy Inc",
+              "uri": "https://www.hughes-williamson.net/main/list/categories/main.htm"
+            }
+          ],
+          "contactPoint": {
+            "name": "Joseph Robinson",
+            "email": "kathytrevino@gmail.com",
+            "telephone": "177.896.3421x0545",
+            "faxNumber": "+56(7)9641410466",
+            "url": "http://munoz-frost.com/terms.php"
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b8ae45e-4df4-11e8-a178-51f86e72d0b5",
+      "date": "2018-05-02T10:36:09Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 729732.4,
+        "currency": "UGX"
+      },
+      "relatedLots": [
+        "30206af7-4df4-11e8-b26f-ab16840b3aaa"
+      ],
+      "relatedBid": "32f86a20-4df4-11e8-a00f-8d0b0d0e321f",
+      "suppliers": [
+        {
+          "id": "UA-EDR-416-46-6553",
+          "name": "Campbell-Garza",
+          "identifier": {
+            "id": "416-46-6553",
+            "scheme": "UA-EDR",
+            "legalName": "Campbell-Garza Group",
+            "uri": "https://www.long.org/index.htm"
+          },
+          "address": {
+            "streetAddress": "1081 William Extension Apt. 166",
+            "locality": "Charlesmouth",
+            "region": "Illinois",
+            "postalCode": "36750",
+            "countryName": "Macao"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "360-29-3321",
+              "scheme": "UA-EDR",
+              "legalName": "Campbell-Garza Inc",
+              "uri": "http://www.huang-lee.com/"
+            }
+          ],
+          "contactPoint": {
+            "name": "Raymond Hernandez",
+            "email": "kevinstevens@hotmail.com",
+            "telephone": "1-229-058-5829",
+            "faxNumber": "086-714-0790",
+            "url": "https://www.burgess-sampson.com/privacy.htm"
+          }
+        }
+      ]
+    }
+  ],
+  "awardPeriod": {
+    "startDate": "2018-05-02T10:36:00Z",
+    "endDate": "2018-05-02T10:36:09Z"
+  },
+  "unsuccessfulLots": [
+    {
+      "id": "30206af7-4df4-11e8-b26f-ab16840b3aaa"
+    },
+    {
+      "id": "30206af8-4df4-11e8-b26f-ab16840b3aaa"
+    },
+    {
+      "id": "30206af6-4df4-11e8-b26f-ab16840b3aaa"
+    }
+  ]
+}
