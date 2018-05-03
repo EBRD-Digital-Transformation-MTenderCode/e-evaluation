@@ -1,106 +1,84 @@
 {
-  "standstillPeriod": {
-    "startDate": "2018-05-02T10:36:03Z",
-    "endDate": "2018-05-02T10:36:09Z"
-  },
-  "awards": [
-    {
-      "id": "9b8ae459-4df4-11e8-a178-51f86e72d0b5",
-      "date": "2018-05-02T10:36:02Z",
-      "description": "Award description",
-      "status": "pending",
-      "statusDetails": "active",
-      "value": {
-        "amount": 2958.38,
-        "currency": "UGX"
-      },
-      "relatedLots": [
-        "30206af8-4df4-11e8-b26f-ab16840b3aaa"
-      ],
-      "relatedBid": "30db5680-4df4-11e8-a00f-8d0b0d0e321f",
-      "suppliers": [
-        {
-          "id": "UA-EDR-722-09-8248",
-          "name": "Pratt LLC",
-          "identifier": {
-            "id": "722-09-8248",
-            "scheme": "UA-EDR",
-            "legalName": "Pratt LLC LLC",
-            "uri": "https://www.daniels.biz/index/"
-          },
-          "address": {
-            "streetAddress": "8735 Huerta Fields",
-            "locality": "East Daniel",
-            "region": "Virginia",
-            "postalCode": "13703",
-            "countryName": "Timor-Leste"
-          },
-          "additionalIdentifiers": [
-            {
-              "id": "370-63-5287",
-              "scheme": "UA-EDR",
-              "legalName": "Pratt LLC Ltd",
-              "uri": "https://www.burns.com/posts/blog/home/"
-            }
-          ],
-          "contactPoint": {
-            "name": "Jimmy Weber",
-            "email": "scottchandler@hotmail.com",
-            "telephone": "337.661.1873x3900",
-            "faxNumber": "+93(8)6677657741",
-            "url": "https://www.church.net/main/app/categories/category/"
-          }
-        }
-      ]
+  "award": {
+    "id": "6da15e64-4ed6-11e8-b892-47ece659ca00",
+    "date": "2018-05-03T13:37:14Z",
+    "description": "Pick",
+    "status": "pending",
+    "statusDetails": "unsuccessful",
+    "value": {
+      "amount": 2.50000001E7,
+      "currency": "AMD"
     },
-    {
-      "id": "9b8ae45a-4df4-11e8-a178-51f86e72d0b5",
-      "date": "2018-05-02T10:36:02Z",
-      "description": "Award description",
-      "status": "pending",
-      "statusDetails": "active",
-      "value": {
-        "amount": 516512.51,
-        "currency": "UGX"
-      },
-      "relatedLots": [
-        "30206af7-4df4-11e8-b26f-ab16840b3aaa"
-      ],
-      "relatedBid": "31950990-4df4-11e8-a00f-8d0b0d0e321f",
-      "suppliers": [
-        {
-          "id": "UA-EDR-702-23-3412",
-          "name": "Phelps-Carroll",
-          "identifier": {
-            "id": "702-23-3412",
-            "scheme": "UA-EDR",
-            "legalName": "Phelps-Carroll and Sons",
-            "uri": "https://smith.com/blog/search/register/"
-          },
-          "address": {
-            "streetAddress": "51772 Tanner Stream Suite 809",
-            "locality": "Woodsville",
-            "region": "Nebraska",
-            "postalCode": "31518-7395",
-            "countryName": "Armenia"
-          },
-          "additionalIdentifiers": [
-            {
-              "id": "173-79-1882",
-              "scheme": "UA-EDR",
-              "legalName": "Phelps-Carroll Inc",
-              "uri": "https://www.rodriguez.com/tags/author.asp"
-            }
-          ],
-          "contactPoint": {
-            "name": "Michael Hunt",
-            "email": "mackenziejimenez@yahoo.com",
-            "telephone": "1-005-497-8994x648",
-            "faxNumber": "06560028141",
-            "url": "http://www.hill.com/posts/search.html"
-          }
+    "relatedLots": [
+      "9c716d83-4ed5-11e8-a676-e1c7f9de952a"
+    ],
+    "relatedBid": "d300b680-4ed5-11e8-9211-43876d93b0eb",
+    "suppliers": [
+      {
+        "id": "CPV-48760000-9",
+        "name": "Google666",
+        "identifier": {
+          "id": "48760000-9",
+          "scheme": "CPV",
+          "legalName": "Google Big Brother",
+          "uri": "hhtps://google.com"
+        },
+        "address": {
+          "streetAddress": "Hell Street",
+          "locality": "Devil's ",
+          "region": "Rage",
+          "postalCode": "666",
+          "countryName": "USA"
+        },
+        "contactPoint": {
+          "name": "Doom",
+          "email": "helloKitty@nyan.cat",
+          "telephone": "8800500600",
+          "faxNumber": "777-777-777",
+          "url": "random.org"
         }
-      ]
-    }
-  ]
+      }
+    ]
+  },
+  "nextAward": {
+    "id": "6da15e63-4ed6-11e8-b892-47ece659ca00",
+    "date": "2018-05-03T13:37:14Z",
+    "description": "Pick",
+    "status": "pending",
+    "statusDetails": "consideration",
+    "value": {
+      "amount": 2.50000001E7,
+      "currency": "AMD"
+    },
+    "relatedLots": [
+      "9c716d83-4ed5-11e8-a676-e1c7f9de952a"
+    ],
+    "relatedBid": "c511d180-4ed5-11e8-9211-43876d93b0eb",
+    "suppliers": [
+      {
+        "id": "CPV-48760000-7",
+        "name": "Google666",
+        "identifier": {
+          "id": "48760000-7",
+          "scheme": "CPV",
+          "legalName": "Google Big Brother",
+          "uri": "hhtps://google.com"
+        },
+        "address": {
+          "streetAddress": "Hell Street",
+          "locality": "Devil's ",
+          "region": "Rage",
+          "postalCode": "666",
+          "countryName": "USA"
+        },
+        "contactPoint": {
+          "name": "Doom",
+          "email": "helloKitty@nyan.cat",
+          "telephone": "8800500600",
+          "faxNumber": "777-777-777",
+          "url": "random.org"
+        }
+      }
+    ]
+  }
 }

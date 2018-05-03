@@ -15,11 +15,9 @@ import com.procurement.evaluation.repository.AwardRepository;
 import com.procurement.evaluation.utils.JsonUtil;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 
 @Service
@@ -102,8 +100,8 @@ public class AwardServiceImpl implements AwardService {
         if (!updatableAward.getStatusDetails().equals(Status.CONSIDERATION))
             throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         AwardEntity updatedAwardEntity = awardsFromEntities.get(updatableAward);
+        updatableAward.setStatusDetails(Status.UNSUCCESSFUL);
         if (awardDto.getDescription() != null) updatableAward.setDescription(awardDto.getDescription());
-        if (awardDto.getStatusDetails() != null) updatableAward.setStatusDetails(awardDto.getStatusDetails());
         if (awardDto.getDocuments() != null) updatableAward.setDocuments(awardDto.getDocuments());
         updatableAward.setDate(dateTime);
         updatedAwardEntity.setStatusDetails(updatableAward.getStatusDetails().value());
@@ -111,12 +109,12 @@ public class AwardServiceImpl implements AwardService {
         awardRepository.save(updatedAwardEntity);
         // next Award
         Award nextAwardByLot = null;
-        Set<Award> awards = awardsFromEntities.keySet().stream()
+        Set<Award> awardsByLot = awardsFromEntities.keySet().stream()
                 .filter(a -> a.getRelatedLots().equals(updatableAward.getRelatedLots()))
                 .sorted(new SortedByValue()).collect(toSet());
-        if (awards.size() > 1) {
-            nextAwardByLot = awards.stream()
-                    .filter(a -> !a.getId().equals(updatableAward.getId()))
+        if (awardsByLot.size() > 1) {
+            nextAwardByLot = awardsByLot.stream()
+                    .filter(a -> !a.getId().equals(updatableAward.getId()) && !a.getStatusDetails().equals(Status.UNSUCCESSFUL))
                     .findFirst().orElse(null);
             if (nextAwardByLot != null) {
                 AwardEntity nextAwardByLotEntity = awardsFromEntities.get(nextAwardByLot);
@@ -146,7 +144,7 @@ public class AwardServiceImpl implements AwardService {
                 .filter(award -> (award.getStatus().equals(Status.ACTIVE)))
                 .flatMap(award -> award.getRelatedLots().stream())
                 .collect(Collectors.toSet());
-         final Set<String> unsuccessfulLots = awards.stream()
+        final Set<String> unsuccessfulLots = awards.stream()
                 .filter(award -> (award.getStatus().equals(Status.UNSUCCESSFUL)))
                 .flatMap(award -> award.getRelatedLots().stream())
                 .filter(lot -> !successfulLots.contains(lot))
