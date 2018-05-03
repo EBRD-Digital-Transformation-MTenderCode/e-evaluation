@@ -237,17 +237,8 @@ public class SelectionsServiceImpl implements SelectionsService {
     }
 
     private class SortedByValue implements Comparator<Award> {
-
         public int compare(final Award obj1, final Award obj2) {
-            final double val1 = obj1.getValue().getAmount();
-            final double val2 = obj2.getValue().getAmount();
-            if (val1 > val2) {
-                return 1;
-            } else if (val1 < val2) {
-                return -1;
-            } else {
-                return 0;
-            }
+            return obj1.getValue().getAmount().compareTo(obj2.getValue().getAmount());
         }
     }
 
