@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Service
@@ -97,8 +98,8 @@ public class AwardServiceImpl implements AwardService {
         final Award updatableAward = awardsFromEntities.keySet().stream()
                 .filter(a -> a.getId().equals(awardDto.getId())).findFirst()
                 .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
-        if (!updatableAward.getStatusDetails().equals(Status.CONSIDERATION))
-            throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
+//        if (!updatableAward.getStatusDetails().equals(Status.CONSIDERATION))
+//            throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         AwardEntity updatedAwardEntity = awardsFromEntities.get(updatableAward);
         updatableAward.setStatusDetails(Status.UNSUCCESSFUL);
         if (awardDto.getDescription() != null) updatableAward.setDescription(awardDto.getDescription());
@@ -109,11 +110,14 @@ public class AwardServiceImpl implements AwardService {
         awardRepository.save(updatedAwardEntity);
         // next Award
         Award nextAwardByLot = null;
-        Set<Award> awardsByLot = awardsFromEntities.keySet().stream()
+        List<Award> awardsByLot = awardsFromEntities.keySet().stream()
                 .filter(a -> a.getRelatedLots().equals(updatableAward.getRelatedLots()))
-                .sorted(new SortedByValue()).collect(toSet());
-        if (awardsByLot.size() > 1) {
-            nextAwardByLot = awardsByLot.stream()
+                .collect(toList());
+        List<Award> sortedAwardsByLot = awardsByLot.stream()
+                .sorted(new SortedByValue())
+                .collect(toList());
+        if (sortedAwardsByLot.size() > 1) {
+            nextAwardByLot = sortedAwardsByLot.stream()
                     .filter(a -> !a.getId().equals(updatableAward.getId()) && !a.getStatusDetails().equals(Status.UNSUCCESSFUL))
                     .findFirst().orElse(null);
             if (nextAwardByLot != null) {
