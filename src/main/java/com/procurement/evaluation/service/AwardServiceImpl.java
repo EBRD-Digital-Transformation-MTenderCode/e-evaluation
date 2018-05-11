@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 @Service
 public class AwardServiceImpl implements AwardService {
@@ -72,7 +71,7 @@ public class AwardServiceImpl implements AwardService {
                                  final String pmd) {
         final List<AwardEntity> awardEntities = Optional.ofNullable(awardRepository.getAllByCpidAndStage(cpId, stage))
                 .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
-        final List<Award> activeAwards = getActiveAwardsFromEntities(awardEntities);
+        final List<Award> activeAwards = getPendingAwardsFromEntities(awardEntities);
         return new ResponseDto<>(true, null, new AwardsResponseDto(activeAwards, null, null));
     }
 
@@ -98,8 +97,6 @@ public class AwardServiceImpl implements AwardService {
         final Award updatableAward = awardsFromEntities.keySet().stream()
                 .filter(a -> a.getId().equals(awardDto.getId())).findFirst()
                 .orElseThrow(() -> new ErrorException(ErrorType.DATA_NOT_FOUND));
-//        if (!updatableAward.getStatusDetails().equals(Status.CONSIDERATION))
-//            throw new ErrorException(ErrorType.INVALID_STATUS_DETAILS);
         AwardEntity updatedAwardEntity = awardsFromEntities.get(updatableAward);
         updatableAward.setStatusDetails(Status.UNSUCCESSFUL);
         if (awardDto.getDescription() != null) updatableAward.setDescription(awardDto.getDescription());
@@ -162,11 +159,10 @@ public class AwardServiceImpl implements AwardService {
                 .collect(Collectors.toList());
     }
 
-    private List<Award> getActiveAwardsFromEntities(final List<AwardEntity> awardEntities) {
+    private List<Award> getPendingAwardsFromEntities(final List<AwardEntity> awardEntities) {
         return awardEntities.stream()
                 .map(e -> jsonUtil.toObject(Award.class, e.getJsonData()))
-                .filter(award -> (award.getStatus().equals(Status.PENDING)
-                        && award.getStatusDetails().equals(Status.ACTIVE)))
+                .filter(award -> award.getStatus().equals(Status.PENDING))
                 .collect(Collectors.toList());
     }
 
