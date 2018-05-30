@@ -6,11 +6,11 @@ import com.procurement.evaluation.model.dto.ocds.Lot
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
 
-data class SelectionsRequestDto (
+data class SelectionsRequestDto(
 
-            @JsonProperty("lots") @Valid @NotNull
-            val lots: List<Lot>,
+        @JsonProperty("lots") @Valid @NotNull
+        val lots: List<Lot>,
 
-            @JsonProperty("bids") @Valid @NotNull
-            val bids: List<Bid>
+        @JsonProperty("bids") @Valid @NotNull
+        val bids: List<Bid>
 )
