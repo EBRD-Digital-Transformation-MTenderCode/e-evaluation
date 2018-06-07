@@ -6,12 +6,11 @@ spring:
     name: e-evaluation
 
 cassandra:
-# contact-points: ac-node1.eprocurement.systems,ac-node2.eprocurement.systems,ac-node3.eprocurement.systems
-  contact-points: 10.0.10.104,10.0.10.105,10.0.10.106
+  contact-points: 10.0.20.104,10.0.20.105,10.0.20.106
   keyspace-name: ocds
   port: 9042
   username: caclient
-  password: brT4Kn27RQs
+  password: 6AH7vbrkMWnfK
 
 eureka:
   client:
