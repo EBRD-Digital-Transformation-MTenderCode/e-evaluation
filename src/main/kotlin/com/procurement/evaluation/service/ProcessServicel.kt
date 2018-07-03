@@ -24,13 +24,13 @@ interface ProcessService {
                               token: String,
                               owner: String,
                               dateTime: LocalDateTime,
-                              dto: UpdateAwardRequestDto): ResponseDto<*>
+                              dto: UpdateAwardRequestDto): ResponseDto
 
     fun endAwardPeriod(cpId: String,
                        stage: String,
                        country: String,
                        pmd: String,
-                       endPeriod: LocalDateTime): ResponseDto<*>
+                       endPeriod: LocalDateTime): ResponseDto
 
 }
 
@@ -43,7 +43,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                                        token: String,
                                        owner: String,
                                        dateTime: LocalDateTime,
-                                       dto: UpdateAwardRequestDto): ResponseDto<*> {
+                                       dto: UpdateAwardRequestDto): ResponseDto {
         val awardDto = dto.award
         when (awardDto.statusDetails) {
             Status.ACTIVE -> {
@@ -73,7 +73,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                                 stage: String,
                                 country: String,
                                 pmd: String,
-                                endPeriod: LocalDateTime): ResponseDto<*> {
+                                endPeriod: LocalDateTime): ResponseDto {
         val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endPeriod)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         val awards = getAwardsFromEntities(awardEntities)
@@ -84,7 +84,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
     private fun updateUnsuccessfulAward(awardDto: Award,
                                         awardsFromEntities: Map<Award, AwardEntity>,
-                                        dateTime: LocalDateTime): ResponseDto<*> {
+                                        dateTime: LocalDateTime): ResponseDto {
         val updatableAward = awardsFromEntities.keys.asSequence()
                 .firstOrNull { it.id == awardDto.id }
                 ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
@@ -162,7 +162,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         return awardEntities.map { toObject(Award::class.java, it.jsonData) to it }.toMap()
     }
 
-    private fun getResponseDtoForActiveAward(award: Award): ResponseDto<*> {
+    private fun getResponseDtoForActiveAward(award: Award): ResponseDto {
         return ResponseDto(true, null, UpdateAwardResponseDto(award = award, nextAward = null))
     }
 

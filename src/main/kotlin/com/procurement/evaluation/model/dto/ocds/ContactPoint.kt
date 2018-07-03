@@ -1,25 +1,23 @@
 package com.procurement.evaluation.model.dto.ocds
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.annotation.JsonProperty
-import javax.validation.constraints.Email
 import javax.validation.constraints.NotNull
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class ContactPoint(
+data class ContactPoint @JsonCreator constructor(
 
-        @JsonProperty("name") @NotNull
+        @field:NotNull
         val name: String,
 
-        @JsonProperty("email") @Email
+        @field:NotNull
         val email: String,
 
-        @JsonProperty("telephone") @NotNull
+        @field:NotNull
         val telephone: String,
 
-        @JsonProperty("faxNumber")
         val faxNumber: String?,
 
-        @JsonProperty("url") @NotNull
+        @field:NotNull
         val url: String
 )

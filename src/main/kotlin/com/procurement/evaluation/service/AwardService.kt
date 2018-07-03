@@ -26,12 +26,12 @@ interface AwardService {
                      pmd: String,
                      awardCriteria: String,
                      startDate: LocalDateTime,
-                     dto: SelectionsRequestDto): ResponseDto<*>
+                     dto: SelectionsRequestDto): ResponseDto
 
     fun getAwards(cpId: String,
                   stage: String,
                   country: String,
-                  pmd: String): ResponseDto<*>
+                  pmd: String): ResponseDto
 }
 
 @Service
@@ -47,7 +47,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
                               pmd: String,
                               awardCriteria: String,
                               startDate: LocalDateTime,
-                              dto: SelectionsRequestDto): ResponseDto<*> {
+                              dto: SelectionsRequestDto): ResponseDto {
 
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
         val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
@@ -70,7 +70,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
     override fun getAwards(cpId: String,
                            stage: String,
                            country: String,
-                           pmd: String): ResponseDto<*> {
+                           pmd: String): ResponseDto {
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         val activeAwards = getPendingAwardsFromEntities(awardEntities)
         return ResponseDto(true, null, AwardsResponseDto(activeAwards, null, null))

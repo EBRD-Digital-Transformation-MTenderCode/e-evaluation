@@ -28,7 +28,7 @@ class EvaluationController(private val processService: ProcessService,
                      @RequestParam(value = "awardCriteria") awardCriteria: String,
                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                      @RequestParam(value = "date") dateTime: LocalDateTime,
-                     @Valid @RequestBody data: SelectionsRequestDto): ResponseEntity<ResponseDto<*>> {
+                     @Valid @RequestBody data: SelectionsRequestDto): ResponseEntity<ResponseDto> {
         return ResponseEntity(
                 awardService.createAwards(
                         cpId = cpId,
@@ -46,7 +46,7 @@ class EvaluationController(private val processService: ProcessService,
     fun getAwards(@RequestParam("identifier") cpId: String,
                   @RequestParam("stage") stage: String,
                   @RequestParam("country") country: String,
-                  @RequestParam("pmd") pmd: String): ResponseEntity<ResponseDto<*>> {
+                  @RequestParam("pmd") pmd: String): ResponseEntity<ResponseDto> {
         return ResponseEntity(
                 awardService.getAwards(
                         cpId = cpId,
@@ -63,7 +63,7 @@ class EvaluationController(private val processService: ProcessService,
                     @RequestParam("owner") owner: String,
                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     @RequestParam(value = "date") dateTime: LocalDateTime,
-                    @Valid @RequestBody data: UpdateAwardRequestDto): ResponseEntity<ResponseDto<*>> {
+                    @Valid @RequestBody data: UpdateAwardRequestDto): ResponseEntity<ResponseDto> {
         return ResponseEntity(
                 processService.updateAndGetNextAward(
                         cpId = cpId,
@@ -81,7 +81,7 @@ class EvaluationController(private val processService: ProcessService,
                        @RequestParam("country") country: String,
                        @RequestParam("pmd") pmd: String,
                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                       @RequestParam("endPeriod") endPeriod: LocalDateTime): ResponseEntity<ResponseDto<*>> {
+                       @RequestParam("endPeriod") endPeriod: LocalDateTime): ResponseEntity<ResponseDto> {
         return ResponseEntity(
                 processService.endAwardPeriod(
                         cpId = cpId,

@@ -1,10 +1,10 @@
 package com.procurement.evaluation.model.dto.ocds
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonCreator
 import javax.validation.constraints.NotNull
 
-data class Lot(
+data class Lot @JsonCreator constructor(
 
-        @JsonProperty("id") @NotNull
+        @field:NotNull
         val id: String
 )

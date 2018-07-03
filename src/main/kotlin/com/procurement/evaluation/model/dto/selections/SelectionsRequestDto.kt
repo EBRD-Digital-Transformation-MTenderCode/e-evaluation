@@ -1,16 +1,16 @@
 package com.procurement.evaluation.model.dto.selections
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.procurement.evaluation.model.dto.ocds.Bid
 import com.procurement.evaluation.model.dto.ocds.Lot
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
 
-data class SelectionsRequestDto(
+data class SelectionsRequestDto @JsonCreator constructor(
 
-        @JsonProperty("lots") @Valid @NotNull
+        @field:Valid @field:NotNull
         val lots: List<Lot>,
 
-        @JsonProperty("bids") @Valid @NotNull
+        @field:Valid @field:NotNull
         val bids: List<Bid>
 )

@@ -9,12 +9,9 @@ import com.procurement.evaluation.model.dto.ocds.Period
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AwardsResponseDto(
 
-        @JsonProperty("awards")
         val awards: List<Award>,
 
-        @JsonProperty("awardPeriod")
-        val period: Period?,
+        val awardPeriod: Period?,
 
-        @JsonProperty("unsuccessfulLots")
         val unsuccessfulLots: List<Lot>?
 )
