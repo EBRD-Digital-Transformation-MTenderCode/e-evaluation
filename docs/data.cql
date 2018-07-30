@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS  ocds.evaluation_rules (
 );
 
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'RT', 'minBids', '5');
-INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('TEST', 'TEST', 'minBids', '3');
+INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST', 'minBids', '3');
 
 CREATE TABLE IF NOT EXISTS  ocds.evaluation_period (
     cp_id text,
