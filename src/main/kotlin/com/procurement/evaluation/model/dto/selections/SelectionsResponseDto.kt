@@ -6,7 +6,7 @@ import com.procurement.evaluation.model.dto.ocds.Period
 
 data class SelectionsResponseDto(
 
-        val period: Period,
+        val awardPeriod: Period,
 
         val awards: List<Award>,
 
