@@ -1,156 +1,213 @@
 {
-  "ocid": "ocds-213czf-000-00001",
-  "country": "UA",
-  "stage": "string",
-  "awardCriteria": "",
-  "procurementMethodDetails": "micro",
-  "lots": [
-    {
-      "id": "l1"
-    },
-    {
-      "id": "l2"
-    },
-    {
-      "id": "l3"
-    },
-    {
-      "id": "l5"
-    }
-  ],
   "bids": [
     {
-      "id": "b1",
-      "relatedLots": [
-        "l4"
-      ],
-      "date": "2017-10-25T15:00:01.23Z",
-      "pendingDate": "2017-10-25T15:00:01.23Z",
-      "createdDate": "2017-10-25T15:00:01.23Z",
-      "value": {
-        "amount": "1000",
-        "currency": "UAH"
-      },
+      "id": "be3fbc00-94cb-11e8-8af3-c93687c12749",
+      "date": "2018-07-31T14:12:22Z",
+      "status": "pending",
+      "statusDetails": "empty",
       "tenderers": [
         {
-          "id": "string",
-          "name": "string"
+          "id": "MD-IDNO-3010000fhfgf55hggg550-0",
+          "name": "Googlehfhhfghg12",
+          "identifier": {
+            "id": "3010000fhfgf55hggg550-0",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "8700000",
+                "description": "Taraclia",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "gfgf",
+                "id": "gfg",
+                "description": "gfg"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
         }
+      ],
+      "value": {
+        "amount": 500.00,
+        "currency": "MDL"
+      },
+      "documents": [
+        {
+          "id": "0e3ba160-949f-11e8-9318-61ca1098e80e",
+          "documentType": "submissionDocuments",
+          "title": "doc1",
+          "relatedLots": [
+            "98190a93-94cb-11e8-9422-df4968e00e7b"
+          ]
+        }
+      ],
+      "relatedLots": [
+        "98190a93-94cb-11e8-9422-df4968e00e7b"
       ]
     },
     {
-      "id": "b2",
-      "relatedLots": [
-        "l4"
-      ],
-      "date": "2017-10-25T15:00:01.23Z",
-      "pendingDate": "2017-10-25T15:00:01.23Z",
-      "createdDate": "2017-10-25T15:00:01.23Z",
-      "value": {
-        "amount": "2000",
-        "currency": "UAH"
-      },
+      "id": "c4df98a0-94cb-11e8-8af3-c93687c12749",
+      "date": "2018-07-31T14:12:33Z",
+      "status": "pending",
+      "statusDetails": "empty",
       "tenderers": [
         {
-          "id": "string",
-          "name": "string"
+          "id": "MD-IDNO-3010000fhfgf5555hggg550-0",
+          "name": "Googlehfhhfghg12",
+          "identifier": {
+            "id": "3010000fhfgf5555hggg550-0",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "8700000",
+                "description": "Taraclia",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "gfgf",
+                "id": "gfg",
+                "description": "gfg"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
         }
+      ],
+      "value": {
+        "amount": 500.00,
+        "currency": "MDL"
+      },
+      "documents": [
+        {
+          "id": "0e3ba160-949f-11e8-9318-61ca1098e80e",
+          "documentType": "submissionDocuments",
+          "title": "doc1",
+          "relatedLots": [
+            "98190a93-94cb-11e8-9422-df4968e00e7b"
+          ]
+        }
+      ],
+      "relatedLots": [
+        "98190a93-94cb-11e8-9422-df4968e00e7b"
       ]
     },
     {
-      "id": "b3",
-      "relatedLots": [
-        "l4"
-      ],
-      "date": "2017-10-25T15:00:01.23Z",
-      "pendingDate": "2017-10-25T15:00:01.23Z",
-      "createdDate": "2017-10-25T15:00:01.23Z",
-      "value": {
-        "amount": "750.02",
-        "currency": "UAH"
-      },
+      "id": "c883e880-94cb-11e8-8af3-c93687c12749",
+      "date": "2018-07-31T14:12:39Z",
+      "status": "pending",
+      "statusDetails": "empty",
       "tenderers": [
         {
-          "id": "string",
-          "name": "string"
+          "id": "MD-IDNO-3010000fhfgf5555hggg5505-0",
+          "name": "Googlehfhhfghg12",
+          "identifier": {
+            "id": "3010000fhfgf5555hggg5505-0",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "8700000",
+                "description": "Taraclia",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "gfgf",
+                "id": "gfg",
+                "description": "gfg"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
         }
+      ],
+      "value": {
+        "amount": 500.00,
+        "currency": "MDL"
+      },
+      "documents": [
+        {
+          "id": "0e3ba160-949f-11e8-9318-61ca1098e80e",
+          "documentType": "submissionDocuments",
+          "title": "doc1",
+          "relatedLots": [
+            "98190a93-94cb-11e8-9422-df4968e00e7b"
+          ]
+        }
+      ],
+      "relatedLots": [
+        "98190a93-94cb-11e8-9422-df4968e00e7b"
       ]
+    }
+  ],
+  "lots": [
+    {
+      "id": "98190a92-94cb-11e8-9422-df4968e00e7b"
     },
     {
-      "id": "b4",
-      "relatedLots": [
-        "l4"
-      ],
-      "date": "2017-10-25T15:00:01.23Z",
-      "pendingDate": "2017-10-25T15:00:01.23Z",
-      "createdDate": "2017-10-25T15:00:01.23Z",
-      "value": {
-        "amount": "750.02",
-        "currency": "UAH"
-      },
-      "tenderers": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ]
-    },
-    {
-      "id": "b5",
-      "relatedLots": [
-        "l4"
-      ],
-      "date": "2017-10-25T15:00:01.23Z",
-      "pendingDate": "2017-10-25T15:00:01.23Z",
-      "createdDate": "2017-10-25T15:00:01.23Z",
-      "value": {
-        "amount": "750.01",
-        "currency": "UAH"
-      },
-      "tenderers": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ]
-    },
-    {
-      "id": "b6",
-      "relatedLots": [
-        "l5"
-      ],
-      "date": "2017-10-25T15:00:01.23Z",
-      "pendingDate": "2017-10-25T15:00:01.23Z",
-      "createdDate": "2017-10-25T15:00:01.23Z",
-      "value": {
-        "amount": "650",
-        "currency": "UAH"
-      },
-      "tenderers": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ]
-    },
-    {
-      "id": "b7",
-      "relatedLots": [
-        "l5"
-      ],
-      "date": "2017-10-25T15:00:01.23Z",
-      "pendingDate": "2017-10-25T15:00:01.23Z",
-      "createdDate": "2017-10-25T15:00:01.23Z",
-      "value": {
-        "amount": "550",
-        "currency": "UAH"
-      },
-      "tenderers": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ]
+      "id": "98190a93-94cb-11e8-9422-df4968e00e7b"
     }
   ]
 }
