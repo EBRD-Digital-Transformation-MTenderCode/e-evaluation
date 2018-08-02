@@ -1,16 +1,16 @@
 {
   "bids": [
     {
-      "id": "be3fbc00-94cb-11e8-8af3-c93687c12749",
-      "date": "2018-07-31T14:12:22Z",
+      "id": "bdc771e0-9643-11e8-848f-8d28ee710cd5",
+      "date": "2018-08-02T11:05:04Z",
       "status": "pending",
       "statusDetails": "empty",
       "tenderers": [
         {
-          "id": "MD-IDNO-3010000fhfgf55hggg550-0",
-          "name": "Googlehfhhfghg12",
+          "id": "MD-IDNO-3010000fhf555555-1",
+          "name": "Googleh555fhfghg12",
           "identifier": {
-            "id": "3010000fhfgf55hggg550-0",
+            "id": "3010000fhf555555-1",
             "scheme": "MD-IDNO",
             "legalName": "Google Big Brother",
             "uri": "hhtps://google.com"
@@ -50,34 +50,33 @@
         }
       ],
       "value": {
-        "amount": 500.00,
+        "amount": 50.00,
         "currency": "MDL"
       },
       "documents": [
         {
           "id": "0e3ba160-949f-11e8-9318-61ca1098e80e",
           "documentType": "submissionDocuments",
-          "title": "doc1",
           "relatedLots": [
-            "98190a93-94cb-11e8-9422-df4968e00e7b"
+            "9b745db4-9643-11e8-9422-df4968e00e7b"
           ]
         }
       ],
       "relatedLots": [
-        "98190a93-94cb-11e8-9422-df4968e00e7b"
+        "9b745db4-9643-11e8-9422-df4968e00e7b"
       ]
     },
     {
-      "id": "c4df98a0-94cb-11e8-8af3-c93687c12749",
-      "date": "2018-07-31T14:12:33Z",
+      "id": "fdab7e50-9643-11e8-848f-8d28ee710cd5",
+      "date": "2018-08-02T11:05:39Z",
       "status": "pending",
       "statusDetails": "empty",
       "tenderers": [
         {
-          "id": "MD-IDNO-3010000fhfgf5555hggg550-0",
-          "name": "Googlehfhhfghg12",
+          "id": "MD-IDNO-3010000fhf555555-2",
+          "name": "Googleh555fhfghg12",
           "identifier": {
-            "id": "3010000fhfgf5555hggg550-0",
+            "id": "3010000fhf555555-2",
             "scheme": "MD-IDNO",
             "legalName": "Google Big Brother",
             "uri": "hhtps://google.com"
@@ -117,7 +116,7 @@
         }
       ],
       "value": {
-        "amount": 500.00,
+        "amount": 150.00,
         "currency": "MDL"
       },
       "documents": [
@@ -126,25 +125,25 @@
           "documentType": "submissionDocuments",
           "title": "doc1",
           "relatedLots": [
-            "98190a93-94cb-11e8-9422-df4968e00e7b"
+            "9b745db4-9643-11e8-9422-df4968e00e7b"
           ]
         }
       ],
       "relatedLots": [
-        "98190a93-94cb-11e8-9422-df4968e00e7b"
+        "9b745db4-9643-11e8-9422-df4968e00e7b"
       ]
     },
     {
-      "id": "c883e880-94cb-11e8-8af3-c93687c12749",
-      "date": "2018-07-31T14:12:39Z",
+      "id": "0233c590-9644-11e8-848f-8d28ee710cd5",
+      "date": "2018-08-02T11:08:43Z",
       "status": "pending",
       "statusDetails": "empty",
       "tenderers": [
         {
-          "id": "MD-IDNO-3010000fhfgf5555hggg5505-0",
-          "name": "Googlehfhhfghg12",
+          "id": "MD-IDNO-3010000fhf5555558-2",
+          "name": "Googleh555fhfghg12",
           "identifier": {
-            "id": "3010000fhfgf5555hggg5505-0",
+            "id": "3010000fhf5555558-2",
             "scheme": "MD-IDNO",
             "legalName": "Google Big Brother",
             "uri": "hhtps://google.com"
@@ -184,30 +183,238 @@
         }
       ],
       "value": {
-        "amount": 500.00,
+        "amount": 67.00,
         "currency": "MDL"
       },
       "documents": [
         {
           "id": "0e3ba160-949f-11e8-9318-61ca1098e80e",
           "documentType": "submissionDocuments",
-          "title": "doc1",
           "relatedLots": [
-            "98190a93-94cb-11e8-9422-df4968e00e7b"
+            "9b745db4-9643-11e8-9422-df4968e00e7b"
           ]
         }
       ],
       "relatedLots": [
-        "98190a93-94cb-11e8-9422-df4968e00e7b"
+        "9b745db4-9643-11e8-9422-df4968e00e7b"
       ]
     }
   ],
   "lots": [
     {
-      "id": "98190a92-94cb-11e8-9422-df4968e00e7b"
+      "id": "9b745db3-9643-11e8-9422-df4968e00e7b"
     },
     {
-      "id": "98190a93-94cb-11e8-9422-df4968e00e7b"
+      "id": "9b745db4-9643-11e8-9422-df4968e00e7b"
+    },
+    {
+      "id": "9b745db5-9643-11e8-9422-df4968e00e7b"
     }
-  ]
+  ],
+  "awardPeriod": {
+    "startDate": "2018-08-02T11:12:00Z"
+  },
+  "awards": [
+    {
+      "token": "c0b965c1-7c19-4c79-984b-d8e7cd1fdcba",
+      "id": "e11dcfd0-9644-11e8-8b5f-b9cd0b7c7771",
+      "date": "2018-08-02T11:12:01Z",
+      "description": "",
+      "status": "pending",
+      "statusDetails": "consideration",
+      "value": {
+        "amount": 50.00,
+        "currency": "MDL"
+      },
+      "relatedLots": [
+        "9b745db4-9643-11e8-9422-df4968e00e7b"
+      ],
+      "relatedBid": "bdc771e0-9643-11e8-848f-8d28ee710cd5",
+      "suppliers": [
+        {
+          "id": "MD-IDNO-3010000fhf555555-1",
+          "name": "Googleh555fhfghg12",
+          "identifier": {
+            "id": "3010000fhf555555-1",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "8700000",
+                "description": "Taraclia",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "gfgf",
+                "id": "gfg",
+                "description": "gfg"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
+        }
+      ]
+    },
+    {
+      "token": "88e5dc37-f41f-494f-9b9f-fb782d47d05e",
+      "id": "e11dcfd1-9644-11e8-8b5f-b9cd0b7c7771",
+      "date": "2018-08-02T11:12:01Z",
+      "description": "",
+      "status": "pending",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 150.00,
+        "currency": "MDL"
+      },
+      "relatedLots": [
+        "9b745db4-9643-11e8-9422-df4968e00e7b"
+      ],
+      "relatedBid": "fdab7e50-9643-11e8-848f-8d28ee710cd5",
+      "suppliers": [
+        {
+          "id": "MD-IDNO-3010000fhf555555-2",
+          "name": "Googleh555fhfghg12",
+          "identifier": {
+            "id": "3010000fhf555555-2",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "8700000",
+                "description": "Taraclia",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "gfgf",
+                "id": "gfg",
+                "description": "gfg"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
+        }
+      ]
+    },
+    {
+      "token": "169284e5-0a8f-476b-90bd-17906d8bb90d",
+      "id": "e11dcfd2-9644-11e8-8b5f-b9cd0b7c7771",
+      "date": "2018-08-02T11:12:01Z",
+      "description": "",
+      "status": "pending",
+      "statusDetails": "empty",
+      "value": {
+        "amount": 67.00,
+        "currency": "MDL"
+      },
+      "relatedLots": [
+        "9b745db4-9643-11e8-9422-df4968e00e7b"
+      ],
+      "relatedBid": "0233c590-9644-11e8-848f-8d28ee710cd5",
+      "suppliers": [
+        {
+          "id": "MD-IDNO-3010000fhf5555558-2",
+          "name": "Googleh555fhfghg12",
+          "identifier": {
+            "id": "3010000fhf5555558-2",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "8700000",
+                "description": "Taraclia",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "gfgf",
+                "id": "gfg",
+                "description": "gfg"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
+        }
+      ]
+    },
+    {
+      "id": "e11dcfd3-9644-11e8-8b5f-b9cd0b7c7771",
+      "date": "2018-08-02T11:12:01Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "relatedLots": [
+        "9b745db3-9643-11e8-9422-df4968e00e7b"
+      ]
+    },
+    {
+      "id": "e11dcfd4-9644-11e8-8b5f-b9cd0b7c7771",
+      "date": "2018-08-02T11:12:01Z",
+      "description": "",
+      "status": "unsuccessful",
+      "statusDetails": "empty",
+      "relatedLots": [
+        "9b745db5-9643-11e8-9422-df4968e00e7b"
+      ]
+    }
+  ],
+  "unsuccessfulLots": []
 }

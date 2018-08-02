@@ -55,7 +55,6 @@ class AwardServiceImpl(private val rulesService: RulesService,
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
         val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        val lotsDtoList = getLotsDto(unsuccessfulLotsSet)
         addUnsuccessfulLotsFromTender(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
@@ -64,6 +63,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
         val awards = successfulAwardsList + unsuccessfulAwardsList
         val periodDto = periodService.saveStartOfPeriod(cpId, stage, startDate)
         saveAwards(awards, cpId, owner, stage)
+        val lotsDtoList = getLotsDto(unsuccessfulLotsSet)
         return ResponseDto(true, null, SelectionsResponseDto(periodDto, awards, lotsDtoList))
     }
 
@@ -99,7 +99,10 @@ class AwardServiceImpl(private val rulesService: RulesService,
     }
 
     private fun getUnsuccessfulLots(uniqueLots: Map<String, Int>, minNumberOfBids: Int): HashSet<String> {
-        return uniqueLots.asSequence().filter { it.value < minNumberOfBids }.map { it.key }.toHashSet()
+        return uniqueLots.asSequence()
+                .filter { it.value < minNumberOfBids }
+                .map { it.key }
+                .toHashSet()
     }
 
     private fun addUnsuccessfulLotsFromTender(lotsFromTender: HashSet<String>,
