@@ -3,6 +3,8 @@ package com.procurement.evaluation.dao
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.querybuilder.Insert
 import com.datastax.driver.core.querybuilder.QueryBuilder
+import com.datastax.driver.core.querybuilder.QueryBuilder.eq
+import com.datastax.driver.core.querybuilder.QueryBuilder.select
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.entity.AwardEntity
@@ -56,11 +58,11 @@ class AwardDaoImpl(private val session: Session) : AwardDao {
     }
 
     override fun findAllByCpIdAndStage(cpId: String, stage: String): List<AwardEntity> {
-        val query = QueryBuilder.select()
+        val query = select()
                 .all()
                 .from(AWARD_TABLE)
-                .where(QueryBuilder.eq(CP_ID, cpId))
-                .and(QueryBuilder.eq(STAGE, stage))
+                .where(eq(CP_ID, cpId))
+                .and(eq(STAGE, stage))
         val resultSet = session.execute(query)
         val entities = ArrayList<AwardEntity>()
         resultSet.forEach { row ->
@@ -79,11 +81,13 @@ class AwardDaoImpl(private val session: Session) : AwardDao {
     }
 
     override fun getByCpIdAndStageAndToken(cpId: String, stage: String, token: UUID): AwardEntity {
-        val query = QueryBuilder.select()
+        val query = select()
                 .all()
                 .from(AWARD_TABLE)
-                .where(QueryBuilder.eq(CP_ID, cpId))
-                .and(QueryBuilder.eq(TOKEN, token)).limit(1)
+                .where(eq(CP_ID, cpId))
+                .and(eq(STAGE, stage))
+                .and(eq(TOKEN, token))
+                .limit(1)
         val row = session.execute(query).one()
         return if (row != null)
             AwardEntity(
