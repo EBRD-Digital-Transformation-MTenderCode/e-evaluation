@@ -3,6 +3,7 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.model.dto.AwardUpdate
 import com.procurement.evaluation.model.dto.AwardsResponseDto
 import com.procurement.evaluation.model.dto.UpdateAwardRequestDto
 import com.procurement.evaluation.model.dto.UpdateAwardResponseDto
@@ -82,7 +83,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         return ResponseDto(true, null, AwardsResponseDto(awards, awardPeriod, unsuccessfulLots))
     }
 
-    private fun updateUnsuccessfulAward(awardDto: Award,
+    private fun updateUnsuccessfulAward(awardDto: AwardUpdate,
                                         awardsFromEntities: Map<Award, AwardEntity>,
                                         dateTime: LocalDateTime): ResponseDto {
         val updatableAward = awardsFromEntities.keys.asSequence()
@@ -121,7 +122,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         return ResponseDto(true, null, UpdateAwardResponseDto(updatableAward, nextAwardByLot))
     }
 
-    private fun updateActiveAward(award: Award, awardDto: Award, dateTime: LocalDateTime) {
+    private fun updateActiveAward(award: Award, awardDto: AwardUpdate, dateTime: LocalDateTime) {
         if (award.statusDetails != Status.CONSIDERATION) throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
         if (awardDto.description != null) award.description = awardDto.description
         if (awardDto.documents != null) award.documents = awardDto.documents
