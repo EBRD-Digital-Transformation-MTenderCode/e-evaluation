@@ -127,6 +127,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         if (awardDto.description != null) award.description = awardDto.description
         if (awardDto.documents != null) award.documents = awardDto.documents
         award.date = dateTime
+        award.statusDetails = Status.ACTIVE
     }
 
     private fun getUnsuccessfulLotsFromAwards(awards: List<Award>): List<Lot> {
