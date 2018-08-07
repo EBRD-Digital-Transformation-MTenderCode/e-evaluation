@@ -45,7 +45,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                                        owner: String,
                                        dateTime: LocalDateTime,
                                        dto: UpdateAwardRequestDto): ResponseDto {
-        periodService.checkPeriod(cpId,stage)
+        periodService.checkPeriod(cpId, stage)
         val awardDto = dto.award
         when (awardDto.statusDetails) {
             Status.ACTIVE -> {
@@ -66,7 +66,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
             Status.UNSUCCESSFUL -> {
                 val entities = awardDao.findAllByCpIdAndStage(cpId, stage)
                 val awardToEntityToMap = getAwardToEntityToMap(entities)
-                return updateUnsuccessfulAward(awardDto, awardToEntityToMap, dateTime,token)
+                return updateUnsuccessfulAward(awardDto, awardToEntityToMap, dateTime, token)
             }
             else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
         }
