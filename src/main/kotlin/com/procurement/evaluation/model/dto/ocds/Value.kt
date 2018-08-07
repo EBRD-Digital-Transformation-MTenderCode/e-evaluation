@@ -12,5 +12,5 @@ data class Value(
         val amount: BigDecimal,
 
         @field:NotNull
-        val currency: Currency
+        val currency: String
 )
