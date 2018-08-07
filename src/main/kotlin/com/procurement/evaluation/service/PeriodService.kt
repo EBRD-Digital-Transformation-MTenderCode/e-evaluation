@@ -3,6 +3,7 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.model.dto.ocds.Period
 import com.procurement.evaluation.model.entity.PeriodEntity
+import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toDate
 import com.procurement.evaluation.utils.toLocal
 import org.springframework.stereotype.Service
@@ -14,6 +15,8 @@ interface PeriodService {
     fun saveStartOfPeriod(cpId: String, stage: String, startDate: LocalDateTime): Period
 
     fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period
+
+    fun checkPeriod(cpId: String, stage: String): Boolean
 }
 
 @Service
@@ -40,6 +43,12 @@ class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService
         )
         periodRepository.save(newPeriod)
         return Period(newPeriod.startDate.toLocal(), newPeriod.endDate?.toLocal())
+    }
+
+    override fun checkPeriod(cpId: String, stage: String): Boolean {
+        val localDateTime = localNowUTC()
+        val periodEntity = periodRepository.getByCpIdAndStage(cpId,stage)
+        return localDateTime >= periodEntity.startDate.toLocal() && localDateTime <= periodEntity.endDate?.toLocal()
     }
 
     private fun getEntity(cpId: String,

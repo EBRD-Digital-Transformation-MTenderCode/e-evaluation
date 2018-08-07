@@ -45,6 +45,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                                        owner: String,
                                        dateTime: LocalDateTime,
                                        dto: UpdateAwardRequestDto): ResponseDto {
+        periodService.checkPeriod(cpId,stage)
         val awardDto = dto.award
         when (awardDto.statusDetails) {
             Status.ACTIVE -> {
