@@ -49,6 +49,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         when (awardDto.statusDetails) {
             Status.ACTIVE -> {
                 val entity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
+                if (entity.token.toString() != token) throw ErrorException(ErrorType.INVALID_TOKEN)
                 if (entity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
                 val award = toObject(Award::class.java, entity.jsonData)
                 updateActiveAward(award, awardDto, dateTime)
