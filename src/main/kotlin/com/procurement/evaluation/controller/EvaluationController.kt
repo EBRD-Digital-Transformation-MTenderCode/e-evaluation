@@ -20,7 +20,7 @@ class EvaluationController(private val processService: ProcessService,
                            private val awardService: AwardService) {
 
     @PostMapping
-    fun createAwards(@RequestParam(value = "identifier") cpId: String,
+    fun createAwards(@RequestParam(value = "cpid") cpId: String,
                      @RequestParam(value = "stage") stage: String,
                      @RequestParam(value = "owner") owner: String,
                      @RequestParam(value = "country") country: String,
@@ -43,7 +43,7 @@ class EvaluationController(private val processService: ProcessService,
     }
 
     @GetMapping
-    fun getAwards(@RequestParam("identifier") cpId: String,
+    fun getAwards(@RequestParam("cpid") cpId: String,
                   @RequestParam("stage") stage: String,
                   @RequestParam("country") country: String,
                   @RequestParam("pmd") pmd: String): ResponseEntity<ResponseDto> {
@@ -57,7 +57,7 @@ class EvaluationController(private val processService: ProcessService,
     }
 
     @PutMapping
-    fun updateAward(@RequestParam("identifier") cpId: String,
+    fun updateAward(@RequestParam("cpid") cpId: String,
                     @RequestParam("stage") stage: String,
                     @RequestParam("token") token: String,
                     @RequestParam("awardId") awardId: String,
@@ -78,7 +78,7 @@ class EvaluationController(private val processService: ProcessService,
     }
 
     @PostMapping("/endAwardPeriod")
-    fun endAwardPeriod(@RequestParam("identifier") cpId: String,
+    fun endAwardPeriod(@RequestParam("cpid") cpId: String,
                        @RequestParam("stage") stage: String,
                        @RequestParam("country") country: String,
                        @RequestParam("pmd") pmd: String,
