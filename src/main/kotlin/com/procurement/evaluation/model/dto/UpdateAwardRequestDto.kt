@@ -18,9 +18,6 @@ data class UpdateAwardRequestDto @JsonCreator constructor(
 data class AwardUpdate @JsonCreator constructor(
 
         @field:NotNull
-        val id: String,
-
-        @field:NotNull
         var statusDetails: Status,
 
         var description: String?,

@@ -6,7 +6,8 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_OWNER("00.02", "Invalid owner."),
     INVALID_STATUS("00.03", "Invalid status of award"),
     INVALID_STATUS_DETAILS("00.04", "Invalid status details of award"),
-    INVALID_TOKEN("00.05", "Invalid token."),
+    INVALID_ID("00.05", "Invalid id of award"),
+    INVALID_TOKEN("00.06", "Invalid token."),
     PERIOD_NOT_FOUND("01.01", "Period not found."),
     BIDS_RULES_NOT_FOUND("02.02", "Bids rules not found."),
     DATE_IS_NOT_IN_PERIOD("02.03","Period invalid");

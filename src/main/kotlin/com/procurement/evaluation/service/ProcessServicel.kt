@@ -23,6 +23,7 @@ interface ProcessService {
     fun updateAndGetNextAward(cpId: String,
                               stage: String,
                               token: String,
+                              awardId: String,
                               owner: String,
                               dateTime: LocalDateTime,
                               dto: UpdateAwardRequestDto): ResponseDto
@@ -42,6 +43,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
     override fun updateAndGetNextAward(cpId: String,
                                        stage: String,
                                        token: String,
+                                       awardId: String,
                                        owner: String,
                                        dateTime: LocalDateTime,
                                        dto: UpdateAwardRequestDto): ResponseDto {
@@ -53,6 +55,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                 if (entity.token.toString() != token) throw ErrorException(ErrorType.INVALID_TOKEN)
                 if (entity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
                 val award = toObject(Award::class.java, entity.jsonData)
+                if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
                 updateActiveAward(award, awardDto, dateTime)
                 val newEntity = getEntity(
                         award = award,
@@ -66,7 +69,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
             Status.UNSUCCESSFUL -> {
                 val entities = awardDao.findAllByCpIdAndStage(cpId, stage)
                 val awardToEntityToMap = getAwardToEntityToMap(entities)
-                return updateUnsuccessfulAward(awardDto, awardToEntityToMap, dateTime, token)
+                return updateUnsuccessfulAward(awardDto, awardToEntityToMap, dateTime, token, awardId)
             }
             else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
         }
@@ -88,14 +91,14 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
     private fun updateUnsuccessfulAward(awardDto: AwardUpdate,
                                         awardsFromEntities: Map<Award, AwardEntity>,
                                         dateTime: LocalDateTime,
-                                        token: String): ResponseDto {
+                                        token: String,
+                                        awardId: String): ResponseDto {
         val updatableAward = awardsFromEntities.keys.asSequence()
-                .firstOrNull { it.id == awardDto.id }
+                .firstOrNull { it.id == awardId }
                 ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
 
         val updatedAwardEntity = awardsFromEntities[updatableAward] ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
         if (updatedAwardEntity.token.toString() != token) throw ErrorException(ErrorType.INVALID_TOKEN)
-
 
         updatableAward.statusDetails = Status.UNSUCCESSFUL
         if (awardDto.description != null) updatableAward.description = awardDto.description
