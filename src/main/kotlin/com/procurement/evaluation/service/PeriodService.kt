@@ -16,6 +16,8 @@ interface PeriodService {
 
     fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period
 
+    fun savePeriod(cpId: String, stage: String, startDate: LocalDateTime, endDate: LocalDateTime): Period
+
     fun checkPeriod(cpId: String, stage: String): Boolean
 }
 
@@ -43,6 +45,17 @@ class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService
         )
         periodRepository.save(newPeriod)
         return Period(newPeriod.startDate.toLocal(), newPeriod.endDate?.toLocal())
+    }
+
+    override fun savePeriod(cpId: String, stage: String, startDate: LocalDateTime, endDate: LocalDateTime): Period {
+        val period = getEntity(
+                cpId = cpId,
+                stage = stage,
+                startDate = startDate.toDate(),
+                endDate = endDate.toDate()
+        )
+        periodRepository.save(period)
+        return Period(period.startDate.toLocal(), period.endDate?.toLocal())
     }
 
     override fun checkPeriod(cpId: String, stage: String): Boolean {

@@ -61,10 +61,15 @@ class AwardServiceImpl(private val rulesService: RulesService,
         sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(awardCriteria))
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val awards = successfulAwardsList + unsuccessfulAwardsList
-        val periodDto = periodService.saveStartOfPeriod(cpId, stage, startDate)
+
+        val awardPeriod = if (successfulAwardsList.isEmpty()) {
+            periodService.savePeriod(cpId, stage, startDate, startDate)
+        } else {
+            periodService.saveStartOfPeriod(cpId, stage, startDate)
+        }
         saveAwards(awards, cpId, owner, stage)
         val lotsDtoList = getLotsDto(unsuccessfulLotsSet)
-        return ResponseDto(true, null, SelectionsResponseDto(periodDto, awards, lotsDtoList))
+        return ResponseDto(true, null, SelectionsResponseDto(awardPeriod, awards, lotsDtoList))
     }
 
     override fun getAwards(cpId: String,
