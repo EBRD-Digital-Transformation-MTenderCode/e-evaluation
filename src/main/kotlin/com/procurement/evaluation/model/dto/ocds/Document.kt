@@ -18,8 +18,5 @@ data class Document @JsonCreator constructor(
 
         val description: String?,
 
-        @field:NotNull
-        val language: String,
-
         val relatedLots: HashSet<String>?
 )
