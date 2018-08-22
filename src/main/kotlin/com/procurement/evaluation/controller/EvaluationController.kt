@@ -1,6 +1,7 @@
 package com.procurement.evaluation.controller
 
 import com.procurement.evaluation.model.dto.UpdateAwardRequestDto
+import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto
 import com.procurement.evaluation.service.AwardService
@@ -92,5 +93,29 @@ class EvaluationController(private val processService: ProcessService,
                         pmd = pmd,
                         endPeriod = endPeriod),
                 HttpStatus.OK)
+    }
+
+
+    @PostMapping("/awardByBid")
+    fun awardByBid(@RequestParam("token") token: String,
+                   @RequestParam("owner") owner: String,
+                   @RequestParam("cpid") cpId: String,
+                   @RequestParam("stage") stage: String,
+                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                   @RequestParam(value = "date") dateTime: LocalDateTime,
+                   @RequestParam("awardId")awardId: String,
+                   @Valid @RequestBody data: AwardByBidRequestDto):ResponseEntity<ResponseDto>{
+        return ResponseEntity(
+            processService.awardByBid(
+                cpId = cpId,
+                stage = stage,
+                token = token,
+                awardId = awardId,
+                owner = owner,
+                dateTime = dateTime,
+                dto = data
+            ),HttpStatus.OK
+        )
+
     }
 }
