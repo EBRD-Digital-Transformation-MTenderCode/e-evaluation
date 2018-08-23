@@ -9,11 +9,11 @@ import javax.validation.constraints.NotNull
 data class AwardByBidRequestDto @JsonCreator constructor(
 
         @field:Valid @field:NotNull
-        val awards: AwardBybid
+        val awards: AwardByBid
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class AwardBybid @JsonCreator constructor(
+data class AwardByBid @JsonCreator constructor(
 
         @field:NotNull
         var statusDetails: Status,

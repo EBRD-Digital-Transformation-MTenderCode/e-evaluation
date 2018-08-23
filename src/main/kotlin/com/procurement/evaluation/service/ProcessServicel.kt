@@ -9,7 +9,7 @@ import com.procurement.evaluation.model.dto.UpdateAwardRequestDto
 import com.procurement.evaluation.model.dto.UpdateAwardResponseDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidResponseDto
-import com.procurement.evaluation.model.dto.awardByBid.AwardBybid
+import com.procurement.evaluation.model.dto.awardByBid.AwardByBid
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
 import com.procurement.evaluation.model.entity.AwardEntity
@@ -106,23 +106,22 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                             dto: AwardByBidRequestDto): ResponseDto {
 
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
+
         val award = toObject(Award::class.java, awardEntity.jsonData)
 
-        val lotsFromAward = award.relatedLots
+        val relatedLots = award.relatedLots
         val documents = dto.awards.documents
 
-        verifyDocumentsRelatedLots(lotsFromAward, documents)
+        verifyDocumentsRelatedLots(relatedLots, documents)
         verifyAwardByBidStatusDetails(dto.awards.statusDetails)
-
         if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
         if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
-
         verifyAwardByBidDocType(dto.awards.documents)
 
-        val relatedLots = award.relatedLots
         val awardsByRelatedLots = getAwardsByRelatedLot(cpId, stage, relatedLots)
 
-        var awardBidId: String = ""
+        var awardBidId: String? = null
+        var awardStatusDetails: String? = null
         var awardLotId: String? = null
         var lotAwarded: Boolean? = null
         val awardsResponse = arrayListOf<Award>()
@@ -130,9 +129,8 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
         if (dto.awards.statusDetails == Status.ACTIVE) {
 
-            for (awrd in awardsByRelatedLots) {
-                if (awrd.statusDetails == Status.ACTIVE)
-                    throw ErrorException(ErrorType.ALREADY_HAVE_ACTIVE_AWARDS)
+            for (award in awardsByRelatedLots) {
+                if (award.statusDetails == Status.ACTIVE) throw ErrorException(ErrorType.ALREADY_HAVE_ACTIVE_AWARDS)
             }
 
             if (award.statusDetails == Status.CONSIDERATION) {
@@ -140,11 +138,11 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                 updateAward(award, dto.awards, dateTime)
                 if (award.relatedBid != null) {
                     awardBidId = award.relatedBid
+                    awardStatusDetails = award.statusDetails.value()
                 }
 
                 lotAwarded = true
-                awardLotId = award.relatedLots.get(0)
-
+                awardLotId = award.relatedLots[0]
 
             } else if (award.statusDetails == Status.UNSUCCESSFUL) {
                 if (isAlreadySavedAwardsFromStatus(awardsByRelatedLots, Status.CONSIDERATION)) {
@@ -152,9 +150,10 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                     updateAward(award, dto.awards, dateTime)
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
+                        awardStatusDetails = award.statusDetails.value()
                     }
                     lotAwarded = true
-                    awardLotId = award.relatedLots.get(0)
+                    awardLotId = award.relatedLots[0]
 
                     val awardsConsideration = getAlreadySavedAwardsFromStatus(awardsByRelatedLots, Status.CONSIDERATION)
                     for (awardConsideration in awardsConsideration) {
@@ -168,19 +167,16 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                             stage = stage,
                             owner = owner)
                         awardDao.save(newEntity)
-
                     }
-
 
                 } else {
                     award.statusDetails = Status.ACTIVE
                     updateAward(award, dto.awards, dateTime)
-
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
+                        awardStatusDetails = award.statusDetails.value()
+
                     }
-
-
                 }
 
             } else {
@@ -196,6 +192,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
+                        awardStatusDetails = award.statusDetails.value()
                     }
                     nextAwardAfterConsideration.statusDetails = Status.CONSIDERATION
                     nextAwardAfterConsideration.date = dateTime
@@ -214,10 +211,10 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
+                        awardStatusDetails = award.statusDetails.value()
                     }
                     lotAwarded = true
                     awardLotId = award.relatedLots.get(0)
-
                 }
 
 
@@ -228,6 +225,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
+                        awardStatusDetails = award.statusDetails.value()
                     }
                     lotAwarded = false
                     awardLotId = award.relatedLots.get(0)
@@ -252,6 +250,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                     updateAward(award, dto.awards, dateTime)
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
+                        awardStatusDetails = award.statusDetails.value()
                     }
 
                 }
@@ -271,7 +270,12 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
             owner = awardEntity.owner)
         awardDao.save(newEntity)
 
-        return ResponseDto(true, null, AwardByBidResponseDto(awardsResponse, awardBidId, awardLotId, lotAwarded))
+        return ResponseDto(true, null, AwardByBidResponseDto(
+                awardsResponse,
+                awardStatusDetails,
+                awardBidId,
+                awardLotId,
+                lotAwarded))
     }
 
     private fun getNextAwardAfterConsideration(rangedAwards: List<Award>): Award? {
@@ -288,7 +292,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         return awards.sortedBy { it.value?.amount }
     }
 
-    private fun updateAward(awardFromBase: Award, awardFromRq: AwardBybid, dateTime: LocalDateTime) {
+    private fun updateAward(awardFromBase: Award, awardFromRq: AwardByBid, dateTime: LocalDateTime) {
         awardFromBase.apply {
             description = awardFromRq.description
             documents = awardFromRq.documents
@@ -351,9 +355,9 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
     private fun verifyDocumentsRelatedLots(relatedLots: List<String>, documents: List<Document>?) {
         if (documents != null) {
             for (document in documents) {
-                val docs = mutableListOf<String>()
-                document.relatedLots?.toCollection(docs)
-                if (!relatedLots.containsAll(docs)) throw ErrorException(ErrorType.RELATED_LOTS_IN_DOCS_ARE_INVALID)
+                val docRelatedLots = mutableListOf<String>()
+                document.relatedLots?.toCollection(docRelatedLots)
+                if (!relatedLots.containsAll(docRelatedLots)) throw ErrorException(ErrorType.RELATED_LOTS_IN_DOCS_ARE_INVALID)
             }
         }
 

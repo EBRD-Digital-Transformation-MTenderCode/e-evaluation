@@ -8,7 +8,9 @@ data class AwardByBidResponseDto(
 
     val awards: List<Award>,
 
-    val bidId: String,
+    val awardStatusDetails: String?,
+
+    val bidId: String?,
 
     val lotId: String?,
 
