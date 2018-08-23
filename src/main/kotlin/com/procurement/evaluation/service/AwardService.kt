@@ -63,9 +63,9 @@ class AwardServiceImpl(private val rulesService: RulesService,
         val awards = successfulAwardsList + unsuccessfulAwardsList
 
         val awardPeriod = if (successfulAwardsList.isEmpty()) {
-            periodService.savePeriod(cpId, stage, startDate, startDate,awardCriteria)
+            periodService.savePeriod(cpId, stage, startDate, startDate, awardCriteria)
         } else {
-            periodService.saveStartOfPeriod(cpId, stage, startDate,awardCriteria)
+            periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
         }
         saveAwards(awards, cpId, owner, stage)
         val lotsDtoList = getLotsDto(unsuccessfulLotsSet)

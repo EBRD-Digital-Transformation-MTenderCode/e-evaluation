@@ -16,6 +16,7 @@ INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD'
 CREATE TABLE IF NOT EXISTS  ocds.evaluation_period (
     cp_id text,
     stage text,
+    award_criteria text,
     start_date timestamp,
     end_date timestamp,
     primary key(cp_id, stage)
