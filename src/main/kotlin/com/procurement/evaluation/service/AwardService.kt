@@ -199,7 +199,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
         awards.forEach { awardDto ->
             val entity = getEntity(awardDto, ocId, owner, stage)
             awardDao.save(entity)
-            if (awardDto.status != Status.UNSUCCESSFUL) awardDto.token = entity.token.toString()
+            awardDto.token = entity.token.toString()
         }
     }
 
