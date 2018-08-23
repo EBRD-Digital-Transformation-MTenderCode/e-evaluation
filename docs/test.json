@@ -1,7 +1,152 @@
 {
-  "award": {
-    "id": "0b1a9d30-970e-11e8-aa1b-f76b92665508",
-    "statusDetails": "Active",
-    "description": "WIN"
-  }
+  "bids": [
+    {
+      "id": "abc147a0-a6f1-11e8-8273-f17aaee1d82e",
+      "date": "2018-08-23T16:29:13Z",
+      "status": "pending",
+      "statusDetails": "empty",
+      "tenderers": [
+        {
+          "id": "MD-IDNO-1-2",
+          "name": "Googleh555fhfgh55g12",
+          "identifier": {
+            "id": "1-2",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "1000000",
+                "description": "Anenii Noi",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "CUATM",
+                "id": "1001000",
+                "description": "or.Anenii Noi",
+                "uri": "enotis"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
+        }
+      ],
+      "value": {
+        "amount": 150.00,
+        "currency": "MDL"
+      },
+      "documents": [
+        {
+          "id": "f7178f90-9fba-11e8-9318-61ca1098e80e",
+          "documentType": "submissionDocuments",
+          "title": "doc1",
+          "relatedLots": [
+            "771c9093-a6f1-11e8-89a1-59d3e648a59e"
+          ]
+        }
+      ],
+      "relatedLots": [
+        "771c9093-a6f1-11e8-89a1-59d3e648a59e"
+      ]
+    },
+    {
+      "id": "c772aa70-a6f1-11e8-8273-f17aaee1d82e",
+      "date": "2018-08-23T16:29:59Z",
+      "status": "pending",
+      "statusDetails": "empty",
+      "tenderers": [
+        {
+          "id": "MD-IDNO-1-1",
+          "name": "Googleh555fhfgh55g12",
+          "identifier": {
+            "id": "1-1",
+            "scheme": "MD-IDNO",
+            "legalName": "Google Big Brother",
+            "uri": "hhtps://google.com"
+          },
+          "address": {
+            "streetAddress": "",
+            "postalCode": "",
+            "addressDetails": {
+              "country": {
+                "scheme": "iso-alpha2",
+                "id": "MD",
+                "description": "MOLDOVA",
+                "uri": "http://reference.iatistandard.org/202/codelists/Country/#id1"
+              },
+              "region": {
+                "scheme": "CUATM",
+                "id": "1000000",
+                "description": "Anenii Noi",
+                "uri": "www.statistica.md/public/files/Clasificatoare/CUATM_rom.zip"
+              },
+              "locality": {
+                "scheme": "CUATM",
+                "id": "1001000",
+                "description": "or.Anenii Noi",
+                "uri": "enotis"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "111",
+            "email": "222",
+            "telephone": "333",
+            "url": "444"
+          },
+          "details": {
+            "scale": "sme"
+          }
+        }
+      ],
+      "value": {
+        "amount": 150.00,
+        "currency": "MDL"
+      },
+      "documents": [
+        {
+          "id": "f7178f90-9fba-11e8-9318-61ca1098e80e",
+          "documentType": "submissionDocuments",
+          "title": "doc1",
+          "relatedLots": [
+            "771c9093-a6f1-11e8-89a1-59d3e648a59e"
+          ]
+        }
+      ],
+      "relatedLots": [
+        "771c9093-a6f1-11e8-89a1-59d3e648a59e"
+      ]
+    }
+  ],
+  "lots": [
+    {
+      "id": "771c9093-a6f1-11e8-89a1-59d3e648a59e"
+    },
+    {
+      "id": "771c9094-a6f1-11e8-89a1-59d3e648a59e"
+    },
+    {
+      "id": "771c9095-a6f1-11e8-89a1-59d3e648a59e"
+    }
+  ],
+  "awardCriteria": "priceOnly"
 }
