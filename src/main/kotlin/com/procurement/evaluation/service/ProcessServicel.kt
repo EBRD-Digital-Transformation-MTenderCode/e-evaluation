@@ -1,6 +1,7 @@
 package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
+import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.AwardUpdate
@@ -47,6 +48,7 @@ interface ProcessService {
 
 @Service
 class ProcessServiceImpl(private val awardDao: AwardDao,
+                         private val periodDao: PeriodDao,
                          private val periodService: PeriodService) : ProcessService {
 
     override fun updateAndGetNextAward(cpId: String,
@@ -107,6 +109,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
         val award = toObject(Award::class.java, awardEntity.jsonData)
+        val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId,stage).awardCriteria)
 
         val lotsFromAward = award.relatedLots
         val documents = dto.awards.documents
@@ -121,6 +124,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
         val relatedLots = award.relatedLots
         val awardsByRelatedLots = getAwardsByRelatedLot(cpId, stage, relatedLots)
+        val rangedAwards = sortAwardsByCriteria(awardsByRelatedLots,awardCriteria)
 
         var awardBidId: String = ""
         var awardLotId: String? = null
@@ -189,7 +193,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
         } else if (dto.awards.statusDetails == Status.UNSUCCESSFUL) {
             if (award.statusDetails == Status.CONSIDERATION) {
-                val nextAwardAfterConsideration = getNextAwardAfterConsideration(rangeAwardsByAmount(awardsByRelatedLots))
+                val nextAwardAfterConsideration = getNextAwardAfterConsideration(rangedAwards)
                 if (nextAwardAfterConsideration != null) {
                     award.statusDetails = Status.UNSUCCESSFUL
                     updateAward(award, dto.awards, dateTime)
@@ -232,7 +236,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                     lotAwarded = false
                     awardLotId = award.relatedLots.get(0)
 
-                    val firsEmptyAward = getNextAwardAfterConsideration(rangeAwardsByAmount(awardsByRelatedLots))
+                    val firsEmptyAward = getNextAwardAfterConsideration(rangedAwards)
                     if (firsEmptyAward != null) {
                         firsEmptyAward.statusDetails = Status.CONSIDERATION
                         firsEmptyAward.date = dateTime
@@ -272,6 +276,29 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         awardDao.save(newEntity)
 
         return ResponseDto(true, null, AwardByBidResponseDto(awardsResponse, awardBidId, awardLotId, lotAwarded))
+    }
+
+    private fun sortAwardsByCriteria(awards: List<Award>, awardCriteria: AwardCriteria): List<Award> {
+        when (awardCriteria) {
+            AwardCriteria.PRICE_ONLY -> {
+                return awards.sortedBy { it.value?.amount }
+            }
+            AwardCriteria.COST_ONLY -> {
+            }
+            AwardCriteria.QUALITY_ONLY -> {
+            }
+            AwardCriteria.RATED_CRITERIA -> {
+            }
+            AwardCriteria.LOWEST_COST -> {
+            }
+            AwardCriteria.BEST_PROPOSAL -> {
+            }
+            AwardCriteria.BEST_VALUE_TO_GOVERNMENT -> {
+            }
+            AwardCriteria.SINGLE_BID_ONLY -> {
+            }
+        }
+        return awards
     }
 
     private fun getNextAwardAfterConsideration(rangedAwards: List<Award>): Award? {
