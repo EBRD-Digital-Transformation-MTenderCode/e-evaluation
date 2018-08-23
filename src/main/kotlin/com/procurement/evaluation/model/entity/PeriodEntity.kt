@@ -6,15 +6,17 @@ import java.util.*
 data class PeriodEntity(
 
 //    @PrimaryKeyColumn(name = "cp_id", type = PrimaryKeyType.PARTITIONED)
-        val cpId: String,
+    val cpId: String,
 
 //    @PrimaryKeyColumn(name = "stage", type = PrimaryKeyType.CLUSTERED)
-        val stage: String,
+    val stage: String,
+
+    val awardCriteria: String,
 
 //    @Column(value = "start_date")
-        var startDate: Date,
+    var startDate: Date,
 
 //    @Column(value = "end_date")
-        var endDate: Date?
+    var endDate: Date?
 
 )
