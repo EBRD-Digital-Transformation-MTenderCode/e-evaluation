@@ -2,9 +2,8 @@ package com.procurement.evaluation.model.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.procurement.evaluation.model.dto.ocds.*
-import com.procurement.evaluation.model.dto.ocds.Award
-import java.time.LocalDateTime
+import com.procurement.evaluation.model.dto.ocds.Document
+import com.procurement.evaluation.model.dto.ocds.Status
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
 

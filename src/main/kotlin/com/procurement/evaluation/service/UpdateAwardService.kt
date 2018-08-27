@@ -5,12 +5,11 @@ import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.AwardUpdate
-import com.procurement.evaluation.model.dto.AwardsResponseDto
 import com.procurement.evaluation.model.dto.UpdateAwardRequestDto
 import com.procurement.evaluation.model.dto.UpdateAwardResponseDto
+import com.procurement.evaluation.model.dto.awardByBid.AwardByBid
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidResponseDto
-import com.procurement.evaluation.model.dto.awardByBid.AwardByBid
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
 import com.procurement.evaluation.model.entity.AwardEntity
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
 
-interface ProcessService {
+interface UpdateAwardService {
 
     fun updateAndGetNextAward(cpId: String,
                               stage: String,
@@ -30,12 +29,6 @@ interface ProcessService {
                               dateTime: LocalDateTime,
                               dto: UpdateAwardRequestDto): ResponseDto
 
-    fun endAwardPeriod(cpId: String,
-                       stage: String,
-                       country: String,
-                       pmd: String,
-                       endPeriod: LocalDateTime): ResponseDto
-
     fun awardByBid(cpId: String,
                    stage: String,
                    token: String,
@@ -43,13 +36,12 @@ interface ProcessService {
                    owner: String,
                    dateTime: LocalDateTime,
                    dto: AwardByBidRequestDto): ResponseDto
-
 }
 
 @Service
-class ProcessServiceImpl(private val awardDao: AwardDao,
-                         private val periodDao: PeriodDao,
-                         private val periodService: PeriodService) : ProcessService {
+class UpdateAwardServiceImpl(private val awardDao: AwardDao,
+                             private val periodDao: PeriodDao,
+                             private val periodService: PeriodService) : UpdateAwardService {
 
     override fun updateAndGetNextAward(cpId: String,
                                        stage: String,
@@ -69,11 +61,11 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                 if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
                 updateActiveAward(award, awardDto, dateTime)
                 val newEntity = getEntity(
-                    award = award,
-                    cpId = cpId,
-                    token = entity.token,
-                    stage = stage,
-                    owner = owner)
+                        award = award,
+                        cpId = cpId,
+                        token = entity.token,
+                        stage = stage,
+                        owner = owner)
                 awardDao.save(newEntity)
                 return getResponseDtoForActiveAward(award)
             }
@@ -84,19 +76,6 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
             }
             else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
         }
-    }
-
-    override fun endAwardPeriod(cpId: String,
-                                stage: String,
-                                country: String,
-                                pmd: String,
-                                endPeriod: LocalDateTime): ResponseDto {
-        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endPeriod)
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-        val awards = getAwardsFromEntities(awardEntities)
-        setAwardsStatusFromStatusDetails(awards, endPeriod)
-        val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
-        return ResponseDto(true, null, AwardsResponseDto(awards, awardPeriod, unsuccessfulLots))
     }
 
     override fun awardByBid(cpId: String,
@@ -110,7 +89,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
 
         val award = toObject(Award::class.java, awardEntity.jsonData)
-        val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId,stage).awardCriteria)
+        val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
 
         val relatedLots = award.relatedLots
         val documents = dto.awards.documents
@@ -122,7 +101,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         verifyAwardByBidDocType(dto.awards.documents)
 
         val awardsByRelatedLots = getAwardsByRelatedLot(cpId, stage, relatedLots)
-        val rangedAwards = sortAwardsByCriteria(awardsByRelatedLots,awardCriteria)
+        val rangedAwards = sortAwardsByCriteria(awardsByRelatedLots, awardCriteria)
 
         var awardBidId: String? = null
         var awardStatusDetails: String? = null
@@ -165,11 +144,11 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                         awardConsideration.date = dateTime
                         awardsResponse.add(awardConsideration)
                         val newEntity = getEntity(
-                            award = awardConsideration,
-                            cpId = cpId,
-                            token = awardEntity.token,
-                            stage = stage,
-                            owner = owner)
+                                award = awardConsideration,
+                                cpId = cpId,
+                                token = awardEntity.token,
+                                stage = stage,
+                                owner = owner)
                         awardDao.save(newEntity)
                     }
 
@@ -203,11 +182,11 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                     awardsResponse.add(nextAwardAfterConsideration)
 
                     val newEntity = getEntity(
-                        award = nextAwardAfterConsideration,
-                        cpId = awardEntity.cpId,
-                        token = awardEntity.token,
-                        stage = awardEntity.stage,
-                        owner = awardEntity.owner)
+                            award = nextAwardAfterConsideration,
+                            cpId = awardEntity.cpId,
+                            token = awardEntity.token,
+                            stage = awardEntity.stage,
+                            owner = awardEntity.owner)
                     awardDao.save(newEntity)
                 } else {
                     award.statusDetails = Status.UNSUCCESSFUL
@@ -241,11 +220,11 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                         awardsResponse.add(firsEmptyAward)
 
                         val newEntity = getEntity(
-                            award = firsEmptyAward,
-                            cpId = awardEntity.cpId,
-                            token = awardEntity.token,
-                            stage = awardEntity.stage,
-                            owner = awardEntity.owner)
+                                award = firsEmptyAward,
+                                cpId = awardEntity.cpId,
+                                token = awardEntity.token,
+                                stage = awardEntity.stage,
+                                owner = awardEntity.owner)
                         awardDao.save(newEntity)
                     }
 
@@ -267,14 +246,14 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         awardsResponse.add(award)
 
         val newEntity = getEntity(
-            award = award,
-            cpId = awardEntity.cpId,
-            token = awardEntity.token,
-            stage = awardEntity.stage,
-            owner = awardEntity.owner)
+                award = award,
+                cpId = awardEntity.cpId,
+                token = awardEntity.token,
+                stage = awardEntity.stage,
+                owner = awardEntity.owner)
         awardDao.save(newEntity)
 
-        return ResponseDto(true, null, AwardByBidResponseDto(
+        return ResponseDto(data = AwardByBidResponseDto(
                 awardsResponse,
                 awardStatusDetails,
                 awardBidId,
@@ -308,7 +287,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
     private fun getNextAwardAfterConsideration(rangedAwards: List<Award>): Award? {
         for (i in 0 until rangedAwards.size - 1) {
             if (rangedAwards[i].statusDetails == Status.CONSIDERATION
-                && rangedAwards[i + 1].statusDetails == Status.EMPTY) {
+                    && rangedAwards[i + 1].statusDetails == Status.EMPTY) {
                 return rangedAwards[i + 1]
             }
         }
@@ -396,8 +375,8 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                                         token: String,
                                         awardId: String): ResponseDto {
         val updatableAward = awardsFromEntities.keys.asSequence()
-            .firstOrNull { it.id == awardId }
-            ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
+                .firstOrNull { it.id == awardId }
+                ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
 
         val updatedAwardEntity = awardsFromEntities[updatableAward] ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
         if (updatedAwardEntity.token.toString() != token) throw ErrorException(ErrorType.INVALID_TOKEN)
@@ -413,15 +392,15 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
 
         // next Award
         val awardsByLot = awardsFromEntities.keys.asSequence()
-            .filter { it.relatedLots == updatableAward.relatedLots }.toList()
+                .filter { it.relatedLots == updatableAward.relatedLots }.toList()
         val sortedAwardsByLot = awardsByLot.asSequence().sortedWith(SortedByValue).toList()
         var nextAwardByLot: Award? = null
         if (sortedAwardsByLot.size > 1) {
             nextAwardByLot = sortedAwardsByLot.asSequence()
-                .firstOrNull { it.id != updatableAward.id && it.statusDetails != Status.UNSUCCESSFUL }
+                    .firstOrNull { it.id != updatableAward.id && it.statusDetails != Status.UNSUCCESSFUL }
             if (nextAwardByLot != null) {
                 val nextAwardByLotEntity = awardsFromEntities[nextAwardByLot]
-                    ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
+                        ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
                 nextAwardByLot.statusDetails = Status.CONSIDERATION
                 nextAwardByLot.date = dateTime
                 nextAwardByLotEntity.statusDetails = nextAwardByLot.statusDetails.value()
@@ -429,7 +408,7 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                 awardDao.save(nextAwardByLotEntity)
             }
         }
-        return ResponseDto(true, null, UpdateAwardResponseDto(updatableAward, nextAwardByLot))
+        return ResponseDto(data = UpdateAwardResponseDto(updatableAward, nextAwardByLot))
     }
 
     private fun updateActiveAward(award: Award, awardDto: AwardUpdate, dateTime: LocalDateTime) {
@@ -440,42 +419,17 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
         award.statusDetails = Status.ACTIVE
     }
 
-    private fun getUnsuccessfulLotsFromAwards(awards: List<Award>): List<Lot> {
-        val successfulLots = awards.asSequence()
-            .filter { it.status == Status.ACTIVE }
-            .flatMap { it.relatedLots.asSequence() }
-            .toList()
-        val unsuccessfulLots = awards.asSequence()
-            .filter { it.status == Status.UNSUCCESSFUL }
-            .flatMap { it.relatedLots.asSequence() }
-            .filter { lot -> !successfulLots.contains(lot) }.toHashSet()
-        return unsuccessfulLots.asSequence().map { Lot(it) }.toList()
-    }
-
     private fun getAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
         return awardEntities.asSequence().map { toObject(Award::class.java, it.jsonData) }.toList()
     }
 
-    private fun setAwardsStatusFromStatusDetails(awards: List<Award>, endPeriod: LocalDateTime) {
-        awards.forEach { award ->
-            if (award.statusDetails != Status.EMPTY) {
-                award.date = endPeriod
-                award.status = award.statusDetails
-                award.statusDetails = Status.EMPTY
-            }
-            if (award.status == Status.PENDING && award.statusDetails == Status.EMPTY) {
-                award.date = endPeriod
-                award.status = Status.UNSUCCESSFUL
-            }
-        }
-    }
 
     private fun getAwardToEntityToMap(awardEntities: List<AwardEntity>): Map<Award, AwardEntity> {
         return awardEntities.map { toObject(Award::class.java, it.jsonData) to it }.toMap()
     }
 
     private fun getResponseDtoForActiveAward(award: Award): ResponseDto {
-        return ResponseDto(true, null, UpdateAwardResponseDto(award = award, nextAward = null))
+        return ResponseDto(data = UpdateAwardResponseDto(award = award, nextAward = null))
     }
 
     companion object SortedByValue : Comparator<Award> {
@@ -491,12 +445,12 @@ class ProcessServiceImpl(private val awardDao: AwardDao,
                           owner: String): AwardEntity {
         val status = award.status ?: throw ErrorException(ErrorType.INVALID_STATUS)
         return AwardEntity(
-            cpId = cpId,
-            stage = stage,
-            token = token,
-            status = status.value(),
-            statusDetails = award.statusDetails.value(),
-            owner = owner,
-            jsonData = toJson(award))
+                cpId = cpId,
+                stage = stage,
+                token = token,
+                status = status.value(),
+                statusDetails = award.statusDetails.value(),
+                owner = owner,
+                jsonData = toJson(award))
     }
 }

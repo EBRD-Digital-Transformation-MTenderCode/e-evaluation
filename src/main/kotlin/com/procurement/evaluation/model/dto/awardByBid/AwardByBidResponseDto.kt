@@ -6,14 +6,14 @@ import com.procurement.evaluation.model.dto.ocds.Award
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AwardByBidResponseDto(
 
-    val awards: List<Award>,
+        val awards: List<Award>,
 
-    val awardStatusDetails: String?,
+        val awardStatusDetails: String?,
 
-    val bidId: String?,
+        val bidId: String?,
 
-    val lotId: String?,
+        val lotId: String?,
 
-    val lotAwarded: Boolean?
+        val lotAwarded: Boolean?
 
 )

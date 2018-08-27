@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
 
-interface AwardService {
+interface CreateAwardService {
 
     fun createAwards(cpId: String,
                      stage: String,
@@ -35,10 +35,10 @@ interface AwardService {
 }
 
 @Service
-class AwardServiceImpl(private val rulesService: RulesService,
-                       private val periodService: PeriodService,
-                       private val awardDao: AwardDao,
-                       private val generationService: GenerationService) : AwardService {
+class CreateAwardServiceImpl(private val rulesService: RulesService,
+                             private val periodService: PeriodService,
+                             private val awardDao: AwardDao,
+                             private val generationService: GenerationService) : CreateAwardService {
 
     override fun createAwards(cpId: String,
                               stage: String,
@@ -69,7 +69,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
         }
         saveAwards(awards, cpId, owner, stage)
         val lotsDtoList = getLotsDto(unsuccessfulLotsSet)
-        return ResponseDto(true, null, SelectionsResponseDto(awardPeriod, awards, lotsDtoList))
+        return ResponseDto(data = SelectionsResponseDto(awardPeriod, awards, lotsDtoList))
     }
 
     override fun getAwards(cpId: String,
@@ -78,7 +78,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
                            pmd: String): ResponseDto {
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         val activeAwards = getPendingAwardsFromEntities(awardEntities)
-        return ResponseDto(true, null, AwardsResponseDto(activeAwards, null, null))
+        return ResponseDto(data = AwardsResponseDto(activeAwards, null, null))
     }
 
     private fun getPendingAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
@@ -130,7 +130,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
         return successfulBids.asSequence().map { bid ->
             Award(
                     token = null,
-                    id = generationService.generateTimeBasedUUID().toString(),
+                    id = generationService.getTimeBasedUUID(),
                     date = localNowUTC(),
                     description = "",
                     status = Status.PENDING,
@@ -147,7 +147,7 @@ class AwardServiceImpl(private val rulesService: RulesService,
         return unSuccessfulLots.asSequence().map { lot ->
             Award(
                     token = null,
-                    id = generationService.generateTimeBasedUUID().toString(),
+                    id = generationService.getTimeBasedUUID(),
                     date = localNowUTC(),
                     description = "",
                     status = Status.UNSUCCESSFUL,

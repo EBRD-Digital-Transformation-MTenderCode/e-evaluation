@@ -10,6 +10,10 @@ interface GenerationService {
     fun generateRandomUUID(): UUID
 
     fun generateTimeBasedUUID(): UUID
+
+    fun getRandomUUID(): String
+
+    fun getTimeBasedUUID(): String
 }
 
 @Service
@@ -21,5 +25,13 @@ class GenerationServiceImpl : GenerationService {
 
     override fun generateTimeBasedUUID(): UUID {
         return UUIDs.timeBased()
+    }
+
+    override fun getRandomUUID(): String {
+        return generateRandomUUID().toString()
+    }
+
+    override fun getTimeBasedUUID(): String {
+        return generateTimeBasedUUID().toString()
     }
 }

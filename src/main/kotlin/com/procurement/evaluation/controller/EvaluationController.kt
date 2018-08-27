@@ -4,8 +4,9 @@ import com.procurement.evaluation.model.dto.UpdateAwardRequestDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto
-import com.procurement.evaluation.service.AwardService
-import com.procurement.evaluation.service.ProcessService
+import com.procurement.evaluation.service.CreateAwardService
+import com.procurement.evaluation.service.StatusService
+import com.procurement.evaluation.service.UpdateAwardService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,8 +18,9 @@ import javax.validation.Valid
 @Validated
 @RestController
 @RequestMapping("/evaluation")
-class EvaluationController(private val processService: ProcessService,
-                           private val awardService: AwardService) {
+class EvaluationController(private val createAwardService: CreateAwardService,
+                           private val updateAwardService: UpdateAwardService,
+                           private val statusService: StatusService) {
 
     @PostMapping
     fun createAwards(@RequestParam(value = "cpid") cpId: String,
@@ -31,7 +33,7 @@ class EvaluationController(private val processService: ProcessService,
                      @RequestParam(value = "date") dateTime: LocalDateTime,
                      @Valid @RequestBody data: SelectionsRequestDto): ResponseEntity<ResponseDto> {
         return ResponseEntity(
-                awardService.createAwards(
+                createAwardService.createAwards(
                         cpId = cpId,
                         stage = stage,
                         owner = owner,
@@ -49,7 +51,7 @@ class EvaluationController(private val processService: ProcessService,
                   @RequestParam("country") country: String,
                   @RequestParam("pmd") pmd: String): ResponseEntity<ResponseDto> {
         return ResponseEntity(
-                awardService.getAwards(
+                createAwardService.getAwards(
                         cpId = cpId,
                         stage = stage,
                         country = country,
@@ -67,7 +69,7 @@ class EvaluationController(private val processService: ProcessService,
                     @RequestParam(value = "date") dateTime: LocalDateTime,
                     @Valid @RequestBody data: UpdateAwardRequestDto): ResponseEntity<ResponseDto> {
         return ResponseEntity(
-                processService.updateAndGetNextAward(
+                updateAwardService.updateAndGetNextAward(
                         cpId = cpId,
                         stage = stage,
                         token = token,
@@ -78,6 +80,29 @@ class EvaluationController(private val processService: ProcessService,
                 HttpStatus.OK)
     }
 
+    @PostMapping("/awardByBid")
+    fun awardByBid(@RequestParam("token") token: String,
+                   @RequestParam("owner") owner: String,
+                   @RequestParam("cpid") cpId: String,
+                   @RequestParam("stage") stage: String,
+                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                   @RequestParam(value = "date") dateTime: LocalDateTime,
+                   @RequestParam("awardId") awardId: String,
+                   @Valid @RequestBody data: AwardByBidRequestDto): ResponseEntity<ResponseDto> {
+        return ResponseEntity(
+                updateAwardService.awardByBid(
+                        cpId = cpId,
+                        stage = stage,
+                        token = token,
+                        awardId = awardId,
+                        owner = owner,
+                        dateTime = dateTime,
+                        dto = data
+                ), HttpStatus.OK
+        )
+
+    }
+
     @PostMapping("/endAwardPeriod")
     fun endAwardPeriod(@RequestParam("cpid") cpId: String,
                        @RequestParam("stage") stage: String,
@@ -86,7 +111,7 @@ class EvaluationController(private val processService: ProcessService,
                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                        @RequestParam("endPeriod") endPeriod: LocalDateTime): ResponseEntity<ResponseDto> {
         return ResponseEntity(
-                processService.endAwardPeriod(
+                statusService.endAwardPeriod(
                         cpId = cpId,
                         stage = stage,
                         country = country,
@@ -96,26 +121,29 @@ class EvaluationController(private val processService: ProcessService,
     }
 
 
-    @PostMapping("/awardByBid")
-    fun awardByBid(@RequestParam("token") token: String,
-                   @RequestParam("owner") owner: String,
-                   @RequestParam("cpid") cpId: String,
-                   @RequestParam("stage") stage: String,
-                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                   @RequestParam(value = "date") dateTime: LocalDateTime,
-                   @RequestParam("awardId")awardId: String,
-                   @Valid @RequestBody data: AwardByBidRequestDto):ResponseEntity<ResponseDto>{
+    @PostMapping("/prepareCancellation")
+    fun prepareCancellation(@RequestParam("cpid") cpId: String,
+                            @RequestParam("stage") stage: String,
+                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                            @RequestParam("date") dateTime: LocalDateTime): ResponseEntity<ResponseDto> {
         return ResponseEntity(
-            processService.awardByBid(
-                cpId = cpId,
-                stage = stage,
-                token = token,
-                awardId = awardId,
-                owner = owner,
-                dateTime = dateTime,
-                dto = data
-            ),HttpStatus.OK
-        )
+                statusService.prepareCancellation(
+                        cpId = cpId,
+                        stage = stage,
+                        dateTime = dateTime),
+                HttpStatus.OK)
+    }
 
+    @PostMapping("/awardsCancellation")
+    fun awardsCancellation(@RequestParam("cpid") cpId: String,
+                           @RequestParam("stage") stage: String,
+                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                           @RequestParam("date") dateTime: LocalDateTime): ResponseEntity<ResponseDto> {
+        return ResponseEntity(
+                statusService.awardsCancellation(
+                        cpId = cpId,
+                        stage = stage,
+                        dateTime = dateTime),
+                HttpStatus.OK)
     }
 }
