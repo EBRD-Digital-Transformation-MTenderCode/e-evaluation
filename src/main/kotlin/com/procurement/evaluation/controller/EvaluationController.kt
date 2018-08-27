@@ -86,7 +86,7 @@ class EvaluationController(private val createAwardService: CreateAwardService,
                    @RequestParam("cpid") cpId: String,
                    @RequestParam("stage") stage: String,
                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                   @RequestParam(value = "date") dateTime: LocalDateTime,
+                   @RequestParam("date") dateTime: LocalDateTime,
                    @RequestParam("awardId") awardId: String,
                    @Valid @RequestBody data: AwardByBidRequestDto): ResponseEntity<ResponseDto> {
         return ResponseEntity(
