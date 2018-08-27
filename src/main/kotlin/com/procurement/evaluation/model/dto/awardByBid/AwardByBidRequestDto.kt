@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull
 data class AwardByBidRequestDto @JsonCreator constructor(
 
         @field:Valid @field:NotNull
-        val awards: AwardByBid
+        val award: AwardByBid
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

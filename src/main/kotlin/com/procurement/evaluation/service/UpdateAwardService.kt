@@ -92,13 +92,13 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
 
         val relatedLots = award.relatedLots
-        val documents = dto.awards.documents
+        val documents = dto.award.documents
 
         verifyDocumentsRelatedLots(relatedLots, documents)
-        verifyAwardByBidStatusDetails(dto.awards.statusDetails)
+        verifyAwardByBidStatusDetails(dto.award.statusDetails)
         if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
         if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
-        verifyAwardByBidDocType(dto.awards.documents)
+        verifyAwardByBidDocType(dto.award.documents)
 
         val awardsByRelatedLots = getAwardsByRelatedLot(cpId, stage, relatedLots)
         val rangedAwards = sortAwardsByCriteria(awardsByRelatedLots, awardCriteria)
@@ -110,7 +110,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         val awardsResponse = arrayListOf<Award>()
 
 
-        if (dto.awards.statusDetails == Status.ACTIVE) {
+        if (dto.award.statusDetails == Status.ACTIVE) {
 
             for (award in awardsByRelatedLots) {
                 if (award.statusDetails == Status.ACTIVE) throw ErrorException(ErrorType.ALREADY_HAVE_ACTIVE_AWARDS)
@@ -118,7 +118,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
 
             if (award.statusDetails == Status.CONSIDERATION) {
                 award.statusDetails = Status.ACTIVE
-                updateAward(award, dto.awards, dateTime)
+                updateAward(award, dto.award, dateTime)
                 if (award.relatedBid != null) {
                     awardBidId = award.relatedBid
                     awardStatusDetails = award.statusDetails.value()
@@ -130,7 +130,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
             } else if (award.statusDetails == Status.UNSUCCESSFUL) {
                 if (isAlreadySavedAwardsFromStatus(awardsByRelatedLots, Status.CONSIDERATION)) {
                     award.statusDetails = Status.ACTIVE
-                    updateAward(award, dto.awards, dateTime)
+                    updateAward(award, dto.award, dateTime)
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
                         awardStatusDetails = award.statusDetails.value()
@@ -154,7 +154,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
 
                 } else {
                     award.statusDetails = Status.ACTIVE
-                    updateAward(award, dto.awards, dateTime)
+                    updateAward(award, dto.award, dateTime)
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
                         awardStatusDetails = award.statusDetails.value()
@@ -166,12 +166,12 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                 throw ErrorException(ErrorType.INVALID_STATUS_DETAILS_SAVED_AWARD)
             }
 
-        } else if (dto.awards.statusDetails == Status.UNSUCCESSFUL) {
+        } else if (dto.award.statusDetails == Status.UNSUCCESSFUL) {
             if (award.statusDetails == Status.CONSIDERATION) {
                 val nextAwardAfterConsideration = getNextAwardAfterConsideration(rangedAwards)
                 if (nextAwardAfterConsideration != null) {
                     award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.awards, dateTime)
+                    updateAward(award, dto.award, dateTime)
 
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
@@ -190,7 +190,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                     awardDao.save(newEntity)
                 } else {
                     award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.awards, dateTime)
+                    updateAward(award, dto.award, dateTime)
 
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
@@ -204,7 +204,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
             } else if (award.statusDetails == Status.ACTIVE) {
                 if (isAlreadySavedAwardsFromStatus(awardsByRelatedLots, Status.EMPTY)) {
                     award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.awards, dateTime)
+                    updateAward(award, dto.award, dateTime)
 
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
@@ -230,7 +230,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
 
                 } else {
                     award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.awards, dateTime)
+                    updateAward(award, dto.award, dateTime)
                     if (award.relatedBid != null) {
                         awardBidId = award.relatedBid
                         awardStatusDetails = award.statusDetails.value()
