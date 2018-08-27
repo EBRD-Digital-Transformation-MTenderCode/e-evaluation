@@ -98,9 +98,7 @@ class EvaluationController(private val createAwardService: CreateAwardService,
                         owner = owner,
                         dateTime = dateTime,
                         dto = data
-                ), HttpStatus.OK
-        )
-
+                ), HttpStatus.OK)
     }
 
     @PostMapping("/endAwardPeriod")
