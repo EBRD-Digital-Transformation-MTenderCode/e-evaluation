@@ -11,7 +11,6 @@ data class CancellationResponseDto(
 
 )
 
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AwardCancellation @JsonCreator constructor(
 
