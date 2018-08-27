@@ -133,7 +133,7 @@ class StatusServiceImpl(private val periodService: PeriodService,
                 statusDetails = award.statusDetails))
     }
 
-    private fun getUpdatedAwardEntities(awardEntities:  List<AwardEntity>, awards: List<Award>): List<AwardEntity> {
+    private fun getUpdatedAwardEntities(awardEntities: List<AwardEntity>, awards: List<Award>): List<AwardEntity> {
         val entities = ArrayList<AwardEntity>()
         awardEntities.asSequence().forEach { entity ->
             awards.asSequence()
@@ -154,7 +154,7 @@ class StatusServiceImpl(private val periodService: PeriodService,
                           cpId: String,
                           stage: String,
                           owner: String,
-                          token: UUID ): AwardEntity {
+                          token: UUID): AwardEntity {
         val status = award.status ?: throw ErrorException(ErrorType.INVALID_STATUS)
         return AwardEntity(
                 cpId = cpId,
