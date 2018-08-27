@@ -1,6 +1,5 @@
 package com.procurement.evaluation.controller
 
-import com.procurement.evaluation.model.dto.UpdateAwardRequestDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto
@@ -59,7 +58,7 @@ class EvaluationController(private val createAwardService: CreateAwardService,
                 HttpStatus.OK)
     }
 
-   @PostMapping("/awardByBid")
+    @PostMapping("/awardByBid")
     fun awardByBid(@RequestParam("token") token: String,
                    @RequestParam("owner") owner: String,
                    @RequestParam("cpid") cpId: String,
