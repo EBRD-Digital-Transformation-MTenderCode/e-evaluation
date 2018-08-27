@@ -59,28 +59,7 @@ class EvaluationController(private val createAwardService: CreateAwardService,
                 HttpStatus.OK)
     }
 
-    @PutMapping
-    fun updateAward(@RequestParam("cpid") cpId: String,
-                    @RequestParam("stage") stage: String,
-                    @RequestParam("token") token: String,
-                    @RequestParam("awardId") awardId: String,
-                    @RequestParam("owner") owner: String,
-                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                    @RequestParam(value = "date") dateTime: LocalDateTime,
-                    @Valid @RequestBody data: UpdateAwardRequestDto): ResponseEntity<ResponseDto> {
-        return ResponseEntity(
-                updateAwardService.updateAndGetNextAward(
-                        cpId = cpId,
-                        stage = stage,
-                        token = token,
-                        awardId = awardId,
-                        owner = owner,
-                        dateTime = dateTime,
-                        dto = data),
-                HttpStatus.OK)
-    }
-
-    @PostMapping("/awardByBid")
+   @PostMapping("/awardByBid")
     fun awardByBid(@RequestParam("token") token: String,
                    @RequestParam("owner") owner: String,
                    @RequestParam("cpid") cpId: String,

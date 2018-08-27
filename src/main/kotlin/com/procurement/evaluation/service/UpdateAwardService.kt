@@ -4,9 +4,6 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.model.dto.AwardUpdate
-import com.procurement.evaluation.model.dto.UpdateAwardRequestDto
-import com.procurement.evaluation.model.dto.UpdateAwardResponseDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBid
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidResponseDto
@@ -21,14 +18,6 @@ import java.util.*
 
 interface UpdateAwardService {
 
-    fun updateAndGetNextAward(cpId: String,
-                              stage: String,
-                              token: String,
-                              awardId: String,
-                              owner: String,
-                              dateTime: LocalDateTime,
-                              dto: UpdateAwardRequestDto): ResponseDto
-
     fun awardByBid(cpId: String,
                    stage: String,
                    token: String,
@@ -40,43 +29,7 @@ interface UpdateAwardService {
 
 @Service
 class UpdateAwardServiceImpl(private val awardDao: AwardDao,
-                             private val periodDao: PeriodDao,
-                             private val periodService: PeriodService) : UpdateAwardService {
-
-    override fun updateAndGetNextAward(cpId: String,
-                                       stage: String,
-                                       token: String,
-                                       awardId: String,
-                                       owner: String,
-                                       dateTime: LocalDateTime,
-                                       dto: UpdateAwardRequestDto): ResponseDto {
-        periodService.checkPeriod(cpId, stage)
-        val awardDto = dto.award
-        when (awardDto.statusDetails) {
-            Status.ACTIVE -> {
-                val entity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
-                if (entity.token.toString() != token) throw ErrorException(ErrorType.INVALID_TOKEN)
-                if (entity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
-                val award = toObject(Award::class.java, entity.jsonData)
-                if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
-                updateActiveAward(award, awardDto, dateTime)
-                val newEntity = getEntity(
-                        award = award,
-                        cpId = cpId,
-                        token = entity.token,
-                        stage = stage,
-                        owner = owner)
-                awardDao.save(newEntity)
-                return getResponseDtoForActiveAward(award)
-            }
-            Status.UNSUCCESSFUL -> {
-                val entities = awardDao.findAllByCpIdAndStage(cpId, stage)
-                val awardToEntityToMap = getAwardToEntityToMap(entities)
-                return updateUnsuccessfulAward(awardDto, awardToEntityToMap, dateTime, token, awardId)
-            }
-            else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
-        }
-    }
+                             private val periodDao: PeriodDao) : UpdateAwardService {
 
     override fun awardByBid(cpId: String,
                             stage: String,
@@ -87,181 +40,133 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                             dto: AwardByBidRequestDto): ResponseDto {
 
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
-
-        val award = toObject(Award::class.java, awardEntity.jsonData)
+        if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
+        val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
+        validation(awardByBid, awardId, dto)
         val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
 
-        val relatedLots = award.relatedLots
-        val documents = dto.award.documents
+        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
+        val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
+        awardEntities.forEach { entity ->
+            val awardFromEntity = toObject(Award::class.java, entity.jsonData)
+            if (awardFromEntity.relatedLots == awardByBid.relatedLots) {
+                awardIdToEntityMap[awardFromEntity.id] = entity
+                awardFromEntitiesSet.add(awardFromEntity)
+            }
+        }
+        val rangedAwards = sortAwardsByCriteria(awardFromEntitiesSet, awardCriteria)
 
-        verifyDocumentsRelatedLots(relatedLots, documents)
-        verifyAwardByBidStatusDetails(dto.award.statusDetails)
-        if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
-        if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
-        verifyAwardByBidDocType(dto.award.documents)
-
-        val awardsByRelatedLots = getAwardsByRelatedLot(cpId, stage, relatedLots)
-        val rangedAwards = sortAwardsByCriteria(awardsByRelatedLots, awardCriteria)
-
-        var awardBidId: String? = null
-        var awardStatusDetails: String? = null
-        var awardLotId: String? = null
+        var bidId: String? = null
+        var statusDetails: String? = null
+        var lotId: String? = null
         var lotAwarded: Boolean? = null
-        val awardsResponse = arrayListOf<Award>()
+        var nextAwardForUpdate: Award? = null
 
-
+        /*********************ACTIVE*********************/
         if (dto.award.statusDetails == Status.ACTIVE) {
-
-            for (award in awardsByRelatedLots) {
+            /*check awards statuses*/
+            for (award in rangedAwards) {
                 if (award.statusDetails == Status.ACTIVE) throw ErrorException(ErrorType.ALREADY_HAVE_ACTIVE_AWARDS)
             }
-
-            if (award.statusDetails == Status.CONSIDERATION) {
-                award.statusDetails = Status.ACTIVE
-                updateAward(award, dto.award, dateTime)
-                if (award.relatedBid != null) {
-                    awardBidId = award.relatedBid
-                    awardStatusDetails = award.statusDetails.value()
-                }
-
-                lotAwarded = true
-                awardLotId = award.relatedLots[0]
-
-            } else if (award.statusDetails == Status.UNSUCCESSFUL) {
-                if (isAlreadySavedAwardsFromStatus(awardsByRelatedLots, Status.CONSIDERATION)) {
-                    award.statusDetails = Status.ACTIVE
-                    updateAward(award, dto.award, dateTime)
-                    if (award.relatedBid != null) {
-                        awardBidId = award.relatedBid
-                        awardStatusDetails = award.statusDetails.value()
-                    }
+            when (awardByBid.statusDetails) {
+                Status.CONSIDERATION -> {
+                    awardByBid.statusDetails = Status.ACTIVE
+                    updateAward(awardByBid, dto.award, dateTime)
+                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
+                    bidId = awardByBid.relatedBid
+                    statusDetails = awardByBid.statusDetails.value()
                     lotAwarded = true
-                    awardLotId = award.relatedLots[0]
-
-                    val awardsConsideration = getAlreadySavedAwardsFromStatus(awardsByRelatedLots, Status.CONSIDERATION)
-                    for (awardConsideration in awardsConsideration) {
-                        awardConsideration.statusDetails = Status.EMPTY
-                        awardConsideration.date = dateTime
-                        awardsResponse.add(awardConsideration)
-                        val newEntity = getEntity(
-                                award = awardConsideration,
-                                cpId = cpId,
-                                token = awardEntity.token,
-                                stage = stage,
-                                owner = owner)
-                        awardDao.save(newEntity)
-                    }
-
-                } else {
-                    award.statusDetails = Status.ACTIVE
-                    updateAward(award, dto.award, dateTime)
-                    if (award.relatedBid != null) {
-                        awardBidId = award.relatedBid
-                        awardStatusDetails = award.statusDetails.value()
-
+                    lotId = awardByBid.relatedLots[0]
+                }
+                Status.UNSUCCESSFUL -> {
+                    awardByBid.statusDetails = Status.ACTIVE
+                    updateAward(awardByBid, dto.award, dateTime)
+                    bidId = awardByBid.relatedBid
+                    statusDetails = awardByBid.statusDetails.value()
+                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
+                    /*find next in status CONSIDERATION*/
+                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == Status.CONSIDERATION }
+                    nextAwardForUpdate?.let {
+                        it.statusDetails = Status.EMPTY
+                        it.date = dateTime
+                        lotAwarded = true
+                        lotId = it.relatedLots[0]
+                        saveAward(it, awardIdToEntityMap[it.id])
                     }
                 }
-
-            } else {
-                throw ErrorException(ErrorType.INVALID_STATUS_DETAILS_SAVED_AWARD)
+                else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS_SAVED_AWARD)
             }
 
+            /*********************UNSUCCESSFUL*********************/
         } else if (dto.award.statusDetails == Status.UNSUCCESSFUL) {
-            if (award.statusDetails == Status.CONSIDERATION) {
-                val nextAwardAfterConsideration = getNextAwardAfterConsideration(rangedAwards)
-                if (nextAwardAfterConsideration != null) {
-                    award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.award, dateTime)
-
-                    if (award.relatedBid != null) {
-                        awardBidId = award.relatedBid
-                        awardStatusDetails = award.statusDetails.value()
+            when (awardByBid.statusDetails) {
+                Status.CONSIDERATION -> {
+                    awardByBid.statusDetails = Status.UNSUCCESSFUL
+                    updateAward(awardByBid, dto.award, dateTime)
+                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
+                    bidId = awardByBid.relatedBid
+                    statusDetails = awardByBid.statusDetails.value()
+                    /*find next in status EMPTY*/
+                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == Status.EMPTY }
+                    if (nextAwardForUpdate != null) {
+                        nextAwardForUpdate.statusDetails = Status.CONSIDERATION
+                        nextAwardForUpdate.date = dateTime
+                        saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
+                    } else {
+                        lotAwarded = true
+                        lotId = awardByBid.relatedLots[0]
                     }
-                    nextAwardAfterConsideration.statusDetails = Status.CONSIDERATION
-                    nextAwardAfterConsideration.date = dateTime
-                    awardsResponse.add(nextAwardAfterConsideration)
-
-                    val newEntity = getEntity(
-                            award = nextAwardAfterConsideration,
-                            cpId = awardEntity.cpId,
-                            token = awardEntity.token,
-                            stage = awardEntity.stage,
-                            owner = awardEntity.owner)
-                    awardDao.save(newEntity)
-                } else {
-                    award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.award, dateTime)
-
-                    if (award.relatedBid != null) {
-                        awardBidId = award.relatedBid
-                        awardStatusDetails = award.statusDetails.value()
-                    }
-                    lotAwarded = true
-                    awardLotId = award.relatedLots.get(0)
                 }
-
-
-            } else if (award.statusDetails == Status.ACTIVE) {
-                if (isAlreadySavedAwardsFromStatus(awardsByRelatedLots, Status.EMPTY)) {
-                    award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.award, dateTime)
-
-                    if (award.relatedBid != null) {
-                        awardBidId = award.relatedBid
-                        awardStatusDetails = award.statusDetails.value()
+                Status.ACTIVE -> {
+                    awardByBid.statusDetails = Status.UNSUCCESSFUL
+                    updateAward(awardByBid, dto.award, dateTime)
+                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
+                    bidId = awardByBid.relatedBid
+                    statusDetails = awardByBid.statusDetails.value()
+                    /*find next in status EMPTY*/
+                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == Status.EMPTY }
+                    if (nextAwardForUpdate != null) {
+                        nextAwardForUpdate.statusDetails = Status.CONSIDERATION
+                        nextAwardForUpdate.date = dateTime
+                        saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
+                        lotAwarded = false
+                        lotId = awardByBid.relatedLots[0]
                     }
-                    lotAwarded = false
-                    awardLotId = award.relatedLots.get(0)
-
-                    val firsEmptyAward = getNextAwardAfterConsideration(rangedAwards)
-                    if (firsEmptyAward != null) {
-                        firsEmptyAward.statusDetails = Status.CONSIDERATION
-                        firsEmptyAward.date = dateTime
-                        awardsResponse.add(firsEmptyAward)
-
-                        val newEntity = getEntity(
-                                award = firsEmptyAward,
-                                cpId = awardEntity.cpId,
-                                token = awardEntity.token,
-                                stage = awardEntity.stage,
-                                owner = awardEntity.owner)
-                        awardDao.save(newEntity)
-                    }
-
-                } else {
-                    award.statusDetails = Status.UNSUCCESSFUL
-                    updateAward(award, dto.award, dateTime)
-                    if (award.relatedBid != null) {
-                        awardBidId = award.relatedBid
-                        awardStatusDetails = award.statusDetails.value()
-                    }
-
                 }
-
-            } else {
-                throw ErrorException(ErrorType.INVALID_STATUS_DETAILS_SAVED_AWARD)
+                else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS_SAVED_AWARD)
             }
-
         }
-        awardsResponse.add(award)
-
-        val newEntity = getEntity(
-                award = award,
-                cpId = awardEntity.cpId,
-                token = awardEntity.token,
-                stage = awardEntity.stage,
-                owner = awardEntity.owner)
-        awardDao.save(newEntity)
 
         return ResponseDto(data = AwardByBidResponseDto(
-                awardsResponse,
-                awardStatusDetails,
-                awardBidId,
-                awardLotId,
-                lotAwarded))
+                award = awardByBid,
+                nextAwardForUpdate = nextAwardForUpdate,
+                awardStatusDetails = statusDetails,
+                bidId = bidId,
+                lotId = lotId,
+                lotAwarded = lotAwarded)
+        )
     }
 
-    private fun sortAwardsByCriteria(awards: List<Award>, awardCriteria: AwardCriteria): List<Award> {
+    private fun saveAward(award: Award, awardEntity: AwardEntity?) {
+        if (awardEntity != null) {
+            val newEntity = awardEntity.copy(
+                    status = award.status!!.value(),
+                    statusDetails = award.statusDetails.value(),
+                    jsonData = toJson(award))
+            awardDao.save(newEntity)
+        }
+    }
+
+    private fun updateAward(awardFromBase: Award, awardFromRq: AwardByBid, dateTime: LocalDateTime) {
+        awardFromBase.apply {
+            description = awardFromRq.description
+            documents = awardFromRq.documents
+            date = dateTime
+        }
+    }
+
+    private fun sortAwardsByCriteria(awards: Set<Award>, awardCriteria: AwardCriteria): List<Award> {
         when (awardCriteria) {
             AwardCriteria.PRICE_ONLY -> {
                 return awards.sortedBy { it.value?.amount }
@@ -281,63 +186,32 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
             AwardCriteria.SINGLE_BID_ONLY -> {
             }
         }
-        return awards
+        return listOf()
     }
 
-    private fun getNextAwardAfterConsideration(rangedAwards: List<Award>): Award? {
-        for (i in 0 until rangedAwards.size - 1) {
-            if (rangedAwards[i].statusDetails == Status.CONSIDERATION
-                    && rangedAwards[i + 1].statusDetails == Status.EMPTY) {
-                return rangedAwards[i + 1]
+    private fun validation(award: Award, awardId: String, dto: AwardByBidRequestDto) {
+        if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
+        verifyDocumentsRelatedLots(award.relatedLots, dto.award.documents)
+        verifyRequestStatusDetails(dto.award.statusDetails)
+        verifyAwardByBidDocType(dto.award.documents)
+    }
+
+
+    private fun verifyDocumentsRelatedLots(relatedLots: List<String>, documents: List<Document>?) {
+        if (documents != null) {
+            for (document in documents) {
+                val docRelatedLots = mutableListOf<String>()
+                document.relatedLots?.toCollection(docRelatedLots)
+                if (!relatedLots.containsAll(docRelatedLots)) throw ErrorException(ErrorType.RELATED_LOTS_IN_DOCS_ARE_INVALID)
             }
         }
-        return null
     }
 
-    private fun rangeAwardsByAmount(awards: List<Award>): List<Award> {
-        return awards.sortedBy { it.value?.amount }
-    }
-
-    private fun updateAward(awardFromBase: Award, awardFromRq: AwardByBid, dateTime: LocalDateTime) {
-        awardFromBase.apply {
-            description = awardFromRq.description
-            documents = awardFromRq.documents
-            date = dateTime
-
-        }
-    }
-
-    private fun getAwardsByRelatedLot(cpId: String, stage: String, relatedLots: List<String>): List<Award> {
-        val awards = arrayListOf<Award>()
-        val awardsSearchRelLots = getAwardsFromEntities(awardDao.findAllByCpIdAndStage(cpId, stage))
-        for (awardInAwards in awardsSearchRelLots) {
-            if (relatedLots.containsAll(awardInAwards.relatedLots))
-                awards.add(awardInAwards)
-        }
-        return awards
-    }
-
-    private fun isAlreadySavedAwardsFromStatus(awardsByRelatedLots: List<Award>, statusDetails: Status): Boolean {
-        val awards = getAlreadySavedAwardsFromStatus(awardsByRelatedLots, statusDetails)
-        if (awards.isNotEmpty()) {
-            return true
-        }
-        return false
-    }
-
-    private fun getAlreadySavedAwardsFromStatus(awardsByRelatedLots: List<Award>, statusDetails: Status): List<Award> {
-
-        val outputAwards = arrayListOf<Award>()
-        for (award in awardsByRelatedLots) {
-            if (award.statusDetails == statusDetails) {
-                outputAwards.add(award)
-            }
-        }
-        return outputAwards
+    private fun verifyRequestStatusDetails(statusDetails: Status) {
+        if (!(statusDetails == Status.ACTIVE || statusDetails == Status.UNSUCCESSFUL)) throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
     }
 
     private fun verifyAwardByBidDocType(documents: List<Document>?) {
-
         val validTypes = arrayListOf<DocumentType>()
         validTypes.add(DocumentType.AWARD_NOTICE)
         validTypes.add(DocumentType.EVALUATION_REPORTS)
@@ -352,105 +226,5 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                 if (!validTypes.contains(document.documentType)) throw ErrorException(ErrorType.INVALID_DOC_TYPE)
             }
         }
-    }
-
-    private fun verifyAwardByBidStatusDetails(statusDetails: Status) {
-        if (!(statusDetails == Status.ACTIVE || statusDetails == Status.UNSUCCESSFUL)) throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
-    }
-
-    private fun verifyDocumentsRelatedLots(relatedLots: List<String>, documents: List<Document>?) {
-        if (documents != null) {
-            for (document in documents) {
-                val docRelatedLots = mutableListOf<String>()
-                document.relatedLots?.toCollection(docRelatedLots)
-                if (!relatedLots.containsAll(docRelatedLots)) throw ErrorException(ErrorType.RELATED_LOTS_IN_DOCS_ARE_INVALID)
-            }
-        }
-
-    }
-
-    private fun updateUnsuccessfulAward(awardDto: AwardUpdate,
-                                        awardsFromEntities: Map<Award, AwardEntity>,
-                                        dateTime: LocalDateTime,
-                                        token: String,
-                                        awardId: String): ResponseDto {
-        val updatableAward = awardsFromEntities.keys.asSequence()
-                .firstOrNull { it.id == awardId }
-                ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
-
-        val updatedAwardEntity = awardsFromEntities[updatableAward] ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
-        if (updatedAwardEntity.token.toString() != token) throw ErrorException(ErrorType.INVALID_TOKEN)
-
-        updatableAward.statusDetails = Status.UNSUCCESSFUL
-        if (awardDto.description != null) updatableAward.description = awardDto.description
-        if (awardDto.documents != null) updatableAward.documents = awardDto.documents
-
-        updatableAward.date = dateTime
-        updatedAwardEntity.statusDetails = updatableAward.statusDetails.value()
-        updatedAwardEntity.jsonData = toJson(updatableAward)
-        awardDao.save(updatedAwardEntity)
-
-        // next Award
-        val awardsByLot = awardsFromEntities.keys.asSequence()
-                .filter { it.relatedLots == updatableAward.relatedLots }.toList()
-        val sortedAwardsByLot = awardsByLot.asSequence().sortedWith(SortedByValue).toList()
-        var nextAwardByLot: Award? = null
-        if (sortedAwardsByLot.size > 1) {
-            nextAwardByLot = sortedAwardsByLot.asSequence()
-                    .firstOrNull { it.id != updatableAward.id && it.statusDetails != Status.UNSUCCESSFUL }
-            if (nextAwardByLot != null) {
-                val nextAwardByLotEntity = awardsFromEntities[nextAwardByLot]
-                        ?: throw  ErrorException(ErrorType.DATA_NOT_FOUND)
-                nextAwardByLot.statusDetails = Status.CONSIDERATION
-                nextAwardByLot.date = dateTime
-                nextAwardByLotEntity.statusDetails = nextAwardByLot.statusDetails.value()
-                nextAwardByLotEntity.jsonData = toJson(nextAwardByLot)
-                awardDao.save(nextAwardByLotEntity)
-            }
-        }
-        return ResponseDto(data = UpdateAwardResponseDto(updatableAward, nextAwardByLot))
-    }
-
-    private fun updateActiveAward(award: Award, awardDto: AwardUpdate, dateTime: LocalDateTime) {
-        if (award.statusDetails != Status.CONSIDERATION) throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
-        if (awardDto.description != null) award.description = awardDto.description
-        if (awardDto.documents != null) award.documents = awardDto.documents
-        award.date = dateTime
-        award.statusDetails = Status.ACTIVE
-    }
-
-    private fun getAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
-        return awardEntities.asSequence().map { toObject(Award::class.java, it.jsonData) }.toList()
-    }
-
-
-    private fun getAwardToEntityToMap(awardEntities: List<AwardEntity>): Map<Award, AwardEntity> {
-        return awardEntities.map { toObject(Award::class.java, it.jsonData) to it }.toMap()
-    }
-
-    private fun getResponseDtoForActiveAward(award: Award): ResponseDto {
-        return ResponseDto(data = UpdateAwardResponseDto(award = award, nextAward = null))
-    }
-
-    companion object SortedByValue : Comparator<Award> {
-        override fun compare(a: Award, b: Award): Int {
-            return a.value!!.amount.compareTo(b.value!!.amount)
-        }
-    }
-
-    private fun getEntity(award: Award,
-                          cpId: String,
-                          stage: String,
-                          token: UUID,
-                          owner: String): AwardEntity {
-        val status = award.status ?: throw ErrorException(ErrorType.INVALID_STATUS)
-        return AwardEntity(
-                cpId = cpId,
-                stage = stage,
-                token = token,
-                status = status.value(),
-                statusDetails = award.statusDetails.value(),
-                owner = owner,
-                jsonData = toJson(award))
     }
 }
