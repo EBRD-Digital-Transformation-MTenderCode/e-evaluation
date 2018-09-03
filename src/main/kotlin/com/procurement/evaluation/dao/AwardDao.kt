@@ -76,7 +76,6 @@ class AwardDaoImpl(private val session: Session) : AwardDao {
                             statusDetails = row.getString(STATUS_DETAILS),
                             jsonData = row.getString(JSON_DATA)))
         }
-        if (entities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
         return entities
     }
 

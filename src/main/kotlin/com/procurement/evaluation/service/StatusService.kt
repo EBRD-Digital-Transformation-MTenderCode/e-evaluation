@@ -41,6 +41,7 @@ class StatusServiceImpl(private val periodService: PeriodService,
                                 endPeriod: LocalDateTime): ResponseDto {
         val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endPeriod)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
         setAwardsStatusFromStatusDetails(awards, endPeriod)
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
@@ -80,6 +81,7 @@ class StatusServiceImpl(private val periodService: PeriodService,
 
     override fun prepareCancellation(cpId: String, stage: String, dateTime: LocalDateTime): ResponseDto {
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) return ResponseDto(data = CancellationResponseDto(listOf()))
         val awards = getAwardsFromEntities(awardEntities)
         val awardPredicate = getAwardPredicateForPrepareCancellation()
         val awardsResponseDto = mutableListOf<AwardCancellation>()
@@ -96,6 +98,7 @@ class StatusServiceImpl(private val periodService: PeriodService,
 
     override fun awardsCancellation(cpId: String, stage: String, dateTime: LocalDateTime): ResponseDto {
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) return ResponseDto(data = CancellationResponseDto(listOf()))
         val awards = getAwardsFromEntities(awardEntities)
         val awardPredicate = getAwardPredicateForCancellation()
         val awardsResponseDto = mutableListOf<AwardCancellation>()

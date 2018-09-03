@@ -44,8 +44,8 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         validation(awardByBid, awardId, dto)
         val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
-
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
         val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
         awardEntities.forEach { entity ->

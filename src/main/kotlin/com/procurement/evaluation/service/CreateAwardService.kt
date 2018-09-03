@@ -77,6 +77,7 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                            country: String,
                            pmd: String): ResponseDto {
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
         val activeAwards = getPendingAwardsFromEntities(awardEntities)
         return ResponseDto(data = AwardsResponseDto(activeAwards, null, null))
     }
