@@ -130,7 +130,7 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
     private fun getSuccessfulAwards(successfulBids: List<Bid>): List<Award> {
         return successfulBids.asSequence().map { bid ->
             Award(
-                    token = null,
+                    token = generationService.generateRandomUUID().toString(),
                     id = generationService.getTimeBasedUUID(),
                     date = localNowUTC(),
                     description = "",
@@ -147,7 +147,7 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
     private fun getUnsuccessfulAwards(unSuccessfulLots: HashSet<String>): List<Award> {
         return unSuccessfulLots.asSequence().map { lot ->
             Award(
-                    token = null,
+                    token = generationService.generateRandomUUID().toString(),
                     id = generationService.getTimeBasedUUID(),
                     date = localNowUTC(),
                     description = "",
@@ -197,10 +197,9 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
     }
 
     fun saveAwards(awards: List<Award>, ocId: String, owner: String, stage: String) {
-        awards.forEach { awardDto ->
-            val entity = getEntity(awardDto, ocId, owner, stage)
+        awards.forEach { award ->
+            val entity = getEntity(award = award, cpId = ocId, owner = owner, stage = stage)
             awardDao.save(entity)
-            awardDto.token = entity.token.toString()
         }
     }
 
@@ -208,11 +207,12 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                           cpId: String,
                           owner: String,
                           stage: String): AwardEntity {
+        val token = UUID.fromString(award.token ?: throw ErrorException(ErrorType.INVALID_TOKEN))
         val status = award.status ?: throw ErrorException(ErrorType.INVALID_STATUS)
         return AwardEntity(
                 cpId = cpId,
                 stage = stage,
-                token = generationService.generateRandomUUID(),
+                token = token,
                 status = status.value(),
                 statusDetails = award.statusDetails.value(),
                 owner = owner,
