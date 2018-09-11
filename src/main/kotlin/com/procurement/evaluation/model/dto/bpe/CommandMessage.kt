@@ -35,14 +35,14 @@ data class Context @JsonCreator constructor(
         val language: String?,
         val pmd: String?,
         val token: String?,
-        val access: String?,
         val startDate: String?,
         val endDate: String?,
         val bidId: String?
 )
 
 enum class CommandType(private val value: String) {
-    NOT_IMPLEMENTED("notImplemented");
+
+    GET_UPDATED_AWARDS_FOR_CANS("GetUpdatedAwardsForCAN");
 
     @JsonValue
     fun value(): String {

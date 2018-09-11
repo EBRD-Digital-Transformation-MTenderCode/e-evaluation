@@ -14,5 +14,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     RELATED_LOTS_IN_DOCS_ARE_INVALID("02.04", "Related lots in docs not found in award related lots(VR 7.4.4)"),
     INVALID_DOC_TYPE("02.05", "Invalid document type Award by bid(VR 7.4.9)"),
     ALREADY_HAVE_ACTIVE_AWARDS("02.06", "Active status already have(BR-7.4.15(1.a)"),
-    INVALID_STATUS_DETAILS_SAVED_AWARD("02.07", "Saved award have incorrect status details BR-7.4.15");
+    INVALID_STATUS_DETAILS_SAVED_AWARD("02.07", "Saved award have incorrect status details BR-7.4.15"),
+    CONTEXT_PARAM_NOT_FOUND("20.01", "Context parameter not found.");
 }

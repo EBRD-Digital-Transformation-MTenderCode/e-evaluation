@@ -28,10 +28,7 @@ interface CreateAwardService {
                      startDate: LocalDateTime,
                      dto: SelectionsRequestDto): ResponseDto
 
-    fun getAwards(cpId: String,
-                  stage: String,
-                  country: String,
-                  pmd: String): ResponseDto
+
 }
 
 @Service
@@ -70,22 +67,6 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
         saveAwards(awards, cpId, owner, stage)
         val lotsDtoList = getLotsDto(unsuccessfulLotsSet)
         return ResponseDto(data = SelectionsResponseDto(awardPeriod, awards, lotsDtoList))
-    }
-
-    override fun getAwards(cpId: String,
-                           stage: String,
-                           country: String,
-                           pmd: String): ResponseDto {
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-        if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
-        val activeAwards = getPendingAwardsFromEntities(awardEntities)
-        return ResponseDto(data = AwardsResponseDto(activeAwards, null, null))
-    }
-
-    private fun getPendingAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
-        return awardEntities.asSequence()
-                .map { entity -> toObject(Award::class.java, entity.jsonData) }
-                .filter { award -> award.status == Status.PENDING }.toList()
     }
 
     private fun getRelatedLotsIdFromBids(bids: List<Bid>): List<String> {

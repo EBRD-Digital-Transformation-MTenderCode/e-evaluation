@@ -44,20 +44,6 @@ class EvaluationController(private val createAwardService: CreateAwardService,
                 HttpStatus.CREATED)
     }
 
-    @GetMapping
-    fun getAwards(@RequestParam("cpid") cpId: String,
-                  @RequestParam("stage") stage: String,
-                  @RequestParam("country") country: String,
-                  @RequestParam("pmd") pmd: String): ResponseEntity<ResponseDto> {
-        return ResponseEntity(
-                createAwardService.getAwards(
-                        cpId = cpId,
-                        stage = stage,
-                        country = country,
-                        pmd = pmd),
-                HttpStatus.OK)
-    }
-
     @PostMapping("/awardByBid")
     fun awardByBid(@RequestParam("token") token: String,
                    @RequestParam("owner") owner: String,

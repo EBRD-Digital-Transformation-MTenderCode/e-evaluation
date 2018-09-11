@@ -4,9 +4,11 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.model.dto.AwardsResponseDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBid
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidResponseDto
+import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
 import com.procurement.evaluation.model.entity.AwardEntity
@@ -25,6 +27,8 @@ interface UpdateAwardService {
                    owner: String,
                    dateTime: LocalDateTime,
                    dto: AwardByBidRequestDto): ResponseDto
+
+    fun getUpdatedAwardsForCAN(cm: CommandMessage): ResponseDto
 }
 
 @Service
@@ -146,6 +150,26 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                 lotId = lotId,
                 lotAwarded = lotAwarded)
         )
+    }
+
+    override fun getUpdatedAwardsForCAN(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+
+        val items = toObject(Award::class.java, entity.jsonData)
+
+
+        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
+        val activeAwards = getPendingAwardsFromEntities(awardEntities)
+
+        return ResponseDto(data = AwardsResponseDto(activeAwards, null, null))
+    }
+
+    private fun getPendingAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
+        return awardEntities.asSequence()
+                .map { entity -> toObject(Award::class.java, entity.jsonData) }
+                .filter { award -> award.status == Status.PENDING }.toList()
     }
 
     private fun saveAward(award: Award, awardEntity: AwardEntity?) {
