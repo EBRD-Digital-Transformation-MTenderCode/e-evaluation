@@ -33,5 +33,7 @@ data class Award @JsonCreator constructor(
         @field:Valid
         val suppliers: List<OrganizationReference>?,
 
-        var documents: List<Document>?
+        var documents: List<Document>?,
+
+        var items: List<Item>?
 )

@@ -4,6 +4,9 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardForCanDto
+import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansRequestDto
+import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansResponseDto
 import com.procurement.evaluation.model.dto.AwardsResponseDto
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBid
 import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
@@ -53,10 +56,10 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
         val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
         awardEntities.forEach { entity ->
-            val awardFromEntity = toObject(Award::class.java, entity.jsonData)
-            if (awardFromEntity.relatedLots == awardByBid.relatedLots) {
-                awardIdToEntityMap[awardFromEntity.id] = entity
-                awardFromEntitiesSet.add(awardFromEntity)
+            val award = toObject(Award::class.java, entity.jsonData)
+            if (award.relatedLots == awardByBid.relatedLots) {
+                awardIdToEntityMap[award.id] = entity
+                awardFromEntitiesSet.add(award)
             }
         }
         val rangedAwards = sortAwardsByCriteria(awardFromEntitiesSet, awardCriteria)
@@ -155,21 +158,33 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
     override fun getUpdatedAwardsForCAN(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
         val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-
-        val items = toObject(Award::class.java, entity.jsonData)
-
-
+        val dto = toObject(AwardsForCansRequestDto::class.java, cm.data)
+        val itemsDto = dto.items
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
-        val activeAwards = getPendingAwardsFromEntities(awardEntities)
-
-        return ResponseDto(data = AwardsResponseDto(activeAwards, null, null))
-    }
-
-    private fun getPendingAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
-        return awardEntities.asSequence()
-                .map { entity -> toObject(Award::class.java, entity.jsonData) }
-                .filter { award -> award.status == Status.PENDING }.toList()
+        val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
+        val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
+        val updatedAwardEntities =  mutableListOf<AwardEntity>()
+        val activeAwards =  mutableListOf<AwardForCanDto>()
+        awardEntities.forEach { entity ->
+            val award = toObject(Award::class.java, entity.jsonData)
+            if (award.status == Status.PENDING && award.statusDetails == Status.ACTIVE) {
+                awardIdToEntityMap[award.id] = entity
+                awardFromEntitiesSet.add(award)
+            }
+        }
+        awardFromEntitiesSet.forEach { award ->
+            val awardItems = itemsDto.asSequence()
+                    .filter { award.relatedLots.contains(it.relatedLot) }
+                    .toList()
+            award.items = awardItems
+            awardIdToEntityMap[award.id]?.let { entity ->
+                entity.jsonData = toJson(award)
+                updatedAwardEntities.add(entity)
+            }
+            activeAwards.add(AwardForCanDto(award.id, award.items!!))
+        }
+        return ResponseDto(data = AwardsForCansResponseDto(activeAwards))
     }
 
     private fun saveAward(award: Award, awardEntity: AwardEntity?) {
