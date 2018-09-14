@@ -14,7 +14,7 @@ class IntDeserializer : JsonDeserializer<Int>() {
     @Throws(IOException::class)
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): Int {
         if (jsonParser.currentToken != JsonToken.VALUE_NUMBER_INT) {
-            throw ErrorException(ErrorType.INVALID_JSON_TYPE, jsonParser.currentName)
+            throw ErrorException(ErrorType.JSON_TYPE, jsonParser.currentName)
         }
         return jsonParser.valueAsInt
     }

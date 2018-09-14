@@ -3,13 +3,13 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardForCan
-import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansRq
-import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansRs
+import com.procurement.evaluation.exception.ErrorType.*
 import com.procurement.evaluation.model.dto.AwardByBid
 import com.procurement.evaluation.model.dto.AwardByBidRq
 import com.procurement.evaluation.model.dto.AwardByBidRs
+import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardForCan
+import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansRq
+import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
@@ -25,7 +25,7 @@ interface UpdateAwardService {
 
     fun awardByBid(cm: CommandMessage): ResponseDto
 
-    fun getUpdatedAwardsForCAN(cm: CommandMessage): ResponseDto
+    fun awardsForCans(cm: CommandMessage): ResponseDto
 }
 
 @Service
@@ -33,22 +33,21 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                              private val periodDao: PeriodDao) : UpdateAwardService {
 
     override fun awardByBid(cm: CommandMessage): ResponseDto {
-
-        val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val token = cm.context.token ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val awardId = cm.context.id ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val owner = cm.context.owner ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val token = cm.context.token ?: throw ErrorException(CONTEXT)
+        val awardId = cm.context.id ?: throw ErrorException(CONTEXT)
+        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
+        val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(AwardByBidRq::class.java, cm.data)
 
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
-        if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
+        if (awardEntity.owner != owner) throw ErrorException(OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         validation(awardByBid, awardId, dto)
         val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-        if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
         val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
         awardEntities.forEach { entity ->
@@ -70,7 +69,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         if (dto.award.statusDetails == Status.ACTIVE) {
             /*check awards statuses*/
             for (award in rangedAwards) {
-                if (award.statusDetails == Status.ACTIVE) throw ErrorException(ErrorType.ALREADY_HAVE_ACTIVE_AWARDS)
+                if (award.statusDetails == Status.ACTIVE) throw ErrorException(ALREADY_HAVE_ACTIVE_AWARDS)
             }
             when (awardByBid.statusDetails) {
                 Status.CONSIDERATION -> {
@@ -98,7 +97,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                         saveAward(it, awardIdToEntityMap[it.id])
                     }
                 }
-                else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS_SAVED_AWARD)
+                else -> throw ErrorException(STATUS_DETAILS_SAVED_AWARD)
             }
 
             /*********************UNSUCCESSFUL*********************/
@@ -137,7 +136,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                         lotId = awardByBid.relatedLots[0]
                     }
                 }
-                else -> throw ErrorException(ErrorType.INVALID_STATUS_DETAILS_SAVED_AWARD)
+                else -> throw ErrorException(STATUS_DETAILS_SAVED_AWARD)
             }
         }
 
@@ -151,15 +150,14 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         )
     }
 
-    override fun getUpdatedAwardsForCAN(cm: CommandMessage): ResponseDto {
-
-        val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+    override fun awardsForCans(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val dto = toObject(AwardsForCansRq::class.java, cm.data)
 
         val itemsDto = dto.items
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-        if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
         val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
         val updatedAwardEntities = mutableListOf<AwardEntity>()
@@ -227,25 +225,24 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
     }
 
     private fun validation(award: Award, awardId: String, dto: AwardByBidRq) {
-        if (award.id != awardId) throw ErrorException(ErrorType.INVALID_ID)
+        if (award.id != awardId) throw ErrorException(ID)
         verifyDocumentsRelatedLots(award.relatedLots, dto.award.documents)
         verifyRequestStatusDetails(dto.award.statusDetails)
         verifyAwardByBidDocType(dto.award.documents)
     }
-
 
     private fun verifyDocumentsRelatedLots(relatedLots: List<String>, documents: List<Document>?) {
         if (documents != null) {
             for (document in documents) {
                 val docRelatedLots = mutableListOf<String>()
                 document.relatedLots?.toCollection(docRelatedLots)
-                if (!relatedLots.containsAll(docRelatedLots)) throw ErrorException(ErrorType.RELATED_LOTS_IN_DOCS_ARE_INVALID)
+                if (!relatedLots.containsAll(docRelatedLots)) throw ErrorException(RELATED_LOTS)
             }
         }
     }
 
     private fun verifyRequestStatusDetails(statusDetails: Status) {
-        if (!(statusDetails == Status.ACTIVE || statusDetails == Status.UNSUCCESSFUL)) throw ErrorException(ErrorType.INVALID_STATUS_DETAILS)
+        if (!(statusDetails == Status.ACTIVE || statusDetails == Status.UNSUCCESSFUL)) throw ErrorException(STATUS_DETAILS)
     }
 
     private fun verifyAwardByBidDocType(documents: List<Document>?) {
@@ -260,7 +257,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         validTypes.add(DocumentType.CANCELLATION_DETAILS)
         if (documents != null) {
             for (document in documents) {
-                if (!validTypes.contains(document.documentType)) throw ErrorException(ErrorType.INVALID_DOC_TYPE)
+                if (!validTypes.contains(document.documentType)) throw ErrorException(DOC_TYPE)
             }
         }
     }

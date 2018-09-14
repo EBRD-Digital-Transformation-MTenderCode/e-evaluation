@@ -1,8 +1,6 @@
 package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.PeriodDao
-import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.ocds.Period
 import com.procurement.evaluation.model.entity.PeriodEntity
 import com.procurement.evaluation.utils.localNowUTC
@@ -40,8 +38,8 @@ class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService
 
     override fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period {
         val period = periodRepository.getByCpIdAndStage(cpId, stage)
-//        if (period.endDate != null) throw ErrorException(ErrorType.INVALID_PERIOD)
-//        if (period.startDate.toLocal() > endDate) throw ErrorException(ErrorType.INVALID_PERIOD)
+//        if (period.endDate != null) throw ErrorException(ErrorType.PERIOD_INVALID)
+//        if (period.startDate.toLocal() > endDate) throw ErrorException(ErrorType.PERIOD_INVALID)
         val newPeriod = getEntity(
                 cpId = period.cpId,
                 stage = period.stage,

@@ -14,7 +14,7 @@ class StringsDeserializer : JsonDeserializer<String>() {
     @Throws(IOException::class)
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): String {
         if (jsonParser.currentToken != JsonToken.VALUE_STRING) {
-            throw ErrorException(ErrorType.INVALID_JSON_TYPE, jsonParser.currentName)
+            throw ErrorException(ErrorType.JSON_TYPE, jsonParser.currentName)
         }
         return jsonParser.valueAsString
     }

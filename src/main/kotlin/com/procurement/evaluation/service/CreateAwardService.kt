@@ -2,7 +2,7 @@ package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.exception.ErrorType.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
@@ -25,13 +25,12 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                              private val generationService: GenerationService) : CreateAwardService {
 
     override fun createAwards(cm: CommandMessage): ResponseDto {
-
-        val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val owner = cm.context.owner ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val country = cm.context.country ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val pmd = cm.context.pmd ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
+        val country = cm.context.country ?: throw ErrorException(CONTEXT)
+        val pmd = cm.context.pmd ?: throw ErrorException(CONTEXT)
+        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(CreateAwardsRq::class.java, cm.data)
 
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
@@ -178,8 +177,8 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                           cpId: String,
                           owner: String,
                           stage: String): AwardEntity {
-        val token = UUID.fromString(award.token ?: throw ErrorException(ErrorType.INVALID_TOKEN))
-        val status = award.status ?: throw ErrorException(ErrorType.INVALID_STATUS)
+        val token = UUID.fromString(award.token ?: throw ErrorException(TOKEN))
+        val status = award.status ?: throw ErrorException(STATUS)
         return AwardEntity(
                 cpId = cpId,
                 stage = stage,

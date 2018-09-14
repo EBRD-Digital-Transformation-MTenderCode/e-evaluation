@@ -16,7 +16,7 @@ class RulesServiceImpl(private val rulesDao: RulesDao) : RulesService {
 
     override fun getRulesMinBids(country: String, method: String): Int {
         return rulesDao.getValue(country, method, PARAMETER_MIN_BIDS)?.toIntOrNull()
-                ?: throw ErrorException(ErrorType.BIDS_RULES_NOT_FOUND)
+                ?: throw ErrorException(ErrorType.BIDS_RULES)
     }
 
     companion object {

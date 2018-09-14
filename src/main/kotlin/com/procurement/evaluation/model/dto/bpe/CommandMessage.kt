@@ -40,11 +40,10 @@ enum class CommandType(private val value: String) {
 
     CREATE_AWARDS("createAwards"),
     AWARD_BY_BID("awardByBid"),
-    GET_UPDATED_AWARDS_FOR_CANS("GetUpdatedAwardsForCAN"),
+    AWARDS_FOR_CANS("AwardsForCans"),
     SET_FINAL_STATUSES("setFinalStatuses"),
     PREPARE_CANCELLATION("prepareCancellation"),
     AWARDS_CANCELLATION("awardsCancellation");
-
 
     @JsonValue
     fun value(): String {
@@ -69,14 +68,11 @@ enum class ApiVersion(private val value: String) {
     }
 }
 
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ResponseDto(
 
         val errors: List<ResponseErrorDto>? = null,
-
         val data: Any? = null,
-
         val id: String? = null
 )
 
@@ -84,7 +80,6 @@ data class ResponseDto(
 data class ResponseErrorDto(
 
         val code: String,
-
         val description: String?
 )
 
@@ -113,4 +108,3 @@ fun getEnumExceptionResponseDto(error: EnumException, id: String? = null): Respo
             )),
             id = id)
 }
-

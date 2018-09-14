@@ -6,7 +6,7 @@ import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.dto.ocds.Period
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class AwardsResponseDto(
+data class FinalStatusesRs(
 
         val awards: List<Award>,
 

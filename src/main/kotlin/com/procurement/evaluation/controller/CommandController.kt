@@ -30,7 +30,7 @@ class CommandController(private val createAwardService: CreateAwardService,
         return when (cm.command) {
             CommandType.CREATE_AWARDS -> createAwardService.createAwards(cm)
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
-            CommandType.GET_UPDATED_AWARDS_FOR_CANS -> updateAwardService.getUpdatedAwardsForCAN(cm)
+            CommandType.AWARDS_FOR_CANS -> updateAwardService.awardsForCans(cm)
             CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
             CommandType.PREPARE_CANCELLATION -> statusService.prepareCancellation(cm)
             CommandType.AWARDS_CANCELLATION -> statusService.awardsCancellation(cm)

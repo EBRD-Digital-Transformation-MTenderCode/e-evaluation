@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.procurement.evaluation.model.dto.ocds.Status
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class CancellationResponseDto(
+data class CancellationRs(
 
         val awards: List<AwardCancellation>
 
