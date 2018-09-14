@@ -57,7 +57,7 @@ private object JsonMapper {
 
 /*Date utils*/
 
-fun String.toLocalDateTime(): LocalDateTime {
+fun String.toLocal(): LocalDateTime {
     return LocalDateTime.parse(this, JsonMapper.dateTimeFormatter)
 }
 

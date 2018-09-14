@@ -10,13 +10,9 @@ import com.procurement.evaluation.exception.ErrorException
 data class CommandMessage @JsonCreator constructor(
 
         val id: String,
-
         val command: CommandType,
-
         val context: Context,
-
         val data: JsonNode,
-
         val version: ApiVersion
 )
 
@@ -37,7 +33,7 @@ data class Context @JsonCreator constructor(
         val token: String?,
         val startDate: String?,
         val endDate: String?,
-        val bidId: String?
+        val id: String?
 )
 
 enum class CommandType(private val value: String) {

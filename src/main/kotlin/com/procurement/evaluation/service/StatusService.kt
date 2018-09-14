@@ -4,7 +4,6 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.AwardCancellation
-import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansRequestDto
 import com.procurement.evaluation.model.dto.AwardsResponseDto
 import com.procurement.evaluation.model.dto.CancellationResponseDto
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
@@ -14,7 +13,7 @@ import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.dto.ocds.Status
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.toJson
-import com.procurement.evaluation.utils.toLocalDateTime
+import com.procurement.evaluation.utils.toLocal
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -36,7 +35,7 @@ class StatusServiceImpl(private val periodService: PeriodService,
     override fun setFinalStatuses(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
         val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val endDate = cm.context.endDate?.toLocalDateTime() ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val endDate = cm.context.endDate?.toLocal() ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
         val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)

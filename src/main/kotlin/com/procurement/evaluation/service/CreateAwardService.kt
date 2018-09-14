@@ -31,8 +31,7 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
         val owner = cm.context.owner ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
         val country = cm.context.country ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
         val pmd = cm.context.pmd ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
-        val startDate = cm.context.startDate?.toLocalDateTime()
-                ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
         val dto = toObject(CreateAwardsRq::class.java, cm.data)
 
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)

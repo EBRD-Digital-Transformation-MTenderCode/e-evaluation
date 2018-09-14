@@ -1,25 +1,25 @@
 package com.procurement.evaluation.controller
 
-import com.procurement.evaluation.model.dto.awardByBid.AwardByBidRequestDto
-import com.procurement.evaluation.model.dto.bpe.ResponseDto
-import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto
-import com.procurement.evaluation.service.CreateAwardService
-import com.procurement.evaluation.service.StatusService
-import com.procurement.evaluation.service.UpdateAwardService
-import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
-import javax.validation.Valid
-
-@Validated
-@RestController
-@RequestMapping("/evaluation")
-class EvaluationController(private val createAwardService: CreateAwardService,
-                           private val updateAwardService: UpdateAwardService,
-                           private val statusService: StatusService) {
+//import com.procurement.evaluation.model.dto.AwardByBidRq
+//import com.procurement.evaluation.model.dto.bpe.ResponseDto
+//import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto
+//import com.procurement.evaluation.service.CreateAwardService
+//import com.procurement.evaluation.service.StatusService
+//import com.procurement.evaluation.service.UpdateAwardService
+//import org.springframework.format.annotation.DateTimeFormat
+//import org.springframework.http.HttpStatus
+//import org.springframework.http.ResponseEntity
+//import org.springframework.validation.annotation.Validated
+//import org.springframework.web.bind.annotation.*
+//import java.time.LocalDateTime
+//import javax.validation.Valid
+//
+//@Validated
+//@RestController
+//@RequestMapping("/evaluation")
+//class EvaluationController(private val createAwardService: CreateAwardService,
+//                           private val updateAwardService: UpdateAwardService,
+//                           private val statusService: StatusService) {
 
 //    @PostMapping
 //    fun createAwards(@RequestParam(value = "cpid") cpId: String,
@@ -52,7 +52,7 @@ class EvaluationController(private val createAwardService: CreateAwardService,
 //                   @RequestParam("awardId") awardId: String,
 //                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
 //                   @RequestParam("date") dateTime: LocalDateTime,
-//                   @Valid @RequestBody data: AwardByBidRequestDto): ResponseEntity<ResponseDto> {
+//                   @Valid @RequestBody data: AwardByBidRq): ResponseEntity<ResponseDto> {
 //        return ResponseEntity(
 //                updateAwardService.awardByBid(
 //                        cpId = cpId,
@@ -108,4 +108,4 @@ class EvaluationController(private val createAwardService: CreateAwardService,
 //                        dateTime = dateTime),
 //                HttpStatus.OK)
 //    }
-}
+//}

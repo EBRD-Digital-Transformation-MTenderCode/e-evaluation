@@ -19,7 +19,6 @@ data class CreateAwardsRq @JsonCreator constructor(
         val bids: List<Bid>
 )
 
-
 data class CreateAwardsRs(
 
         val awardPeriod: Period,

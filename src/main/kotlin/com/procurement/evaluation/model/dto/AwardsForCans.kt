@@ -5,20 +5,18 @@ import com.procurement.evaluation.model.dto.ocds.Item
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
 
-
-data class AwardsForCansRequestDto @JsonCreator constructor(
+data class AwardsForCansRq @JsonCreator constructor(
 
         @field:Valid @field:NotNull
         val items: List<Item>
 )
 
+data class AwardsForCansRs @JsonCreator constructor(
 
-data class AwardsForCansResponseDto @JsonCreator constructor(
-
-        val awards: List<AwardForCanDto>
+        val awards: List<AwardForCan>
 )
 
-data class AwardForCanDto @JsonCreator constructor(
+data class AwardForCan @JsonCreator constructor(
 
         val id: String,
 
