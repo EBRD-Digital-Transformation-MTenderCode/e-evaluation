@@ -23,13 +23,7 @@ import java.util.*
 
 interface UpdateAwardService {
 
-    fun awardByBid(cpId: String,
-                   stage: String,
-                   token: String,
-                   awardId: String,
-                   owner: String,
-                   dateTime: LocalDateTime,
-                   dto: AwardByBidRequestDto): ResponseDto
+    fun awardByBid(cm: CommandMessage): ResponseDto
 
     fun getUpdatedAwardsForCAN(cm: CommandMessage): ResponseDto
 }
@@ -38,13 +32,16 @@ interface UpdateAwardService {
 class UpdateAwardServiceImpl(private val awardDao: AwardDao,
                              private val periodDao: PeriodDao) : UpdateAwardService {
 
-    override fun awardByBid(cpId: String,
-                            stage: String,
-                            token: String,
-                            awardId: String,
-                            owner: String,
-                            dateTime: LocalDateTime,
-                            dto: AwardByBidRequestDto): ResponseDto {
+    override fun awardByBid(cm: CommandMessage): ResponseDto {
+
+        cpId: String,
+        stage: String,
+        token: String,
+        awardId: String,
+        owner: String,
+        dateTime: LocalDateTime,
+        dto: AwardByBidRequestDto
+
 
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
         if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)

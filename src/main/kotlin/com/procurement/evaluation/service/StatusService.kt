@@ -4,14 +4,17 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.AwardCancellation
+import com.procurement.evaluation.model.dto.AwardsForCansRequestDto.AwardsForCansRequestDto
 import com.procurement.evaluation.model.dto.AwardsResponseDto
 import com.procurement.evaluation.model.dto.CancellationResponseDto
+import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.dto.ocds.Status
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.toJson
+import com.procurement.evaluation.utils.toLocalDateTime
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -19,11 +22,7 @@ import java.util.*
 
 interface StatusService {
 
-    fun endAwardPeriod(cpId: String,
-                       stage: String,
-                       country: String,
-                       pmd: String,
-                       endPeriod: LocalDateTime): ResponseDto
+    fun setFinalStatuses(cm: CommandMessage): ResponseDto
 
     fun prepareCancellation(cpId: String, stage: String, dateTime: LocalDateTime): ResponseDto
 
@@ -34,16 +33,15 @@ interface StatusService {
 class StatusServiceImpl(private val periodService: PeriodService,
                         private val awardDao: AwardDao) : StatusService {
 
-    override fun endAwardPeriod(cpId: String,
-                                stage: String,
-                                country: String,
-                                pmd: String,
-                                endPeriod: LocalDateTime): ResponseDto {
-        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endPeriod)
+    override fun setFinalStatuses(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val endDate = cm.context.endDate?.toLocalDateTime() ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(ErrorType.DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
-        setAwardsStatusFromStatusDetails(awards, endPeriod)
+        setAwardsStatusFromStatusDetails(awards, endDate)
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
         val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
         return ResponseDto(data = AwardsResponseDto(awards, awardPeriod, unsuccessfulLots))

@@ -42,7 +42,13 @@ data class Context @JsonCreator constructor(
 
 enum class CommandType(private val value: String) {
 
-    GET_UPDATED_AWARDS_FOR_CANS("GetUpdatedAwardsForCAN");
+    CREATE_AWARDS("createAwards"),
+    AWARD_BY_BID("awardByBid"),
+    GET_UPDATED_AWARDS_FOR_CANS("GetUpdatedAwardsForCAN"),
+    SET_FINAL_STATUSES("setFinalStatuses"),
+    PREPARE_CANCELLATION("prepareCancellation"),
+    AWARDS_CANCELLATION("awardsCancellation");
+
 
     @JsonValue
     fun value(): String {

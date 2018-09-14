@@ -3,32 +3,19 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.model.dto.AwardsResponseDto
+import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
-import com.procurement.evaluation.model.dto.selections.SelectionsRequestDto
-import com.procurement.evaluation.model.dto.selections.SelectionsResponseDto
+import com.procurement.evaluation.model.dto.selections.CreateAwardsRq
+import com.procurement.evaluation.model.dto.selections.CreateAwardsRs
 import com.procurement.evaluation.model.entity.AwardEntity
-import com.procurement.evaluation.utils.containsAny
-import com.procurement.evaluation.utils.localNowUTC
-import com.procurement.evaluation.utils.toJson
-import com.procurement.evaluation.utils.toObject
+import com.procurement.evaluation.utils.*
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.*
 
 interface CreateAwardService {
 
-    fun createAwards(cpId: String,
-                     stage: String,
-                     owner: String,
-                     country: String,
-                     pmd: String,
-                     awardCriteria: String,
-                     startDate: LocalDateTime,
-                     dto: SelectionsRequestDto): ResponseDto
-
-
+    fun createAwards(cm: CommandMessage): ResponseDto
 }
 
 @Service
@@ -37,14 +24,16 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                              private val awardDao: AwardDao,
                              private val generationService: GenerationService) : CreateAwardService {
 
-    override fun createAwards(cpId: String,
-                              stage: String,
-                              owner: String,
-                              country: String,
-                              pmd: String,
-                              awardCriteria: String,
-                              startDate: LocalDateTime,
-                              dto: SelectionsRequestDto): ResponseDto {
+    override fun createAwards(cm: CommandMessage): ResponseDto {
+
+        val cpId = cm.context.cpid ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val stage = cm.context.stage ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val owner = cm.context.owner ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val country = cm.context.country ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val pmd = cm.context.pmd ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val startDate = cm.context.startDate?.toLocalDateTime()
+                ?: throw ErrorException(ErrorType.CONTEXT_PARAM_NOT_FOUND)
+        val dto = toObject(CreateAwardsRq::class.java, cm.data)
 
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
         val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
@@ -55,18 +44,18 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
         addUnsuccessfulLotsFromTender(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(awardCriteria))
+        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(dto.awardCriteria))
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val awards = successfulAwardsList + unsuccessfulAwardsList
 
         val awardPeriod = if (successfulAwardsList.isEmpty()) {
-            periodService.savePeriod(cpId, stage, startDate, startDate, awardCriteria)
+            periodService.savePeriod(cpId, stage, startDate, startDate, dto.awardCriteria)
         } else {
-            periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
+            periodService.saveStartOfPeriod(cpId, stage, startDate, dto.awardCriteria)
         }
         saveAwards(awards, cpId, owner, stage)
-        val lotsDtoList = getLotsDto(unsuccessfulLotsSet)
-        return ResponseDto(data = SelectionsResponseDto(awardPeriod, awards, lotsDtoList))
+        val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
+        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
     }
 
     private fun getRelatedLotsIdFromBids(bids: List<Bid>): List<String> {
@@ -121,7 +110,8 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                     relatedLots = bid.relatedLots,
                     relatedBid = bid.id,
                     suppliers = bid.tenderers,
-                    documents = null)
+                    documents = null,
+                    items = null)
         }.toList()
     }
 
@@ -138,7 +128,8 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                     relatedLots = listOf(lot),
                     relatedBid = null,
                     suppliers = null,
-                    documents = null)
+                    documents = null,
+                    items = null)
         }.toList()
     }
 

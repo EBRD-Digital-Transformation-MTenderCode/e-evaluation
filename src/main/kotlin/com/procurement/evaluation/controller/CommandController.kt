@@ -3,6 +3,8 @@ package com.procurement.evaluation.controller
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
+import com.procurement.evaluation.service.CreateAwardService
+import com.procurement.evaluation.service.StatusService
 import com.procurement.evaluation.service.UpdateAwardService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 @RestController
 @RequestMapping("/command")
-class CommandController(private val updateAwardService: UpdateAwardService) {
+class CommandController(private val createAwardService: CreateAwardService,
+                        private val updateAwardService: UpdateAwardService,
+                        private val statusService: StatusService) {
 
     @PostMapping
     fun command(@RequestBody commandMessage: CommandMessage): ResponseEntity<ResponseDto> {
@@ -24,7 +28,12 @@ class CommandController(private val updateAwardService: UpdateAwardService) {
 
     fun execute(cm: CommandMessage): ResponseDto {
         return when (cm.command) {
+            CommandType.CREATE_AWARDS -> createAwardService.createAwards(cm)
+            CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
             CommandType.GET_UPDATED_AWARDS_FOR_CANS -> updateAwardService.getUpdatedAwardsForCAN(cm)
+            CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
+            CommandType.PREPARE_CANCELLATION -> statusService.prepareCancellation(cm)
+            CommandType.AWARDS_CANCELLATION -> statusService.awardsCancellation(cm)
         }
     }
 }
