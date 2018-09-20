@@ -40,7 +40,7 @@ enum class CommandType(private val value: String) {
 
     CREATE_AWARDS("createAwards"),
     AWARD_BY_BID("awardByBid"),
-    AWARDS_FOR_CANS("AwardsForCans"),
+    AWARDS_FOR_CANS("awardsForCans"),
     SET_FINAL_STATUSES("setFinalStatuses"),
     PREPARE_CANCELLATION("prepareCancellation"),
     AWARDS_CANCELLATION("awardsCancellation");
