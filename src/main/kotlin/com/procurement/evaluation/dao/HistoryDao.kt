@@ -53,7 +53,7 @@ class HistoryDaoImpl(private val session: Session) : HistoryDao {
     }
 
     companion object {
-        private const val HISTORY_TABLE = "contracting_history"
+        private const val HISTORY_TABLE = "evaluation_history"
         private const val OPERATION_ID = "operation_id"
         private const val COMMAND = "command"
         private const val OPERATION_DATE = "operation_date"
