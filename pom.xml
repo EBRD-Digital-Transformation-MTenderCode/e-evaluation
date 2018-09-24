@@ -14,49 +14,37 @@
     </parent>
 
     <properties>
-
-
         <!--Project-->
         <final-artifact-name>${project.artifactId}-${project.version}</final-artifact-name>
         <project.service.port>8080</project.service.port>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-
         <!--Kotlin-->
         <kotlin.version>1.2.70</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
-
         <!--Docker-->
         <docker-registry>dev.docker-registry.eprocurement.systems</docker-registry>
         <docker-image-profile>-swarm</docker-image-profile>
         <docker-maven-plugin.version>0.24.0</docker-maven-plugin.version>
-
         <!--Spring-->
         <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
-
         <!--Libs-->
         <springfox-swagger2.version>2.6.1</springfox-swagger2.version>
         <netty-transport-native-epoll.version>4.1.17.Final</netty-transport-native-epoll.version>
-
         <!--Loggin-->
         <logstash.logback.encoder.version>4.11</logstash.logback.encoder.version>
-
         <!--Database-->
         <cassandra-driver.version>3.3.0</cassandra-driver.version>
-
         <!--Test-->
         <junit-jupiter.version>5.2.0</junit-jupiter.version>
         <junit-platform.version>1.2.0</junit-platform.version>
         <mockito-kotlin.version>1.5.0</mockito-kotlin.version>
         <mockito.version>2.18.3</mockito.version>
-
         <!--Plugins-->
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>2.21.0</maven-failsafe-plugin.version>
-
-
     </properties>
 
     <dependencyManagement>
@@ -73,6 +61,10 @@
 
     <dependencies>
         <!--springframework-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -203,21 +195,6 @@
         </dependency>
 
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>deploy</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-starter-config</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
