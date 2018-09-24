@@ -38,8 +38,6 @@ class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService
 
     override fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period {
         val period = periodRepository.getByCpIdAndStage(cpId, stage)
-//        if (period.endDate != null) throw ErrorException(ErrorType.PERIOD_INVALID)
-//        if (period.startDate.toLocal() > endDate) throw ErrorException(ErrorType.PERIOD_INVALID)
         val newPeriod = getEntity(
                 cpId = period.cpId,
                 stage = period.stage,
