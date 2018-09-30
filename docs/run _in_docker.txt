@@ -1,26 +1,4 @@
-
-mvn clean package docker:build
-
-docker push dev.docker-registry.eprocurement.systems/e-evaluation:18.06.1
-
-
-//copy image to remote node
-docker save dev.docker-registry.eprocurement.systems/e-evaluation:18.06.1 | bzip2 | ssh root@10.0.20.116 'bunzip2 | docker load'
-YLDKekTUnzyouh3D
-
-
-docker stop evaluation-1
-
-docker rm evaluation-1
-
-docker rmi dev.docker-registry.eprocurement.systems/e-evaluation:18.06.1
-
-echo 'Re-deploying'
-docker run -d --name=evaluation-1 \
-  --env __PROP_spring_cloud_config_uri=http://config-server-1:8700 \
-  --env __PROP_spring_profiles_active=default \
-  --env __PROP_spring_cloud_config_label=cc4e98e \
-  --publish 9081:8080 \
-  --network ocds-network \
-  --dns 10.0.20.115 \
-  dev.docker-registry.eprocurement.systems/e-evaluation:18.06.1
+mvn clean package docker:build docker:push
+docker login docker.io/eprocurementsystems
+Docker ID: eprocurementsystems
+pass: uStudioeProcurement
