@@ -8,11 +8,6 @@ CREATE TABLE IF NOT EXISTS  ocds.evaluation_rules (
     primary key(country, pmd, parameter)
 );
 
-INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'OT', 'minBids', '2');
-INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'RT', 'minBids', '3');
-INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_OT', 'minBids', '2');
-INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_RT', 'minBids', '3');
-
 CREATE TABLE IF NOT EXISTS  ocds.evaluation_period (
     cp_id text,
     stage text,
@@ -40,3 +35,6 @@ CREATE TABLE IF NOT EXISTS  ocds.evaluation_history (
     json_data text,
     primary key(operation_id, command)
 );
+
+INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'OT', 'minBids', '2');
+INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_OT', 'minBids', '2');
