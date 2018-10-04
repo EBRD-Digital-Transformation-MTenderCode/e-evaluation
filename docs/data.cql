@@ -37,6 +37,6 @@ CREATE TABLE IF NOT EXISTS  ocds.evaluation_history (
 );
 
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'OT', 'minBids', '2');
-INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'RT', 'minBids', '3');
+INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'RT', 'minBids', '2');
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_OT', 'minBids', '2');
-INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_RT', 'minBids', '3');
+INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_RT', 'minBids', '2');
