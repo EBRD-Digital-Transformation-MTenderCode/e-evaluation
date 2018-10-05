@@ -1,33 +1,45 @@
 {
-  "awards":
-  [{
-    "id": "",
-    "date": "",
-    --"description":"",
-    "status": "",
-    "statusDetails":"",
-    "relatedLots":[""],
-    "relatedBid":"",
-    "value":
+  "awards": [
     {
-      "amount":"",
-      "currency":""
-    },
-    "suppliers":
-    [{
-      "id":"",
-      "name":""
-    }],
-    --"documents":
-    [{
-      "documentType": "",
       "id": "",
-      --"title": "",
-      --"description": "",
-      "relatedLots":[""]
-    }]
-  }],
-  "bidId":"",
-  --"lotId":"",
-  --"lotAwarded": true
+      "date": "",
+      --
+      "description": "",
+      "status": "",
+      "statusDetails": "",
+      "relatedLots": [
+        ""
+      ],
+      "relatedBid": "",
+      "value": {
+        "amount": "",
+        "currency": ""
+      },
+      "suppliers": [
+        {
+          "id": "",
+          "name": ""
+        }
+      ],
+      --
+      "documents": [
+        {
+          "documentType": "",
+          "id": "",
+          --
+          "title": "",
+          --
+          "description": "",
+          "relatedLots": [
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "bidId": "",
+  --
+  "lotId": "",
+  --
+  "lotAwarded": true
 }
