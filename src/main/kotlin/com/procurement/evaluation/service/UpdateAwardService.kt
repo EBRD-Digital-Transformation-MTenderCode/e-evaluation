@@ -186,7 +186,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
     private fun saveAward(award: Award, awardEntity: AwardEntity?) {
         if (awardEntity != null) {
             val newEntity = awardEntity.copy(
-                    status = award.status!!.value(),
+                    status = award.status.value(),
                     statusDetails = award.statusDetails.value(),
                     jsonData = toJson(award))
             awardDao.save(newEntity)

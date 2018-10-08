@@ -2,7 +2,8 @@ package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType.*
+import com.procurement.evaluation.exception.ErrorType.CONTEXT
+import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.model.dto.AwardCancellation
 import com.procurement.evaluation.model.dto.CancellationRs
 import com.procurement.evaluation.model.dto.FinalStatusesRs
@@ -164,12 +165,11 @@ class StatusServiceImpl(private val periodService: PeriodService,
                           stage: String,
                           owner: String,
                           token: UUID): AwardEntity {
-        val status = award.status ?: throw ErrorException(STATUS)
         return AwardEntity(
                 cpId = cpId,
                 stage = stage,
                 token = token,
-                status = status.value(),
+                status = award.status.value(),
                 statusDetails = award.statusDetails.value(),
                 owner = owner,
                 jsonData = toJson(award))

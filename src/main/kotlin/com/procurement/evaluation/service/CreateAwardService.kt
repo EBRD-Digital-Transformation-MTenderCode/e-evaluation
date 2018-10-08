@@ -2,7 +2,8 @@ package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType.*
+import com.procurement.evaluation.exception.ErrorType.CONTEXT
+import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
@@ -178,12 +179,11 @@ class CreateAwardServiceImpl(private val rulesService: RulesService,
                           owner: String,
                           stage: String): AwardEntity {
         val token = UUID.fromString(award.token ?: throw ErrorException(TOKEN))
-        val status = award.status ?: throw ErrorException(STATUS)
         return AwardEntity(
                 cpId = cpId,
                 stage = stage,
                 token = token,
-                status = status.value(),
+                status = award.status.value(),
                 statusDetails = award.statusDetails.value(),
                 owner = owner,
                 jsonData = toJson(award))
