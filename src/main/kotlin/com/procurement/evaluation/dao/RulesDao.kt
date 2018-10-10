@@ -22,10 +22,10 @@ class RulesDao(private val session: Session) {
     }
 
     companion object {
-        private val RULES_TABLE = "evaluation_rules"
-        private val CONTRY = "country"
-        private val PMD = "pmd"
-        private val PARAMETER = "parameter"
-        private val VALUE = "value"
+        private const val RULES_TABLE = "evaluation_rules"
+        private const val CONTRY = "country"
+        private const val PMD = "pmd"
+        private const val PARAMETER = "parameter"
+        private const val VALUE = "value"
     }
 }
