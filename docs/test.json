@@ -1,30 +1,60 @@
 {
-  "id": "d986d022-aa69-4644-ae2e-4f413224f999",
-  "command": "awardsForCans",
-  "context": {
-    "operationId": "d986d021-aa69-4644-ae2e-4f413224f999",
-    "requestId": "3d318e40-cbe4-11e8-b979-5b374e7e1962",
-    "cpid": "ocds-t1s2t3-MD-1539010791308",
-    "ocid": "ocds-t1s2t3-MD-1539010791308-EV-1539010791397",
-    "stage": "EV",
-    "prevStage": "EV",
-    "processType": "awardPeriodEnd",
-    "operationType": "standstillPeriodEv",
-    "phase": "awardedContractPreparation",
-    "owner": "445f6851-c908-407d-9b45-14b92f3e964b",
-    "country": "MD",
-    "language": "ro",
-    "pmd": "TEST_OT",
-    "token": "d69e1572-8d02-4da3-8e06-756e1f63fb11",
-    "startDate": "2018-10-09T16:56:17Z",
-    "endDate": "2018-10-09T16:56:26Z"
-  },
-  "data": {
-    "items": null,
-    "standstillPeriod": {
-      "startDate": "2018-10-09T16:56:17Z",
-      "endDate": "2018-10-09T16:56:26Z"
+  "items": [
+    {
+      "id": "ceb80cc0-cb0a-11e8-aec7-5b636a964e1f",
+      "description": "p",
+      "classification": {
+        "scheme": "CPV",
+        "id": "03100000-2",
+        "description": "Produse agricole şi horticole"
+      },
+      "quantity": 100.00,
+      "unit": {
+        "id": "120",
+        "name": "Milion decalitri"
+      },
+      "relatedLot": "ceb80cc2-cb0a-11e8-aec7-5b636a964e1f"
+    },
+    {
+      "id": "ceb80cc1-cb0a-11e8-aec7-5b636a964e1f",
+      "description": "p",
+      "classification": {
+        "scheme": "CPV",
+        "id": "03100000-2",
+        "description": "Produse agricole şi horticole"
+      },
+      "quantity": 100.00,
+      "unit": {
+        "id": "120",
+        "name": "Milion decalitri"
+      },
+      "relatedLot": "ceb80cc3-cb0a-11e8-aec7-5b636a964e1f"
     }
+  ],
+  "standstillPeriod": {
+    "startDate": "2018-10-10T07:39:19Z",
+    "endDate": "2018-10-10T07:39:40Z"
   },
-  "version": "0.0.1"
+  "awards": [
+    {
+      "id": "3a165bb2-cb0c-11e8-8560-53a31f0ed8f0",
+      "items": [
+        {
+          "id": "ceb80cc1-cb0a-11e8-aec7-5b636a964e1f",
+          "description": "p",
+          "classification": {
+            "scheme": "CPV",
+            "id": "03100000-2",
+            "description": "Produse agricole şi horticole"
+          },
+          "quantity": 100.00,
+          "unit": {
+            "id": "120",
+            "name": "Milion decalitri"
+          },
+          "relatedLot": "ceb80cc3-cb0a-11e8-aec7-5b636a964e1f"
+        }
+      ]
+    }
+  ]
 }
