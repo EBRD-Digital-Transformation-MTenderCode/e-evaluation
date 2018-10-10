@@ -89,13 +89,13 @@ class AwardDao(private val session: Session) {
     }
 
     companion object {
-        private val AWARD_TABLE = "evaluation_award"
-        private val CP_ID = "cp_id"
-        private val STAGE = "stage"
-        private val TOKEN = "token_entity"
-        private val OWNER = "owner"
-        private val STATUS = "status"
-        private val STATUS_DETAILS = "status_details"
-        private val JSON_DATA = "json_data"
+        private const val AWARD_TABLE = "evaluation_award"
+        private const val CP_ID = "cp_id"
+        private const val STAGE = "stage"
+        private const val TOKEN = "token_entity"
+        private const val OWNER = "owner"
+        private const val STATUS = "status"
+        private const val STATUS_DETAILS = "status_details"
+        private const val JSON_DATA = "json_data"
     }
 }

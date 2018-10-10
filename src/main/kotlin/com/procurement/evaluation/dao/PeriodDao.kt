@@ -39,11 +39,11 @@ class PeriodDao(private val session: Session) {
     }
 
     companion object {
-        private val PERIOD_TABLE = "evaluation_period"
-        private val CP_ID = "cp_id"
-        private val AWARD_CRITERIA = "award_criteria"
-        private val STAGE = "stage"
-        private val START_DATE = "start_date"
-        private val END_DATE = "end_date"
+        private const val PERIOD_TABLE = "evaluation_period"
+        private const val CP_ID = "cp_id"
+        private const val AWARD_CRITERIA = "award_criteria"
+        private const val STAGE = "stage"
+        private const val START_DATE = "start_date"
+        private const val END_DATE = "end_date"
     }
 }
