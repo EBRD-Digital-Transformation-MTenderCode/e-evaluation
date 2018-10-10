@@ -7,18 +7,10 @@ import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.entity.PeriodEntity
 import org.springframework.stereotype.Service
 
-interface PeriodDao {
-
-    fun save(entity: PeriodEntity)
-
-    fun getByCpIdAndStage(cpId: String, stage: String): PeriodEntity
-
-}
-
 @Service
-class PeriodDaoImpl(private val session: Session) : PeriodDao {
+class PeriodDao(private val session: Session) {
 
-    override fun save(entity: PeriodEntity) {
+    fun save(entity: PeriodEntity) {
         val insert =
                 insertInto(PERIOD_TABLE)
                         .value(CP_ID, entity.cpId)
@@ -29,7 +21,7 @@ class PeriodDaoImpl(private val session: Session) : PeriodDao {
         session.execute(insert)
     }
 
-    override fun getByCpIdAndStage(cpId: String, stage: String): PeriodEntity {
+    fun getByCpIdAndStage(cpId: String, stage: String): PeriodEntity {
         val query = select()
                 .all()
                 .from(PERIOD_TABLE)

@@ -11,22 +11,10 @@ import com.procurement.evaluation.model.entity.AwardEntity
 import org.springframework.stereotype.Service
 import java.util.*
 
-interface AwardDao {
-
-    fun save(entity: AwardEntity)
-
-    fun saveAll(entities: List<AwardEntity>)
-
-    fun findAllByCpIdAndStage(cpId: String, stage: String): List<AwardEntity>
-
-    fun getByCpIdAndStageAndToken(cpId: String, stage: String, token: UUID): AwardEntity
-
-}
-
 @Service
-class AwardDaoImpl(private val session: Session) : AwardDao {
+class AwardDao(private val session: Session) {
 
-    override fun save(entity: AwardEntity) {
+    fun save(entity: AwardEntity) {
         val insert =
                 QueryBuilder.insertInto(AWARD_TABLE)
                         .value(CP_ID, entity.cpId)
@@ -40,7 +28,7 @@ class AwardDaoImpl(private val session: Session) : AwardDao {
     }
 
 
-    override fun saveAll(entities: List<AwardEntity>) {
+    fun saveAll(entities: List<AwardEntity>) {
         val operations = ArrayList<Insert>()
         entities.forEach { entity ->
             operations.add(QueryBuilder.insertInto(AWARD_TABLE)
@@ -57,7 +45,7 @@ class AwardDaoImpl(private val session: Session) : AwardDao {
         session.execute(batch)
     }
 
-    override fun findAllByCpIdAndStage(cpId: String, stage: String): List<AwardEntity> {
+    fun findAllByCpIdAndStage(cpId: String, stage: String): List<AwardEntity> {
         val query = select()
                 .all()
                 .from(AWARD_TABLE)
@@ -79,7 +67,7 @@ class AwardDaoImpl(private val session: Session) : AwardDao {
         return entities
     }
 
-    override fun getByCpIdAndStageAndToken(cpId: String, stage: String, token: UUID): AwardEntity {
+    fun getByCpIdAndStageAndToken(cpId: String, stage: String, token: UUID): AwardEntity {
         val query = select()
                 .all()
                 .from(AWARD_TABLE)
