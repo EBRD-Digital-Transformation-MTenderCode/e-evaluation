@@ -10,21 +10,10 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
 
-interface PeriodService {
-
-    fun saveStartOfPeriod(cpId: String, stage: String, startDate: LocalDateTime, awardCriteria: String): Period
-
-    fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period
-
-    fun savePeriod(cpId: String, stage: String, startDate: LocalDateTime, endDate: LocalDateTime, awardCriteria: String): Period
-
-    fun checkPeriod(cpId: String, stage: String): Boolean
-}
-
 @Service
-class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService {
+class PeriodService(private val periodRepository: PeriodDao) {
 
-    override fun saveStartOfPeriod(cpId: String, stage: String, startDate: LocalDateTime, awardCriteria: String): Period {
+    fun saveStartOfPeriod(cpId: String, stage: String, startDate: LocalDateTime, awardCriteria: String): Period {
         val period = getEntity(
                 cpId = cpId,
                 stage = stage,
@@ -36,7 +25,7 @@ class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService
         return Period(period.startDate.toLocal(), null)
     }
 
-    override fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period {
+    fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period {
         val period = periodRepository.getByCpIdAndStage(cpId, stage)
         val newPeriod = getEntity(
                 cpId = period.cpId,
@@ -49,7 +38,7 @@ class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService
         return Period(newPeriod.startDate.toLocal(), newPeriod.endDate?.toLocal())
     }
 
-    override fun savePeriod(cpId: String, stage: String, startDate: LocalDateTime, endDate: LocalDateTime, awardCriteria: String): Period {
+    fun savePeriod(cpId: String, stage: String, startDate: LocalDateTime, endDate: LocalDateTime, awardCriteria: String): Period {
         val period = getEntity(
                 cpId = cpId,
                 stage = stage,
@@ -61,7 +50,7 @@ class PeriodServiceImpl(private val periodRepository: PeriodDao) : PeriodService
         return Period(period.startDate.toLocal(), period.endDate?.toLocal())
     }
 
-    override fun checkPeriod(cpId: String, stage: String): Boolean {
+    fun checkPeriod(cpId: String, stage: String): Boolean {
         val localDateTime = localNowUTC()
         val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
         val isStartDateValid = localDateTime >= periodEntity.startDate.toLocal()

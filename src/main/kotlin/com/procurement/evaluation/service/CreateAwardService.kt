@@ -13,18 +13,13 @@ import com.procurement.evaluation.utils.*
 import org.springframework.stereotype.Service
 import java.util.*
 
-interface CreateAwardService {
-
-    fun createAwards(cm: CommandMessage): ResponseDto
-}
-
 @Service
-class CreateAwardServiceImpl(private val rulesService: RulesService,
-                             private val periodService: PeriodService,
-                             private val awardDao: AwardDao,
-                             private val generationService: GenerationService) : CreateAwardService {
+class CreateAwardService(private val rulesService: RulesService,
+                         private val periodService: PeriodService,
+                         private val awardDao: AwardDao,
+                         private val generationService: GenerationService) {
 
-    override fun createAwards(cm: CommandMessage): ResponseDto {
+    fun createAwards(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)

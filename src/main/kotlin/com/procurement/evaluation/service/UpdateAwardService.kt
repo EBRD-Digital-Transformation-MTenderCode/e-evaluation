@@ -21,18 +21,11 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
 
-interface UpdateAwardService {
-
-    fun awardByBid(cm: CommandMessage): ResponseDto
-
-    fun awardsForCans(cm: CommandMessage): ResponseDto
-}
-
 @Service
-class UpdateAwardServiceImpl(private val awardDao: AwardDao,
-                             private val periodDao: PeriodDao) : UpdateAwardService {
+class UpdateAwardService(private val awardDao: AwardDao,
+                         private val periodDao: PeriodDao) {
 
-    override fun awardByBid(cm: CommandMessage): ResponseDto {
+    fun awardByBid(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val token = cm.context.token ?: throw ErrorException(CONTEXT)
@@ -150,7 +143,7 @@ class UpdateAwardServiceImpl(private val awardDao: AwardDao,
         )
     }
 
-    override fun awardsForCans(cm: CommandMessage): ResponseDto {
+    fun awardsForCans(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val dto = toObject(AwardsForCansRq::class.java, cm.data)

@@ -5,16 +5,10 @@ import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import org.springframework.stereotype.Service
 
-interface RulesService {
-
-    fun getRulesMinBids(country: String, method: String): Int
-}
-
 @Service
-class RulesServiceImpl(private val rulesDao: RulesDao) : RulesService {
+class RulesService(private val rulesDao: RulesDao) {
 
-
-    override fun getRulesMinBids(country: String, method: String): Int {
+    fun getRulesMinBids(country: String, method: String): Int {
         return rulesDao.getValue(country, method, PARAMETER_MIN_BIDS)?.toIntOrNull()
                 ?: throw ErrorException(ErrorType.BIDS_RULES)
     }
