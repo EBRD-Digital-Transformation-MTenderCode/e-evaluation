@@ -52,6 +52,37 @@ class CreateAwardService(private val rulesService: RulesService,
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
     }
 
+    fun createAwardsByLotsMdOt(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val country = cm.context.country ?: throw ErrorException(CONTEXT)
+        val pmd = cm.context.pmd ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
+        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
+
+        val dto = toObject(CreateAwardsRq::class.java, cm.data)
+        val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
+        val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
+
+        for (lot in dto.lots){
+            val lotId=lot.id
+            //todo получить все биды по данному лоту, если бидов меньше чем надо - добавить в список неуспешных
+            //тоесть получить список неуспешных лотов!!!
+            //для неуспешных лотов сформировать аварды по правилу 7,5,9
+            for (bid in dto.bids){
+
+            }
+        }
+        val lotsFromTender = getLotsFromTender(dto.lots)
+        val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
+        val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
+        //todo 7.5.11
+        //todo saves awards
+        periodService.saveAwardCriteria(cpId, stage, dto.awardCriteria)
+        //todo Returns list of Lots.ID && list of Awards;
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private fun getRelatedLotsIdFromBids(bids: List<Bid>): List<String> {
         return bids.asSequence().flatMap { it.relatedLots.asSequence() }.toList()
     }

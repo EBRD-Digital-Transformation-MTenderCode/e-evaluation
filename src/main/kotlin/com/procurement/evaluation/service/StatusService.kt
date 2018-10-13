@@ -12,6 +12,7 @@ import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.dto.ocds.Status
+import com.procurement.evaluation.model.dto.selections.CreateAwardsRq
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toLocal

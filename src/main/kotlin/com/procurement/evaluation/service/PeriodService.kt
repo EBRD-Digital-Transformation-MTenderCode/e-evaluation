@@ -22,7 +22,7 @@ class PeriodService(private val periodRepository: PeriodDao) {
                 endDate = null
         )
         periodRepository.save(period)
-        return Period(period.startDate.toLocal(), null)
+        return Period(period.startDate!!.toLocal(), null)
     }
 
     fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period {
@@ -31,11 +31,11 @@ class PeriodService(private val periodRepository: PeriodDao) {
                 cpId = period.cpId,
                 stage = period.stage,
                 awardCriteria = period.awardCriteria,
-                startDate = period.startDate,
+                startDate = period.startDate!!,
                 endDate = endDate.toDate()
         )
         periodRepository.save(newPeriod)
-        return Period(newPeriod.startDate.toLocal(), newPeriod.endDate?.toLocal())
+        return Period(period.startDate!!.toLocal(), endDate)
     }
 
     fun savePeriod(cpId: String, stage: String, startDate: LocalDateTime, endDate: LocalDateTime, awardCriteria: String): Period {
@@ -47,13 +47,24 @@ class PeriodService(private val periodRepository: PeriodDao) {
                 endDate = endDate.toDate()
         )
         periodRepository.save(period)
-        return Period(period.startDate.toLocal(), period.endDate?.toLocal())
+        return Period(startDate, endDate)
+    }
+
+    fun saveAwardCriteria(cpId: String, stage: String, awardCriteria: String) {
+        val period = getEntity(
+                cpId = cpId,
+                stage = stage,
+                awardCriteria = awardCriteria,
+                startDate = null,
+                endDate = null
+        )
+        periodRepository.save(period)
     }
 
     fun checkPeriod(cpId: String, stage: String): Boolean {
         val localDateTime = localNowUTC()
         val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
-        val isStartDateValid = localDateTime >= periodEntity.startDate.toLocal()
+        val isStartDateValid = localDateTime >= periodEntity.startDate!!.toLocal()
         var isEndDateValid = true
         if (periodEntity.endDate != null) {
             isEndDateValid = localDateTime <= periodEntity.endDate!!.toLocal()
@@ -63,9 +74,10 @@ class PeriodService(private val periodRepository: PeriodDao) {
 
     private fun getEntity(cpId: String,
                           stage: String,
-                          startDate: Date,
-                          awardCriteria: String,
-                          endDate: Date?): PeriodEntity {
+                          startDate: Date?,
+                          endDate: Date?,
+                          awardCriteria: String
+                          ): PeriodEntity {
         return PeriodEntity(
                 cpId = cpId,
                 stage = stage,
