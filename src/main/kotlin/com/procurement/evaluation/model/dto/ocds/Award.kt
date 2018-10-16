@@ -18,6 +18,8 @@ data class Award @JsonCreator constructor(
 
         var description: String?,
 
+        var title:String?,
+
         var status: Status,
 
         @field:NotNull

@@ -7,6 +7,7 @@ import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
+import com.procurement.evaluation.model.dto.selections.CreateAwardsByLotsRs
 import com.procurement.evaluation.model.dto.selections.CreateAwardsRq
 import com.procurement.evaluation.model.dto.selections.CreateAwardsRs
 import com.procurement.evaluation.model.entity.AwardEntity
@@ -57,30 +58,19 @@ class CreateAwardService(private val rulesService: RulesService,
         val country = cm.context.country ?: throw ErrorException(CONTEXT)
         val pmd = cm.context.pmd ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
 
         val dto = toObject(CreateAwardsRq::class.java, cm.data)
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
         val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
-
-        for (lot in dto.lots){
-            val lotId=lot.id
-            //todo получить все биды по данному лоту, если бидов меньше чем надо - добавить в список неуспешных
-            //тоесть получить список неуспешных лотов!!!
-            //для неуспешных лотов сформировать аварды по правилу 7,5,9
-            for (bid in dto.bids){
-
-            }
-        }
-        val lotsFromTender = getLotsFromTender(dto.lots)
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        //todo 7.5.11
-        //todo saves awards
+        val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
+        val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
+        saveAwards(unsuccessfulAwardsList, cpId, owner, stage)
         periodService.saveAwardCriteria(cpId, stage, dto.awardCriteria)
-        //todo Returns list of Lots.ID && list of Awards;
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+        return ResponseDto(data = CreateAwardsByLotsRs(unsuccessfulAwardsList, unsuccessfulLots))
     }
 
     private fun getRelatedLotsIdFromBids(bids: List<Bid>): List<String> {
@@ -129,6 +119,7 @@ class CreateAwardService(private val rulesService: RulesService,
                     id = generationService.getTimeBasedUUID(),
                     date = localNowUTC(),
                     description = "",
+                    title = null,
                     status = Status.PENDING,
                     statusDetails = Status.EMPTY,
                     value = bid.value,
@@ -146,7 +137,8 @@ class CreateAwardService(private val rulesService: RulesService,
                     token = generationService.generateRandomUUID().toString(),
                     id = generationService.getTimeBasedUUID(),
                     date = localNowUTC(),
-                    description = "",
+                    description = "Other reasons (discontinuation of procedure)",
+                    title = "The contract/lot is not awarded",
                     status = Status.UNSUCCESSFUL,
                     statusDetails = Status.EMPTY,
                     value = null,
