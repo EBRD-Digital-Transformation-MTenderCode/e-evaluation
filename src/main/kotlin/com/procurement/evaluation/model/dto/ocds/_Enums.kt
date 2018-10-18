@@ -48,6 +48,7 @@ enum class DocumentType constructor(private val value: String) {
     CONTRACT_SUMMARY("contractSummary"),
     CANCELLATION_DETAILS("cancellationDetails");
 
+
     override fun toString(): String {
         return this.value
     }
