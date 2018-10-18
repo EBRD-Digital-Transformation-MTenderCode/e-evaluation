@@ -221,7 +221,6 @@ class UpdateAwardService(private val awardDao: AwardDao,
         if (award.id != awardId) throw ErrorException(ID)
         verifyDocumentsRelatedLots(award.relatedLots, dto.award.documents)
         verifyRequestStatusDetails(dto.award.statusDetails)
-        verifyAwardByBidDocType(dto.award.documents)
     }
 
     private fun verifyDocumentsRelatedLots(relatedLots: List<String>, documents: List<Document>?) {
@@ -238,20 +237,4 @@ class UpdateAwardService(private val awardDao: AwardDao,
         if (!(statusDetails == Status.ACTIVE || statusDetails == Status.UNSUCCESSFUL)) throw ErrorException(STATUS_DETAILS)
     }
 
-    private fun verifyAwardByBidDocType(documents: List<Document>?) {
-        val validTypes = arrayListOf<DocumentType>()
-        validTypes.add(DocumentType.AWARD_NOTICE)
-        validTypes.add(DocumentType.EVALUATION_REPORTS)
-        validTypes.add(DocumentType.SHORTLISTED_FIRMS)
-        validTypes.add(DocumentType.WINNING_BID)
-        validTypes.add(DocumentType.COMPLAINTS)
-        validTypes.add(DocumentType.BIDDERS)
-        validTypes.add(DocumentType.CONFLICT_OF_INTEREST)
-        validTypes.add(DocumentType.CANCELLATION_DETAILS)
-        if (documents != null) {
-            for (document in documents) {
-                if (!validTypes.contains(document.documentType)) throw ErrorException(DOC_TYPE)
-            }
-        }
-    }
 }
