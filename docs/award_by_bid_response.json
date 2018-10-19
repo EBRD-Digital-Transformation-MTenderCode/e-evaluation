@@ -1,45 +1,36 @@
 {
-  "awards": [
-    {
-      "id": "",
-      "date": "",
-      --
-      "description": "",
-      "status": "",
-      "statusDetails": "",
-      "relatedLots": [
-        ""
-      ],
-      "relatedBid": "",
-      "value": {
-        "amount": "",
-        "currency": ""
-      },
-      "suppliers": [
-        {
-          "id": "",
-          "name": ""
-        }
-      ],
-      --
+  "id": "2227257c-31d9-4347-ad75-c2f81fdf9333",
+  "command": "awardByBid",
+  "context": {
+    "operationId": "2217257c-31d9-4347-ad75-c2f81fdf9333",
+    "requestId": "2eb63470-d2fa-11e8-80be-a55dbe3e3d08",
+    "cpid": "ocds-t1s2t3-MD-1539881896036",
+    "ocid": "ocds-t1s2t3-MD-1539881896036-EV-1539881896147",
+    "stage": "EV",
+    "prevStage": "EV",
+    "processType": "awardByBid",
+    "operationType": "awardByBidEv",
+    "phase": "awarding",
+    "owner": "445f6851-c908-407d-9b45-14b92f3e964b",
+    "country": "MD",
+    "language": "ro",
+    "pmd": "TEST_OT",
+    "token": "8e0469a7-52bc-41cb-af5b-ca6dd923bdb7",
+    "startDate": "2018-10-18T17:21:00Z",
+    "id": "167e79f0-d2f8-11e8-9971-fd3c2a637abf",
+    "isAuction": false
+  },
+  "data": {
+    "award": {
+      "statusDetails": "active",
+      "description": "Good",
       "documents": [
         {
-          "documentType": "",
-          "id": "",
-          --
-          "title": "",
-          --
-          "description": "",
-          "relatedLots": [
-            ""
-          ]
+          "documentType": "contractDraft",
+          "id": "f33eeb0e-eb12-476c-a62c-b35cec612b9c-1539341161194"
         }
       ]
     }
-  ],
-  "bidId": "",
-  --
-  "lotId": "",
-  --
-  "lotAwarded": true
+  },
+  "version": "0.0.1"
 }
