@@ -10,22 +10,17 @@ import javax.validation.constraints.NotNull
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Bid @JsonCreator constructor(
 
-        @field:NotNull
         val id: String,
 
-        @field:NotNull
-        val date: LocalDateTime,
+        val date: LocalDateTime?,
 
         val pendingDate: LocalDateTime?,
 
         val createdDate: LocalDateTime?,
 
-        @field:Valid @field:NotNull
         val value: Value,
 
-        @field:Valid @field:NotNull @field:NotEmpty
         val tenderers: List<OrganizationReference>,
 
-        @field:Valid @field:NotNull @field:NotEmpty
         val relatedLots: List<String>
 )
