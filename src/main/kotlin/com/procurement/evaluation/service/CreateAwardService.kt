@@ -53,7 +53,7 @@ class CreateAwardService(private val rulesService: RulesService,
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
     }
 
-    fun createAwardsByLotsMdOt(cm: CommandMessage): ResponseDto {
+    fun createAwardsByLotsAuction(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val country = cm.context.country ?: throw ErrorException(CONTEXT)
         val pmd = cm.context.pmd ?: throw ErrorException(CONTEXT)
