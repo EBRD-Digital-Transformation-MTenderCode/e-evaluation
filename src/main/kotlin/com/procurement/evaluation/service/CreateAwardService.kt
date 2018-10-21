@@ -85,8 +85,8 @@ class CreateAwardService(private val rulesService: RulesService,
         val pmd = cm.context.pmd ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
-
         val dto = toObject(CreateAwardsAuctionRq::class.java, cm.data)
+
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
         val dtoBidsList = getBidsFromBidsData(dto.bidsData)
         val relatedLotsFromBids = getRelatedLotsIdFromBids(dtoBidsList)
