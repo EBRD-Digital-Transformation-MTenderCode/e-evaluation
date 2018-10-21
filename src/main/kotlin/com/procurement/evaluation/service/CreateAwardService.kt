@@ -82,7 +82,7 @@ class CreateAwardService(private val rulesService: RulesService,
         }
         saveAwards(awards, cpId, owner, stage)
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
+        return ResponseDto(data = CreateAwardsAuctionRs(unsuccessfulAwardsList, unsuccessfulLots))
     }
 
     fun createAwardsByLotsAuction(cm: CommandMessage): ResponseDto {
