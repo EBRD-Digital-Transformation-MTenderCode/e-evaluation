@@ -58,7 +58,6 @@ class CreateAwardService(private val rulesService: RulesService,
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
         val country = cm.context.country ?: throw ErrorException(CONTEXT)
         val pmd = cm.context.pmd ?: throw ErrorException(CONTEXT)
-        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(CreateAwardsAuctionRq::class.java, cm.data)
 
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
@@ -74,12 +73,7 @@ class CreateAwardService(private val rulesService: RulesService,
         sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(dto.tender.awardCriteria))
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val awards = successfulAwardsList + unsuccessfulAwardsList
-
-        val awardPeriod = if (successfulAwardsList.isEmpty()) {
-            periodService.savePeriod(cpId, stage, startDate, startDate, dto.tender.awardCriteria)
-        } else {
-            periodService.saveStartOfPeriod(cpId, stage, startDate, dto.tender.awardCriteria)
-        }
+        periodService.saveAwardCriteria(cpId, stage, dto.tender.awardCriteria)
         saveAwards(awards, cpId, owner, stage)
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         return ResponseDto(data = CreateAwardsAuctionRs(unsuccessfulAwardsList, unsuccessfulLots))
@@ -100,8 +94,8 @@ class CreateAwardService(private val rulesService: RulesService,
         val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        saveAwards(unsuccessfulAwardsList, cpId, owner, stage)
         periodService.saveAwardCriteria(cpId, stage, dto.tender.awardCriteria)
+        saveAwards(unsuccessfulAwardsList, cpId, owner, stage)
         return ResponseDto(data = CreateAwardsAuctionRs(unsuccessfulAwardsList, unsuccessfulLots))
     }
 
