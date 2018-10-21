@@ -8,7 +8,7 @@ import com.procurement.evaluation.model.dto.ocds.Lot
 
 data class CreateAwardsAuctionRq @JsonCreator constructor(
 
-        val tender: AuctionTender,
+        val tender: TenderAuction,
 
         val bidsData: Set<BidsData>
 )
@@ -21,7 +21,7 @@ data class CreateAwardsAuctionRs @JsonCreator constructor(
         val unsuccessfulLots: List<Lot>
 )
 
-data class AuctionTender @JsonCreator constructor(
+data class TenderAuction @JsonCreator constructor(
 
         val id: String?,
 
