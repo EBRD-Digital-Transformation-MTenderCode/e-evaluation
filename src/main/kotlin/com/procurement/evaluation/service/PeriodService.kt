@@ -77,7 +77,7 @@ class PeriodService(private val periodRepository: PeriodDao) {
                           startDate: Date?,
                           endDate: Date?,
                           awardCriteria: String
-                          ): PeriodEntity {
+    ): PeriodEntity {
         return PeriodEntity(
                 cpId = cpId,
                 stage = stage,

@@ -4,10 +4,10 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.exception.ErrorType.TOKEN
+import com.procurement.evaluation.model.dto.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
-import com.procurement.evaluation.model.dto.selections.*
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.*
 import org.springframework.stereotype.Service

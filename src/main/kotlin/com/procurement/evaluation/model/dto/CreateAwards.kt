@@ -1,12 +1,10 @@
-package com.procurement.evaluation.model.dto.selections
+package com.procurement.evaluation.model.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.Bid
 import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.dto.ocds.Period
-import javax.validation.Valid
-import javax.validation.constraints.NotNull
 
 data class CreateAwardsRq @JsonCreator constructor(
 

@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto.AwardsForCansRequestDto
+package com.procurement.evaluation.model.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.procurement.evaluation.model.dto.ocds.Item
