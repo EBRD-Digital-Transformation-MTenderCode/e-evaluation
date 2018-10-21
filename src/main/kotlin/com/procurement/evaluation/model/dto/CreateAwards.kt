@@ -12,10 +12,8 @@ data class CreateAwardsRq @JsonCreator constructor(
 
         val awardCriteria: String,
 
-        @field:Valid @field:NotNull
         val lots: List<Lot>,
 
-        @field:Valid @field:NotNull
         val bids: List<Bid>
 )
 

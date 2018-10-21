@@ -26,6 +26,7 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
             CommandType.PREPARE_CANCELLATION -> statusService.prepareCancellation(cm)
             CommandType.AWARDS_CANCELLATION -> statusService.awardsCancellation(cm)
+            CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_BY_LOTS_MD_OT -> createAwardService.createAwardsByLotsAuction(cm)
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
