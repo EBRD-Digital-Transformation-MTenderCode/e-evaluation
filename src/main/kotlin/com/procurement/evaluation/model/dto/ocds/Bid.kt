@@ -15,7 +15,7 @@ data class Bid @JsonCreator constructor(
 
         val createdDate: LocalDateTime?,
 
-        val value: Value,
+        var value: Value,
 
         val tenderers: List<OrganizationReference>,
 
