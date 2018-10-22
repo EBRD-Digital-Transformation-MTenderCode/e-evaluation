@@ -1,6 +1,8 @@
 package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.PeriodDao
+import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.ocds.Period
 import com.procurement.evaluation.model.entity.PeriodEntity
 import com.procurement.evaluation.utils.localNowUTC
@@ -59,6 +61,15 @@ class PeriodService(private val periodRepository: PeriodDao) {
                 endDate = null
         )
         periodRepository.save(period)
+    }
+
+    fun getAwardCriteria(cpId: String, stage: String): String {
+        val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
+        if (periodEntity != null ){
+            return periodEntity.awardCriteria
+        }else{
+            throw ErrorException(ErrorType.DATA_NOT_FOUND)
+        }
     }
 
     fun checkPeriod(cpId: String, stage: String): Boolean {

@@ -116,13 +116,12 @@ class CreateAwardService(private val rulesService: RulesService,
         val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(CreateAwardsAuctionEndRq::class.java, cm.data)
 
+
+        val awardCriteria = periodService.getAwardCriteria(cpId, stage)
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
         val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
-        val lotsFromTenderSet = getLotsFromTender(dto.lots)
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        addUnsuccessfulLotsFromTender(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val auctionResultList = dto.tender.electronicAuctions.details.asSequence()
                 .flatMap { it.electronicAuctionResult.asSequence() }.toList()
@@ -132,18 +131,11 @@ class CreateAwardService(private val rulesService: RulesService,
                 bid.value = res.value
             }
         }
-        val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(dto.awardCriteria))
-        val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
-        val awards = successfulAwardsList + unsuccessfulAwardsList
-        val awardPeriod = if (successfulAwardsList.isEmpty()) {
-            periodService.savePeriod(cpId, stage, startDate, startDate, dto.awardCriteria)
-        } else {
-            periodService.saveStartOfPeriod(cpId, stage, startDate, dto.awardCriteria)
-        }
+        val awards = getSuccessfulAwards(successfulBidsList)
+        sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria))
+        val awardPeriod = periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
         saveAwards(awards, cpId, owner, stage)
-        val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
+        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, null))
     }
 
     private fun getBidsFromBidsData(bidsData: Set<BidsData>): List<Bid> {
