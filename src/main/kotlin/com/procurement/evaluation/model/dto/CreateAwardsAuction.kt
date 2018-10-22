@@ -2,7 +2,6 @@ package com.procurement.evaluation.model.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.Bid
 import com.procurement.evaluation.model.dto.ocds.Lot
 

@@ -65,9 +65,9 @@ class PeriodService(private val periodRepository: PeriodDao) {
 
     fun getAwardCriteria(cpId: String, stage: String): String {
         val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
-        if (periodEntity != null ){
+        if (periodEntity != null) {
             return periodEntity.awardCriteria
-        }else{
+        } else {
             throw ErrorException(ErrorType.DATA_NOT_FOUND)
         }
     }
