@@ -15,16 +15,6 @@ data class CreateAwardsAuctionEndRq @JsonCreator constructor(
         val bids: List<Bid>
 )
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class CreateAwardsAuctionEndRs @JsonCreator constructor(
-
-        val awardPeriod: Period,
-
-        val awards: List<Award>,
-
-        val unsuccessfulLots: List<Lot>
-)
-
 data class TenderAuctionEnd @JsonCreator constructor(
 
         val electronicAuctions: ElectronicAuctions

@@ -1,6 +1,7 @@
 package com.procurement.evaluation.model.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.Bid
 import com.procurement.evaluation.model.dto.ocds.Lot
@@ -13,13 +14,4 @@ data class CreateAwardsRq @JsonCreator constructor(
         val lots: List<Lot>,
 
         val bids: List<Bid>
-)
-
-data class CreateAwardsRs(
-
-        val awardPeriod: Period,
-
-        val awards: List<Award>,
-
-        val unsuccessfulLots: List<Lot>
 )

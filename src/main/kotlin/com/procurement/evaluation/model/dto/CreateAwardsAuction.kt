@@ -13,14 +13,6 @@ data class CreateAwardsAuctionRq @JsonCreator constructor(
         val bidsData: Set<BidsData>
 )
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class CreateAwardsAuctionRs @JsonCreator constructor(
-
-        val awards: List<Award>,
-
-        val unsuccessfulLots: List<Lot>
-)
-
 data class TenderAuction @JsonCreator constructor(
 
         val id: String?,
