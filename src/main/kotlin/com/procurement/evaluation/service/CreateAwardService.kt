@@ -116,7 +116,6 @@ class CreateAwardService(private val rulesService: RulesService,
         val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(CreateAwardsAuctionEndRq::class.java, cm.data)
 
-
         val awardCriteria = periodService.getAwardCriteria(cpId, stage)
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
         val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
