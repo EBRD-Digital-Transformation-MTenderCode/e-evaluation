@@ -8,10 +8,6 @@ data class CreateAwardsAuctionEndRq @JsonCreator constructor(
 
         val tender: TenderAuctionEnd,
 
-//        val awardCriteria: String,
-
-//        val lots: List<Lot>,
-
         val bids: List<Bid>
 )
 
