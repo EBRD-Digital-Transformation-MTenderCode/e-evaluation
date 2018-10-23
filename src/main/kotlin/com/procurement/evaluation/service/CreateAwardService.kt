@@ -35,7 +35,7 @@ class CreateAwardService(private val rulesService: RulesService,
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
         val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        addUnsuccessfulLotsFromTender(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
+        addUnsuccessfulLots(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
         sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(dto.awardCriteria))
@@ -69,7 +69,7 @@ class CreateAwardService(private val rulesService: RulesService,
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
         val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        addUnsuccessfulLotsFromTender(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
+        addUnsuccessfulLots(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dtoBidsList, successfulLotsSet)
         val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
         sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(dto.tender.awardCriteria))
@@ -100,7 +100,7 @@ class CreateAwardService(private val rulesService: RulesService,
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
         val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        addUnsuccessfulLotsFromTender(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
+        addUnsuccessfulLots(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         periodService.saveAwardCriteria(cpId, stage, dto.tender.awardCriteria)
@@ -117,11 +117,17 @@ class CreateAwardService(private val rulesService: RulesService,
         val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(CreateAwardsAuctionEndRq::class.java, cm.data)
 
+        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         val awardCriteria = periodService.getAwardCriteria(cpId, stage)
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
-        val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
+
+        val unsuccessfulLotsFromAwardEntities = getUnsuccessfulLotsFromAwardEntities(awardEntities)
+        val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids).asSequence()
+                .filter {!unsuccessfulLotsFromAwardEntities.contains(it)}.toList()
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
+        val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
+        addUnsuccessfulLots(unsuccessfulLotsFromAwardEntities, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val auctionResultList = dto.tender.electronicAuctions.details.asSequence()
                 .flatMap { it.electronicAuctionResult.asSequence() }.toList()
@@ -136,8 +142,15 @@ class CreateAwardService(private val rulesService: RulesService,
         sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria))
         val awardPeriod = periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
         saveAwards(awards, cpId, owner, stage)
-        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, null))
+        val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
+        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
     }
+
+    private fun getUnsuccessfulLotsFromAwardEntities(awardEntities: List<AwardEntity>): HashSet<String> {
+        val awards =  awardEntities.asSequence().map { toObject(Award::class.java, it.jsonData) }.toSet()
+        return awards.asSequence().flatMap { it.relatedLots.asSequence() }.toHashSet()
+    }
+
 
     private fun getBidsFromBidsData(bidsData: Set<BidsData>): List<Bid> {
         return bidsData.asSequence()
@@ -168,9 +181,9 @@ class CreateAwardService(private val rulesService: RulesService,
                 .toHashSet()
     }
 
-    private fun addUnsuccessfulLotsFromTender(lotsFromTender: HashSet<String>,
-                                              successfulLots: HashSet<String>,
-                                              unsuccessfulLots: HashSet<String>) {
+    private fun addUnsuccessfulLots(lotsFromTender: HashSet<String>,
+                                    successfulLots: HashSet<String>,
+                                    unsuccessfulLots: HashSet<String>) {
         lotsFromTender.asSequence()
                 .filter { !successfulLots.contains(it) && !unsuccessfulLots.contains(it) }
                 .toCollection(unsuccessfulLots)
