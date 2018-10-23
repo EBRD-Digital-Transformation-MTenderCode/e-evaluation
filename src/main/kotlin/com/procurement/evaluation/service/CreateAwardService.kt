@@ -144,7 +144,6 @@ class CreateAwardService(private val rulesService: RulesService,
         return awards.asSequence().flatMap { it.relatedLots.asSequence() }.toHashSet()
     }
 
-
     private fun getBidsFromBidsData(bidsData: Set<BidsData>): List<Bid> {
         return bidsData.asSequence()
                 .flatMap { it.bids.asSequence() }
