@@ -1,60 +1,191 @@
 {
-  "items": [
-    {
-      "id": "ceb80cc0-cb0a-11e8-aec7-5b636a964e1f",
-      "description": "p",
-      "classification": {
-        "scheme": "CPV",
-        "id": "03100000-2",
-        "description": "Produse agricole şi horticole"
-      },
-      "quantity": 100.00,
-      "unit": {
-        "id": "120",
-        "name": "Milion decalitri"
-      },
-      "relatedLot": "ceb80cc2-cb0a-11e8-aec7-5b636a964e1f"
-    },
-    {
-      "id": "ceb80cc1-cb0a-11e8-aec7-5b636a964e1f",
-      "description": "p",
-      "classification": {
-        "scheme": "CPV",
-        "id": "03100000-2",
-        "description": "Produse agricole şi horticole"
-      },
-      "quantity": 100.00,
-      "unit": {
-        "id": "120",
-        "name": "Milion decalitri"
-      },
-      "relatedLot": "ceb80cc3-cb0a-11e8-aec7-5b636a964e1f"
-    }
-  ],
-  "standstillPeriod": {
-    "startDate": "2018-10-10T07:39:19Z",
-    "endDate": "2018-10-10T07:39:40Z"
+  "id": "68012340-d6e5-11e8-988a-67168e70f033",
+  "command": "createAwardsAuctionEnd",
+  "context": {
+    "operationId": "68012340-d6e5-11e8-988a-67168e70f033",
+    "requestId": "68012340-d6e5-11e8-988a-67168e70f033",
+    "cpid": "ocds-t1s2t3-MD-1540313147302",
+    "ocid": "ocds-t1s2t3-MD-1540313147302-EV-1540313147460",
+    "stage": "EV",
+    "processType": "auctionPeriodEnd",
+    "operationType": "auctionPeriodEnd",
+    "phase": "awarding",
+    "owner": "445f6851-c908-407d-9b45-14b92f3e964b",
+    "country": "MD",
+    "language": "ro",
+    "pmd": "TEST_SV",
+    "token": "e7b3466b-73a0-4206-967e-1044bc46dadb",
+    "startDate": "2018-10-23T17:02:21Z",
+    "timeStamp": 1540314141558376,
+    "isAuction": true
   },
-  "awards": [
-    {
-      "id": "3a165bb2-cb0c-11e8-8560-53a31f0ed8f0",
-      "items": [
-        {
-          "id": "ceb80cc1-cb0a-11e8-aec7-5b636a964e1f",
-          "description": "p",
-          "classification": {
-            "scheme": "CPV",
-            "id": "03100000-2",
-            "description": "Produse agricole şi horticole"
-          },
-          "quantity": 100.00,
-          "unit": {
-            "id": "120",
-            "name": "Milion decalitri"
-          },
-          "relatedLot": "ceb80cc3-cb0a-11e8-aec7-5b636a964e1f"
-        }
-      ]
-    }
-  ]
+  "data": {
+    "tender": {
+      "auctionPeriod": {
+        "startDate": "2018-10-23T16:55:00Z",
+        "endDate": "2018-10-23T17:01:35Z"
+      },
+      "electronicAuctions": {
+        "details": [
+          {
+            "id": "41c04e1f-8bac-47d8-9538-ce75098549f8",
+            "relatedLot": "17620461-d6e3-11e8-8191-413e90804d99",
+            "auctionPeriod": {
+              "startDate": "2018-10-23T16:55:00Z",
+              "endDate": "2018-10-23T17:01:35Z"
+            },
+            "electronicAuctionModalities": [
+              {
+                "url": "http://auction.eprocurement.systems/auctions/ocds-t1s2t3-MD-1540313147302/17620461-d6e3-11e8-8191-413e90804d99",
+                "eligibleMinimumDifference": {
+                  "amount": 50.0,
+                  "currency": "MDL"
+                }
+              }
+            ],
+            "electronicAuctionProgress": [
+              {
+                "id": "3",
+                "period": {
+                  "startDate": "2018-10-23T16:59:25Z",
+                  "endDate": "2018-10-23T17:01:30Z"
+                },
+                "breakdown": [
+                  {
+                    "relatedBid": "6e369030-d6e3-11e8-ad26-e5c1eb0d4905",
+                    "status": "met",
+                    "dateMet": "2018-10-23T17:01:30Z",
+                    "value": {
+                      "amount": 6000.0,
+                      "currency": "MDL"
+                    }
+                  },
+                  {
+                    "relatedBid": "744688e0-d6e3-11e8-ad26-e5c1eb0d4905",
+                    "status": "met",
+                    "dateMet": "2018-10-23T17:01:30Z",
+                    "value": {
+                      "amount": 6950.0,
+                      "currency": "MDL"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "1",
+                "period": {
+                  "startDate": "2018-10-23T16:55:05Z",
+                  "endDate": "2018-10-23T16:57:10Z"
+                },
+                "breakdown": [
+                  {
+                    "relatedBid": "6e369030-d6e3-11e8-ad26-e5c1eb0d4905",
+                    "status": "met",
+                    "dateMet": "2018-10-23T16:57:10Z",
+                    "value": {
+                      "amount": 6000.0,
+                      "currency": "MDL"
+                    }
+                  },
+                  {
+                    "relatedBid": "744688e0-d6e3-11e8-ad26-e5c1eb0d4905",
+                    "status": "met",
+                    "dateMet": "2018-10-23T16:57:10Z",
+                    "value": {
+                      "amount": 7000.0,
+                      "currency": "MDL"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "2",
+                "period": {
+                  "startDate": "2018-10-23T16:57:15Z",
+                  "endDate": "2018-10-23T16:59:20Z"
+                },
+                "breakdown": [
+                  {
+                    "relatedBid": "6e369030-d6e3-11e8-ad26-e5c1eb0d4905",
+                    "status": "met",
+                    "dateMet": "2018-10-23T16:59:20Z",
+                    "value": {
+                      "amount": 6000.0,
+                      "currency": "MDL"
+                    }
+                  },
+                  {
+                    "relatedBid": "744688e0-d6e3-11e8-ad26-e5c1eb0d4905",
+                    "status": "met",
+                    "dateMet": "2018-10-23T16:57:48Z",
+                    "value": {
+                      "amount": 6950.0,
+                      "currency": "MDL"
+                    }
+                  }
+                ]
+              }
+            ],
+            "electronicAuctionResult": [
+              {
+                "relatedBid": "744688e0-d6e3-11e8-ad26-e5c1eb0d4905",
+                "value": {
+                  "amount": 6950.0,
+                  "currency": "MDL"
+                }
+              },
+              {
+                "relatedBid": "6e369030-d6e3-11e8-ad26-e5c1eb0d4905",
+                "value": {
+                  "amount": 6000.0,
+                  "currency": "MDL"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "bids": [
+      {
+        "id": "6e369030-d6e3-11e8-ad26-e5c1eb0d4905",
+        "date": "2018-10-23T16:48:12Z",
+        "createdDate": "2018-10-23T16:48:12Z",
+        "pendingDate": "2018-10-23T16:48:12Z",
+        "value": {
+          "amount": 6000.00,
+          "currency": "MDL"
+        },
+        "tenderers": [
+          {
+            "id": "MD-IDNO-1-1",
+            "name": "Googleh555fhfgh55g12"
+          }
+        ],
+        "relatedLots": [
+          "17620461-d6e3-11e8-8191-413e90804d99"
+        ]
+      },
+      {
+        "id": "744688e0-d6e3-11e8-ad26-e5c1eb0d4905",
+        "date": "2018-10-23T16:48:23Z",
+        "createdDate": "2018-10-23T16:48:23Z",
+        "pendingDate": "2018-10-23T16:48:23Z",
+        "value": {
+          "amount": 7000.00,
+          "currency": "MDL"
+        },
+        "tenderers": [
+          {
+            "id": "MD-IDNO-1-2",
+            "name": "Googleh555fhfgh55g12"
+          }
+        ],
+        "relatedLots": [
+          "17620461-d6e3-11e8-8191-413e90804d99"
+        ]
+      }
+    ]
+  },
+  "version": "0.0.1"
 }

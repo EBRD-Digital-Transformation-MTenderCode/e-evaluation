@@ -61,6 +61,11 @@ class PeriodService(private val periodRepository: PeriodDao) {
         periodRepository.save(period)
     }
 
+    fun getAwardCriteria(cpId: String, stage: String): String {
+        val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
+        return periodEntity.awardCriteria
+    }
+
     fun checkPeriod(cpId: String, stage: String): Boolean {
         val localDateTime = localNowUTC()
         val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
@@ -77,7 +82,7 @@ class PeriodService(private val periodRepository: PeriodDao) {
                           startDate: Date?,
                           endDate: Date?,
                           awardCriteria: String
-                          ): PeriodEntity {
+    ): PeriodEntity {
         return PeriodEntity(
                 cpId = cpId,
                 stage = stage,
