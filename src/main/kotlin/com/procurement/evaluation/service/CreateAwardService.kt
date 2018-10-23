@@ -120,15 +120,18 @@ class CreateAwardService(private val rulesService: RulesService,
 
         val unsuccessfulLotsSet = getUnsuccessfulLotsFromAwardEntities(awardEntities)
         val successfulLotsSet = getRelatedLotsIdFromBids(dto.bids).asSequence()
-                .filter {!unsuccessfulLotsSet.contains(it)}.toHashSet()
+                .filter { !unsuccessfulLotsSet.contains(it) }.toHashSet()
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val auctionResultList = dto.tender.electronicAuctions.details.asSequence()
                 .flatMap { it.electronicAuctionResult.asSequence() }.toList()
         for (bid in successfulBidsList) {
             for (res in auctionResultList) {
-                if (bid.id == res.relatedBid)
-                    if (bid.value.amount<res.value.amount) throw ErrorException(ErrorType.INVALID_AUCTION_RESULT)
+                if (bid.id == res.relatedBid) {
+                    if (bid.value.amount < res.value.amount) {
+                        throw ErrorException(ErrorType.INVALID_AUCTION_RESULT)
+                    }
                     bid.value = res.value
+                }
             }
         }
         val awards = getSuccessfulAwards(successfulBidsList)
@@ -140,7 +143,7 @@ class CreateAwardService(private val rulesService: RulesService,
     }
 
     private fun getUnsuccessfulLotsFromAwardEntities(awardEntities: List<AwardEntity>): HashSet<String> {
-        val awards =  awardEntities.asSequence().map { toObject(Award::class.java, it.jsonData) }.toSet()
+        val awards = awardEntities.asSequence().map { toObject(Award::class.java, it.jsonData) }.toSet()
         return awards.asSequence().flatMap { it.relatedLots.asSequence() }.toHashSet()
     }
 
