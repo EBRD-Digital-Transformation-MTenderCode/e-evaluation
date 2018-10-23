@@ -2,6 +2,7 @@ package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.model.dto.*
@@ -119,17 +120,15 @@ class CreateAwardService(private val rulesService: RulesService,
         val awardCriteria = periodService.getAwardCriteria(cpId, stage)
         val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
         val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
-        val lotsFromTenderSet = getLotsFromTender(dto.lots)
         val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
         val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        addUnsuccessfulLotsFromTender(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val auctionResultList = dto.tender.electronicAuctions.details.asSequence()
                 .flatMap { it.electronicAuctionResult.asSequence() }.toList()
         for (bid in successfulBidsList) {
             for (res in auctionResultList) {
                 if (bid.id == res.relatedBid)
+                    if (bid.value.amount<res.value.amount) throw ErrorException(ErrorType.INVALID_AUCTION_RESULT)
                     bid.value = res.value
             }
         }
@@ -137,8 +136,7 @@ class CreateAwardService(private val rulesService: RulesService,
         sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria))
         val awardPeriod = periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
         saveAwards(awards, cpId, owner, stage)
-        val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
+        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, null))
     }
 
     private fun getBidsFromBidsData(bidsData: Set<BidsData>): List<Bid> {
