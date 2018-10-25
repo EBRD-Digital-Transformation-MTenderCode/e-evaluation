@@ -5,6 +5,5 @@ import javax.validation.constraints.NotNull
 
 data class Lot @JsonCreator constructor(
 
-        @field:NotNull
         val id: String
 )

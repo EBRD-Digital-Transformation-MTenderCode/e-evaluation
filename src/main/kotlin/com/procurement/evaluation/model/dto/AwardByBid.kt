@@ -9,7 +9,6 @@ import javax.validation.Valid
 
 data class AwardByBidRq @JsonCreator constructor(
 
-        @field:Valid
         val award: AwardByBid
 )
 
