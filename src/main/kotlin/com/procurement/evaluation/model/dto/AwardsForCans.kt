@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull
 
 data class AwardsForCansRq @JsonCreator constructor(
 
-        @field:Valid @field:NotNull
         val items: List<Item>
 )
 
