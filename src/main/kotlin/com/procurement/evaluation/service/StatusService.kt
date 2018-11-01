@@ -4,7 +4,6 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
-import com.procurement.evaluation.model.dto.AwardCancellation
 import com.procurement.evaluation.model.dto.CancellationRq
 import com.procurement.evaluation.model.dto.CancellationRs
 import com.procurement.evaluation.model.dto.FinalStatusesRs
@@ -53,16 +52,16 @@ class StatusService(private val periodService: PeriodService,
         if (awardEntities.isEmpty()) return ResponseDto(data = CancellationRs(listOf()))
         val awards = getAwardsFromEntities(awardEntities)
         val awardPredicate = getAwardPredicateForPrepareCancellation()
-        val awardsResponseDto = mutableListOf<AwardCancellation>()
+        val updatedAwards = mutableListOf<Award>()
         awards.asSequence()
                 .filter(awardPredicate)
                 .forEach { award ->
                     award.date = dateTime
                     award.statusDetails = Status.UNSUCCESSFUL
-                    addAwardToResponseDto(awardsResponseDto, award)
+                    updatedAwards.add(award)
                 }
-        awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
-        return ResponseDto(data = CancellationRs(awardsResponseDto))
+        awardDao.saveAll(getUpdatedAwardEntities(awardEntities, updatedAwards))
+        return ResponseDto(data = CancellationRs(updatedAwards))
     }
 
     fun awardsCancellation(cm: CommandMessage): ResponseDto {
@@ -72,33 +71,29 @@ class StatusService(private val periodService: PeriodService,
         val phase = cm.context.phase ?: throw ErrorException(CONTEXT)
         val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
 
-        val awardsResponseDto = mutableListOf<AwardCancellation>()
+        var updatedAwards = listOf<Award>()
         when (Phase.fromValue(phase)) {
             AWARDING -> {
                 val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
                 if (awardEntities.isEmpty()) return ResponseDto(data = CancellationRs(listOf()))
                 val awards = getAwardsFromEntities(awardEntities)
                 val awardPredicate = getAwardPredicateForCancellation()
-                awards.asSequence()
-                        .filter(awardPredicate)
-                        .forEach { award ->
-                            award.date = dateTime
-                            award.status = Status.UNSUCCESSFUL
-                            award.statusDetails = Status.EMPTY
-                            addAwardToResponseDto(awardsResponseDto, award)
-                        }
+                updatedAwards = awards.asSequence().filter(awardPredicate).toList()
+                updatedAwards.forEach { award ->
+                    award.date = dateTime
+                    award.status = Status.UNSUCCESSFUL
+                    award.statusDetails = Status.EMPTY
+
+                }
                 awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
             }
             TENDERING, CLARIFICATION, EMPTY -> {
                 val dto = toObject(CancellationRq::class.java, cm.data)
-                val awards = getUnsuccessfulAwards(dto.lots)
-                awards.asSequence().forEach { award ->
-                    addAwardToResponseDto(awardsResponseDto, award)
-                }
-                awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
+                updatedAwards = getUnsuccessfulAwards(dto.lots)
+                awardDao.saveAll(getAwardEntities(updatedAwards, cpId, owner, stage))
             }
         }
-        return ResponseDto(data = CancellationRs(awardsResponseDto))
+        return ResponseDto(data = CancellationRs(updatedAwards))
     }
 
     private fun getUnsuccessfulAwards(unSuccessfulLots: List<Lot>): List<Award> {
@@ -163,13 +158,6 @@ class StatusService(private val periodService: PeriodService,
         return { award: Award ->
             (award.status == Status.PENDING) && (award.statusDetails == Status.UNSUCCESSFUL)
         }
-    }
-
-    private fun addAwardToResponseDto(awardsResponseDto: MutableList<AwardCancellation>, award: Award) {
-        awardsResponseDto.add(AwardCancellation(
-                id = award.id,
-                status = award.status,
-                statusDetails = award.statusDetails))
     }
 
     private fun getUpdatedAwardEntities(awardEntities: List<AwardEntity>, awards: List<Award>): List<AwardEntity> {
