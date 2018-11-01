@@ -2,7 +2,6 @@ package com.procurement.evaluation.model.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.procurement.evaluation.model.dto.ocds.Bid
-import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.dto.ocds.Value
 
 data class CreateAwardsAuctionEndRq @JsonCreator constructor(

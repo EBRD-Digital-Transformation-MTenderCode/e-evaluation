@@ -189,7 +189,6 @@ class StatusService(private val periodService: PeriodService,
         return entities
     }
 
-
     private fun getAwardEntities(awards: List<Award>, cpId: String, owner: String, stage: String): List<AwardEntity> {
         val entities = ArrayList<AwardEntity>()
         awards.asSequence()
