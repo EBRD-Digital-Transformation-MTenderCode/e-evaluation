@@ -148,3 +148,36 @@ enum class AwardCriteria constructor(private val value: String) {
         }
     }
 }
+
+enum class Phase constructor(private val value: String) {
+    AWARDING("awarding"),
+    TENDERING("tendering"),
+    CLARIFICATION("clarification"),
+    EMPTY("empty");
+
+    @JsonValue
+    fun value(): String {
+        return this.value
+    }
+
+    override fun toString(): String {
+        return this.value
+    }
+
+    companion object {
+
+        private val CONSTANTS = HashMap<String, Phase>()
+
+        init {
+            for (c in values()) {
+                CONSTANTS[c.value] = c
+            }
+        }
+
+        @JsonCreator
+        fun fromValue(value: String): Phase {
+            return CONSTANTS[value]
+                    ?: throw EnumException(Phase::class.java.name, value, Arrays.toString(values()))
+        }
+    }
+}
