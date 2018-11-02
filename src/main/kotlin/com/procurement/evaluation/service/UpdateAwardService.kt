@@ -184,13 +184,44 @@ class UpdateAwardService(private val awardDao: AwardDao,
         }
     }
 
-    private fun updateAward(awardFromBase: Award, awardFromRq: AwardByBid, dateTime: LocalDateTime) {
+    private fun updateAward(awardFromBase: Award, awardDto: AwardByBid, dateTime: LocalDateTime) {
         awardFromBase.apply {
-            description = awardFromRq.description
-            documents = awardFromRq.documents
+            description = awardDto.description
+            documents = updateDocuments(awardFromBase.documents, awardDto.documents)
             date = dateTime
         }
     }
+
+    private fun updateDocuments(documentsDb: List<Document>?, documentsDto: List<Document>?): List<Document>? {
+        return if (documentsDb != null && documentsDb.isNotEmpty()) {
+            if (documentsDto != null) {
+                val documentsDtoId = documentsDto.asSequence().map { it.id }.toSet()
+                val documentsDbId = documentsDb.asSequence().map { it.id }.toSet()
+                val newDocumentsId = documentsDtoId - documentsDbId
+                //update
+                documentsDb.forEach { document ->
+                    documentsDto.firstOrNull { it.id == document.id }
+                            ?.let { document.updateDocument(it) }
+                }
+                //new
+                val newDocuments = documentsDto.asSequence()
+                        .filter { it.id in newDocumentsId }.toList()
+                documentsDb + newDocuments
+            } else {
+                documentsDb
+            }
+
+        } else {
+            documentsDto
+        }
+    }
+
+    private fun Document.updateDocument(documentDto: Document) {
+        this.title = documentDto.title
+        this.description = documentDto.description
+        this.relatedLots = documentDto.relatedLots
+    }
+
 
     private fun sortAwardsByCriteria(awards: Set<Award>, awardCriteria: AwardCriteria): List<Award> {
         when (awardCriteria) {
