@@ -46,7 +46,8 @@ enum class CommandType(private val value: String) {
     AWARDS_CANCELLATION("awardsCancellation"),
     CREATE_AWARDS_BY_LOT_AUCTION("createAwardsByLotAuction"),
     CREATE_AWARDS_AUCTION("createAwardsAuction"),
-    CREATE_AWARDS_AUCTION_END("createAwardsAuctionEnd");
+    CREATE_AWARDS_AUCTION_END("createAwardsAuctionEnd"),
+    CHECK_AWARD_VALUE("checkAwardValue");
 
     @JsonValue
     fun value(): String {
