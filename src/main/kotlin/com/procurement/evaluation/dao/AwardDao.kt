@@ -88,23 +88,25 @@ class AwardDao(private val session: Session) {
         else throw ErrorException(ErrorType.DATA_NOT_FOUND)
     }
 
-    fun getByCpId(cpId: String, stage: String, token: UUID): AwardEntity {
+    fun findAllByCpId(cpId: String): List<AwardEntity> {
         val query = select()
                 .all()
                 .from(AWARD_TABLE)
                 .where(eq(CP_ID, cpId))
-                .limit(1)
-        val row = session.execute(query).one()
-        return if (row != null)
-            AwardEntity(
-                    cpId = row.getString(CP_ID),
-                    token = row.getUUID(TOKEN),
-                    stage = row.getString(STAGE),
-                    owner = row.getString(OWNER),
-                    status = row.getString(STATUS),
-                    statusDetails = row.getString(STATUS_DETAILS),
-                    jsonData = row.getString(JSON_DATA))
-        else throw ErrorException(ErrorType.DATA_NOT_FOUND)
+        val resultSet = session.execute(query)
+        val entities = ArrayList<AwardEntity>()
+        resultSet.forEach { row ->
+            entities.add(
+                    AwardEntity(
+                            cpId = row.getString(CP_ID),
+                            token = row.getUUID(TOKEN),
+                            stage = row.getString(STAGE),
+                            owner = row.getString(OWNER),
+                            status = row.getString(STATUS),
+                            statusDetails = row.getString(STATUS_DETAILS),
+                            jsonData = row.getString(JSON_DATA)))
+        }
+        return entities
     }
 
     companion object {

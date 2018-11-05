@@ -8,6 +8,8 @@ enum class ErrorType constructor(val code: String, val message: String) {
     STATUS_DETAILS("00.04", "Invalid status details of award"),
     ID("00.05", "Invalid id of award"),
     TOKEN("00.06", "Invalid token."),
+    AMOUNT("00.07", "Invalid amount."),
+    CURRENCY("00.08", "Invalid currency."),
     PERIOD_NOT_FOUND("01.01", "Period not found."),
     PERIOD_INVALID("01.02", "Invalid period."),
     BIDS_RULES("02.02", "Bids rules not found."),

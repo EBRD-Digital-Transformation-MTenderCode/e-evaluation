@@ -5,7 +5,10 @@ import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
-import com.procurement.evaluation.model.dto.*
+import com.procurement.evaluation.model.dto.CancellationRq
+import com.procurement.evaluation.model.dto.CancellationRs
+import com.procurement.evaluation.model.dto.CheckAwardRq
+import com.procurement.evaluation.model.dto.FinalStatusesRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Award
@@ -97,12 +100,17 @@ class StatusService(private val periodService: PeriodService,
 
     fun checkAwardValue(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
         val dto = toObject(CheckAwardRq::class.java, cm.data)
 
-        val awardEntity = awardDao.getByCpId(cpId)
-        if (awardEntity.owner != owner) throw ErrorException(ErrorType.OWNER)
-        val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
+        val awardRq = dto.awards
+        val awardEntities = awardDao.findAllByCpId(cpId)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
+
+        val awards = getAwardsFromEntities(awardEntities)
+        val award = awards.asSequence().firstOrNull { it.id == awardRq.id } ?: throw ErrorException(DATA_NOT_FOUND)
+        if (awardRq.value.amountNet > award.value!!.amount) throw ErrorException(ErrorType.AMOUNT)
+        if (awardRq.value.currency != award.value.currency) throw ErrorException(ErrorType.CURRENCY)
+        return ResponseDto(data = "ok")
     }
 
     private fun getUnsuccessfulAwards(unSuccessfulLots: List<Lot>): List<Award> {

@@ -3,6 +3,7 @@ package com.procurement.evaluation.model.dto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.procurement.evaluation.model.dto.databinding.MoneyDeserializer
+import java.math.BigDecimal
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CheckAwardRq(
@@ -25,7 +26,7 @@ data class CheckValue(
         val amount: String,
 
         @JsonDeserialize(using = MoneyDeserializer::class)
-        val amountNet: String,
+        val amountNet: BigDecimal,
 
         val valueAddedTaxIncluded: Boolean,
 
