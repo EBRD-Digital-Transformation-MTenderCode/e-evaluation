@@ -82,17 +82,17 @@ class UpdateAwardService(private val awardDao: AwardDao,
                 Status.UNSUCCESSFUL -> {
                     awardByBid.statusDetails = Status.ACTIVE
                     updateAward(awardByBid, dto.award, dateTime)
+                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
                     statusDetails = awardByBid.statusDetails.value()
-                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     /*find next in status CONSIDERATION*/
                     nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == Status.CONSIDERATION }
-                    nextAwardForUpdate?.let {
-                        it.statusDetails = Status.EMPTY
-                        it.date = dateTime
+                    if (nextAwardForUpdate != null) {
+                        nextAwardForUpdate.statusDetails = Status.EMPTY
+                        nextAwardForUpdate.date = dateTime
+                        saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                         lotAwarded = true
-                        lotId = it.relatedLots[0]
-                        saveAward(it, awardIdToEntityMap[it.id])
+                        lotId = nextAwardForUpdate.relatedLots[0]
                     }
                 }
                 else -> throw ErrorException(STATUS_DETAILS_SAVED_AWARD)
