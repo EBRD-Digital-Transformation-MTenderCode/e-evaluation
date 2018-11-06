@@ -54,15 +54,22 @@ class UpdateAwardService(private val awardDao: AwardDao,
         var statusDetails: String? = null
         var lotId: String? = null
         var lotAwarded: Boolean? = null
+        var bidAwarded = true
         var nextAwardForUpdate: Award? = null
 
         /*********************ACTIVE*********************/
         if (dto.award.statusDetails == Status.ACTIVE) {
             /*check awards statuses*/
             for (award in rangedAwards) {
-                if (award.statusDetails == Status.ACTIVE) throw ErrorException(ALREADY_HAVE_ACTIVE_AWARDS)
+                if (award.id != awardId && award.statusDetails == Status.ACTIVE)
+                    throw ErrorException(ALREADY_HAVE_ACTIVE_AWARDS)
             }
             when (awardByBid.statusDetails) {
+                Status.ACTIVE -> {
+                    updateAward(awardByBid, dto.award, dateTime)
+                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
+                    bidAwarded = false
+                }
                 Status.CONSIDERATION -> {
                     awardByBid.statusDetails = Status.ACTIVE
                     updateAward(awardByBid, dto.award, dateTime)
@@ -94,6 +101,11 @@ class UpdateAwardService(private val awardDao: AwardDao,
             /*********************UNSUCCESSFUL*********************/
         } else if (dto.award.statusDetails == Status.UNSUCCESSFUL) {
             when (awardByBid.statusDetails) {
+                Status.UNSUCCESSFUL -> {
+                    updateAward(awardByBid, dto.award, dateTime)
+                    saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
+                    bidAwarded = false
+                }
                 Status.CONSIDERATION -> {
                     awardByBid.statusDetails = Status.UNSUCCESSFUL
                     updateAward(awardByBid, dto.award, dateTime)
@@ -137,7 +149,8 @@ class UpdateAwardService(private val awardDao: AwardDao,
                 awardStatusDetails = statusDetails,
                 bidId = bidId,
                 lotId = lotId,
-                lotAwarded = lotAwarded)
+                lotAwarded = lotAwarded,
+                bidAwarded = bidAwarded)
         )
     }
 

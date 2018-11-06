@@ -34,5 +34,7 @@ data class AwardByBidRs(
 
         val lotId: String?,
 
-        val lotAwarded: Boolean?
+        val lotAwarded: Boolean?,
+
+        val bidAwarded: Boolean
 )
