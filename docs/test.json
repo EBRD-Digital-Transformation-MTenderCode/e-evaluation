@@ -1,167 +1,77 @@
 {
-  "bidsData": [
-    {
-      "owner": "445f6851-c908-407d-9b45-14b92f3e964b",
-      "bids": [
-        {
-          "id": "56f592e0-d54e-11e8-9b10-93caa9b2ae8d",
-          "date": "2018-10-21T16:28:27Z",
-          "createdDate": "2018-10-21T16:28:27Z",
-          "pendingDate": "2018-10-21T16:28:27Z",
-          "value": {
-            "amount": 1.65,
-            "currency": "MDL"
-          },
-          "tenderers": [
-            {
-              "id": "MD-IDNO-987654322",
-              "name": "TEST Provider 2"
-            }
-          ],
-          "relatedLots": [
-            "cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98"
-          ]
-        },
-        {
-          "id": "71c3c1a0-d54e-11e8-9b10-93caa9b2ae8d",
-          "date": "2018-10-21T16:29:12Z",
-          "createdDate": "2018-10-21T16:29:12Z",
-          "pendingDate": "2018-10-21T16:29:12Z",
-          "value": {
-            "amount": 1.65,
-            "currency": "MDL"
-          },
-          "tenderers": [
-            {
-              "id": "MD-IDNO-987654311",
-              "name": "TEST Provider 1"
-            }
-          ],
-          "relatedLots": [
-            "cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98"
-          ]
-        }
-      ]
-    }
-  ],
-  "tender": {
-    "id": "ocds-t1s2t3-MD-1540139077874",
-    "title": "Tender title",
-    "description": "Tender description",
-    "awardCriteria": "priceOnly",
-    "lots": [
-      {
-        "id": "cdeb2d23-d54d-11e8-ac0d-dd2b0a703f98",
-        "title": "A title for this lot.",
-        "description": "A description of this lot.",
-        "value": {
-          "amount": 100.00,
-          "currency": "MDL"
-        }
-      },
-      {
-        "id": "cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98",
-        "title": "A title for this lot.",
-        "description": "A description of this lot.",
-        "value": {
-          "amount": 100.00,
-          "currency": "MDL"
-        }
-      }
-    ]
+  "id": "872de200-deb8-11e8-8760-878eb4ca6d79",
+  "command": "awardsForCans",
+  "context": {
+    "operationId": "05b38352-64eb-11e8-adc0-fa7ae01bbe60",
+    "requestId": "872de200-deb8-11e8-8760-878eb4ca6d79",
+    "cpid": "ocds-t1s2t3-MD-1541170585085",
+    "ocid": "ocds-t1s2t3-MD-1541170585085-EV-1541170585212",
+    "stage": "EV",
+    "prevStage": "EV",
+    "processType": "awardPeriodEnd",
+    "operationType": "standstillPeriodEv",
+    "phase": "awardedContractPreparation",
+    "owner": "445f6851-c908-407d-9b45-14b92f3e964b",
+    "country": "MD",
+    "language": "ro",
+    "pmd": "TEST_SV",
+    "token": "46ebf049-fe74-4e14-886b-1ca8c3f6582d",
+    "startDate": "2018-11-02T16:01:15Z",
+    "endDate": "2018-11-02T16:01:20Z",
+    "timeStamp": 1541174475808,
+    "isAuction": true
   },
-  "isAuctionStarted": true,
-  "auctionsLinks": [
-    {
-      "owner": "445f6851-c908-407d-9b45-14b92f3e964b",
-      "links": [
-        {
-          "relatedBid": "56f592e0-d54e-11e8-9b10-93caa9b2ae8d",
-          "url": "http://auction.eprocurement.systems/ocds-t1s2t3-MD-1540139077874/cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98?bid_id=56f592e0-d54e-11e8-9b10-93caa9b2ae8d&sign=d9b1dcb0-7101-4022-bf4b-04cf427f7ffe"
-        },
-        {
-          "relatedBid": "71c3c1a0-d54e-11e8-9b10-93caa9b2ae8d",
-          "url": "http://auction.eprocurement.systems/ocds-t1s2t3-MD-1540139077874/cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98?bid_id=71c3c1a0-d54e-11e8-9b10-93caa9b2ae8d&sign=a6a6e900-4874-4625-b2a8-931738b7eae6"
-        }
-      ]
-    }
-  ],
-  "electronicAuctions": {
-    "details": [
+  "data": {
+    "items": [
       {
-        "id": "7687a6d9-d83f-4e78-aad3-741880544215",
-        "relatedLot": "cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98",
-        "auctionPeriod": {
-          "startDate": "2018-10-22T09:42:30Z"
+        "id": "7820aad0-deaf-11e8-9704-b5b507496d2a",
+        "description": "666-2",
+        "classification": {
+          "scheme": "CPV",
+          "id": "30199220-8",
+          "description": "Cărţi poştale neilustrate"
         },
-        "electronicAuctionModalities": [
+        "additionalClassifications": [
           {
-            "url": "http://auction.eprocurement.systems/ocds-t1s2t3-MD-1540139077874/cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98",
-            "eligibleMinimumDifference": {
-              "amount": 5.0,
-              "currency": "MDL"
-            }
+            "scheme": "CPVS",
+            "id": "AB06-7",
+            "description": "Plastic"
           }
-        ]
-      }
-    ]
-  },
-  "auctionsData": {
-    "tender": {
-      "id": "ocds-t1s2t3-MD-1540139077874",
-      "title": "Tender title",
-      "description": "Tender description",
-      "lots": [
-        {
-          "id": "cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98",
-          "title": "A title for this lot.",
-          "description": "A description of this lot.",
-          "eligibleMinimumDifference": 5.0,
-          "value": {
-            "amount": 100.0,
-            "currency": "MDL"
-          },
-          "auctionPeriod": {
-            "startDate": "2018-10-22T09:42:30Z"
-          }
-        }
-      ]
-    },
-    "bids": [
-      {
-        "id": "56f592e0-d54e-11e8-9b10-93caa9b2ae8d",
-        "value": 1.65,
-        "relatedLot": "cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98",
-        "pendingDate": "2018-10-21T16:28:27Z",
-        "sign": "d9b1dcb0-7101-4022-bf4b-04cf427f7ffe"
+        ],
+        "quantity": 1.00,
+        "unit": {
+          "id": "8",
+          "name": "Kilometru; mie metri"
+        },
+        "relatedLot": "7820aad3-deaf-11e8-9704-b5b507496d2a"
       },
       {
-        "id": "71c3c1a0-d54e-11e8-9b10-93caa9b2ae8d",
-        "value": 1.65,
-        "relatedLot": "cdeb2d24-d54d-11e8-ac0d-dd2b0a703f98",
-        "pendingDate": "2018-10-21T16:29:12Z",
-        "sign": "a6a6e900-4874-4625-b2a8-931738b7eae6"
+        "id": "7820aad1-deaf-11e8-9704-b5b507496d2a",
+        "description": "666-2",
+        "classification": {
+          "scheme": "CPV",
+          "id": "30199220-8",
+          "description": "Cărţi poştale neilustrate"
+        },
+        "additionalClassifications": [
+          {
+            "scheme": "CPVS",
+            "id": "AB06-7",
+            "description": "Plastic"
+          }
+        ],
+        "quantity": 1.00,
+        "unit": {
+          "id": "8",
+          "name": "Kilometru; mie metri"
+        },
+        "relatedLot": "7820aad2-deaf-11e8-9704-b5b507496d2a"
       }
-    ]
+    ],
+    "standstillPeriod": {
+      "startDate": "2018-11-02T16:01:15Z",
+      "endDate": "2018-11-02T16:01:20Z"
+    }
   },
-  "awardPeriod": null,
-  "awards": [
-    {
-      "token": "f1797744-9b35-46f7-ab46-a9ae46e09185",
-      "id": "d60f6a60-d54e-11e8-8c9d-3769c43efa0f",
-      "date": "2018-10-21T16:32:01Z",
-      "description": "Other reasons (discontinuation of procedure)",
-      "title": "The contract/lot is not awarded",
-      "status": "unsuccessful",
-      "statusDetails": "empty",
-      "relatedLots": [
-        "cdeb2d23-d54d-11e8-ac0d-dd2b0a703f98"
-      ]
-    }
-  ],
-  "unsuccessfulLots": [
-    {
-      "id": "cdeb2d23-d54d-11e8-ac0d-dd2b0a703f98"
-    }
-  ]
+  "version": "0.0.1"
 }

@@ -184,6 +184,9 @@ class UpdateAwardService(private val awardDao: AwardDao,
             }
             activeAwards.add(AwardForCan(award.id, award.items!!))
         }
+
+        if (updatedAwardEntities.isNotEmpty())awardDao.saveAll(updatedAwardEntities)
+
         return ResponseDto(data = AwardsForCansRs(activeAwards))
     }
 
