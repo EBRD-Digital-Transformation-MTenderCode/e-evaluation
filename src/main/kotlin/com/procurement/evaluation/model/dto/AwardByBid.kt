@@ -3,8 +3,8 @@ package com.procurement.evaluation.model.dto
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.procurement.evaluation.model.dto.ocds.Award
+import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.Document
-import com.procurement.evaluation.model.dto.ocds.AwardStatus
 
 data class AwardByBidRq @JsonCreator constructor(
 
@@ -14,7 +14,7 @@ data class AwardByBidRq @JsonCreator constructor(
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AwardByBid @JsonCreator constructor(
 
-        var statusDetails: AwardStatus,
+        var statusDetails: AwardStatusDetails,
 
         var description: String?,
 

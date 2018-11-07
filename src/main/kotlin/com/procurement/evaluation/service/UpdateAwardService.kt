@@ -275,7 +275,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
         }
     }
 
-    private fun verifyRequestStatusDetails(statusDetails: AwardStatus) {
+    private fun verifyRequestStatusDetails(statusDetails: AwardStatusDetails) {
         if (!(statusDetails == AwardStatusDetails.ACTIVE || statusDetails == AwardStatusDetails.UNSUCCESSFUL))
             throw ErrorException(STATUS_DETAILS)
     }
