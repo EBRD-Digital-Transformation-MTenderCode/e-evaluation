@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.Document
-import com.procurement.evaluation.model.dto.ocds.Status
+import com.procurement.evaluation.model.dto.ocds.AwardStatus
 
 data class AwardByBidRq @JsonCreator constructor(
 
@@ -14,7 +14,7 @@ data class AwardByBidRq @JsonCreator constructor(
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AwardByBid @JsonCreator constructor(
 
-        var statusDetails: Status,
+        var statusDetails: AwardStatus,
 
         var description: String?,
 

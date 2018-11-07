@@ -213,8 +213,8 @@ class CreateAwardService(private val rulesService: RulesService,
                     date = localNowUTC(),
                     description = "",
                     title = null,
-                    status = Status.PENDING,
-                    statusDetails = Status.EMPTY,
+                    status = AwardStatus.PENDING,
+                    statusDetails = AwardStatusDetails.EMPTY,
                     value = bid.value,
                     relatedLots = bid.relatedLots,
                     relatedBid = bid.id,
@@ -232,8 +232,8 @@ class CreateAwardService(private val rulesService: RulesService,
                     date = localNowUTC(),
                     description = "Other reasons (discontinuation of procedure)",
                     title = "The contract/lot is not awarded",
-                    status = Status.UNSUCCESSFUL,
-                    statusDetails = Status.EMPTY,
+                    status = AwardStatus.UNSUCCESSFUL,
+                    statusDetails = AwardStatusDetails.EMPTY,
                     value = null,
                     relatedLots = listOf(lot),
                     relatedBid = null,
@@ -252,7 +252,7 @@ class CreateAwardService(private val rulesService: RulesService,
                             .filter { it.relatedLots.contains(lotId) }
                             .sortedWith(SortedByValue)
                             .firstOrNull()
-                            ?.let { it.statusDetails = Status.CONSIDERATION }
+                            ?.let { it.statusDetails = AwardStatusDetails.CONSIDERATION }
                 }
             }
             AwardCriteria.COST_ONLY -> {
@@ -287,8 +287,8 @@ class CreateAwardService(private val rulesService: RulesService,
                 cpId = cpId,
                 stage = stage,
                 token = token,
-                status = award.status.value(),
-                statusDetails = award.statusDetails.value(),
+                status = award.status.value,
+                statusDetails = award.statusDetails.value,
                 owner = owner,
                 jsonData = toJson(award))
     }

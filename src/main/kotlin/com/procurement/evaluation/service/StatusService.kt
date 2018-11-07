@@ -15,7 +15,7 @@ import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.dto.ocds.Phase
 import com.procurement.evaluation.model.dto.ocds.Phase.*
-import com.procurement.evaluation.model.dto.ocds.Status
+import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toJson
@@ -59,7 +59,7 @@ class StatusService(private val periodService: PeriodService,
                 .filter(awardPredicate)
                 .forEach { award ->
                     award.date = dateTime
-                    award.statusDetails = Status.UNSUCCESSFUL
+                    award.statusDetails = AwardStatus.UNSUCCESSFUL
                     updatedAwards.add(award)
                 }
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, updatedAwards))
@@ -83,8 +83,8 @@ class StatusService(private val periodService: PeriodService,
                 updatedAwards = awards.asSequence().filter(awardPredicate).toList()
                 updatedAwards.forEach { award ->
                     award.date = dateTime
-                    award.status = Status.UNSUCCESSFUL
-                    award.statusDetails = Status.EMPTY
+                    award.status = AwardStatus.UNSUCCESSFUL
+                    award.statusDetails = AwardStatus.EMPTY
 
                 }
                 awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
@@ -121,8 +121,8 @@ class StatusService(private val periodService: PeriodService,
                     date = localNowUTC(),
                     description = "Other reasons (discontinuation of procedure)",
                     title = "The contract/lot is not awarded",
-                    status = Status.UNSUCCESSFUL,
-                    statusDetails = Status.EMPTY,
+                    status = AwardStatus.UNSUCCESSFUL,
+                    statusDetails = AwardStatus.EMPTY,
                     value = null,
                     relatedLots = listOf(lot.id),
                     relatedBid = null,
@@ -138,25 +138,25 @@ class StatusService(private val periodService: PeriodService,
 
     private fun setAwardsStatusFromStatusDetails(awards: List<Award>, endPeriod: LocalDateTime) {
         awards.forEach { award ->
-            if (award.statusDetails != Status.EMPTY) {
+            if (award.statusDetails != AwardStatus.EMPTY) {
                 award.date = endPeriod
                 award.status = award.statusDetails
-                award.statusDetails = Status.EMPTY
+                award.statusDetails = AwardStatus.EMPTY
             }
-            if (award.status == Status.PENDING && award.statusDetails == Status.EMPTY) {
+            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatus.EMPTY) {
                 award.date = endPeriod
-                award.status = Status.UNSUCCESSFUL
+                award.status = AwardStatus.UNSUCCESSFUL
             }
         }
     }
 
     private fun getUnsuccessfulLotsFromAwards(awards: List<Award>): List<Lot> {
         val successfulLots = awards.asSequence()
-                .filter { it.status == Status.ACTIVE }
+                .filter { it.status == AwardStatus.ACTIVE }
                 .flatMap { it.relatedLots.asSequence() }
                 .toList()
         val unsuccessfulLots = awards.asSequence()
-                .filter { it.status == Status.UNSUCCESSFUL }
+                .filter { it.status == AwardStatus.UNSUCCESSFUL }
                 .flatMap { it.relatedLots.asSequence() }
                 .filter { lot -> !successfulLots.contains(lot) }.toHashSet()
         return unsuccessfulLots.asSequence().map { Lot(it) }.toList()
@@ -164,16 +164,16 @@ class StatusService(private val periodService: PeriodService,
 
     private fun getAwardPredicateForPrepareCancellation(): (Award) -> Boolean {
         return { award: Award ->
-            (award.status == Status.PENDING)
-                    && (award.statusDetails == Status.EMPTY
-                    || award.statusDetails == Status.ACTIVE
-                    || award.statusDetails == Status.CONSIDERATION)
+            (award.status == AwardStatus.PENDING)
+                    && (award.statusDetails == AwardStatus.EMPTY
+                    || award.statusDetails == AwardStatus.ACTIVE
+                    || award.statusDetails == AwardStatus.CONSIDERATION)
         }
     }
 
     private fun getAwardPredicateForCancellation(): (Award) -> Boolean {
         return { award: Award ->
-            (award.status == Status.PENDING) && (award.statusDetails == Status.UNSUCCESSFUL)
+            (award.status == AwardStatus.PENDING) && (award.statusDetails == AwardStatus.UNSUCCESSFUL)
         }
     }
 

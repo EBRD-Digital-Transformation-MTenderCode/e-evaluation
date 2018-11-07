@@ -17,9 +17,9 @@ data class Award @JsonCreator constructor(
 
         var title: String?,
 
-        var status: Status,
+        var status: AwardStatus,
 
-        var statusDetails: Status,
+        var statusDetails: AwardStatusDetails,
 
         val value: Value?,
 
