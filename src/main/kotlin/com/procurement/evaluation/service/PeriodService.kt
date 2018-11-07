@@ -3,7 +3,6 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.model.dto.ocds.Period
 import com.procurement.evaluation.model.entity.PeriodEntity
-import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toDate
 import com.procurement.evaluation.utils.toLocal
 import org.springframework.stereotype.Service
