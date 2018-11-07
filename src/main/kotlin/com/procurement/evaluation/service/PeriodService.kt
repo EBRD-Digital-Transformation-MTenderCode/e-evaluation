@@ -66,17 +66,6 @@ class PeriodService(private val periodRepository: PeriodDao) {
         return periodEntity.awardCriteria
     }
 
-    fun checkPeriod(cpId: String, stage: String): Boolean {
-        val localDateTime = localNowUTC()
-        val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
-        val isStartDateValid = localDateTime >= periodEntity.startDate!!.toLocal()
-        var isEndDateValid = true
-        if (periodEntity.endDate != null) {
-            isEndDateValid = localDateTime <= periodEntity.endDate!!.toLocal()
-        }
-        return isStartDateValid && isEndDateValid
-    }
-
     private fun getEntity(cpId: String,
                           stage: String,
                           startDate: Date?,

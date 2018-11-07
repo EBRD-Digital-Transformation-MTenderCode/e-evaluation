@@ -11,11 +11,8 @@ import com.procurement.evaluation.model.dto.CheckAwardRq
 import com.procurement.evaluation.model.dto.FinalStatusesRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
-import com.procurement.evaluation.model.dto.ocds.Award
-import com.procurement.evaluation.model.dto.ocds.Lot
-import com.procurement.evaluation.model.dto.ocds.Phase
+import com.procurement.evaluation.model.dto.ocds.*
 import com.procurement.evaluation.model.dto.ocds.Phase.*
-import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toJson
@@ -59,7 +56,7 @@ class StatusService(private val periodService: PeriodService,
                 .filter(awardPredicate)
                 .forEach { award ->
                     award.date = dateTime
-                    award.statusDetails = AwardStatus.UNSUCCESSFUL
+                    award.statusDetails = AwardStatusDetails.UNSUCCESSFUL
                     updatedAwards.add(award)
                 }
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, updatedAwards))
@@ -74,7 +71,7 @@ class StatusService(private val periodService: PeriodService,
         val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
 
         var updatedAwards = listOf<Award>()
-        when (Phase.fromValue(phase)) {
+        when (Phase.valueOf(phase)) {
             AWARDING -> {
                 val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
                 if (awardEntities.isEmpty()) return ResponseDto(data = CancellationRs(listOf()))
@@ -84,7 +81,7 @@ class StatusService(private val periodService: PeriodService,
                 updatedAwards.forEach { award ->
                     award.date = dateTime
                     award.status = AwardStatus.UNSUCCESSFUL
-                    award.statusDetails = AwardStatus.EMPTY
+                    award.statusDetails = AwardStatusDetails.EMPTY
 
                 }
                 awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
@@ -122,7 +119,7 @@ class StatusService(private val periodService: PeriodService,
                     description = "Other reasons (discontinuation of procedure)",
                     title = "The contract/lot is not awarded",
                     status = AwardStatus.UNSUCCESSFUL,
-                    statusDetails = AwardStatus.EMPTY,
+                    statusDetails = AwardStatusDetails.EMPTY,
                     value = null,
                     relatedLots = listOf(lot.id),
                     relatedBid = null,
@@ -138,12 +135,12 @@ class StatusService(private val periodService: PeriodService,
 
     private fun setAwardsStatusFromStatusDetails(awards: List<Award>, endPeriod: LocalDateTime) {
         awards.forEach { award ->
-            if (award.statusDetails != AwardStatus.EMPTY) {
+            if (award.statusDetails != AwardStatusDetails.EMPTY) {
                 award.date = endPeriod
-                award.status = award.statusDetails
-                award.statusDetails = AwardStatus.EMPTY
+                award.status = AwardStatus.valueOf(award.statusDetails.value)
+                award.statusDetails = AwardStatusDetails.EMPTY
             }
-            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatus.EMPTY) {
+            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.EMPTY) {
                 award.date = endPeriod
                 award.status = AwardStatus.UNSUCCESSFUL
             }
@@ -165,15 +162,15 @@ class StatusService(private val periodService: PeriodService,
     private fun getAwardPredicateForPrepareCancellation(): (Award) -> Boolean {
         return { award: Award ->
             (award.status == AwardStatus.PENDING)
-                    && (award.statusDetails == AwardStatus.EMPTY
-                    || award.statusDetails == AwardStatus.ACTIVE
-                    || award.statusDetails == AwardStatus.CONSIDERATION)
+                    && (award.statusDetails == AwardStatusDetails.EMPTY
+                    || award.statusDetails == AwardStatusDetails.ACTIVE
+                    || award.statusDetails == AwardStatusDetails.CONSIDERATION)
         }
     }
 
     private fun getAwardPredicateForCancellation(): (Award) -> Boolean {
         return { award: Award ->
-            (award.status == AwardStatus.PENDING) && (award.statusDetails == AwardStatus.UNSUCCESSFUL)
+            (award.status == AwardStatus.PENDING) && (award.statusDetails == AwardStatusDetails.UNSUCCESSFUL)
         }
     }
 
@@ -217,8 +214,8 @@ class StatusService(private val periodService: PeriodService,
                 cpId = cpId,
                 stage = stage,
                 token = token,
-                status = award.status.value(),
-                statusDetails = award.statusDetails.value(),
+                status = award.status.value,
+                statusDetails = award.statusDetails.value,
                 owner = owner,
                 jsonData = toJson(award))
     }

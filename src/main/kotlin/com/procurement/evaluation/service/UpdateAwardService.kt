@@ -7,10 +7,7 @@ import com.procurement.evaluation.exception.ErrorType.*
 import com.procurement.evaluation.model.dto.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
-import com.procurement.evaluation.model.dto.ocds.Award
-import com.procurement.evaluation.model.dto.ocds.AwardCriteria
-import com.procurement.evaluation.model.dto.ocds.Document
-import com.procurement.evaluation.model.dto.ocds.AwardStatus
+import com.procurement.evaluation.model.dto.ocds.*
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toLocal
@@ -36,7 +33,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
         if (awardEntity.owner != owner) throw ErrorException(OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         validation(awardByBid, awardId, dto)
-        val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
+        val awardCriteria = AwardCriteria.valueOf(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
@@ -58,37 +55,37 @@ class UpdateAwardService(private val awardDao: AwardDao,
         var nextAwardForUpdate: Award? = null
 
         /*********************ACTIVE*********************/
-        if (dto.award.statusDetails == AwardStatus.ACTIVE) {
+        if (dto.award.statusDetails == AwardStatusDetails.ACTIVE) {
             /*check awards statuses*/
             for (award in rangedAwards) {
-                if (award.id != awardId && award.statusDetails == AwardStatus.ACTIVE)
+                if (award.id != awardId && award.statusDetails == AwardStatusDetails.ACTIVE)
                     throw ErrorException(ALREADY_HAVE_ACTIVE_AWARDS)
             }
             when (awardByBid.statusDetails) {
-                AwardStatus.ACTIVE -> {
+                AwardStatusDetails.ACTIVE -> {
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidAwarded = false
                 }
-                AwardStatus.CONSIDERATION -> {
-                    awardByBid.statusDetails = AwardStatus.ACTIVE
+                AwardStatusDetails.CONSIDERATION -> {
+                    awardByBid.statusDetails = AwardStatusDetails.ACTIVE
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value()
+                    statusDetails = awardByBid.statusDetails.value
                     lotAwarded = true
                     lotId = awardByBid.relatedLots[0]
                 }
-                AwardStatus.UNSUCCESSFUL -> {
-                    awardByBid.statusDetails = AwardStatus.ACTIVE
+                AwardStatusDetails.UNSUCCESSFUL -> {
+                    awardByBid.statusDetails = AwardStatusDetails.ACTIVE
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value()
+                    statusDetails = awardByBid.statusDetails.value
                     /*find next in status CONSIDERATION*/
-                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatus.CONSIDERATION }
+                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatusDetails.CONSIDERATION }
                     if (nextAwardForUpdate != null) {
-                        nextAwardForUpdate.statusDetails = AwardStatus.EMPTY
+                        nextAwardForUpdate.statusDetails = AwardStatusDetails.EMPTY
                         nextAwardForUpdate.date = dateTime
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                         lotAwarded = true
@@ -99,23 +96,23 @@ class UpdateAwardService(private val awardDao: AwardDao,
             }
 
             /*********************UNSUCCESSFUL*********************/
-        } else if (dto.award.statusDetails == AwardStatus.UNSUCCESSFUL) {
+        } else if (dto.award.statusDetails == AwardStatusDetails.UNSUCCESSFUL) {
             when (awardByBid.statusDetails) {
-                AwardStatus.UNSUCCESSFUL -> {
+                AwardStatusDetails.UNSUCCESSFUL -> {
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidAwarded = false
                 }
-                AwardStatus.CONSIDERATION -> {
-                    awardByBid.statusDetails = AwardStatus.UNSUCCESSFUL
+                AwardStatusDetails.CONSIDERATION -> {
+                    awardByBid.statusDetails = AwardStatusDetails.UNSUCCESSFUL
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value()
+                    statusDetails = awardByBid.statusDetails.value
                     /*find next in status EMPTY*/
-                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatus.EMPTY }
+                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatusDetails.EMPTY }
                     if (nextAwardForUpdate != null) {
-                        nextAwardForUpdate.statusDetails = AwardStatus.CONSIDERATION
+                        nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                     } else {
@@ -123,16 +120,16 @@ class UpdateAwardService(private val awardDao: AwardDao,
                         lotId = awardByBid.relatedLots[0]
                     }
                 }
-                AwardStatus.ACTIVE -> {
-                    awardByBid.statusDetails = AwardStatus.UNSUCCESSFUL
+                AwardStatusDetails.ACTIVE -> {
+                    awardByBid.statusDetails = AwardStatusDetails.UNSUCCESSFUL
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value()
+                    statusDetails = awardByBid.statusDetails.value
                     /*find next in status EMPTY*/
-                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatus.EMPTY }
+                    nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatusDetails.EMPTY }
                     if (nextAwardForUpdate != null) {
-                        nextAwardForUpdate.statusDetails = AwardStatus.CONSIDERATION
+                        nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                         lotAwarded = false
@@ -168,7 +165,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
         val activeAwards = mutableListOf<AwardForCan>()
         awardEntities.forEach { entity ->
             val award = toObject(Award::class.java, entity.jsonData)
-            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatus.ACTIVE) {
+            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.ACTIVE) {
                 awardIdToEntityMap[award.id] = entity
                 awardFromEntitiesSet.add(award)
             }
@@ -193,8 +190,8 @@ class UpdateAwardService(private val awardDao: AwardDao,
     private fun saveAward(award: Award, awardEntity: AwardEntity?) {
         if (awardEntity != null) {
             val newEntity = awardEntity.copy(
-                    status = award.status.value(),
-                    statusDetails = award.statusDetails.value(),
+                    status = award.status.value,
+                    statusDetails = award.statusDetails.value,
                     jsonData = toJson(award))
             awardDao.save(newEntity)
         }
@@ -279,7 +276,8 @@ class UpdateAwardService(private val awardDao: AwardDao,
     }
 
     private fun verifyRequestStatusDetails(statusDetails: AwardStatus) {
-        if (!(statusDetails == AwardStatus.ACTIVE || statusDetails == AwardStatus.UNSUCCESSFUL)) throw ErrorException(STATUS_DETAILS)
+        if (!(statusDetails == AwardStatusDetails.ACTIVE || statusDetails == AwardStatusDetails.UNSUCCESSFUL))
+            throw ErrorException(STATUS_DETAILS)
     }
 
 }

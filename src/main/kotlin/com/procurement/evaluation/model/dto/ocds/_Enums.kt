@@ -1,8 +1,6 @@
 package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonValue
-import com.procurement.evaluation.exception.EnumException
-import java.util.*
 
 
 enum class DocumentType(@JsonValue private val value: String) {
@@ -59,18 +57,6 @@ enum class AwardCriteria(@JsonValue val value: String) {
 
     override fun toString(): String {
         return this.value
-    }
-
-    companion object {
-        private val CONSTANTS = HashMap<String, AwardCriteria>()
-
-        init {
-            values().forEach { CONSTANTS[it.value] = it }
-        }
-
-        fun fromValue(v: String): AwardCriteria {
-            return CONSTANTS[v] ?: throw EnumException(AwardCriteria::class.java.name, v, Arrays.toString(values()))
-        }
     }
 }
 
