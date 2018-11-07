@@ -1,6 +1,7 @@
 package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonValue
+import com.procurement.evaluation.exception.EnumException
 
 
 enum class DocumentType(@JsonValue private val value: String) {
@@ -31,6 +32,18 @@ enum class AwardStatus(@JsonValue val value: String) {
     override fun toString(): String {
         return this.value
     }
+
+    companion object {
+        private val CONSTANTS = HashMap<String, AwardStatus>()
+
+        init {
+            AwardStatus.values().forEach { CONSTANTS[it.value] = it }
+        }
+
+        fun fromValue(v: String): AwardStatus {
+            return CONSTANTS[v] ?: throw EnumException(AwardStatus::class.java.name, v, AwardStatus.values().toString())
+        }
+    }
 }
 
 enum class AwardStatusDetails(@JsonValue val value: String) {
@@ -58,6 +71,18 @@ enum class AwardCriteria(@JsonValue val value: String) {
     override fun toString(): String {
         return this.value
     }
+
+    companion object {
+        private val CONSTANTS = HashMap<String, AwardCriteria>()
+
+        init {
+            values().forEach { CONSTANTS[it.value] = it }
+        }
+
+        fun fromValue(v: String): AwardCriteria {
+            return CONSTANTS[v] ?: throw EnumException(AwardCriteria::class.java.name, v, values().toString())
+        }
+    }
 }
 
 enum class Phase(@JsonValue val value: String) {
@@ -68,5 +93,17 @@ enum class Phase(@JsonValue val value: String) {
 
     override fun toString(): String {
         return this.value
+    }
+
+    companion object {
+        private val CONSTANTS = HashMap<String, Phase>()
+
+        init {
+            Phase.values().forEach { CONSTANTS[it.value] = it }
+        }
+
+        fun fromValue(v: String): Phase {
+            return CONSTANTS[v] ?: throw EnumException(Phase::class.java.name, v, values().toString())
+        }
     }
 }

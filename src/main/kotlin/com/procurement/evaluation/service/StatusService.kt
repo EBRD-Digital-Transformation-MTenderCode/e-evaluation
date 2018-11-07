@@ -71,7 +71,7 @@ class StatusService(private val periodService: PeriodService,
         val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
 
         var updatedAwards = listOf<Award>()
-        when (Phase.valueOf(phase)) {
+        when (Phase.fromValue(phase)) {
             AWARDING -> {
                 val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
                 if (awardEntities.isEmpty()) return ResponseDto(data = CancellationRs(listOf()))
@@ -137,7 +137,7 @@ class StatusService(private val periodService: PeriodService,
         awards.forEach { award ->
             if (award.statusDetails != AwardStatusDetails.EMPTY) {
                 award.date = endPeriod
-                award.status = AwardStatus.valueOf(award.statusDetails.value)
+                award.status = AwardStatus.fromValue(award.statusDetails.value)
                 award.statusDetails = AwardStatusDetails.EMPTY
             }
             if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.EMPTY) {

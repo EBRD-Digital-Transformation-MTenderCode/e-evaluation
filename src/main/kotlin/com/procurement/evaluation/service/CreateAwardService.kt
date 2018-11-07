@@ -37,7 +37,7 @@ class CreateAwardService(private val rulesService: RulesService,
         addUnsuccessfulLots(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.valueOf(dto.awardCriteria))
+        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(dto.awardCriteria))
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val awards = successfulAwardsList + unsuccessfulAwardsList
 
@@ -71,7 +71,7 @@ class CreateAwardService(private val rulesService: RulesService,
         addUnsuccessfulLots(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dtoBidsList, successfulLotsSet)
         val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.valueOf(dto.tender.awardCriteria))
+        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(dto.tender.awardCriteria))
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val awards = successfulAwardsList + unsuccessfulAwardsList
         val awardPeriod = if (successfulAwardsList.isEmpty()) {
@@ -134,7 +134,7 @@ class CreateAwardService(private val rulesService: RulesService,
             }
         }
         val awards = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(awards, AwardCriteria.valueOf(awardCriteria))
+        sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria))
         val awardPeriod = periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
         awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)

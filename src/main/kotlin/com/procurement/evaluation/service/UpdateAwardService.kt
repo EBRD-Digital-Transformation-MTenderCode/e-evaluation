@@ -33,7 +33,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
         if (awardEntity.owner != owner) throw ErrorException(OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         validation(awardByBid, awardId, dto)
-        val awardCriteria = AwardCriteria.valueOf(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
+        val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
