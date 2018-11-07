@@ -41,7 +41,7 @@ enum class AwardStatus(@JsonValue val value: String) {
         }
 
         fun fromValue(v: String): AwardStatus {
-            return CONSTANTS[v] ?: throw EnumException(AwardStatus::class.java.name, v, AwardStatus.values().toString())
+            return CONSTANTS[v] ?: throw EnumException(AwardStatus::class.java.name, v, values().toString())
         }
     }
 }
