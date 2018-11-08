@@ -1,22 +1,20 @@
 package com.procurement.evaluation.model.dto
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.procurement.evaluation.model.dto.ocds.Status
+import com.procurement.evaluation.model.dto.ocds.Award
+import com.procurement.evaluation.model.dto.ocds.Lot
+
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class CancellationRs(
+data class CancellationRq(
 
-        val awards: List<AwardCancellation>
+        val lots: List<Lot>
 
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class AwardCancellation @JsonCreator constructor(
+data class CancellationRs(
 
-        val id: String,
+        val awards: List<Award>
 
-        var status: Status?,
-
-        var statusDetails: Status
 )

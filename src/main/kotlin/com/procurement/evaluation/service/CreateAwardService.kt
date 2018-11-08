@@ -4,7 +4,6 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
-import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.model.dto.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
@@ -47,7 +46,7 @@ class CreateAwardService(private val rulesService: RulesService,
         } else {
             periodService.saveStartOfPeriod(cpId, stage, startDate, dto.awardCriteria)
         }
-        saveAwards(awards, cpId, owner, stage)
+        awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
     }
@@ -80,7 +79,7 @@ class CreateAwardService(private val rulesService: RulesService,
         } else {
             periodService.saveStartOfPeriod(cpId, stage, startDate, dto.tender.awardCriteria)
         }
-        saveAwards(awards, cpId, owner, stage)
+        awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
     }
@@ -104,7 +103,7 @@ class CreateAwardService(private val rulesService: RulesService,
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         periodService.saveAwardCriteria(cpId, stage, dto.tender.awardCriteria)
-        saveAwards(unsuccessfulAwardsList, cpId, owner, stage)
+        awardDao.saveAll(getAwardEntities(unsuccessfulAwardsList, cpId, owner, stage))
         return ResponseDto(data = CreateAwardsRs(null, unsuccessfulAwardsList, unsuccessfulLots))
     }
 
@@ -137,9 +136,23 @@ class CreateAwardService(private val rulesService: RulesService,
         val awards = getSuccessfulAwards(successfulBidsList)
         sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria))
         val awardPeriod = periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
-        saveAwards(awards, cpId, owner, stage)
+        awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots))
+    }
+
+    private fun getAwardEntities(awards: List<Award>, cpId: String, owner: String, stage: String): List<AwardEntity> {
+        val entities = ArrayList<AwardEntity>()
+        awards.asSequence()
+                .forEach { award ->
+                    entities.add(getEntity(
+                            award = award,
+                            cpId = cpId,
+                            stage = stage,
+                            owner = owner,
+                            token = UUID.fromString(award.token)))
+                }
+        return entities
     }
 
     private fun getUnsuccessfulLotsFromAwardEntities(awardEntities: List<AwardEntity>): HashSet<String> {
@@ -200,8 +213,8 @@ class CreateAwardService(private val rulesService: RulesService,
                     date = localNowUTC(),
                     description = "",
                     title = null,
-                    status = Status.PENDING,
-                    statusDetails = Status.EMPTY,
+                    status = AwardStatus.PENDING,
+                    statusDetails = AwardStatusDetails.EMPTY,
                     value = bid.value,
                     relatedLots = bid.relatedLots,
                     relatedBid = bid.id,
@@ -219,8 +232,8 @@ class CreateAwardService(private val rulesService: RulesService,
                     date = localNowUTC(),
                     description = "Other reasons (discontinuation of procedure)",
                     title = "The contract/lot is not awarded",
-                    status = Status.UNSUCCESSFUL,
-                    statusDetails = Status.EMPTY,
+                    status = AwardStatus.UNSUCCESSFUL,
+                    statusDetails = AwardStatusDetails.EMPTY,
                     value = null,
                     relatedLots = listOf(lot),
                     relatedBid = null,
@@ -239,7 +252,7 @@ class CreateAwardService(private val rulesService: RulesService,
                             .filter { it.relatedLots.contains(lotId) }
                             .sortedWith(SortedByValue)
                             .firstOrNull()
-                            ?.let { it.statusDetails = Status.CONSIDERATION }
+                            ?.let { it.statusDetails = AwardStatusDetails.CONSIDERATION }
                 }
             }
             AwardCriteria.COST_ONLY -> {
@@ -265,24 +278,17 @@ class CreateAwardService(private val rulesService: RulesService,
         }
     }
 
-    fun saveAwards(awards: List<Award>, ocId: String, owner: String, stage: String) {
-        awards.forEach { award ->
-            val entity = getEntity(award = award, cpId = ocId, owner = owner, stage = stage)
-            awardDao.save(entity)
-        }
-    }
-
     private fun getEntity(award: Award,
                           cpId: String,
+                          stage: String,
                           owner: String,
-                          stage: String): AwardEntity {
-        val token = UUID.fromString(award.token ?: throw ErrorException(TOKEN))
+                          token: UUID): AwardEntity {
         return AwardEntity(
                 cpId = cpId,
                 stage = stage,
                 token = token,
-                status = award.status.value(),
-                statusDetails = award.statusDetails.value(),
+                status = award.status.value,
+                statusDetails = award.statusDetails.value,
                 owner = owner,
                 jsonData = toJson(award))
     }

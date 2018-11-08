@@ -3,7 +3,6 @@ package com.procurement.evaluation.model.dto.ocds
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
-import javax.validation.constraints.NotNull
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Document @JsonCreator constructor(
@@ -12,9 +11,9 @@ data class Document @JsonCreator constructor(
 
         val documentType: DocumentType,
 
-        val title: String?,
+        var title: String?,
 
-        val description: String?,
+        var description: String?,
 
-        val relatedLots: HashSet<String>?
+        var relatedLots: HashSet<String>?
 )

@@ -29,6 +29,7 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
             CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)
+            CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)

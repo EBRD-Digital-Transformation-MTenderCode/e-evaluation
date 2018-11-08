@@ -3,8 +3,6 @@ package com.procurement.evaluation.model.dto.ocds
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDateTime
-import javax.validation.Valid
-import javax.validation.constraints.NotNull
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Award @JsonCreator constructor(
@@ -19,9 +17,9 @@ data class Award @JsonCreator constructor(
 
         var title: String?,
 
-        var status: Status,
+        var status: AwardStatus,
 
-        var statusDetails: Status,
+        var statusDetails: AwardStatusDetails,
 
         val value: Value?,
 

@@ -1,13 +1,10 @@
 package com.procurement.evaluation.model.dto.ocds
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.procurement.evaluation.exception.EnumException
-import java.util.*
 
 
-enum class DocumentType constructor(private val value: String) {
-
+enum class DocumentType(@JsonValue private val value: String) {
     AWARD_NOTICE("awardNotice"),
     EVALUATION_REPORTS("evaluationReports"),
     SHORTLISTED_FIRMS("shortlistedFirms"),
@@ -20,65 +17,12 @@ enum class DocumentType constructor(private val value: String) {
     CONTRACT_ARRANGEMENTS("contractArrangements"),
     CONTRACT_SCHEDULE("contractSchedule");
 
-//    TENDER_NOTICE("tenderNotice"),
-//    CONTRACT_NOTICE("contractNotice"),
-//    COMPLETION_CERTIFICATE("completionCertificate"),
-//    PROCUREMENT_PLAN("procurementPlan"),
-//    BIDDING_DOCUMENTS("biddingDocuments"),
-//    TECHNICAL_SPECIFICATIONS("technicalSpecifications"),
-//    EVALUATION_CRITERIA("evaluationCriteria"),
-//    PHYSICAL_PROGRESS_REPORT("physicalProgressReport"),
-//    FINANCIAL_PROGRESS_REPORT("financialProgressReport"),
-//    FINAL_AUDIT("finalAudit"),
-//    HEARING_NOTICE("hearingNotice"),
-//    MARKET_STUDIES("marketStudies"),
-//    ELIGIBILITY_CRITERIA("eligibilityCriteria"),
-//    CLARIFICATIONS("clarifications"),
-//    ENVIRONMENTAL_IMPACT("environmentalImpact"),
-//    ASSET_AND_LIABILITY_ASSESSMENT("assetAndLiabilityAssessment"),
-//    RISK_PROVISIONS("riskProvisions"),
-//    CONTRACT_ANNEXE("contractAnnexe"),
-//    CONTRACT_GUARANTEES("contractGuarantees"),
-//    SUB_CONTRACT("subContract"),
-//    NEEDS_ASSESSMENT("needsAssessment"),
-//    FEASIBILITY_STUDY("feasibilityStudy"),
-//    PROJECT_PLAN("projectPlan"),
-//    BILL_OF_QUANTITY("billOfQuantity"),
-//    DEBARMENTS("debarments"),
-//    ILLUSTRATION("illustration"),
-//    SUBMISSION_DOCUMENTS("submissionDocuments"),
-//    CONTRACT_SUMMARY("contractSummary"),
-//    CONTRACT_SIGNED("contractSigned"),
-
-
     override fun toString(): String {
         return this.value
     }
-
-    @JsonValue
-    fun value(): String {
-        return this.value
-    }
-
-    companion object {
-
-        private val CONSTANTS = HashMap<String, DocumentType>()
-
-        init {
-            for (c in values()) {
-                CONSTANTS[c.value] = c
-            }
-        }
-
-        @JsonCreator
-        fun fromValue(value: String): DocumentType {
-            return CONSTANTS[value]
-                    ?: throw EnumException(DocumentType::class.java.name, value, Arrays.toString(values()))
-        }
-    }
 }
 
-enum class Status constructor(private val value: String) {
+enum class AwardStatus(@JsonValue val value: String) {
     PENDING("pending"),
     ACTIVE("active"),
     UNSUCCESSFUL("unsuccessful"),
@@ -89,30 +33,32 @@ enum class Status constructor(private val value: String) {
         return this.value
     }
 
-    @JsonValue
-    fun value(): String {
-        return this.value
-    }
-
     companion object {
-
-        private val CONSTANTS = HashMap<String, Status>()
+        private val CONSTANTS = HashMap<String, AwardStatus>()
 
         init {
-            for (c in values()) {
-                CONSTANTS[c.value] = c
-            }
+            AwardStatus.values().forEach { CONSTANTS[it.value] = it }
         }
 
-        @JsonCreator
-        fun fromValue(value: String): Status {
-            return CONSTANTS[value] ?: throw IllegalArgumentException(value)
+        fun fromValue(v: String): AwardStatus {
+            return CONSTANTS[v] ?: throw EnumException(AwardStatus::class.java.name, v, values().toString())
         }
     }
-
 }
 
-enum class AwardCriteria constructor(private val value: String) {
+enum class AwardStatusDetails(@JsonValue val value: String) {
+    PENDING("pending"),
+    ACTIVE("active"),
+    UNSUCCESSFUL("unsuccessful"),
+    CONSIDERATION("consideration"),
+    EMPTY("empty");
+
+    override fun toString(): String {
+        return this.value
+    }
+}
+
+enum class AwardCriteria(@JsonValue val value: String) {
     PRICE_ONLY("priceOnly"),
     COST_ONLY("costOnly"),
     QUALITY_ONLY("qualityOnly"),
@@ -122,29 +68,42 @@ enum class AwardCriteria constructor(private val value: String) {
     BEST_VALUE_TO_GOVERNMENT("bestValueToGovernment"),
     SINGLE_BID_ONLY("singleBidOnly");
 
-    @JsonValue
-    fun value(): String {
+    override fun toString(): String {
         return this.value
     }
+
+    companion object {
+        private val CONSTANTS = HashMap<String, AwardCriteria>()
+
+        init {
+            values().forEach { CONSTANTS[it.value] = it }
+        }
+
+        fun fromValue(v: String): AwardCriteria {
+            return CONSTANTS[v] ?: throw EnumException(AwardCriteria::class.java.name, v, values().toString())
+        }
+    }
+}
+
+enum class Phase(@JsonValue val value: String) {
+    AWARDING("awarding"),
+    TENDERING("tendering"),
+    CLARIFICATION("clarification"),
+    EMPTY("empty");
 
     override fun toString(): String {
         return this.value
     }
 
     companion object {
-
-        private val CONSTANTS = HashMap<String, AwardCriteria>()
+        private val CONSTANTS = HashMap<String, Phase>()
 
         init {
-            for (c in values()) {
-                CONSTANTS[c.value] = c
-            }
+            Phase.values().forEach { CONSTANTS[it.value] = it }
         }
 
-        @JsonCreator
-        fun fromValue(value: String): AwardCriteria {
-            return CONSTANTS[value]
-                    ?: throw EnumException(AwardCriteria::class.java.name, value, Arrays.toString(values()))
+        fun fromValue(v: String): Phase {
+            return CONSTANTS[v] ?: throw EnumException(Phase::class.java.name, v, values().toString())
         }
     }
 }

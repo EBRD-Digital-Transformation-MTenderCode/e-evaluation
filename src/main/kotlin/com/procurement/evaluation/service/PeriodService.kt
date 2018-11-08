@@ -3,7 +3,6 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.model.dto.ocds.Period
 import com.procurement.evaluation.model.entity.PeriodEntity
-import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toDate
 import com.procurement.evaluation.utils.toLocal
 import org.springframework.stereotype.Service
@@ -64,17 +63,6 @@ class PeriodService(private val periodRepository: PeriodDao) {
     fun getAwardCriteria(cpId: String, stage: String): String {
         val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
         return periodEntity.awardCriteria
-    }
-
-    fun checkPeriod(cpId: String, stage: String): Boolean {
-        val localDateTime = localNowUTC()
-        val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
-        val isStartDateValid = localDateTime >= periodEntity.startDate!!.toLocal()
-        var isEndDateValid = true
-        if (periodEntity.endDate != null) {
-            isEndDateValid = localDateTime <= periodEntity.endDate!!.toLocal()
-        }
-        return isStartDateValid && isEndDateValid
     }
 
     private fun getEntity(cpId: String,
