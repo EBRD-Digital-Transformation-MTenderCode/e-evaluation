@@ -1,36 +1,25 @@
 {
-  "id": "2227257c-31d9-4347-ad75-c2f81fdf9333",
-  "command": "awardByBid",
-  "context": {
-    "operationId": "2217257c-31d9-4347-ad75-c2f81fdf9333",
-    "requestId": "2eb63470-d2fa-11e8-80be-a55dbe3e3d08",
-    "cpid": "ocds-t1s2t3-MD-1539881896036",
-    "ocid": "ocds-t1s2t3-MD-1539881896036-EV-1539881896147",
-    "stage": "EV",
-    "prevStage": "EV",
-    "processType": "awardByBid",
-    "operationType": "awardByBidEv",
-    "phase": "awarding",
-    "owner": "445f6851-c908-407d-9b45-14b92f3e964b",
-    "country": "MD",
-    "language": "ro",
-    "pmd": "TEST_OT",
-    "token": "8e0469a7-52bc-41cb-af5b-ca6dd923bdb7",
-    "startDate": "2018-10-18T17:21:00Z",
-    "id": "167e79f0-d2f8-11e8-9971-fd3c2a637abf",
-    "isAuction": false
+  "award": {
+    "token": "9bd47f45-617f-4171-8673-80f40ced0774",
+    "id": "68cb6d81-defb-11e8-abcc-bd4a18e99f48",
+    "date": "2018-11-11T15:01:47Z",
+    "description": "Ofertantul nu corespunde altor criterii de selecție",
+    "status": "pending",
+    "statusDetails": "unsuccessful",
+    "value": {
+      "amount": 495833.35,
+      "currency": "MDL"
+    },
+    "relatedLots": [
+      "bd97a3f1-d37b-11e8-be5b-3f7dc3194c12"
+    ],
+    "relatedBid": "05fb8f00-dded-11e8-8b01-9199d67cc036",
+    "suppliers": [
+      {
+        "id": "MD-IDNO-1013600002827",
+        "name": "TOPOBAU"
+      }
+    ]
   },
-  "data": {
-    "award": {
-      "statusDetails": "active",
-      "description": "Good",
-      "documents": [
-        {
-          "documentType": "contractDraft",
-          "id": "f33eeb0e-eb12-476c-a62c-b35cec612b9c-1539341161194"
-        }
-      ]
-    }
-  },
-  "version": "0.0.1"
+  "bidAwarded": false
 }
