@@ -39,7 +39,12 @@ class StatusService(private val periodService: PeriodService,
         setAwardsStatusFromStatusDetails(awards, endDate)
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
         val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
-        return ResponseDto(data = FinalStatusesRs(awards, awardPeriod, unsuccessfulLots))
+        val activeAwards = getActiveAwards(awards)
+        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, awardPeriod, unsuccessfulLots))
+    }
+
+    private fun getActiveAwards(awards: List<Award>): List<Award> {
+        return awards.asSequence().filter { it.status == AwardStatus.ACTIVE }.toList()
     }
 
     fun prepareCancellation(cm: CommandMessage): ResponseDto {
