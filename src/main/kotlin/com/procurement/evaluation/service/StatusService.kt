@@ -104,7 +104,7 @@ class StatusService(private val periodService: PeriodService,
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val dto = toObject(CheckAwardRq::class.java, cm.data)
 
-        val awardRq = dto.awards
+        val awardRq = dto.award
         val awardEntities = awardDao.findAllByCpId(cpId)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
