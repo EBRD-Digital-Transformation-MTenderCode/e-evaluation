@@ -23,7 +23,7 @@ data class CheckAward(
 data class CheckValue(
 
         @JsonDeserialize(using = MoneyDeserializer::class)
-        val amount: String,
+        val amount: BigDecimal,
 
         @JsonDeserialize(using = MoneyDeserializer::class)
         val amountNet: BigDecimal,
