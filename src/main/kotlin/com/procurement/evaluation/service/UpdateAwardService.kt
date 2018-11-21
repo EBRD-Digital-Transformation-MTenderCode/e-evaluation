@@ -26,14 +26,16 @@ class UpdateAwardService(private val awardDao: AwardDao,
         val token = cm.context.token ?: throw ErrorException(CONTEXT)
         val awardId = cm.context.id ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
+        val awardCriteriaContext = cm.context.awardCriteria ?: throw ErrorException(CONTEXT)
         val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(AwardByBidRq::class.java, cm.data)
 
+//      val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
+        val awardCriteria = AwardCriteria.fromValue(awardCriteriaContext)
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
         if (awardEntity.owner != owner) throw ErrorException(OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         validation(awardByBid, awardId, dto)
-        val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
@@ -48,6 +50,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
         val rangedAwards = sortAwardsByCriteria(awardFromEntitiesSet, awardCriteria)
 
         var bidId: String? = null
+        var consideredBidId : String? = null
         var statusDetails: String? = null
         var lotId: String? = null
         var lotAwarded: Boolean? = null
@@ -114,6 +117,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
+                        consideredBidId = nextAwardForUpdate.relatedBid
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                     } else {
                         lotAwarded = true
@@ -131,6 +135,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
+                        consideredBidId = nextAwardForUpdate.relatedBid
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                         lotAwarded = false
                         lotId = awardByBid.relatedLots[0]
@@ -145,6 +150,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
                 nextAwardForUpdate = nextAwardForUpdate,
                 awardStatusDetails = statusDetails,
                 bidId = bidId,
+                consideredBidId = consideredBidId,
                 lotId = lotId,
                 lotAwarded = lotAwarded,
                 bidAwarded = bidAwarded)
