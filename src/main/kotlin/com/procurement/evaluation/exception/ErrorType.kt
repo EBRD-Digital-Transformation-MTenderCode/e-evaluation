@@ -18,5 +18,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     ALREADY_HAVE_ACTIVE_AWARDS("02.06", "Awards already have active status."),
     STATUS_DETAILS_SAVED_AWARD("02.07", "Saved award have incorrect status details."),
     INVALID_AUCTION_RESULT("02.08", "Invalid auction result amount."),
+    AWARD_CRITERIA("02.09", "Award Criteria can't be recognized"),
     CONTEXT("20.01", "Context parameter not found.");
 }
