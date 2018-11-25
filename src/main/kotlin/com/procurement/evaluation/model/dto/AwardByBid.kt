@@ -32,6 +32,8 @@ data class AwardByBidRs(
 
         val bidId: String?,
 
+        val consideredBidId: String?,
+
         val lotId: String?,
 
         val lotAwarded: Boolean?,

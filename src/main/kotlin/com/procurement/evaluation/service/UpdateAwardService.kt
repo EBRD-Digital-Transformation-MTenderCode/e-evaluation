@@ -26,6 +26,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
         val token = cm.context.token ?: throw ErrorException(CONTEXT)
         val awardId = cm.context.id ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
+        val awardCriteria = AwardCriteria.fromValue(cm.context.awardCriteria ?: throw ErrorException(CONTEXT))
         val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(AwardByBidRq::class.java, cm.data)
 
@@ -33,7 +34,6 @@ class UpdateAwardService(private val awardDao: AwardDao,
         if (awardEntity.owner != owner) throw ErrorException(OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         validation(awardByBid, awardId, dto)
-        val awardCriteria = AwardCriteria.fromValue(periodDao.getByCpIdAndStage(cpId, stage).awardCriteria)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
@@ -45,9 +45,11 @@ class UpdateAwardService(private val awardDao: AwardDao,
                 awardFromEntitiesSet.add(award)
             }
         }
+
         val rangedAwards = sortAwardsByCriteria(awardFromEntitiesSet, awardCriteria)
 
         var bidId: String? = null
+        var consideredBidId: String? = null
         var statusDetails: String? = null
         var lotId: String? = null
         var lotAwarded: Boolean? = null
@@ -114,6 +116,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
+                        consideredBidId = nextAwardForUpdate.relatedBid
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                     } else {
                         lotAwarded = true
@@ -131,6 +134,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
+                        consideredBidId = nextAwardForUpdate.relatedBid
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                         lotAwarded = false
                         lotId = awardByBid.relatedLots[0]
@@ -145,6 +149,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
                 nextAwardForUpdate = nextAwardForUpdate,
                 awardStatusDetails = statusDetails,
                 bidId = bidId,
+                consideredBidId = consideredBidId,
                 lotId = lotId,
                 lotAwarded = lotAwarded,
                 bidAwarded = bidAwarded)
@@ -241,22 +246,25 @@ class UpdateAwardService(private val awardDao: AwardDao,
             AwardCriteria.PRICE_ONLY -> {
                 return awards.sortedBy { it.value?.amount }
             }
-            AwardCriteria.COST_ONLY -> {
+            else -> {
+                throw ErrorException(AWARD_CRITERIA)
             }
-            AwardCriteria.QUALITY_ONLY -> {
-            }
-            AwardCriteria.RATED_CRITERIA -> {
-            }
-            AwardCriteria.LOWEST_COST -> {
-            }
-            AwardCriteria.BEST_PROPOSAL -> {
-            }
-            AwardCriteria.BEST_VALUE_TO_GOVERNMENT -> {
-            }
-            AwardCriteria.SINGLE_BID_ONLY -> {
-            }
+//            AwardCriteria.COST_ONLY -> {
+//            }
+//            AwardCriteria.QUALITY_ONLY -> {
+//            }
+//            AwardCriteria.RATED_CRITERIA -> {
+//            }
+//            AwardCriteria.LOWEST_COST -> {
+//            }
+//            AwardCriteria.BEST_PROPOSAL -> {
+//            }
+//            AwardCriteria.BEST_VALUE_TO_GOVERNMENT -> {
+//            }
+//            AwardCriteria.SINGLE_BID_ONLY -> {
+//            }
         }
-        return listOf()
+//        return listOf()
     }
 
     private fun validation(award: Award, awardId: String, dto: AwardByBidRq) {

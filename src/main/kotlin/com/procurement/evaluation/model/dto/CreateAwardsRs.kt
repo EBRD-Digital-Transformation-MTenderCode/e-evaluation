@@ -13,5 +13,9 @@ data class CreateAwardsRs(
 
         val awards: List<Award>,
 
-        val unsuccessfulLots: List<Lot>?
+        val unsuccessfulLots: List<Lot>?,
+
+        val firstBids: Set<FirstBid>?
 )
+
+data class FirstBid(val id: String)

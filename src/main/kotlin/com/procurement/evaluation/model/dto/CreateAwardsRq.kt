@@ -6,8 +6,6 @@ import com.procurement.evaluation.model.dto.ocds.Lot
 
 data class CreateAwardsRq @JsonCreator constructor(
 
-        val awardCriteria: String,
-
         val lots: List<Lot>,
 
         val bids: List<Bid>

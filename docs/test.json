@@ -1,31 +1,71 @@
 {
-  "id": "b5e63820-e5c2-11e8-a5f3-e5b0f713a8ec",
-  "command": "awardByBid",
-  "context": {
-    "operationId": "64163c23-bb39-4a36-afc3-034f7467df90",
-    "requestId": "b5e63820-e5c2-11e8-a5f3-e5b0f713a8ec",
-    "cpid": "ocds-b3wdp1-MD-1539843885006",
-    "ocid": "ocds-b3wdp1-MD-1539843885006-EV-1539938905167",
-    "stage": "EV",
-    "prevStage": "EV",
-    "processType": "awardByBid",
-    "operationType": "awardByBidEv",
-    "phase": "awarding",
-    "owner": "434aef14-9d52-4ea0-a9f7-8737a95686c9",
-    "country": "MD",
-    "language": "ro",
-    "pmd": "OT",
-    "token": "9bd47f45-617f-4171-8673-80f40ced0774",
-    "startDate": "2018-11-11T15:01:47Z",
-    "id": "68cb6d81-defb-11e8-abcc-bd4a18e99f48",
-    "timeStamp": 1541948507298,
-    "isAuction": false
+  "award": {
+    "token": "e9f49297-20ef-4864-8e19-708d67c55183",
+    "id": "8eff1ed0-edc3-11e8-aa18-59f5e717b684",
+    "date": "2018-11-21T19:56:00Z",
+    "description": "222222222",
+    "status": "pending",
+    "statusDetails": "active",
+    "value": {
+      "amount": 999.99,
+      "currency": "MDL"
+    },
+    "relatedLots": [
+      "1c34d434-edc3-11e8-853d-3bb34b395cf2"
+    ],
+    "relatedBid": "5185d0d0-edc3-11e8-9294-1b89a9f88b70",
+    "suppliers": [
+      {
+        "id": "MD-IDNO-335333",
+        "name": "Googleh555fhfgh55g12",
+        "identifier": {
+          "id": "335333",
+          "scheme": "MD-IDNO",
+          "legalName": "Google Big Brother",
+          "uri": null
+        },
+        "address": {
+          "streetAddress": "",
+          "postalCode": "",
+          "addressDetails": {
+            "country": {
+              "scheme": "iso-alpha2",
+              "id": "MD",
+              "description": "MOLDOVA",
+              "uri": "http://reference.iatistandard.org"
+            },
+            "region": {
+              "scheme": "CUATM",
+              "id": "1000000",
+              "description": "Anenii Noi",
+              "uri": "http://statistica.md"
+            },
+            "locality": {
+              "scheme": "CUATM",
+              "id": "1001000",
+              "description": "or.Anenii Noi",
+              "uri": "http://statistica.md"
+            }
+          }
+        },
+        "contactPoint": {
+          "name": "111",
+          "email": "222",
+          "telephone": "333",
+          "url": "444"
+        },
+        "details": {
+          "scale": "sme"
+        }
+      }
+    ],
+    "documents": [
+      {
+        "id": "baa34dea-e15f-4ef6-ab91-856b1fbeed73-1542636831253",
+        "documentType": "awardNotice",
+        "description": "TEST"
+      }
+    ]
   },
-  "data": {
-    "award": {
-      "description": "Ofertantul nu corespunde altor criterii de selecție",
-      "statusDetails": "unsuccessful"
-    }
-  },
-  "version": "0.0.1"
+  "bidAwarded": false
 }

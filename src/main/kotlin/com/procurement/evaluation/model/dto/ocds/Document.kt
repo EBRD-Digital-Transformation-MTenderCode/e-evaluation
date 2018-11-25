@@ -15,5 +15,5 @@ data class Document @JsonCreator constructor(
 
         var description: String?,
 
-        var relatedLots: HashSet<String>?
+        var relatedLots: HashSet<String>
 )
