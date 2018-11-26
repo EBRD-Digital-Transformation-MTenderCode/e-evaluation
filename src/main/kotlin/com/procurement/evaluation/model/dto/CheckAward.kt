@@ -8,7 +8,7 @@ import java.math.BigDecimal
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CheckAwardRq(
 
-        val awards: CheckAward
+        val award: CheckAward
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,7 +23,7 @@ data class CheckAward(
 data class CheckValue(
 
         @JsonDeserialize(using = MoneyDeserializer::class)
-        val amount: String,
+        val amount: BigDecimal,
 
         @JsonDeserialize(using = MoneyDeserializer::class)
         val amountNet: BigDecimal,

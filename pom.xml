@@ -42,10 +42,9 @@
         <maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>2.21.0</maven-failsafe-plugin.version>
         <!--Docker-->
-        <!--<docker-registry>docker-registry.eprocurement.systems</docker-registry>-->
-        <docker-registry>docker.io/eprocurementsystems</docker-registry>
-        <docker-image-profile></docker-image-profile>
         <docker-maven-plugin.version>0.24.0</docker-maven-plugin.version>
+        <docker-registry>docker-registry.eprocurement.systems</docker-registry>
+        <!--<docker-registry>docker.io/eprocurementsystems</docker-registry>-->
     </properties>
 
     <dependencyManagement>
@@ -149,7 +148,6 @@
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
 
         <resources>
             <resource>
@@ -288,7 +286,9 @@
                     <images>
                         <image>
                             <registry>${docker-registry}</registry>
-                            <name>${docker-registry}/${project.artifactId}${docker-image-profile}:${project.version}-${git.commit.id.abbrev}
+                            <!--suppress UnresolvedMavenProperty -->
+                            <name>
+                                ${docker-registry}/${project.artifactId}:${project.version}.${git.commit.id.abbrev}
                             </name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/main</dockerFileDir>

@@ -39,7 +39,12 @@ class StatusService(private val periodService: PeriodService,
         setAwardsStatusFromStatusDetails(awards, endDate)
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
         val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
-        return ResponseDto(data = FinalStatusesRs(awards, awardPeriod, unsuccessfulLots))
+        val activeAwards = getActiveAwards(awards)
+        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, awardPeriod, unsuccessfulLots))
+    }
+
+    private fun getActiveAwards(awards: List<Award>): List<Award> {
+        return awards.asSequence().filter { it.status == AwardStatus.ACTIVE }.toList()
     }
 
     fun prepareCancellation(cm: CommandMessage): ResponseDto {
@@ -99,7 +104,7 @@ class StatusService(private val periodService: PeriodService,
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val dto = toObject(CheckAwardRq::class.java, cm.data)
 
-        val awardRq = dto.awards
+        val awardRq = dto.award
         val awardEntities = awardDao.findAllByCpId(cpId)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
