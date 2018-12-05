@@ -245,6 +245,8 @@ class UpdateAwardService(private val awardDao: AwardDao,
         when (awardCriteria) {
             AwardCriteria.PRICE_ONLY -> {
                 return awards.sortedBy { it.value?.amount }
+//                return awards.sortedWith(compareBy({ it.value?.amount }, { it.date }))
+//                return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.date })
             }
             else -> {
                 throw ErrorException(AWARD_CRITERIA)
