@@ -128,6 +128,7 @@ class StatusService(private val periodService: PeriodService,
                     value = null,
                     relatedLots = listOf(lot.id),
                     relatedBid = null,
+                    bidDate = null,
                     suppliers = null,
                     documents = null,
                     items = null)
