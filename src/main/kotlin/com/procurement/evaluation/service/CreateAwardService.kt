@@ -228,6 +228,7 @@ class CreateAwardService(private val rulesService: RulesService,
                     value = bid.value,
                     relatedLots = bid.relatedLots,
                     relatedBid = bid.id,
+                    bidDate = bid.date,
                     suppliers = bid.tenderers,
                     documents = null,
                     items = null)
@@ -247,6 +248,7 @@ class CreateAwardService(private val rulesService: RulesService,
                     value = null,
                     relatedLots = listOf(lot),
                     relatedBid = null,
+                    bidDate = null,
                     suppliers = null,
                     documents = null,
                     items = null)
@@ -260,7 +262,7 @@ class CreateAwardService(private val rulesService: RulesService,
                 lotIds.forEach { lotId ->
                     awards.asSequence()
                             .filter { it.relatedLots.contains(lotId) }
-                            .sortedWith(SortedByValue)
+                            .sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
                             .firstOrNull()
                             ?.let { award -> award.statusDetails = AwardStatusDetails.CONSIDERATION }
                 }
@@ -279,12 +281,6 @@ class CreateAwardService(private val rulesService: RulesService,
             }
             AwardCriteria.SINGLE_BID_ONLY -> {
             }
-        }
-    }
-
-    companion object SortedByValue : Comparator<Award> {
-        override fun compare(a: Award, b: Award): Int {
-            return a.value!!.amount.compareTo(b.value!!.amount)
         }
     }
 
