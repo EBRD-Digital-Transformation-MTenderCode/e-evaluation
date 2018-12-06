@@ -262,7 +262,7 @@ class CreateAwardService(private val rulesService: RulesService,
                 lotIds.forEach { lotId ->
                     awards.asSequence()
                             .filter { it.relatedLots.contains(lotId) }
-                            .sortedWith(compareBy<Award> { it.value?.amount }.thenByDescending { it.bidDate })
+                            .sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
                             .firstOrNull()
                             ?.let { award -> award.statusDetails = AwardStatusDetails.CONSIDERATION }
                 }
