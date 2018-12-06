@@ -244,9 +244,7 @@ class UpdateAwardService(private val awardDao: AwardDao,
     private fun sortAwardsByCriteria(awards: Set<Award>, awardCriteria: AwardCriteria): List<Award> {
         when (awardCriteria) {
             AwardCriteria.PRICE_ONLY -> {
-//                return awards.sortedBy { it.value?.amount }
-//                return awards.sortedWith(compareBy({ it.value?.amount }, { it.date }))
-                return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.date })
+                return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenByDescending { it.date })
             }
             else -> {
                 throw ErrorException(AWARD_CRITERIA)
