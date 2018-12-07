@@ -29,7 +29,6 @@ class StatusService(private val periodService: PeriodService,
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val endDate = cm.context.endDate?.toLocal() ?: throw ErrorException(CONTEXT)
 
-        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
@@ -37,7 +36,7 @@ class StatusService(private val periodService: PeriodService,
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
         val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
         val activeAwards = getActiveAwards(awards)
-        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, awardPeriod, unsuccessfulLots))
+        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, unsuccessfulLots))
     }
 
     private fun getActiveAwards(awards: List<Award>): List<Award> {
