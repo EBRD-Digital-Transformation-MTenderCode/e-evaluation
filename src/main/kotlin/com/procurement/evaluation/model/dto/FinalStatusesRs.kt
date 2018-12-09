@@ -12,7 +12,5 @@ data class FinalStatusesRs(
 
         val activeAwards: List<Award>,
 
-        val awardPeriod: Period?,
-
         val unsuccessfulLots: List<Lot>?
 )

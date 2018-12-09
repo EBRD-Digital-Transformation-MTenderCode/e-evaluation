@@ -27,6 +27,8 @@ data class Award @JsonCreator constructor(
 
         val relatedBid: String?,
 
+        val bidDate: LocalDateTime?,
+
         val suppliers: List<OrganizationReference>?,
 
         var documents: List<Document>?,

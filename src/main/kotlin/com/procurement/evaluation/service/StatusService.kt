@@ -5,10 +5,7 @@ import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
-import com.procurement.evaluation.model.dto.CancellationRq
-import com.procurement.evaluation.model.dto.CancellationRs
-import com.procurement.evaluation.model.dto.CheckAwardRq
-import com.procurement.evaluation.model.dto.FinalStatusesRs
+import com.procurement.evaluation.model.dto.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.*
@@ -32,7 +29,6 @@ class StatusService(private val periodService: PeriodService,
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val endDate = cm.context.endDate?.toLocal() ?: throw ErrorException(CONTEXT)
 
-        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
@@ -40,7 +36,7 @@ class StatusService(private val periodService: PeriodService,
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
         val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
         val activeAwards = getActiveAwards(awards)
-        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, awardPeriod, unsuccessfulLots))
+        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, unsuccessfulLots))
     }
 
     private fun getActiveAwards(awards: List<Award>): List<Award> {
@@ -115,6 +111,15 @@ class StatusService(private val periodService: PeriodService,
         return ResponseDto(data = "ok")
     }
 
+
+    fun endAwardPeriod(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = "EV"
+        val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
+        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
+        return ResponseDto(data = EndAwardPeriodRs(awardPeriod))
+    }
+
     private fun getUnsuccessfulAwards(unSuccessfulLots: List<Lot>): List<Award> {
         return unSuccessfulLots.asSequence().map { lot ->
             Award(
@@ -128,6 +133,7 @@ class StatusService(private val periodService: PeriodService,
                     value = null,
                     relatedLots = listOf(lot.id),
                     relatedBid = null,
+                    bidDate = null,
                     suppliers = null,
                     documents = null,
                     items = null)
@@ -140,14 +146,15 @@ class StatusService(private val periodService: PeriodService,
 
     private fun setAwardsStatusFromStatusDetails(awards: List<Award>, endPeriod: LocalDateTime) {
         awards.forEach { award ->
-            if (award.statusDetails != AwardStatusDetails.EMPTY) {
+            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.ACTIVE) {
                 award.date = endPeriod
-                award.status = AwardStatus.fromValue(award.statusDetails.value)
+                award.status = AwardStatus.ACTIVE
                 award.statusDetails = AwardStatusDetails.EMPTY
             }
-            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.EMPTY) {
+            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.UNSUCCESSFUL) {
                 award.date = endPeriod
                 award.status = AwardStatus.UNSUCCESSFUL
+                award.statusDetails = AwardStatusDetails.EMPTY
             }
         }
     }
@@ -224,4 +231,5 @@ class StatusService(private val periodService: PeriodService,
                 owner = owner,
                 jsonData = toJson(award))
     }
+
 }
