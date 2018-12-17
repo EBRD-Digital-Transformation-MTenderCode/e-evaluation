@@ -44,7 +44,6 @@
         <!--Docker-->
         <docker-maven-plugin.version>0.24.0</docker-maven-plugin.version>
         <docker-registry>docker-registry.eprocurement.systems</docker-registry>
-        <!--<docker-registry>docker.io/eprocurementsystems</docker-registry>-->
     </properties>
 
     <dependencyManagement>

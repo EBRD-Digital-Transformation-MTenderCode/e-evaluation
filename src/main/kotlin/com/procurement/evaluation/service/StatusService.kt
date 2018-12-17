@@ -146,14 +146,15 @@ class StatusService(private val periodService: PeriodService,
 
     private fun setAwardsStatusFromStatusDetails(awards: List<Award>, endPeriod: LocalDateTime) {
         awards.forEach { award ->
-            if (award.statusDetails != AwardStatusDetails.EMPTY) {
+            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.ACTIVE) {
                 award.date = endPeriod
-                award.status = AwardStatus.fromValue(award.statusDetails.value)
+                award.status = AwardStatus.ACTIVE
                 award.statusDetails = AwardStatusDetails.EMPTY
             }
-            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.EMPTY) {
+            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.UNSUCCESSFUL) {
                 award.date = endPeriod
                 award.status = AwardStatus.UNSUCCESSFUL
+                award.statusDetails = AwardStatusDetails.EMPTY
             }
         }
     }
