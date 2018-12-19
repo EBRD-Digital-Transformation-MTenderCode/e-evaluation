@@ -240,9 +240,6 @@ class UpdateAwardService(private val awardDao: AwardDao) {
 
         return ResponseDto(data = SetInitialAwardsStatusesRs(
                 awards = rangedListAwards,
-                firsBids = FirstBid(
-                        id = rangedListAwards.first().id
-                ),
                 lotId = relatedLotId
         ))
     }

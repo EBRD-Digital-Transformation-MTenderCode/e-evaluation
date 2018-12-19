@@ -31,7 +31,7 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.AWARDS_CANCELLATION -> statusService.awardsCancellation(cm)
             CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
-            CommandType.SET_INITIAL_AWARDS_STATUS->updateAwardService.setInitialAwardsStatuses(cm)
+            CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)

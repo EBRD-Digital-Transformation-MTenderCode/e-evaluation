@@ -6,16 +6,18 @@ import com.procurement.evaluation.model.dto.ocds.Award
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class SetInitialAwardsStatusesRq(
 
-    val can: SetInitialCanRq
+        val can: SetInitialCanRq
 )
 
 data class SetInitialCanRq(
-    val awardId: String
+
+        val awardId: String
 )
 
 data class SetInitialAwardsStatusesRs(
-    val awards: List<Award>,
-    val firsBids: FirstBid,
-    val lotId: String
+
+        val awards: List<Award>,
+
+        val lotId: String
 )
 
