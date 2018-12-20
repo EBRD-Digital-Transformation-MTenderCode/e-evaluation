@@ -136,6 +136,17 @@ class StatusService(private val periodService: PeriodService,
         return ResponseDto(data = EndAwardPeriodRs(awardPeriod))
     }
 
+    fun getLotForCheck(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val token = cm.context.token ?: throw ErrorException(CONTEXT)
+        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
+        val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
+        if (awardEntity.owner != owner) throw ErrorException(ErrorType.OWNER)
+        val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
+        return ResponseDto(data = GetLotForCheckRs(awardByBid.relatedLots[0]))
+    }
+
     private fun getUnsuccessfulAwards(unSuccessfulLots: List<Lot>): List<Award> {
         return unSuccessfulLots.asSequence().map { lot ->
             Award(
@@ -247,5 +258,4 @@ class StatusService(private val periodService: PeriodService,
                 owner = owner,
                 jsonData = toJson(award))
     }
-
 }
