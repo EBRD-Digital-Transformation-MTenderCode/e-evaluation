@@ -114,7 +114,9 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
-                        consideredBidId = nextAwardForUpdate.relatedBid
+                        if (awardCriteria == AwardCriteria.PRICE_ONLY) {
+                            consideredBidId = nextAwardForUpdate.relatedBid
+                        }
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                     } else {
                         lotAwarded = true
@@ -132,7 +134,9 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
-                        consideredBidId = nextAwardForUpdate.relatedBid
+                        if (awardCriteria == AwardCriteria.PRICE_ONLY) {
+                            consideredBidId = nextAwardForUpdate.relatedBid
+                        }
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                         lotAwarded = false
                         lotId = awardByBid.relatedLots[0]
@@ -283,29 +287,17 @@ class UpdateAwardService(private val awardDao: AwardDao) {
     }
 
     private fun sortAwardsByCriteria(awards: Set<Award>, awardCriteria: AwardCriteria): List<Award> {
-        when (awardCriteria) {
-            AwardCriteria.PRICE_ONLY -> {
-                return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
-            }
-            else -> {
-                throw ErrorException(AWARD_CRITERIA)
-            }
+        return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
+//        when (awardCriteria) {
+//            AwardCriteria.PRICE_ONLY -> {
+//            }
 //            AwardCriteria.COST_ONLY -> {
 //            }
 //            AwardCriteria.QUALITY_ONLY -> {
 //            }
 //            AwardCriteria.RATED_CRITERIA -> {
 //            }
-//            AwardCriteria.LOWEST_COST -> {
-//            }
-//            AwardCriteria.BEST_PROPOSAL -> {
-//            }
-//            AwardCriteria.BEST_VALUE_TO_GOVERNMENT -> {
-//            }
-//            AwardCriteria.SINGLE_BID_ONLY -> {
-//            }
-        }
-//        return listOf()
+//        }
     }
 
     private fun validation(award: Award, awardId: String, dto: AwardByBidRq) {
