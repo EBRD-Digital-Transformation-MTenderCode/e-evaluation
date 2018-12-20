@@ -3,14 +3,14 @@ package com.procurement.evaluation.model.dto
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.procurement.evaluation.model.dto.ocds.Item
 
-data class AwardsForCansRq @JsonCreator constructor(
+data class AwardForCansRq @JsonCreator constructor(
 
         val items: List<Item>
 )
 
-data class AwardsForCansRs @JsonCreator constructor(
+data class AwardForCansRs @JsonCreator constructor(
 
-        val awards: List<AwardForCan>
+        val award: AwardForCan
 )
 
 data class AwardForCan @JsonCreator constructor(

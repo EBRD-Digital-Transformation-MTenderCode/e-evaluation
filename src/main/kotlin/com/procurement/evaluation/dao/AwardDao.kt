@@ -29,20 +29,7 @@ class AwardDao(private val session: Session) {
 
 
     fun saveAll(entities: List<AwardEntity>) {
-        val operations = ArrayList<Insert>()
-        entities.forEach { entity ->
-            operations.add(QueryBuilder.insertInto(AWARD_TABLE)
-                    .value(CP_ID, entity.cpId)
-                    .value(TOKEN, entity.token)
-                    .value(STAGE, entity.stage)
-                    .value(OWNER, entity.owner)
-                    .value(STATUS, entity.status)
-                    .value(STATUS_DETAILS, entity.statusDetails)
-                    .value(JSON_DATA, entity.jsonData)
-            )
-        }
-        val batch = QueryBuilder.batch(*operations.toTypedArray())
-        session.execute(batch)
+        entities.forEach { save(it)}
     }
 
     fun findAllByCpIdAndStage(cpId: String, stage: String): List<AwardEntity> {

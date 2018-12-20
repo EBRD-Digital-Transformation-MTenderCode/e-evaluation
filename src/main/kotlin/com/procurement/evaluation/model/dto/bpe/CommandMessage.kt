@@ -41,7 +41,6 @@ enum class CommandType(private val value: String) {
 
     CREATE_AWARDS("createAwards"),
     AWARD_BY_BID("awardByBid"),
-    AWARDS_FOR_CANS("awardsForCans"),
     SET_FINAL_STATUSES("setFinalStatuses"),
     PREPARE_CANCELLATION("prepareCancellation"),
     AWARDS_CANCELLATION("awardsCancellation"),
@@ -51,7 +50,8 @@ enum class CommandType(private val value: String) {
     CHECK_AWARD_VALUE("checkAwardValue"),
     END_AWARD_PERIOD("endAwardPeriod"),
     SET_INITIAL_AWARDS_STATUS("setInitialAwardsStatus"),
-    CHECK_AWARD_FOR_CAN("checkAwardForCan");
+    CHECK_AWARD_FOR_CAN("checkAwardForCan"),
+    UPDATE_AWARD_FOR_CAN("updateAwardForCan");
 
     @JsonValue
     fun value(): String {

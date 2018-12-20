@@ -154,40 +154,29 @@ class UpdateAwardService(private val awardDao: AwardDao) {
         )
     }
 
-    fun awardsForCans(cm: CommandMessage): ResponseDto {
+    fun updateAwardForCan(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val dto = toObject(AwardsForCansRq::class.java, cm.data)
+        val lotId = cm.context.id ?: throw ErrorException(CONTEXT)
+        val dto = toObject(AwardForCansRq::class.java, cm.data)
 
-        val itemsDto = dto.items
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
-        val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
-        val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
-        val updatedAwardEntities = mutableListOf<AwardEntity>()
-        val activeAwards = mutableListOf<AwardForCan>()
-        awardEntities.forEach { entity ->
-            val award = toObject(Award::class.java, entity.jsonData)
-            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.ACTIVE) {
-                awardIdToEntityMap[award.id] = entity
-                awardFromEntitiesSet.add(award)
+        for (awardEntity in awardEntities) {
+            val award = toObject(Award::class.java, awardEntity.jsonData)
+            if (award.relatedLots.contains(lotId)
+                    && award.status == AwardStatus.PENDING
+                    && award.statusDetails == AwardStatusDetails.ACTIVE) {
+                val awardItems = dto.items.asSequence()
+                        .filter { award.relatedLots.contains(lotId) }
+                        .toList()
+                award.items = awardItems
+                awardEntity.jsonData = toJson(award)
+                awardDao.save(awardEntity)
+                return ResponseDto(data = AwardForCansRs(AwardForCan(award.id, award.items!!)))
             }
         }
-        awardFromEntitiesSet.forEach { award ->
-            val awardItems = itemsDto.asSequence()
-                    .filter { award.relatedLots.contains(it.relatedLot) }
-                    .toList()
-            award.items = awardItems
-            awardIdToEntityMap[award.id]?.let { entity ->
-                entity.jsonData = toJson(award)
-                updatedAwardEntities.add(entity)
-            }
-            activeAwards.add(AwardForCan(award.id, award.items!!))
-        }
-
-        if (updatedAwardEntities.isNotEmpty()) awardDao.saveAll(updatedAwardEntities)
-
-        return ResponseDto(data = AwardsForCansRs(activeAwards))
+        throw ErrorException(DATA_NOT_FOUND)
     }
 
     fun setInitialAwardsStatuses(cm: CommandMessage): ResponseDto {

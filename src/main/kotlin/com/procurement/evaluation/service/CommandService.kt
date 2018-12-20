@@ -25,7 +25,6 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)
             CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
-            CommandType.AWARDS_FOR_CANS -> updateAwardService.awardsForCans(cm)
             CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
             CommandType.PREPARE_CANCELLATION -> statusService.prepareCancellation(cm)
             CommandType.AWARDS_CANCELLATION -> statusService.awardsCancellation(cm)
@@ -33,6 +32,7 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
             CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
             CommandType.CHECK_AWARD_FOR_CAN -> statusService.checkAwardForCan(cm)
+            CommandType.UPDATE_AWARD_FOR_CAN -> updateAwardService.updateAwardForCan(cm)
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)
