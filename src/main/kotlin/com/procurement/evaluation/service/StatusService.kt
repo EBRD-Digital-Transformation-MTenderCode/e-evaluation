@@ -112,6 +112,21 @@ class StatusService(private val periodService: PeriodService,
     }
 
 
+    fun checkAwardForCan(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val lotId = cm.context.id ?: throw ErrorException(CONTEXT)
+
+        val awardEntities = awardDao.findAllByCpId(cpId)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
+
+        val awards = getAwardsFromEntities(awardEntities)
+        val award = awards.asSequence().firstOrNull { it.relatedLots.contains(lotId) }
+                ?: throw ErrorException(DATA_NOT_FOUND)
+//        if (award.status != AwardStatus.ACTIVE) throw ErrorException(DATA_NOT_FOUND)
+//        if (award.statusDetails != AwardStatusDetails.CONSIDERATION) throw ErrorException(DATA_NOT_FOUND)
+        return ResponseDto(data = "ok")
+    }
+
     fun endAwardPeriod(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = "EV"
