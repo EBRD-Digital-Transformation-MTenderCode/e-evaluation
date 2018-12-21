@@ -10,7 +10,5 @@ data class AwardForCansRs @JsonCreator constructor(
 
 data class AwardForCan @JsonCreator constructor(
 
-        val id: String,
-
-        val relatedLot: String
+        val id: String
 )

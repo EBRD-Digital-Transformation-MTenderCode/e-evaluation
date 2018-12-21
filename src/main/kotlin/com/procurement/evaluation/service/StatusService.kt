@@ -125,7 +125,7 @@ class StatusService(private val periodService: PeriodService,
                 ?: throw ErrorException(DATA_NOT_FOUND)
         if (award.status != AwardStatus.PENDING) throw ErrorException(DATA_NOT_FOUND)
         if (award.statusDetails != AwardStatusDetails.ACTIVE) throw ErrorException(DATA_NOT_FOUND)
-        return ResponseDto(data = AwardForCansRs(AwardForCan(award.id, award.relatedLots[0])))
+        return ResponseDto(data = AwardForCansRs(AwardForCan(award.id)))
     }
 
     fun endAwardPeriod(cm: CommandMessage): ResponseDto {
