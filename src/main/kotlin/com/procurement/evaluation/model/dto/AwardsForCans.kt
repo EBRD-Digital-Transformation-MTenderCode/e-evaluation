@@ -5,10 +5,5 @@ import com.procurement.evaluation.model.dto.ocds.Item
 
 data class AwardForCansRs @JsonCreator constructor(
 
-        val award: AwardForCan
-)
-
-data class AwardForCan @JsonCreator constructor(
-
-        val id: String
+        val awardId: String
 )
