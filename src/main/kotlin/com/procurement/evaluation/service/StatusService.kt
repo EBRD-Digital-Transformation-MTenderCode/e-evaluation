@@ -120,10 +120,12 @@ class StatusService(private val periodService: PeriodService,
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
-        val award = awards.asSequence().firstOrNull { it.relatedLots.contains(lotId) }
+        val award = awards.asSequence().firstOrNull {
+            it.relatedLots.contains(lotId)
+                    && it.status == AwardStatus.PENDING
+                    && it.statusDetails == AwardStatusDetails.ACTIVE}
                 ?: throw ErrorException(DATA_NOT_FOUND)
-        if (award.status != AwardStatus.PENDING) throw ErrorException(STATUS)
-        if (award.statusDetails != AwardStatusDetails.ACTIVE) throw ErrorException(STATUS_DETAILS)
+
         return ResponseDto(data = AwardForCansRs(award.id))
     }
 
