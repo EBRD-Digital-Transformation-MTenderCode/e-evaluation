@@ -3,8 +3,7 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.exception.ErrorType.CONTEXT
-import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
+import com.procurement.evaluation.exception.ErrorType.*
 import com.procurement.evaluation.model.dto.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
@@ -123,8 +122,8 @@ class StatusService(private val periodService: PeriodService,
         val awards = getAwardsFromEntities(awardEntities)
         val award = awards.asSequence().firstOrNull { it.relatedLots.contains(lotId) }
                 ?: throw ErrorException(DATA_NOT_FOUND)
-        if (award.status != AwardStatus.PENDING) throw ErrorException(DATA_NOT_FOUND)
-        if (award.statusDetails != AwardStatusDetails.ACTIVE) throw ErrorException(DATA_NOT_FOUND)
+        if (award.status != AwardStatus.PENDING) throw ErrorException(STATUS)
+        if (award.statusDetails != AwardStatusDetails.ACTIVE) throw ErrorException(STATUS_DETAILS)
         return ResponseDto(data = AwardForCansRs(AwardForCan(award.id)))
     }
 
