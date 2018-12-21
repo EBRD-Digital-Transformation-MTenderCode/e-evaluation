@@ -141,10 +141,10 @@ class StatusService(private val periodService: PeriodService,
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
-        val awardsRs = awards.asSequence()
+                .asSequence()
                 .filter { awardsIdsSet.contains(it.id) }
                 .toList()
-        return ResponseDto(data = AwardsForAcRs(awardsRs))
+        return ResponseDto(data = AwardsForAcRs(awards))
     }
 
 
