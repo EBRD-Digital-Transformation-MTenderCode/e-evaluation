@@ -50,8 +50,7 @@ enum class CommandType(private val value: String) {
     CHECK_AWARD_VALUE("checkAwardValue"),
     END_AWARD_PERIOD("endAwardPeriod"),
     SET_INITIAL_AWARDS_STATUS("setInitialAwardsStatus"),
-    CHECK_AWARD_FOR_CAN("checkAwardForCan"),
-    UPDATE_AWARD_FOR_CAN("updateAwardForCan"),
+    GET_AWARD_FOR_CAN("getAwardForCan"),
     GET_LOT_FOR_CHECK("getLotForCheck");
 
     @JsonValue

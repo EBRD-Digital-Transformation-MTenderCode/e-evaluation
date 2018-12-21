@@ -31,8 +31,7 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
             CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
-            CommandType.CHECK_AWARD_FOR_CAN -> statusService.checkAwardForCan(cm)
-            CommandType.UPDATE_AWARD_FOR_CAN -> updateAwardService.updateAwardForCan(cm)
+            CommandType.GET_AWARD_FOR_CAN -> statusService.getAwardForCan(cm)
             CommandType.GET_LOT_FOR_CHECK -> statusService.getLotForCheck(cm)
 
 

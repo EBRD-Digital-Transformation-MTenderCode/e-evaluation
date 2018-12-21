@@ -112,7 +112,7 @@ class StatusService(private val periodService: PeriodService,
     }
 
 
-    fun checkAwardForCan(cm: CommandMessage): ResponseDto {
+    fun getAwardForCan(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val lotId = cm.context.id ?: throw ErrorException(CONTEXT)
@@ -125,7 +125,7 @@ class StatusService(private val periodService: PeriodService,
                 ?: throw ErrorException(DATA_NOT_FOUND)
         if (award.status != AwardStatus.PENDING) throw ErrorException(DATA_NOT_FOUND)
         if (award.statusDetails != AwardStatusDetails.ACTIVE) throw ErrorException(DATA_NOT_FOUND)
-        return ResponseDto(data = "ok")
+        return ResponseDto(data = AwardForCansRs(AwardForCan(award.id, award.relatedLots[0])))
     }
 
     fun endAwardPeriod(cm: CommandMessage): ResponseDto {
