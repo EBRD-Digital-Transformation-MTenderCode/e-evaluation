@@ -121,11 +121,31 @@ class StatusService(private val periodService: PeriodService,
 
         val awards = getAwardsFromEntities(awardEntities)
         val award = awards.asSequence().firstOrNull {
-            it.relatedLots.contains(lotId)}
+            it.relatedLots.contains(lotId)
+                    && it.status == AwardStatus.PENDING
+                    && it.statusDetails == AwardStatusDetails.ACTIVE
+        }
                 ?: throw ErrorException(DATA_NOT_FOUND)
 
         return ResponseDto(data = AwardForCansRs(award.id))
     }
+
+    fun getAwardsForAc(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val dto = toObject(AwardsForAcRq::class.java, cm.data)
+        val awardsIdsSet = dto.cans.asSequence().map { it.awardId }.toSet()
+
+        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
+
+        val awards = getAwardsFromEntities(awardEntities)
+                .asSequence()
+                .filter { awardsIdsSet.contains(it.id) }
+                .toList()
+        return ResponseDto(data = AwardsForAcRs(awards))
+    }
+
 
     fun endAwardPeriod(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
