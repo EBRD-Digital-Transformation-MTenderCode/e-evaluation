@@ -140,7 +140,7 @@ class StatusService(private val periodService: PeriodService,
 
         val awards = getAwardsFromEntities(awardEntities)
         val award = awards.asSequence().firstOrNull {
-            it.relatedLots.contains(bidId)
+            it.relatedBid==bidId
         }
             ?: throw ErrorException(DATA_NOT_FOUND)
 
