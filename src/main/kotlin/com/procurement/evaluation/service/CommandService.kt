@@ -34,6 +34,8 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.GET_AWARD_FOR_CAN -> statusService.getAwardForCan(cm)
             CommandType.GET_AWARDS_FOR_AC -> statusService.getAwardsForAc(cm)
             CommandType.GET_LOT_FOR_CHECK -> statusService.getLotForCheck(cm)
+            CommandType.GET_AWARD_ID_FOR_CHECK->statusService.getAwardIdForCheck(cm)
+
 
 
         }
