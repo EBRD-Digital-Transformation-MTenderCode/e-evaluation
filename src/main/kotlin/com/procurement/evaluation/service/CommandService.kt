@@ -35,9 +35,6 @@ class CommandService(private val historyDao: HistoryDao,
             CommandType.GET_AWARDS_FOR_AC -> statusService.getAwardsForAc(cm)
             CommandType.GET_LOT_FOR_CHECK -> statusService.getLotForCheck(cm)
             CommandType.GET_AWARD_ID_FOR_CHECK->statusService.getAwardIdForCheck(cm)
-
-
-
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)

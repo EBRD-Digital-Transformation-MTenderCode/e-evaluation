@@ -32,10 +32,14 @@ class StatusService(private val periodService: PeriodService,
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
         setAwardsStatusFromStatusDetails(awards, endDate)
+        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
-        val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
-        val activeAwards = getActiveAwards(awards)
-        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, unsuccessfulLots))
+        val awardsRs = awards.asSequence()
+                .map { FinalAward(id = it.id, status = it.status, statusDetails = it.statusDetails) }
+                .toList()
+        return ResponseDto(data = FinalStatusesRs(
+                awards = awardsRs,
+                awardPeriod = awardPeriod))
     }
 
     private fun getActiveAwards(awards: List<Award>): List<Award> {
