@@ -42,10 +42,6 @@ class StatusService(private val periodService: PeriodService,
                 awardPeriod = awardPeriod))
     }
 
-    private fun getActiveAwards(awards: List<Award>): List<Award> {
-        return awards.asSequence().filter { it.status == AwardStatus.ACTIVE }.toList()
-    }
-
     fun prepareCancellation(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
@@ -224,18 +220,6 @@ class StatusService(private val periodService: PeriodService,
                 award.statusDetails = AwardStatusDetails.EMPTY
             }
         }
-    }
-
-    private fun getUnsuccessfulLotsFromAwards(awards: List<Award>): List<Lot> {
-        val successfulLots = awards.asSequence()
-                .filter { it.status == AwardStatus.ACTIVE }
-                .flatMap { it.relatedLots.asSequence() }
-                .toList()
-        val unsuccessfulLots = awards.asSequence()
-                .filter { it.status == AwardStatus.UNSUCCESSFUL }
-                .flatMap { it.relatedLots.asSequence() }
-                .filter { lot -> !successfulLots.contains(lot) }.toHashSet()
-        return unsuccessfulLots.asSequence().map { Lot(it) }.toList()
     }
 
     private fun getAwardPredicateForPrepareCancellation(): (Award) -> Boolean {
