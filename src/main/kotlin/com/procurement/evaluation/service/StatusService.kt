@@ -3,8 +3,7 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.exception.ErrorType.CONTEXT
-import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
+import com.procurement.evaluation.exception.ErrorType.*
 import com.procurement.evaluation.model.dto.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
@@ -33,14 +32,14 @@ class StatusService(private val periodService: PeriodService,
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
         setAwardsStatusFromStatusDetails(awards, endDate)
+        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
-        val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
-        val activeAwards = getActiveAwards(awards)
-        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, unsuccessfulLots))
-    }
-
-    private fun getActiveAwards(awards: List<Award>): List<Award> {
-        return awards.asSequence().filter { it.status == AwardStatus.ACTIVE }.toList()
+        val awardsRs = awards.asSequence()
+                .map { FinalAward(id = it.id, status = it.status, statusDetails = it.statusDetails) }
+                .toList()
+        return ResponseDto(data = FinalStatusesRs(
+                awards = awardsRs,
+                awardPeriod = awardPeriod))
     }
 
     fun prepareCancellation(cm: CommandMessage): ResponseDto {
@@ -149,7 +148,7 @@ class StatusService(private val periodService: PeriodService,
 
         val awards = getAwardsFromEntities(awardEntities)
         val award = awards.asSequence().firstOrNull {
-            it.relatedBid == bidId
+            it.relatedBid==bidId
         }
             ?: throw ErrorException(DATA_NOT_FOUND)
 
@@ -232,13 +231,13 @@ class StatusService(private val periodService: PeriodService,
 
     private fun getUnsuccessfulLotsFromAwards(awards: List<Award>): List<Lot> {
         val successfulLots = awards.asSequence()
-            .filter { it.status == AwardStatus.ACTIVE }
-            .flatMap { it.relatedLots.asSequence() }
-            .toList()
+                .filter { it.status == AwardStatus.ACTIVE }
+                .flatMap { it.relatedLots.asSequence() }
+                .toList()
         val unsuccessfulLots = awards.asSequence()
-            .filter { it.status == AwardStatus.UNSUCCESSFUL }
-            .flatMap { it.relatedLots.asSequence() }
-            .filter { lot -> !successfulLots.contains(lot) }.toHashSet()
+                .filter { it.status == AwardStatus.UNSUCCESSFUL }
+                .flatMap { it.relatedLots.asSequence() }
+                .filter { lot -> !successfulLots.contains(lot) }.toHashSet()
         return unsuccessfulLots.asSequence().map { Lot(it) }.toList()
     }
 
