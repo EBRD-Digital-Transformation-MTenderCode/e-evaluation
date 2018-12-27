@@ -1,7 +1,6 @@
 package com.procurement.evaluation.dao
 
 import com.datastax.driver.core.Session
-import com.datastax.driver.core.querybuilder.Insert
 import com.datastax.driver.core.querybuilder.QueryBuilder
 import com.datastax.driver.core.querybuilder.QueryBuilder.eq
 import com.datastax.driver.core.querybuilder.QueryBuilder.select
@@ -29,7 +28,7 @@ class AwardDao(private val session: Session) {
 
 
     fun saveAll(entities: List<AwardEntity>) {
-        entities.forEach { save(it)}
+        entities.forEach { save(it) }
     }
 
     fun findAllByCpIdAndStage(cpId: String, stage: String): List<AwardEntity> {

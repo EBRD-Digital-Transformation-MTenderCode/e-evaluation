@@ -1,15 +1,23 @@
 package com.procurement.evaluation.model.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.procurement.evaluation.model.dto.ocds.Award
-import com.procurement.evaluation.model.dto.ocds.Lot
+import com.procurement.evaluation.model.dto.ocds.AwardStatus
+import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
+import com.procurement.evaluation.model.dto.ocds.Period
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class FinalStatusesRs(
 
-        val awards: List<Award>,
+        val awards: List<FinalAward>,
 
-        val activeAwards: List<Award>,
+        val awardPeriod: Period
+)
 
-        val unsuccessfulLots: List<Lot>?
+data class FinalAward(
+
+        val id: String,
+
+        val status: AwardStatus,
+
+        val statusDetails: AwardStatusDetails
 )
