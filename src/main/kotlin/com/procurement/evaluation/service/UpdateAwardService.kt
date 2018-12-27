@@ -164,20 +164,13 @@ class UpdateAwardService(private val awardDao: AwardDao) {
         val awardCriteria = AwardCriteria.fromValue(cm.context.awardCriteria ?: throw ErrorException(CONTEXT))
         val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(SetInitialAwardsStatusesRq::class.java, cm.data)
-
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-
-        val awardByIdEntity = awardEntities.asSequence().first {
-            toObject(Award::class.java, it.jsonData).id == dto.can.awardId
-        }
-        val awardFindByRq = toObject(Award::class.java, awardByIdEntity.jsonData)
-        val relatedLotId = awardFindByRq.relatedLots.first()
 
         val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
         val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
         awardEntities.forEach { entity ->
             val award = toObject(Award::class.java, entity.jsonData)
-            if (award.relatedLots == awardFindByRq.relatedLots) {
+            if (award.relatedLots.contains(dto.lotId)) {
                 awardIdToEntityMap[award.id] = entity
                 awardFromEntitiesSet.add(award)
             }
@@ -207,8 +200,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
         }
 
         return ResponseDto(data = SetInitialAwardsStatusesRs(
-                awards = rangedListAwards,
-                lotId = relatedLotId
+                awards = rangedListAwards
         ))
     }
 
