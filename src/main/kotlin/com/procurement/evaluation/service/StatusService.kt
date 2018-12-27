@@ -3,7 +3,8 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.exception.ErrorType.*
+import com.procurement.evaluation.exception.ErrorType.CONTEXT
+import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.model.dto.*
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
@@ -53,12 +54,12 @@ class StatusService(private val periodService: PeriodService,
         val awardPredicate = getAwardPredicateForPrepareCancellation()
         val updatedAwards = mutableListOf<Award>()
         awards.asSequence()
-            .filter(awardPredicate)
-            .forEach { award ->
-                award.date = dateTime
-                award.statusDetails = AwardStatusDetails.UNSUCCESSFUL
-                updatedAwards.add(award)
-            }
+                .filter(awardPredicate)
+                .forEach { award ->
+                    award.date = dateTime
+                    award.statusDetails = AwardStatusDetails.UNSUCCESSFUL
+                    updatedAwards.add(award)
+                }
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, updatedAwards))
         return ResponseDto(data = CancellationRs(updatedAwards))
     }
@@ -120,10 +121,10 @@ class StatusService(private val periodService: PeriodService,
         val awardsFromEntities = getAwardsFromEntities(awardEntities)
         val awards = awardsFromEntities.asSequence().filter {
             it.relatedLots.contains(lotId)
-                && it.status == AwardStatus.PENDING
+                    && it.status == AwardStatus.PENDING
         }.toSet()
 
-        var awardId: String?=null
+        var awardId: String? = null
         var awardingSuccess = false
 
         awards.forEach {
@@ -134,8 +135,8 @@ class StatusService(private val periodService: PeriodService,
         }
 
         return ResponseDto(data = GetAwardForCanRs(
-            awardingSuccess = awardingSuccess,
-            awardId = awardId))
+                awardingSuccess = awardingSuccess,
+                awardId = awardId))
     }
 
     fun getAwardIdForCheck(cm: CommandMessage): ResponseDto {
@@ -148,9 +149,9 @@ class StatusService(private val periodService: PeriodService,
 
         val awards = getAwardsFromEntities(awardEntities)
         val award = awards.asSequence().firstOrNull {
-            it.relatedBid==bidId
+            it.relatedBid == bidId
         }
-            ?: throw ErrorException(DATA_NOT_FOUND)
+                ?: throw ErrorException(DATA_NOT_FOUND)
 
         return ResponseDto(data = AwardForCansRs(award.id))
     }
@@ -165,9 +166,9 @@ class StatusService(private val periodService: PeriodService,
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
-            .asSequence()
-            .filter { awardsIdsSet.contains(it.id) }
-            .toList()
+                .asSequence()
+                .filter { awardsIdsSet.contains(it.id) }
+                .toList()
         return ResponseDto(data = AwardsForAcRs(awards))
     }
 
@@ -193,20 +194,20 @@ class StatusService(private val periodService: PeriodService,
     private fun getUnsuccessfulAwards(unSuccessfulLots: List<Lot>): List<Award> {
         return unSuccessfulLots.asSequence().map { lot ->
             Award(
-                token = generationService.generateRandomUUID().toString(),
-                id = generationService.getTimeBasedUUID(),
-                date = localNowUTC(),
-                description = "Other reasons (discontinuation of procedure)",
-                title = "The contract/lot is not awarded",
-                status = AwardStatus.UNSUCCESSFUL,
-                statusDetails = AwardStatusDetails.EMPTY,
-                value = null,
-                relatedLots = listOf(lot.id),
-                relatedBid = null,
-                bidDate = null,
-                suppliers = null,
-                documents = null,
-                items = null)
+                    token = generationService.generateRandomUUID().toString(),
+                    id = generationService.getTimeBasedUUID(),
+                    date = localNowUTC(),
+                    description = "Other reasons (discontinuation of procedure)",
+                    title = "The contract/lot is not awarded",
+                    status = AwardStatus.UNSUCCESSFUL,
+                    statusDetails = AwardStatusDetails.EMPTY,
+                    value = null,
+                    relatedLots = listOf(lot.id),
+                    relatedBid = null,
+                    bidDate = null,
+                    suppliers = null,
+                    documents = null,
+                    items = null)
         }.toList()
     }
 
@@ -244,9 +245,9 @@ class StatusService(private val periodService: PeriodService,
     private fun getAwardPredicateForPrepareCancellation(): (Award) -> Boolean {
         return { award: Award ->
             (award.status == AwardStatus.PENDING)
-                && (award.statusDetails == AwardStatusDetails.EMPTY
-                || award.statusDetails == AwardStatusDetails.ACTIVE
-                || award.statusDetails == AwardStatusDetails.CONSIDERATION)
+                    && (award.statusDetails == AwardStatusDetails.EMPTY
+                    || award.statusDetails == AwardStatusDetails.ACTIVE
+                    || award.statusDetails == AwardStatusDetails.CONSIDERATION)
         }
     }
 
@@ -260,15 +261,15 @@ class StatusService(private val periodService: PeriodService,
         val entities = ArrayList<AwardEntity>()
         awardEntities.asSequence().forEach { entity ->
             awards.asSequence()
-                .firstOrNull { it.token == entity.token.toString() }
-                ?.let { award ->
-                    entities.add(getEntity(
-                        award = award,
-                        cpId = entity.cpId,
-                        stage = entity.stage,
-                        owner = entity.owner,
-                        token = entity.token))
-                }
+                    .firstOrNull { it.token == entity.token.toString() }
+                    ?.let { award ->
+                        entities.add(getEntity(
+                                award = award,
+                                cpId = entity.cpId,
+                                stage = entity.stage,
+                                owner = entity.owner,
+                                token = entity.token))
+                    }
         }
         return entities
     }
@@ -276,14 +277,14 @@ class StatusService(private val periodService: PeriodService,
     private fun getAwardEntities(awards: List<Award>, cpId: String, owner: String, stage: String): List<AwardEntity> {
         val entities = ArrayList<AwardEntity>()
         awards.asSequence()
-            .forEach { award ->
-                entities.add(getEntity(
-                    award = award,
-                    cpId = cpId,
-                    stage = stage,
-                    owner = owner,
-                    token = UUID.fromString(award.token)))
-            }
+                .forEach { award ->
+                    entities.add(getEntity(
+                            award = award,
+                            cpId = cpId,
+                            stage = stage,
+                            owner = owner,
+                            token = UUID.fromString(award.token)))
+                }
         return entities
     }
 
@@ -293,12 +294,12 @@ class StatusService(private val periodService: PeriodService,
                           owner: String,
                           token: UUID): AwardEntity {
         return AwardEntity(
-            cpId = cpId,
-            stage = stage,
-            token = token,
-            status = award.status.value,
-            statusDetails = award.statusDetails.value,
-            owner = owner,
-            jsonData = toJson(award))
+                cpId = cpId,
+                stage = stage,
+                token = token,
+                status = award.status.value,
+                statusDetails = award.statusDetails.value,
+                owner = owner,
+                jsonData = toJson(award))
     }
 }
