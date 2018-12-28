@@ -26,9 +26,8 @@ class StatusService(private val periodService: PeriodService,
 
     fun setFinalStatuses(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-
+        val stage = "EV"
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
