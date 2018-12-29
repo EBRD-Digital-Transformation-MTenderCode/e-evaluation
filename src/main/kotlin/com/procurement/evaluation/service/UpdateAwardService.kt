@@ -1,7 +1,6 @@
 package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
-import com.procurement.evaluation.dao.PeriodDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType.*
 import com.procurement.evaluation.model.dto.*
@@ -17,8 +16,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Service
-class UpdateAwardService(private val awardDao: AwardDao,
-                         private val periodDao: PeriodDao) {
+class UpdateAwardService(private val awardDao: AwardDao) {
 
     fun awardByBid(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
@@ -116,7 +114,9 @@ class UpdateAwardService(private val awardDao: AwardDao,
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
-                        consideredBidId = nextAwardForUpdate.relatedBid
+                        if (awardCriteria == AwardCriteria.PRICE_ONLY) {
+                            consideredBidId = nextAwardForUpdate.relatedBid
+                        }
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                     } else {
                         lotAwarded = true
@@ -134,7 +134,9 @@ class UpdateAwardService(private val awardDao: AwardDao,
                     if (nextAwardForUpdate != null) {
                         nextAwardForUpdate.statusDetails = AwardStatusDetails.CONSIDERATION
                         nextAwardForUpdate.date = dateTime
-                        consideredBidId = nextAwardForUpdate.relatedBid
+                        if (awardCriteria == AwardCriteria.PRICE_ONLY) {
+                            consideredBidId = nextAwardForUpdate.relatedBid
+                        }
                         saveAward(nextAwardForUpdate, awardIdToEntityMap[nextAwardForUpdate.id])
                         lotAwarded = false
                         lotId = awardByBid.relatedLots[0]
@@ -156,41 +158,52 @@ class UpdateAwardService(private val awardDao: AwardDao,
         )
     }
 
-    fun awardsForCans(cm: CommandMessage): ResponseDto {
+    fun setInitialAwardsStatuses(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val dto = toObject(AwardsForCansRq::class.java, cm.data)
-
-        val itemsDto = dto.items
+        val awardCriteria = AwardCriteria.fromValue(cm.context.awardCriteria ?: throw ErrorException(CONTEXT))
+        val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
+        val dto = toObject(SetInitialAwardsStatusesRq::class.java, cm.data)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
-        val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
+
         val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
-        val updatedAwardEntities = mutableListOf<AwardEntity>()
-        val activeAwards = mutableListOf<AwardForCan>()
+        val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
         awardEntities.forEach { entity ->
             val award = toObject(Award::class.java, entity.jsonData)
-            if (award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.ACTIVE) {
+            if (award.relatedLots.contains(dto.lotId)) {
                 awardIdToEntityMap[award.id] = entity
                 awardFromEntitiesSet.add(award)
             }
         }
-        awardFromEntitiesSet.forEach { award ->
-            val awardItems = itemsDto.asSequence()
-                    .filter { award.relatedLots.contains(it.relatedLot) }
-                    .toList()
-            award.items = awardItems
-            awardIdToEntityMap[award.id]?.let { entity ->
-                entity.jsonData = toJson(award)
-                updatedAwardEntities.add(entity)
+
+        val rangedListAwards = sortAwardsByCriteria(awardFromEntitiesSet, awardCriteria)
+        for ((index, value) in rangedListAwards.withIndex()) {
+            if (index == 0) {
+                value.apply {
+                    statusDetails = AwardStatusDetails.CONSIDERATION
+                }
+            } else {
+                value.apply {
+                    statusDetails = AwardStatusDetails.EMPTY
+                }
             }
-            activeAwards.add(AwardForCan(award.id, award.items!!))
+            value.apply {
+                status = AwardStatus.PENDING
+                date = dateTime
+
+            }
+            awardIdToEntityMap[value.id]!!.apply {
+                jsonData = toJson(value)
+            }
+            awardDao.save(awardIdToEntityMap[value.id]!!)
+
         }
 
-        if (updatedAwardEntities.isNotEmpty()) awardDao.saveAll(updatedAwardEntities)
-
-        return ResponseDto(data = AwardsForCansRs(activeAwards))
+        return ResponseDto(data = SetInitialAwardsStatusesRs(
+                awards = rangedListAwards
+        ))
     }
+
 
     private fun saveAward(award: Award, awardEntity: AwardEntity?) {
         if (awardEntity != null) {
@@ -240,31 +253,18 @@ class UpdateAwardService(private val awardDao: AwardDao,
         this.relatedLots = documentDto.relatedLots
     }
 
-
     private fun sortAwardsByCriteria(awards: Set<Award>, awardCriteria: AwardCriteria): List<Award> {
-        when (awardCriteria) {
-            AwardCriteria.PRICE_ONLY -> {
-                return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
-            }
-            else -> {
-                throw ErrorException(AWARD_CRITERIA)
-            }
+        return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
+//        when (awardCriteria) {
+//            AwardCriteria.PRICE_ONLY -> {
+//            }
 //            AwardCriteria.COST_ONLY -> {
 //            }
 //            AwardCriteria.QUALITY_ONLY -> {
 //            }
 //            AwardCriteria.RATED_CRITERIA -> {
 //            }
-//            AwardCriteria.LOWEST_COST -> {
-//            }
-//            AwardCriteria.BEST_PROPOSAL -> {
-//            }
-//            AwardCriteria.BEST_VALUE_TO_GOVERNMENT -> {
-//            }
-//            AwardCriteria.SINGLE_BID_ONLY -> {
-//            }
-        }
-//        return listOf()
+//        }
     }
 
     private fun validation(award: Award, awardId: String, dto: AwardByBidRq) {

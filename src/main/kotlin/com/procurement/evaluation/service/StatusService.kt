@@ -26,21 +26,20 @@ class StatusService(private val periodService: PeriodService,
 
     fun setFinalStatuses(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val endDate = cm.context.endDate?.toLocal() ?: throw ErrorException(CONTEXT)
-
+        val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
+        val stage = "EV"
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
         setAwardsStatusFromStatusDetails(awards, endDate)
+        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
-        val unsuccessfulLots = getUnsuccessfulLotsFromAwards(awards)
-        val activeAwards = getActiveAwards(awards)
-        return ResponseDto(data = FinalStatusesRs(awards, activeAwards, unsuccessfulLots))
-    }
-
-    private fun getActiveAwards(awards: List<Award>): List<Award> {
-        return awards.asSequence().filter { it.status == AwardStatus.ACTIVE }.toList()
+        val awardsRs = awards.asSequence()
+                .map { FinalAward(id = it.id, status = it.status, statusDetails = it.statusDetails) }
+                .toList()
+        return ResponseDto(data = FinalStatusesRs(
+                awards = awardsRs,
+                awardPeriod = awardPeriod))
     }
 
     fun prepareCancellation(cm: CommandMessage): ResponseDto {
@@ -111,6 +110,66 @@ class StatusService(private val periodService: PeriodService,
         return ResponseDto(data = "ok")
     }
 
+    fun getAwardForCan(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val lotId = cm.context.id ?: throw ErrorException(CONTEXT)
+        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
+
+        val awardsFromEntities = getAwardsFromEntities(awardEntities)
+        val awards = awardsFromEntities.asSequence().filter {
+            it.relatedLots.contains(lotId)
+                    && it.status == AwardStatus.PENDING
+        }.toSet()
+
+        var awardId: String? = null
+        var awardingSuccess = false
+
+        awards.forEach {
+            if (it.statusDetails == AwardStatusDetails.ACTIVE) {
+                awardId = it.id
+                awardingSuccess = true
+            }
+        }
+
+        return ResponseDto(data = GetAwardForCanRs(
+                awardingSuccess = awardingSuccess,
+                awardId = awardId))
+    }
+
+    fun getAwardIdForCheck(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val bidId = cm.context.id ?: throw ErrorException(CONTEXT)
+
+        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
+
+        val awards = getAwardsFromEntities(awardEntities)
+        val award = awards.asSequence().firstOrNull {
+            it.relatedBid == bidId
+        }
+                ?: throw ErrorException(DATA_NOT_FOUND)
+
+        return ResponseDto(data = AwardForCansRs(award.id))
+    }
+
+    fun getAwardsForAc(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val dto = toObject(AwardsForAcRq::class.java, cm.data)
+        val awardsIdsSet = dto.cans.asSequence().map { it.awardId }.toSet()
+
+        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
+        if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
+
+        val awards = getAwardsFromEntities(awardEntities)
+                .asSequence()
+                .filter { awardsIdsSet.contains(it.id) }
+                .toList()
+        return ResponseDto(data = AwardsForAcRs(awards))
+    }
 
     fun endAwardPeriod(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
@@ -118,6 +177,17 @@ class StatusService(private val periodService: PeriodService,
         val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         return ResponseDto(data = EndAwardPeriodRs(awardPeriod))
+    }
+
+    fun getLotForCheck(cm: CommandMessage): ResponseDto {
+        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
+        val token = cm.context.token ?: throw ErrorException(CONTEXT)
+        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
+        val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
+        if (awardEntity.owner != owner) throw ErrorException(ErrorType.OWNER)
+        val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
+        return ResponseDto(data = GetLotForCheckRs(awardByBid.relatedLots[0]))
     }
 
     private fun getUnsuccessfulAwards(unSuccessfulLots: List<Lot>): List<Award> {
@@ -231,5 +301,4 @@ class StatusService(private val periodService: PeriodService,
                 owner = owner,
                 jsonData = toJson(award))
     }
-
 }

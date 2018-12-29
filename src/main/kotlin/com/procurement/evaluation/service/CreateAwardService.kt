@@ -49,7 +49,7 @@ class CreateAwardService(private val rulesService: RulesService,
         }
         awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        val firstBids = getFirstBidsFromAwards(successfulAwardsList)
+        val firstBids = getFirstBidsFromAwards(AwardCriteria.fromValue(awardCriteria), successfulAwardsList)
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids))
     }
 
@@ -83,7 +83,7 @@ class CreateAwardService(private val rulesService: RulesService,
         }
         awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        val firstBids = getFirstBidsFromAwards(successfulAwardsList)
+        val firstBids = getFirstBidsFromAwards(AwardCriteria.fromValue(awardCriteria), successfulAwardsList)
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids))
     }
 
@@ -118,7 +118,7 @@ class CreateAwardService(private val rulesService: RulesService,
         val awardPeriod = periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
         awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        val firstBids = getFirstBidsFromAwards(awards)
+        val firstBids = getFirstBidsFromAwards(AwardCriteria.fromValue(awardCriteria), awards)
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids))
     }
 
@@ -145,10 +145,12 @@ class CreateAwardService(private val rulesService: RulesService,
         return ResponseDto(data = CreateAwardsRs(null, unsuccessfulAwardsList, unsuccessfulLots, null))
     }
 
-    private fun getFirstBidsFromAwards(awards: List<Award>): Set<FirstBid>? {
-        return awards.asSequence()
-                .filter { it.status == AwardStatus.PENDING && it.statusDetails == AwardStatusDetails.CONSIDERATION }
-                .map { FirstBid(it.relatedBid!!) }.toSet()
+    private fun getFirstBidsFromAwards(awardCriteria: AwardCriteria, awards: List<Award>): Set<FirstBid>? {
+        return if (awardCriteria == AwardCriteria.PRICE_ONLY) {
+            awards.asSequence()
+                    .filter { it.status == AwardStatus.PENDING && it.statusDetails == AwardStatusDetails.CONSIDERATION }
+                    .map { FirstBid(it.relatedBid!!) }.toSet()
+        } else null
     }
 
     private fun getAwardEntities(awards: List<Award>, cpId: String, owner: String, stage: String): List<AwardEntity> {
@@ -221,7 +223,7 @@ class CreateAwardService(private val rulesService: RulesService,
                     token = generationService.generateRandomUUID().toString(),
                     id = generationService.getTimeBasedUUID(),
                     date = localNowUTC(),
-                    description = "",
+                    description = null,
                     title = null,
                     status = AwardStatus.PENDING,
                     statusDetails = AwardStatusDetails.EMPTY,
@@ -256,32 +258,24 @@ class CreateAwardService(private val rulesService: RulesService,
     }
 
     private fun sortSuccessfulAwards(awards: List<Award>, awardCriteria: AwardCriteria) {
-        when (awardCriteria) {
-            AwardCriteria.PRICE_ONLY -> {
-                val lotIds = awards.asSequence().flatMap { it.relatedLots.asSequence() }.toSet()
-                lotIds.forEach { lotId ->
-                    awards.asSequence()
-                            .filter { it.relatedLots.contains(lotId) }
-                            .sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
-                            .firstOrNull()
-                            ?.let { award -> award.statusDetails = AwardStatusDetails.CONSIDERATION }
-                }
-            }
-            AwardCriteria.COST_ONLY -> {
-            }
-            AwardCriteria.QUALITY_ONLY -> {
-            }
-            AwardCriteria.RATED_CRITERIA -> {
-            }
-            AwardCriteria.LOWEST_COST -> {
-            }
-            AwardCriteria.BEST_PROPOSAL -> {
-            }
-            AwardCriteria.BEST_VALUE_TO_GOVERNMENT -> {
-            }
-            AwardCriteria.SINGLE_BID_ONLY -> {
-            }
+        val lotIds = awards.asSequence().flatMap { it.relatedLots.asSequence() }.toSet()
+        lotIds.forEach { lotId ->
+            awards.asSequence()
+                    .filter { it.relatedLots.contains(lotId) }
+                    .sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
+                    .firstOrNull()
+                    ?.let { award -> award.statusDetails = AwardStatusDetails.CONSIDERATION }
         }
+//        when (awardCriteria) {
+//            AwardCriteria.PRICE_ONLY -> {
+//            }
+//            AwardCriteria.COST_ONLY -> {
+//            }
+//            AwardCriteria.QUALITY_ONLY -> {
+//            }
+//            AwardCriteria.RATED_CRITERIA -> {
+//            }
+//        }
     }
 
     private fun getEntity(award: Award,
