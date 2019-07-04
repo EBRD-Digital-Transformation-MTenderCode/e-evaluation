@@ -285,7 +285,8 @@
                     <images>
                         <image>
                             <registry>${docker-registry}</registry>
-                            <name>${docker-registry}/${project.artifactId}${docker-image-profile}:${project.version}
+                            <name>
+                                ${docker-registry}/${project.artifactId}${docker-image-profile}:${project.version}.${git.commit.id.abbrev}
                             </name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/main</dockerFileDir>
@@ -298,7 +299,6 @@
                     </images>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
