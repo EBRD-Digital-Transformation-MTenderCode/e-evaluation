@@ -1,0 +1,57 @@
+{
+  "token": "dbd5d628-3040-4326-b5e8-537c71ee5c71",
+  "award": {
+    "id": "4d7ea60c-6b38-441f-b0f0-eb52814b3c1c",
+    "date": "2019-10-29T16:51:00Z",
+    "status": "pending",
+    "statusDetails": "empty",
+    "relatedLots": [
+      "lot-1"
+    ],
+    "value": {
+      "amount": 100.01,
+      "currency": "MDL"
+    },
+    "suppliers": [
+      {
+        "id": "identifier.scheme-identifier.id",
+        "name": "award.suppliers[0].name",
+        "identifier": {
+          "scheme": "award.suppliers[0].identifier.scheme",
+          "id": "award.suppliers[0].identifier.id",
+          "legalName": "award.suppliers[0].identifier.legalName"
+        },
+        "address": {
+          "streetAddress": "award.suppliers[0].address.streetAddress",
+          "addressDetails": {
+            "country": {
+              "scheme": "award.suppliers[0].address.addressDetails.country.scheme",
+              "id": "award.suppliers[0].address.addressDetails.country.id",
+              "description": "award.suppliers[0].address.addressDetails.country.description",
+              "uri": "award.suppliers[0].address.addressDetails.country.uri"
+            },
+            "region": {
+              "scheme": "award.suppliers[0].address.addressDetails.region.scheme",
+              "id": "award.suppliers[0].address.addressDetails.region.id",
+              "description": "award.suppliers[0].address.addressDetails.region.description",
+              "uri": "award.suppliers[0].address.addressDetails.region.uri"
+            },
+            "locality": {
+              "scheme": "award.suppliers[0].address.addressDetails.locality.scheme",
+              "id": "award.suppliers[0].address.addressDetails.locality.id",
+              "description": "award.suppliers[0].address.addressDetails.locality.description"
+            }
+          }
+        },
+        "contactPoint": {
+          "name": "award.suppliers[0].contactPoint.name",
+          "email": "award.suppliers[0].contactPoint.email",
+          "telephone": "award.suppliers[0].contactPoint.telephone"
+        },
+        "details": {
+          "scale": "award.suppliers[0].details.scale"
+        }
+      }
+    ]
+  }
+}
