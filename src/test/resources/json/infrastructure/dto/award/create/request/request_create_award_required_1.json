@@ -1,0 +1,64 @@
+{
+  "mdm": {
+    "scales": [
+      "mdm.scales[0]",
+      "mdm.scales[1]"
+    ],
+    "schemas": [
+      "mdm.schemas[0]"
+    ]
+  },
+  "award": {
+    "value": {
+      "amount": 100.01,
+      "currency": "MDL"
+    },
+    "suppliers": [
+      {
+        "name": "award.suppliers[0].name",
+        "identifier": {
+          "scheme": "award.suppliers[0].identifier.scheme",
+          "id": "award.suppliers[0].identifier.id",
+          "legalName": "award.suppliers[0].identifier.legalName"
+        },
+        "additionalIdentifiers": [
+          {
+            "scheme": "award.suppliers[0].additionalIdentifiers[0].scheme",
+            "id": "award.suppliers[0].additionalIdentifiers[0].id",
+            "legalName": "award.suppliers[0].additionalIdentifiers[0].legalName"
+          }
+        ],
+        "address": {
+          "streetAddress": "award.suppliers[0].address.streetAddress",
+          "addressDetails": {
+            "country": {
+              "scheme": "award.suppliers[0].address.addressDetails.country.scheme",
+              "id": "award.suppliers[0].address.addressDetails.country.id",
+              "description": "award.suppliers[0].address.addressDetails.country.description",
+              "uri": "award.suppliers[0].address.addressDetails.country.uri"
+            },
+            "region": {
+              "scheme": "award.suppliers[0].address.addressDetails.region.scheme",
+              "id": "award.suppliers[0].address.addressDetails.region.id",
+              "description": "award.suppliers[0].address.addressDetails.region.description",
+              "uri": "award.suppliers[0].address.addressDetails.region.uri"
+            },
+            "locality": {
+              "scheme": "award.suppliers[0].address.addressDetails.locality.scheme",
+              "id": "award.suppliers[0].address.addressDetails.locality.id",
+              "description": "award.suppliers[0].address.addressDetails.locality.description"
+            }
+          }
+        },
+        "contactPoint": {
+          "name": "award.suppliers[0].contactPoint.name",
+          "email": "award.suppliers[0].contactPoint.email",
+          "telephone": "award.suppliers[0].contactPoint.telephone"
+        },
+        "details": {
+          "scale": "award.suppliers[0].details.scale"
+        }
+      }
+    ]
+  }
+}
