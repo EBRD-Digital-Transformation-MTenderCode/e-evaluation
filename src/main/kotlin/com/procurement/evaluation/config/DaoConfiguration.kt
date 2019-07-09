@@ -10,14 +10,19 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @EnableConfigurationProperties(CassandraProperties::class)
-@ComponentScan(basePackages = ["com.procurement.evaluation.dao"])
+@ComponentScan(
+    basePackages = [
+        "com.procurement.evaluation.dao",
+        "com.procurement.evaluation.infrastructure.repository"
+    ]
+)
 class DaoConfiguration constructor(private val cassandraProperties: CassandraProperties) {
 
     internal val cluster: Cluster
         get() = Cluster.builder()
-                .addContactPoints(*cassandraProperties.getContactPoints())
-                .withAuthProvider(PlainTextAuthProvider(cassandraProperties.username, cassandraProperties.password))
-                .build()
+            .addContactPoints(*cassandraProperties.getContactPoints())
+            .withAuthProvider(PlainTextAuthProvider(cassandraProperties.username, cassandraProperties.password))
+            .build()
 
     @Bean
     fun session(): Session {
