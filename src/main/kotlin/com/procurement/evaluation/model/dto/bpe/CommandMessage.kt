@@ -39,6 +39,7 @@ data class Context @JsonCreator constructor(
 
 enum class CommandType(private val value: String) {
 
+    CREATE_AWARD("createAward"),
     CREATE_AWARDS("createAwards"),
     AWARD_BY_BID("awardByBid"),
     SET_FINAL_STATUSES("setFinalStatuses"),
