@@ -19,5 +19,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     STATUS_DETAILS_SAVED_AWARD("02.07", "Saved award have incorrect status details."),
     INVALID_AUCTION_RESULT("02.08", "Invalid auction result amount."),
     AWARD_CRITERIA("02.09", "Award Criteria can't be recognized"),
-    CONTEXT("20.01", "Context parameter not found.");
+    CONTEXT("20.01", "Context parameter not found."),
+    INVALID_FORMAT_LOT_ID("03.01", "Invalid format the lot id.");
 }
