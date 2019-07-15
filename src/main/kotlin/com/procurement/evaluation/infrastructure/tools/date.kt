@@ -8,3 +8,5 @@ import java.util.*
 fun String.toLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, JsonDateTimeFormatter.formatter)
 
 fun Date.toLocalDateTime(): LocalDateTime = this.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()
+
+fun LocalDateTime.toCassandraTimestamp(): Date = Date.from(this.atZone(ZoneOffset.UTC).toInstant())
