@@ -20,5 +20,9 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_AUCTION_RESULT("02.08", "Invalid auction result amount."),
     AWARD_CRITERIA("02.09", "Award Criteria can't be recognized"),
     CONTEXT("20.01", "Context parameter not found."),
-    INVALID_FORMAT_LOT_ID("03.01", "Invalid format the lot id.");
+    INVALID_FORMAT_LOT_ID("03.01", "Invalid format the lot id."),
+    UNKNOWN_SCHEME_IDENTIFIER("04.01", "A scheme of an identifier in a supplier is unknown."),
+    UNKNOWN_SCALE_SUPPLIER("05.01", "A scale in a supplier is unknown."),
+    SUPPLIER_IS_NOT_UNIQUE_IN_AWARD("05.01", "Supplier Identifiers should be unique in Award."),
+    SUPPLIER_IS_NOT_UNIQUE_IN_LOT("06.01", "One supplier can not submit more then one offer per lot.");
 }

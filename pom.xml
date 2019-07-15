@@ -34,7 +34,7 @@
         <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
 
         <!--Database-->
-        <cassandra-driver.version>3.3.0</cassandra-driver.version>
+        <cassandra-driver.version>3.7.1</cassandra-driver.version>
 
         <!--Libs-->
         <springfox-swagger2.version>2.6.1</springfox-swagger2.version>
@@ -47,7 +47,8 @@
         <junit-jupiter.version>5.4.0</junit-jupiter.version>
         <junit-platform.version>1.4.0</junit-platform.version>
         <mockito-kotlin.version>1.6.0</mockito-kotlin.version>
-        <mockito.version>2.25.1</mockito.version>
+        <mockito.version>2.23.0</mockito.version>
+        <testcontainer-cassandra.version>1.11.2</testcontainer-cassandra.version>
 
         <!--Plugins-->
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
@@ -57,6 +58,57 @@
         <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
         <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>integration-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>failsafe-integration-tests</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!--Jacoco-->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+                        <configuration>
+                            <append>true</append>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>pre-integration-test</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>post-integration-test</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
@@ -224,6 +276,13 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>cassandra</artifactId>
+            <version>${testcontainer-cassandra.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
