@@ -14,7 +14,7 @@ data class CreateAwardRequest(
 ) {
     data class Mdm(
         @field:JsonProperty("scales") @param:JsonProperty("scales") val scales: List<String>,
-        @field:JsonProperty("schemas") @param:JsonProperty("schemas") val schemas: List<String>
+        @field:JsonProperty("schemes") @param:JsonProperty("schemes") val schemes: List<String>
     )
 
     data class Award(

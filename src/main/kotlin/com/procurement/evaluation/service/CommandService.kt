@@ -52,7 +52,7 @@ class CommandService(
                     mdm = request.mdm.let { mdm ->
                         CreateAwardData.Mdm(
                             scales = mdm.scales.toList(),
-                            schemas = mdm.schemas.toList()
+                            schemes = mdm.schemes.toList()
                         )
                     },
                     award = request.award.let { award ->

@@ -273,7 +273,7 @@ class AwardServiceImpl(
      *   eEvaluation throws Exception: "Undefined identifier schema";
      */
     private fun checkSchemeOfIdentifier(data: CreateAwardData) {
-        val schemes = data.mdm.schemas.toSet()
+        val schemes = data.mdm.schemes.toSet()
 
         val invalidScheme = data.award.suppliers.any { supplier ->
             supplier.identifier.scheme !in schemes

@@ -9,7 +9,7 @@ data class CreateAwardData(
 
     data class Mdm(
         val scales: List<String>,
-        val schemas: List<String>
+        val schemes: List<String>
     )
 
     data class Award(
