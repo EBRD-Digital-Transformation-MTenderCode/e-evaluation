@@ -4,7 +4,7 @@
       "mdm.scales[0]",
       "mdm.scales[1]"
     ],
-    "schemas": [
+    "schemes": [
       "mdm.schemas[0]"
     ]
   },
