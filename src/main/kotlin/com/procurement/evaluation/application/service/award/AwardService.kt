@@ -273,10 +273,13 @@ class AwardServiceImpl(
      *   eEvaluation throws Exception: "Undefined identifier schema";
      */
     private fun checkSchemeOfIdentifier(data: CreateAwardData) {
-        val schemes = data.mdm.schemes.toSet()
+        val schemes = data.mdm.schemes
+            .asSequence()
+            .map { it.toUpperCase() }
+            .toSet()
 
         val invalidScheme = data.award.suppliers.any { supplier ->
-            supplier.identifier.scheme !in schemes
+            supplier.identifier.scheme.toUpperCase() !in schemes
         }
 
         if (invalidScheme)
@@ -293,10 +296,13 @@ class AwardServiceImpl(
      *   eEvaluation throws Exception: "Undefined supplier scale";
      */
     private fun checkScaleOfSupplier(data: CreateAwardData) {
-        val scales = data.mdm.scales.toSet()
+        val scales = data.mdm.scales
+            .asSequence()
+            .map { it.toUpperCase() }
+            .toSet()
 
         val invalidScale = data.award.suppliers.any { supplier ->
-            supplier.details.scale !in scales
+            supplier.details.scale.toUpperCase() !in scales
         }
 
         if (invalidScale)
