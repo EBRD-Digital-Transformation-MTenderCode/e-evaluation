@@ -72,7 +72,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
 
         val result = saveNewStart(statement)
         if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the start award period '$start' by cpid '$cpid' and stage '$stage' from the database.")
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the start award period '$start' by cpid '$cpid' and stage '$stage' to the database. Record is already.")
     }
 
     private fun saveNewStart(statement: BoundStatement): ResultSet = try {

@@ -109,6 +109,19 @@ class CassandraAwardPeriodRepositoryIT {
     }
 
     @Test
+    fun errorAlreadyNewStart() {
+        awardPeriodRepository.saveNewStart(cpid = CPID, stage = STAGE, start = START_DATE)
+
+        val exception = assertThrows<SaveEntityException> {
+            awardPeriodRepository.saveNewStart(cpid = CPID, stage = STAGE, start = START_DATE)
+        }
+        assertEquals(
+            "An error occurred when writing a record(s) of the start award period '$START_DATE' by cpid '$CPID' and stage '$STAGE' to the database. Record is already.",
+            exception.message
+        )
+    }
+
+    @Test
     fun errorSaveNewStart() {
         doThrow(RuntimeException())
             .whenever(session)
