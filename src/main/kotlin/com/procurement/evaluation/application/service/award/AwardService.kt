@@ -194,8 +194,7 @@ class AwardServiceImpl(
             items = null
         )
 
-        val awardPeriodStart = awardPeriodRepository.findStartDateBy(cpid = cpid, stage = stage)
-            ?: context.startDate
+        val prevAwardPeriodStart = awardPeriodRepository.findStartDateBy(cpid = cpid, stage = stage)
 
         val newAwardEntity = AwardEntity(
             cpId = cpid,
@@ -208,7 +207,14 @@ class AwardServiceImpl(
         )
 
         //FIXME Consistency cannot be guaranteed
-        awardPeriodRepository.saveNewStart(cpid = cpid, stage = stage, start = awardPeriodStart)
+        val awardPeriodStart = if (prevAwardPeriodStart != null) {
+            prevAwardPeriodStart
+        } else {
+            val newAwardPeriodStart = context.startDate
+            awardPeriodRepository.saveNewStart(cpid = cpid, stage = stage, start = newAwardPeriodStart)
+            newAwardPeriodStart
+        }
+
         awardRepository.saveNew(cpid = cpid, award = newAwardEntity)
 
         return getCreatedAwardData(award, awardPeriodStart, lotAwarded)
