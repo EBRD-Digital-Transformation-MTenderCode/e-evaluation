@@ -12,6 +12,7 @@ import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.evaluation.application.exception.ReadEntityException
+import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
@@ -99,6 +100,70 @@ class CassandraAwardRepositoryIT {
             awardRepository.findBy(cpid = CPID)
         }
         assertEquals("Error read Award(s) from the database.", exception.message)
+    }
+
+    @Test
+    fun saveNewAward() {
+        val awardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            status = AWARD_STATUS.value,
+            statusDetails = AWARD_STATUS_DETAILS.value,
+            owner = OWNER,
+            jsonData = JSON_DATA
+        )
+        awardRepository.saveNew(cpid = CPID, award = awardEntity)
+
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID)
+
+        assertEquals(1, actualFundedAwards.size)
+        assertEquals(expectedFundedAward(), actualFundedAwards[0])
+    }
+
+    @Test
+    fun errorAlreadyAward() {
+        val awardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            status = AWARD_STATUS.value,
+            statusDetails = AWARD_STATUS_DETAILS.value,
+            owner = OWNER,
+            jsonData = JSON_DATA
+        )
+        awardRepository.saveNew(cpid = CPID, award = awardEntity)
+
+        val exception = assertThrows<SaveEntityException> {
+            awardRepository.saveNew(cpid = CPID, award = awardEntity)
+        }
+
+        assertEquals(
+            "An error occurred when writing a record(s) of the award by cpid '$CPID' and stage '$STAGE' to the database. Record is already.",
+            exception.message
+        )
+    }
+
+    @Test
+    fun errorSaveNewStart() {
+        doThrow(RuntimeException())
+            .whenever(session)
+            .execute(any<BoundStatement>())
+
+        val awardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            status = AWARD_STATUS.value,
+            statusDetails = AWARD_STATUS_DETAILS.value,
+            owner = OWNER,
+            jsonData = JSON_DATA
+        )
+
+        val exception = assertThrows<SaveEntityException> {
+            awardRepository.saveNew(cpid = CPID, award = awardEntity)
+        }
+        assertEquals("Error writing new award to database.", exception.message)
     }
 
     private fun createKeyspace() {
