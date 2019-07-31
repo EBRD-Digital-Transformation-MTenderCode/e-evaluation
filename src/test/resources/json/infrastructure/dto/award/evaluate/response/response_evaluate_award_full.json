@@ -1,0 +1,33 @@
+{
+  "award": {
+    "id": "2e9bd5fa-6b9e-4703-a66f-a10317c4d100",
+    "date": "2019-08-10T11:10:20Z",
+    "description": "award.description",
+    "status": "pending",
+    "statusDetails": "active",
+    "relatedLots": [
+      "5cc5e65c-2138-4316-aa62-822e723dd2e0"
+    ],
+    "value": {
+      "amount": 100.21,
+      "currency": "MDL"
+    },
+    "suppliers": [
+      {
+        "id": "award.suppliers[0].id",
+        "name": "award.suppliers[0].name"
+      }
+    ],
+    "documents": [
+      {
+        "documentType": "contractDraft",
+        "id": "9264f875-2c3b-46b4-a928-a60beefe5e73",
+        "title": "award.documents[0].title",
+        "description": "award.documents[0].description",
+        "relatedLots": [
+          "5cc5e65c-2138-4316-aa62-822e723dd2e0"
+        ]
+      }
+    ]
+  }
+}
