@@ -1,0 +1,15 @@
+{
+  "award": {
+    "statusDetails": "pending",
+    "documents": [
+      {
+        "id": "9264f875-2c3b-46b4-a928-a60beefe5e73",
+        "title": "award.documents[0].title",
+        "relatedLots": [
+          "5cc5e65c-2138-4316-aa62-822e723dd2e0"
+        ],
+        "documentType": "contractDraft"
+      }
+    ]
+  }
+}
