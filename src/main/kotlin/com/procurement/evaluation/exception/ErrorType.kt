@@ -24,5 +24,8 @@ enum class ErrorType constructor(val code: String, val message: String) {
     UNKNOWN_SCHEME_IDENTIFIER("04.01", "A scheme of an identifier in a supplier is unknown."),
     UNKNOWN_SCALE_SUPPLIER("05.01", "A scale in a supplier is unknown."),
     SUPPLIER_IS_NOT_UNIQUE_IN_AWARD("05.01", "Supplier Identifiers should be unique in Award."),
-    SUPPLIER_IS_NOT_UNIQUE_IN_LOT("06.01", "One supplier can not submit more then one offer per lot.");
+    SUPPLIER_IS_NOT_UNIQUE_IN_LOT("06.01", "One supplier can not submit more then one offer per lot."),
+    INVALID_FORMAT_AWARD_ID("07.01", "Invalid format the award id."),
+    INVALID_FORMAT_TOKEN("08.01", "Invalid format the award id."),
+    AWARD_NOT_FOUND("09.01", "Award is not found.");
 }

@@ -19,6 +19,8 @@ import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.entity.AwardEntity
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -34,11 +36,14 @@ class CassandraAwardRepositoryIT {
     companion object {
         private const val CPID = "cpid-1"
         private const val STAGE = "EV"
-        private val TOKEN = UUID.randomUUID()
+        private val TOKEN: UUID = UUID.randomUUID()
         private const val OWNER = "owner-1"
         private val AWARD_STATUS = AwardStatus.PENDING
+        private val UPDATED_AWARD_STATUS = AwardStatus.ACTIVE
         private val AWARD_STATUS_DETAILS = AwardStatusDetails.EMPTY
+        private val UPDATED_AWARD_STATUS_DETAILS = AwardStatusDetails.UNSUCCESSFUL
         private const val JSON_DATA = """ {"award": "data"} """
+        private const val UPDATED_JSON_DATA = """ {"award": "updated data"} """
     }
 
     @Autowired
@@ -73,7 +78,7 @@ class CassandraAwardRepositoryIT {
     }
 
     @Test
-    fun findBy() {
+    fun findByCPID() {
         insertAward()
 
         val actualFundedAwards = awardRepository.findBy(cpid = CPID)
@@ -83,13 +88,13 @@ class CassandraAwardRepositoryIT {
     }
 
     @Test
-    fun awardNotFound() {
-        val actualFundedAwards = awardRepository.findBy(cpid = "UNKNOWN")
+    fun awardByCPIDNotFound() {
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID)
         assertEquals(0, actualFundedAwards.size)
     }
 
     @Test
-    fun errorRead() {
+    fun errorReadByCPID() {
         insertAward()
 
         doThrow(RuntimeException())
@@ -98,6 +103,66 @@ class CassandraAwardRepositoryIT {
 
         val exception = assertThrows<ReadEntityException> {
             awardRepository.findBy(cpid = CPID)
+        }
+        assertEquals("Error read Award(s) from the database.", exception.message)
+    }
+
+    @Test
+    fun findByCPIDAndStage() {
+        insertAward()
+
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID, stage = STAGE)
+
+        assertEquals(1, actualFundedAwards.size)
+        assertEquals(expectedFundedAward(), actualFundedAwards[0])
+    }
+
+    @Test
+    fun awardByCPIDAndStageNotFound() {
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID, stage = STAGE)
+        assertEquals(0, actualFundedAwards.size)
+    }
+
+    @Test
+    fun errorReadByCPIDAndStage() {
+        insertAward()
+
+        doThrow(RuntimeException())
+            .whenever(session)
+            .execute(any<BoundStatement>())
+
+        val exception = assertThrows<ReadEntityException> {
+            awardRepository.findBy(cpid = CPID, stage = STAGE)
+        }
+        assertEquals("Error read Award(s) from the database.", exception.message)
+    }
+
+    @Test
+    fun findByCPIDAndStageAndToken() {
+        insertAward()
+
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+
+        assertNotNull(actualFundedAward)
+        assertEquals(expectedFundedAward(), actualFundedAward)
+    }
+
+    @Test
+    fun awardByCPIDAndStageAndTokenNotFound() {
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+        assertNull(actualFundedAward)
+    }
+
+    @Test
+    fun errorReadByCPIDAndStageAndToken() {
+        insertAward()
+
+        doThrow(RuntimeException())
+            .whenever(session)
+            .execute(any<BoundStatement>())
+
+        val exception = assertThrows<ReadEntityException> {
+            awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
         }
         assertEquals("Error read Award(s) from the database.", exception.message)
     }
@@ -164,6 +229,70 @@ class CassandraAwardRepositoryIT {
             awardRepository.saveNew(cpid = CPID, award = awardEntity)
         }
         assertEquals("Error writing new award to database.", exception.message)
+    }
+
+    @Test
+    fun update() {
+        insertAward()
+
+        val updatedAwardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            owner = OWNER,
+            status = UPDATED_AWARD_STATUS.value,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            jsonData = UPDATED_JSON_DATA
+        )
+        awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
+
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+
+        assertNotNull(actualFundedAward)
+        assertEquals(updatedAwardEntity, actualFundedAward)
+    }
+
+    @Test
+    fun recordForUpdateNotFound() {
+        val updatedAwardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            owner = OWNER,
+            status = UPDATED_AWARD_STATUS.value,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            jsonData = UPDATED_JSON_DATA
+        )
+        val exception = assertThrows<SaveEntityException> {
+            awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
+        }
+
+        assertEquals(
+            "An error occurred when writing a record(s) of the award by cpid '$CPID' and stage '$STAGE' and token to the database. Record is already.",
+            exception.message
+        )
+    }
+
+    @Test
+    fun errorUpdate() {
+        doThrow(RuntimeException())
+            .whenever(session)
+            .execute(any<BoundStatement>())
+
+        val updatedAwardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            owner = OWNER,
+            status = UPDATED_AWARD_STATUS.value,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            jsonData = UPDATED_JSON_DATA
+        )
+
+        val exception = assertThrows<SaveEntityException> {
+            awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
+        }
+        assertEquals("Error writing updated award to database.", exception.message)
     }
 
     private fun createKeyspace() {

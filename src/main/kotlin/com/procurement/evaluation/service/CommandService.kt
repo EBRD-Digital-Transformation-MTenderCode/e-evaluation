@@ -3,11 +3,15 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
+import com.procurement.evaluation.application.service.award.EvaluateAwardContext
+import com.procurement.evaluation.application.service.award.EvaluateAwardData
+import com.procurement.evaluation.application.service.award.EvaluatedAwardData
 import com.procurement.evaluation.dao.HistoryDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
+import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
@@ -240,6 +244,75 @@ class CommandService(
                     log.debug("Award was created. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
             }
+            CommandType.EVALUATE_AWARD -> {
+                val context = EvaluateAwardContext(
+                    cpid = getCPID(cm),
+                    stage = getStage(cm),
+                    token = getToken(cm),
+                    owner = getOwner(cm),
+                    startDate = getStartDate(cm),
+                    awardId = getAwardId(cm)
+                )
+
+                val request = toObject(EvaluateAwardRequest::class.java, cm.data)
+                val data = EvaluateAwardData(
+                    award = request.award.let { award ->
+                        EvaluateAwardData.Award(
+                            statusDetails = award.statusDetails,
+                            description = award.description,
+                            documents = award.documents?.map { document ->
+                                EvaluateAwardData.Award.Document(
+                                    id = document.id,
+                                    title = document.title,
+                                    description = document.description,
+                                    relatedLots = document.relatedLots.toList(),
+                                    documentType = document.documentType
+                                )
+                            }
+                        )
+                    }
+                )
+                val result = awardService.evaluate(context, data)
+                if (log.isDebugEnabled)
+                    log.debug("Award was evaluate. Result: ${toJson(result)}")
+
+                val dataResponse = EvaluatedAwardData(
+                    award = result.award.let { award ->
+                        EvaluatedAwardData.Award(
+                            id = award.id,
+                            date = award.date,
+                            description = award.description,
+                            status = award.status,
+                            statusDetails = award.statusDetails,
+                            relatedLots = award.relatedLots.toList(),
+                            value = award.value.let { value ->
+                                EvaluatedAwardData.Award.Value(
+                                    amount = value.amount,
+                                    currency = value.currency
+                                )
+                            },
+                            suppliers = award.suppliers.map { supplier ->
+                                EvaluatedAwardData.Award.Supplier(
+                                    id = supplier.id,
+                                    name = supplier.name
+                                )
+                            },
+                            documents = award.documents?.map { document ->
+                                EvaluatedAwardData.Award.Document(
+                                    id = document.id,
+                                    title = document.title,
+                                    description = document.description,
+                                    relatedLots = document.relatedLots.toList(),
+                                    documentType = document.documentType
+                                )
+                            }
+                        )
+                    }
+                )
+                if (log.isDebugEnabled)
+                    log.debug("Award was evaluate. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
             CommandType.CREATE_AWARDS -> createAwardService.createAwards(cm)
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)
@@ -269,6 +342,15 @@ class CommandService(
     private fun getStartDate(cm: CommandMessage): LocalDateTime = cm.context.startDate?.toLocalDateTime()
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'startDate' attribute in context.")
 
+    private fun getToken(cm: CommandMessage): UUID = cm.context.token
+        ?.let { id ->
+            try {
+                UUID.fromString(id)
+            } catch (exception: Exception) {
+                throw ErrorException(error = ErrorType.INVALID_FORMAT_TOKEN)
+            }
+        } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'token' attribute in context.")
+
     private fun getOwner(cm: CommandMessage): String = cm.context.owner
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'owner' attribute in context.")
 
@@ -278,6 +360,16 @@ class CommandService(
                 UUID.fromString(id)
             } catch (exception: Exception) {
                 throw ErrorException(error = ErrorType.INVALID_FORMAT_LOT_ID)
+            }
+        }
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'token' attribute in context.")
+
+    private fun getAwardId(cm: CommandMessage): UUID = cm.context.id
+        ?.let { id ->
+            try {
+                UUID.fromString(id)
+            } catch (exception: Exception) {
+                throw ErrorException(error = ErrorType.INVALID_FORMAT_AWARD_ID)
             }
         }
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")

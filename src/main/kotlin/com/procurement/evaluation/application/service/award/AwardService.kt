@@ -3,8 +3,15 @@ package com.procurement.evaluation.application.service.award
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
+import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
+import com.procurement.evaluation.exception.ErrorType.OWNER
+import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
+import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
+import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
+import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -15,6 +22,7 @@ import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.ContactPoint
 import com.procurement.evaluation.model.dto.ocds.CountryDetails
 import com.procurement.evaluation.model.dto.ocds.Details
+import com.procurement.evaluation.model.dto.ocds.Document
 import com.procurement.evaluation.model.dto.ocds.Identifier
 import com.procurement.evaluation.model.dto.ocds.LocalityDetails
 import com.procurement.evaluation.model.dto.ocds.OrganizationReference
@@ -30,6 +38,8 @@ import java.util.*
 
 interface AwardService {
     fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData
+
+    fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
 }
 
 @Service
@@ -474,6 +484,303 @@ class AwardServiceImpl(
                     }
                 )
             }
+        )
+    )
+
+    /**
+     * BR-7.10.4
+     *
+     * eEvaluation performs next steps:
+     * 1. Validates token & ID (award.ID) values from the context of Request by rule VR-7.10.1;
+     * 2. Validates Owner value from the context of Request by rule VR-7.10.2;
+     * 3. Validates award.statusDetails value from Request by rule VR-7.10.4;
+     * 4. Validates award.documents.documentType value in every Documents from Request by rule VR-7.10.3;
+     * 5. Validates award.documents.relatedLots value in every Documents from Request by rule VR-7.10.5;
+     * 6. Finds saved version of Award in DB by ID (award.ID) & Stage values from the context of Request;
+     * 7. Updated Award found before according to the next order:
+     *   a. Updates award.Description == award.description from Request;
+     *   b. Proceeds award.Documents by rule BR-7.10.5;
+     *   c. Proceeds award.statusDetails by rule BR-7.10.6;
+     *   d. Sets award.Date == startDate from the context of Request;
+     * 8. Returns updated Award for Response getting next fields:
+     *   - Award.ID;
+     *   - Award.relatedLots;
+     *   - Award.description;
+     *   - Award.status;
+     *   - Award.statusDetails;
+     *   - Award.supplier.ID;
+     *   - Award.supplier.name;
+     *   - Award.value;
+     *   - Award.date;
+     *   - Award.documents;
+     */
+    override fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData {
+        val cpid = context.cpid
+
+        val awardEntity = awardRepository.findBy(cpid = cpid, stage = context.stage, token = context.token)
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        //VR-7.10.1
+        if (context.token != awardEntity.token)
+            throw ErrorException(error = TOKEN)
+
+        //VR-7.10.2
+        if (context.owner != awardEntity.owner)
+            throw ErrorException(error = OWNER)
+
+        val award = toObject(Award::class.java, awardEntity.jsonData)
+
+        //VR-7.10.1
+        if (context.awardId != UUID.fromString(award.id))
+            throw ErrorException(error = AWARD_NOT_FOUND)
+
+        //VR-7.10.4
+        checkStatusDetails(context = context, data = data, award = award)
+
+        //VR-7.10.5
+        checkDocuments(data = data, award = award)
+
+        val updatedDocuments = updateDocuments(data = data, award = award)
+
+        val updatedAward = award.copy(
+            description = data.award.description,
+            //BR-7.10.5
+            documents = updatedDocuments,
+            //BR-7.10.6
+            statusDetails = statusDetails(data = data, award = award),
+            date = context.startDate
+        )
+
+        val updatedAwardEntity = awardEntity.copy(
+            statusDetails = award.statusDetails.toString(),
+            jsonData = toJson(updatedAward)
+        )
+
+        awardRepository.update(cpid = cpid, updatedAward = updatedAwardEntity)
+
+        return getEvaluatedAwardData(updatedAward = updatedAward)
+    }
+
+    /**
+     * VR-7.10.4 statusDetails (award)
+     *
+     * 1. Checks award.statusDetails in Award from Request:
+     *   a. IF award.statusDetails == "unsuccessful" in Request
+     *      validation is successful;
+     *   b. ELSE IF (award.statusDetails == "active" in Request)
+     *      eEvaluation executes next steps:
+     *        i.  Selects all Award objects in DB related to one proceeded Lot beside Award from Request;
+     *        ii. Checks award.statusDetails in all selected Awards found previously:
+     *          1. IF award.statusDetails != "active" in all Awards
+     *             validation is successful;
+     *          2. ELSE
+     *             eEvaluation throws Exception: "Lot has already received successful award";
+     *   c. ELSE IF (award.statusDetails != "active" || "unsuccessful")
+     *      eEvaluation throws Exception: "Invalid status value";
+     */
+    private fun checkStatusDetails(
+        context: EvaluateAwardContext,
+        data: EvaluateAwardData,
+        award: Award
+    ) {
+        when {
+            data.award.statusDetails == AwardStatusDetails.UNSUCCESSFUL -> return
+            data.award.statusDetails == AwardStatusDetails.ACTIVE -> {
+                val lots = award.relatedLots.toSet()
+                val awards = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+                    .asSequence()
+                    .map { entity ->
+                        toObject(Award::class.java, entity.jsonData)
+                    }
+                    .filter {
+                        lots.containsAll(it.relatedLots)
+                    }
+                    .toList()
+
+                if (isNotAcceptableStatusDetails(awards))
+                    throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
+            }
+            else -> throw ErrorException(error = STATUS_DETAILS)
+        }
+    }
+
+    private fun isNotAcceptableStatusDetails(awards: List<Award>) =
+        awards.any { award -> award.statusDetails == AwardStatusDetails.ACTIVE }
+
+    /**
+     * VR-7.10.5 Documents.relatedLots (award)
+     *
+     * Checks Documents.relatedLots in all Award.Documents objects from Request:
+     *   a. IF award.documents.relatedLots from Request include value of award.relatedLots field
+     *      from saved version of Award,
+     *        validation is successful;
+     *   b. ELSE
+     *        eEvaluation throws Exception;
+     */
+    private fun checkDocuments(data: EvaluateAwardData, award: Award) {
+        val relatedLotsFromDocuments = data.award.documents
+            ?.asSequence()
+            ?.flatMap { it.relatedLots.asSequence() }
+            ?.toSet()
+
+        if (relatedLotsFromDocuments != null) {
+            val relatedLotsFromAward = award.relatedLots
+                .asSequence()
+                .map { relatedLot ->
+                    UUID.fromString(relatedLot)
+                }
+                .toSet()
+
+            if (!relatedLotsFromDocuments.containsAll(relatedLotsFromAward))
+                throw throw ErrorException(error = RELATED_LOTS)
+        }
+    }
+
+    /**
+     * BR-7.10.5 Documents (Update Case)
+     *
+     * eEvaluation analyzes the availability of Documents object in Request:
+     * 1. IF there NO Documents object in Request,
+     *      eEvaluation checks the availability of Documents object in DB:
+     *        a. IF there are NO Documents in DB
+     *             eEvaluation doesn't execute any operations;
+     *        b. ELSE (Documents are presented in saved version of Award)
+     *             eEvaluation rewrites Documents in new version of Award in DB and includes them for Response;
+     * 2. ELSE (Documents are presented in Request),
+     *      eEvaluation checks the availability of Documents object in DB:
+     *        a. IF there are NO Documents in DB, eEvaluation executes next operations:
+     *          i. Saves Documents objects in new version of Award in DB and includes them for Response;
+     *        b. ELSE (Documents are presented in saved version of Award)
+     *             eEvaluation executes next operations:
+     *               i. Compares set of Documents.ID from Request and set of Documents.ID from DB;
+     *                 1. IF there are new Documents.ID from Request (that are not presented in DB)
+     *                      eEvaluation executes next operations:
+     *                       a. Determines all new documents objects from Request after comparison;
+     *                       b. Adds Documents objects (determined on step 2.b.i.1.a) in new version of Award in DB;
+     *                       c. Determines all documents objects from Request that are presented in Documents section in DB;
+     *                       d. Updates saved versions of Documents (determined on step 2.b.i.1.c) getting the values from next fields of Documents objects from Request:
+     *                         i.   Document.title;
+     *                         ii.  Document.description;
+     *                         iii. Document.documentType;
+     *                       e. Includes updated and renewed Documents object to Award for Response;
+     *                 2. ELSE (there are NO new Documents.ID from Request)
+     *                      eEvaluation executes next operations:
+     *                        a. Updates saved versions of Documents getting the values from next fields of Documents objects from Request:
+     *                          i.   Document.title;
+     *                          ii.  Document.description;
+     *                          iii. Document.documentType;
+     *                        b. Includes updated Documents object to Award for Response;
+     */
+    private fun updateDocuments(data: EvaluateAwardData, award: Award): List<Document> {
+        val requestDocumentsById = data.award.documents?.associateBy { it.id } ?: emptyMap()
+        if (requestDocumentsById.isEmpty())
+            return award.documents ?: emptyList()
+
+        val awardDocumentsById = award.documents?.associateBy { UUID.fromString(it.id) } ?: emptyMap()
+        return if (awardDocumentsById.isEmpty())
+            requestDocumentsById.values.map {
+                convertToDocument(it)
+            }
+        else {
+            val documentIds: Set<UUID> = requestDocumentsById.keys + awardDocumentsById.keys
+            documentIds.map { id ->
+                requestDocumentsById[id]
+                    ?.let { requestDocument ->
+                        awardDocumentsById[id]?.copy(
+                            title = requestDocument.title,
+                            description = requestDocument.description,
+                            documentType = requestDocument.documentType
+                        ) ?: convertToDocument(requestDocument)
+                    } ?: awardDocumentsById.getValue(id)
+            }
+        }
+    }
+
+    private fun convertToDocument(document: EvaluateAwardData.Award.Document): Document = Document(
+        id = document.id.toString(),
+        documentType = document.documentType,
+        title = document.title,
+        description = document.description,
+        relatedLots = document.relatedLots.asSequence().map { it.toString() }.toHashSet()
+    )
+
+    /**
+     * BR-7.10.6 "statusDetails" (awards)
+     *
+     * eEvaluation checks the value of award.statusDetails from Request:
+     * 1. IF award gets statusDetails == "active" in request, eEvaluation checks the value of statusDetails field in saved version of award:
+     *   a. IF statusDetails of award's saved version == "empty", eEvaluation performs next steps:
+     *        Saves new award.statusDetails == "active";
+     *   b. ELSE IF statusDetails of award's saved version == "active"
+     *        eEvaluation does not perform any operation with award.statusDetails;
+     *   c. ELSE IF statusDetails of award's saved version == "unsuccessful" eEvaluation performs next steps:
+     *        Saves new award.statusDetails ==  "active";
+     *   d. ELSE IF statusDetails of award's saved version != "unsuccessful" || "empty" || "active"
+     *        eEvaluation returns exception.
+     * 2. ELSE (award gets statusDetails == "unsuccessful" in Request), eEvaluation checks the value of statusDetails field in saved version of award:
+     *   a. IF statusDetails of award's saved version == "empty", eEvaluation performs next steps:
+     *        Saves new award.statusDetails ==  "unsuccessful";
+     *   b. ELSE IF statusDetails of award's saved version == "unsuccessful"
+     *        eEvaluation does not perform any operation with award.statusDetails;
+     *   c. ELSE IF statusDetails of award's saved version == "active", eEvaluation performs next steps:
+     *        Saves new award.statusDetails ==  "unsuccessful";
+     *   d. ELSE IF statusDetails of award's saved version != "active" || "empty" || "unsuccessful"
+     *        eEvaluation returns exception.
+     */
+    private fun statusDetails(data: EvaluateAwardData, award: Award): AwardStatusDetails {
+        return when (data.award.statusDetails) {
+            AwardStatusDetails.ACTIVE -> {
+                when (award.statusDetails) {
+                    AwardStatusDetails.EMPTY -> AwardStatusDetails.ACTIVE
+                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.ACTIVE
+                    AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.ACTIVE
+                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
+                }
+            }
+
+            AwardStatusDetails.UNSUCCESSFUL -> {
+                when (award.statusDetails) {
+                    AwardStatusDetails.EMPTY -> AwardStatusDetails.UNSUCCESSFUL
+                    AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.UNSUCCESSFUL
+                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.UNSUCCESSFUL
+                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
+                }
+            }
+
+            else -> throw ErrorException(error = STATUS_DETAILS)
+        }
+    }
+
+    private fun getEvaluatedAwardData(updatedAward: Award): EvaluatedAwardData = EvaluatedAwardData(
+        award = EvaluatedAwardData.Award(
+            id = UUID.fromString(updatedAward.id),
+            date = updatedAward.date!!,
+            description = updatedAward.description,
+            status = updatedAward.status,
+            statusDetails = updatedAward.statusDetails,
+            relatedLots = updatedAward.relatedLots.map { UUID.fromString(it) },
+            value = updatedAward.value!!.let { value ->
+                EvaluatedAwardData.Award.Value(
+                    amount = value.amount,
+                    currency = value.currency!!
+                )
+            },
+            suppliers = updatedAward.suppliers!!.map { supplier ->
+                EvaluatedAwardData.Award.Supplier(
+                    id = supplier.id,
+                    name = supplier.name
+                )
+            },
+            documents = updatedAward.documents?.map { document ->
+                EvaluatedAwardData.Award.Document(
+                    id = UUID.fromString(document.id),
+                    documentType = document.documentType,
+                    title = document.title,
+                    description = document.description,
+                    relatedLots = document.relatedLots!!.map { UUID.fromString(it) }
+                )
+            }
+
         )
     )
 }
