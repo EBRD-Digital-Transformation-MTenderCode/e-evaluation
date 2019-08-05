@@ -594,7 +594,10 @@ class AwardServiceImpl(
                         toObject(Award::class.java, entity.jsonData)
                     }
                     .filter {
-                        lots.containsAll(it.relatedLots)
+                        if(UUID.fromString(it.id) == context.awardId)
+                            false
+                        else
+                            lots.containsAll(it.relatedLots)
                     }
                     .toList()
 
