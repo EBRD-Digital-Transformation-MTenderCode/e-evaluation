@@ -619,12 +619,13 @@ class AwardServiceImpl(
      *        eEvaluation throws Exception;
      */
     private fun checkDocuments(data: EvaluateAwardData, award: Award) {
-        val relatedLotsFromDocuments = data.award.documents
+        val relatedLotsFromDocuments: Set<UUID> = data.award.documents
             ?.asSequence()
-            ?.flatMap { it.relatedLots.asSequence() }
+            ?.flatMap { it.relatedLots?.asSequence() ?: emptySequence() }
             ?.toSet()
+            ?: emptySet()
 
-        if (relatedLotsFromDocuments != null) {
+        if (relatedLotsFromDocuments.isNotEmpty()) {
             val relatedLotsFromAward = award.relatedLots
                 .asSequence()
                 .map { relatedLot ->
@@ -703,7 +704,7 @@ class AwardServiceImpl(
         documentType = document.documentType,
         title = document.title,
         description = document.description,
-        relatedLots = document.relatedLots.asSequence().map { it.toString() }.toHashSet()
+        relatedLots = document.relatedLots?.asSequence()?.map { it.toString() }?.toHashSet()
     )
 
     /**

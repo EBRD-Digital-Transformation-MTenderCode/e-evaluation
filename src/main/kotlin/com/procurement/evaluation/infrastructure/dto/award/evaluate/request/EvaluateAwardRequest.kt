@@ -22,12 +22,15 @@ data class EvaluateAwardRequest(
 
         data class Document(
             @field:JsonProperty("id") @param:JsonProperty("id") val id: DocumentId,
-            @field:JsonProperty("title") @param:JsonProperty("title") val title: String,
+
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @field:JsonProperty("title") @param:JsonProperty("title") val title: String?,
 
             @JsonInclude(JsonInclude.Include.NON_NULL)
             @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
 
-            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<UUID>,
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
+            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<UUID>?,
             @field:JsonProperty("documentType") @param:JsonProperty("documentType") val documentType: DocumentType
         )
     }

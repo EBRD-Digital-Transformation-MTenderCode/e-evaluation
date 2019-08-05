@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.infrastructure.bind.amount.AmountDeserializer
 import com.procurement.evaluation.infrastructure.bind.amount.AmountSerializer
 import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeDeserializer
@@ -53,7 +54,7 @@ data class EvaluateAwardResponse(
 
         data class Document(
             @field:JsonProperty("documentType") @param:JsonProperty("documentType") val documentType: DocumentType,
-            @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
+            @field:JsonProperty("id") @param:JsonProperty("id") val id: DocumentId,
 
             @JsonInclude(JsonInclude.Include.NON_NULL)
             @field:JsonProperty("title") @param:JsonProperty("title") val title: String?,
@@ -61,7 +62,8 @@ data class EvaluateAwardResponse(
             @JsonInclude(JsonInclude.Include.NON_NULL)
             @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
 
-            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<UUID>
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
+            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<UUID>?
         )
     }
 }

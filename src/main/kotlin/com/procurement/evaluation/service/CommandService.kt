@@ -5,13 +5,13 @@ import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
-import com.procurement.evaluation.application.service.award.EvaluatedAwardData
 import com.procurement.evaluation.dao.HistoryDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
+import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
@@ -265,7 +265,7 @@ class CommandService(
                                     id = document.id,
                                     title = document.title,
                                     description = document.description,
-                                    relatedLots = document.relatedLots.toList(),
+                                    relatedLots = document.relatedLots?.toList(),
                                     documentType = document.documentType
                                 )
                             }
@@ -276,9 +276,9 @@ class CommandService(
                 if (log.isDebugEnabled)
                     log.debug("Award was evaluate. Result: ${toJson(result)}")
 
-                val dataResponse = EvaluatedAwardData(
+                val dataResponse = EvaluateAwardResponse(
                     award = result.award.let { award ->
-                        EvaluatedAwardData.Award(
+                        EvaluateAwardResponse.Award(
                             id = award.id,
                             date = award.date,
                             description = award.description,
@@ -286,23 +286,23 @@ class CommandService(
                             statusDetails = award.statusDetails,
                             relatedLots = award.relatedLots.toList(),
                             value = award.value.let { value ->
-                                EvaluatedAwardData.Award.Value(
+                                EvaluateAwardResponse.Award.Value(
                                     amount = value.amount,
                                     currency = value.currency
                                 )
                             },
                             suppliers = award.suppliers.map { supplier ->
-                                EvaluatedAwardData.Award.Supplier(
+                                EvaluateAwardResponse.Award.Supplier(
                                     id = supplier.id,
                                     name = supplier.name
                                 )
                             },
                             documents = award.documents?.map { document ->
-                                EvaluatedAwardData.Award.Document(
+                                EvaluateAwardResponse.Award.Document(
                                     id = document.id,
                                     title = document.title,
                                     description = document.description,
-                                    relatedLots = document.relatedLots.toList(),
+                                    relatedLots = document.relatedLots?.toList(),
                                     documentType = document.documentType
                                 )
                             }
