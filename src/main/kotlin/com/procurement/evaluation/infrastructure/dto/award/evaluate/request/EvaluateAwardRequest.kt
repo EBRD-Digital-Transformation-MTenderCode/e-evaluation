@@ -2,6 +2,7 @@ package com.procurement.evaluation.infrastructure.dto.award.evaluate.request
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.DocumentType
 import java.util.*
@@ -20,7 +21,7 @@ data class EvaluateAwardRequest(
     ) {
 
         data class Document(
-            @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
+            @field:JsonProperty("id") @param:JsonProperty("id") val id: DocumentId,
             @field:JsonProperty("title") @param:JsonProperty("title") val title: String,
 
             @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -2,6 +2,7 @@ package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
@@ -672,17 +673,18 @@ class AwardServiceImpl(
      *                        b. Includes updated Documents object to Award for Response;
      */
     private fun updateDocuments(data: EvaluateAwardData, award: Award): List<Document> {
-        val requestDocumentsById = data.award.documents?.associateBy { it.id } ?: emptyMap()
+        val requestDocumentsById: Map<DocumentId, EvaluateAwardData.Award.Document> =
+            data.award.documents?.associateBy { it.id } ?: emptyMap()
         if (requestDocumentsById.isEmpty())
             return award.documents ?: emptyList()
 
-        val awardDocumentsById = award.documents?.associateBy { UUID.fromString(it.id) } ?: emptyMap()
+        val awardDocumentsById: Map<DocumentId, Document> = award.documents?.associateBy { it.id } ?: emptyMap()
         return if (awardDocumentsById.isEmpty())
             requestDocumentsById.values.map {
                 convertToDocument(it)
             }
         else {
-            val documentIds: Set<UUID> = requestDocumentsById.keys + awardDocumentsById.keys
+            val documentIds: Set<DocumentId> = requestDocumentsById.keys + awardDocumentsById.keys
             documentIds.map { id ->
                 requestDocumentsById[id]
                     ?.let { requestDocument ->
@@ -697,7 +699,7 @@ class AwardServiceImpl(
     }
 
     private fun convertToDocument(document: EvaluateAwardData.Award.Document): Document = Document(
-        id = document.id.toString(),
+        id = document.id,
         documentType = document.documentType,
         title = document.title,
         description = document.description,
@@ -773,7 +775,7 @@ class AwardServiceImpl(
             },
             documents = updatedAward.documents?.map { document ->
                 EvaluatedAwardData.Award.Document(
-                    id = UUID.fromString(document.id),
+                    id = document.id,
                     documentType = document.documentType,
                     title = document.title,
                     description = document.description,
