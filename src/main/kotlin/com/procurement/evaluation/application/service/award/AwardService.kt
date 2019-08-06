@@ -783,7 +783,7 @@ class AwardServiceImpl(
                     documentType = document.documentType,
                     title = document.title,
                     description = document.description,
-                    relatedLots = document.relatedLots!!.map { UUID.fromString(it) }
+                    relatedLots = document.relatedLots?.map { UUID.fromString(it) }
                 )
             }
 
