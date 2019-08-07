@@ -6,8 +6,10 @@ import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
+import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.OWNER
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
+import com.procurement.evaluation.exception.ErrorType.STATUS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
@@ -41,6 +43,8 @@ interface AwardService {
     fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData
 
     fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
+
+    fun getWinning(context: GetWinningAwardContext): WinningAward?
 }
 
 @Service
@@ -594,7 +598,7 @@ class AwardServiceImpl(
                         toObject(Award::class.java, entity.jsonData)
                     }
                     .filter {
-                        if(UUID.fromString(it.id) == context.awardId)
+                        if (UUID.fromString(it.id) == context.awardId)
                             false
                         else
                             lots.containsAll(it.relatedLots)
@@ -789,4 +793,98 @@ class AwardServiceImpl(
 
         )
     )
+
+    /**
+     * BR-7.6.3 "ID" (award) (check Award before CAN create)
+     *
+     * eEvaluation performs next steps:
+     * 1. Selects all awards objects in DB by values of CPID && Stage from the context of Request && ID (lot.ID)
+     *    from the context of comunda and saves them (awards) as a list to memory;
+     * 2. Checks award.status && award.statusDetails in every award object from list selected before:
+     *   a. IF [there is award where award.status == "pending" && award.statusDetails == "active"] then: eEvaluation performs next operations:
+     *     i.   Finds award object where award.status == "pending" && award.statusDetails == "active" in list generated on step 1;
+     *     ii.  Get.award.ID value from award object found before and returns it for Response;
+     *     iii. Sets parameter awardingSucces == TRUE and returns it for Response;
+     * ELSE IF [all awards in list have award.status == "pending" && award.statusDetails == "unsuccessful"] then:
+     *   eEvaluation sets parameter awardingSucces == FALSE and returns it for Response;
+     */
+    override fun getWinning(context: GetWinningAwardContext): WinningAward? {
+        val awardEntities: List<AwardEntity> = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+        if (awardEntities.isEmpty())
+            throw ErrorException(DATA_NOT_FOUND)
+
+        val awardsByLotId = getAwardsByLotId(context = context, entities = awardEntities)
+
+        return findActiveAward(awardsByLotId)?.let { award ->
+            WinningAward(id = UUID.fromString(award.id))
+        }
+    }
+
+    /**
+     * VR-7.6.2
+     *
+     * 1. eEvaluation analyzes the quantity of Awards by lot:
+     *   a. IF [there 1 or more award in list by lot]  then:
+     *      validation is successful;
+     *   b. ELSE [no awards in list] then:
+     *      system throws Exception: "No awards for awarding finishing";
+     */
+    private fun getAwardsByLotId(context: GetWinningAwardContext, entities: List<AwardEntity>): List<Award> {
+        val lotId = context.lotId.toString()
+        val awardsByLotId = entities.asSequence()
+            .map { entity ->
+                toObject(Award::class.java, entity.jsonData)
+            }
+            .filter { award ->
+                award.relatedLots.contains(lotId)
+            }
+            .toList()
+
+        if (awardsByLotId.isEmpty())
+            throw ErrorException(error = AWARD_NOT_FOUND, message = "No awards for awarding finishing.")
+
+        return awardsByLotId
+    }
+
+    /**
+     * VR-7.6.3 status statusDetails (award)
+     *
+     * 1. eEvaluation checks award.status && award.statusDetails in every award object from list selected before:
+     *   a. IF [there is award where award.status == "pending" && award.statusDetails == "active"] then:
+     *      validation is successful;
+     *   b. ELSE IF [all awards in list have award.status == "pending" && award.statusDetails == "unsuccessful"] then:
+     *      validation is successful;
+     *   c. ELSE then:
+     *      system throws Exception: "Awarding by lot is not finished";
+     */
+    private fun findActiveAward(awards: List<Award>): Award? {
+        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { award ->
+            if (award.status != AwardStatus.PENDING)
+                throw ErrorException(error = STATUS)
+            award.statusDetails
+        }
+
+        val activeAwards: List<Award> = awardsByStatusDetails[AwardStatusDetails.ACTIVE] ?: emptyList()
+        if (activeAwards.isNotEmpty()) {
+            if (activeAwards.size > 1) {
+                val idsBadAwards = activeAwards.joinToString(
+                    separator = "', ",
+                    prefix = "['",
+                    postfix = "']",
+                    transform = { award -> award.id }
+                )
+                throw ErrorException(
+                    error = STATUS_DETAILS,
+                    message = "More than one award has an active status details[$idsBadAwards]"
+                )
+            }
+            return activeAwards.first()
+        }
+
+        val unsuccessfulAwards: List<Award> = awardsByStatusDetails[AwardStatusDetails.UNSUCCESSFUL] ?: emptyList()
+        if (unsuccessfulAwards.size != awards.size)
+            throw ErrorException(error = STATUS_DETAILS)
+
+        return null
+    }
 }

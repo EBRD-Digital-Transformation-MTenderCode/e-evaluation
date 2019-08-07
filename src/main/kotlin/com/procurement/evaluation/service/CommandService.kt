@@ -5,9 +5,11 @@ import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
+import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.dao.HistoryDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
@@ -324,7 +326,27 @@ class CommandService(
             CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
             CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
-            CommandType.GET_AWARD_FOR_CAN -> statusService.getAwardForCan(cm)
+            CommandType.GET_WINNING_AWARD -> {
+                val context = GetWinningAwardContext(
+                    cpid = getCPID(cm),
+                    stage = getStage(cm),
+                    lotId = getLotId(cm)
+                )
+                val award = awardService.getWinning(context = context)
+                if (log.isDebugEnabled) {
+                    if (award == null)
+                        log.debug("Winning award was not found.")
+                    else
+                        log.debug("Winning award was found with the id: '${award.id}'.")
+                }
+                ResponseDto(
+                    data = WinningAwardResponse(
+                        award = award?.let {
+                            WinningAwardResponse.Award(id = it.id)
+                        }
+                    )
+                )
+            }
             CommandType.GET_AWARDS_FOR_AC -> statusService.getAwardsForAc(cm)
             CommandType.GET_LOT_FOR_CHECK -> statusService.getLotForCheck(cm)
             CommandType.GET_AWARD_ID_FOR_CHECK -> statusService.getAwardIdForCheck(cm)
