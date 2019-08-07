@@ -53,6 +53,7 @@ enum class CommandType(private val value: String) {
     END_AWARD_PERIOD("endAwardPeriod"),
     SET_INITIAL_AWARDS_STATUS("setInitialAwardsStatus"),
     GET_WINNING_AWARD("getWinAward"),
+    GET_EVALUATED_AWARDS("getEvaluatedAwards"),
     GET_AWARDS_FOR_AC("getAwardsForAc"),
     GET_LOT_FOR_CHECK("getLotForCheck"),
     GET_AWARD_ID_FOR_CHECK("getAwardIdForCheck");

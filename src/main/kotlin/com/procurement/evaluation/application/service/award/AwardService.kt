@@ -45,6 +45,8 @@ interface AwardService {
     fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
 
     fun getWinning(context: GetWinningAwardContext): WinningAward?
+
+    fun getEvaluated(context: GetEvaluatedAwardsContext): List<EvaluatedAward>
 }
 
 @Service
@@ -813,11 +815,11 @@ class AwardServiceImpl(
         if (awardEntities.isEmpty())
             throw ErrorException(DATA_NOT_FOUND)
 
-        val awardsByLotId = getAwardsByLotId(context = context, entities = awardEntities)
-
-        return findActiveAward(awardsByLotId)?.let { award ->
-            WinningAward(id = UUID.fromString(award.id))
-        }
+        return getAwardsByLotId(lotId = context.lotId, entities = awardEntities)
+            .findActiveAward()
+            ?.let { award ->
+                WinningAward(id = UUID.fromString(award.id))
+            }
     }
 
     /**
@@ -829,17 +831,10 @@ class AwardServiceImpl(
      *   b. ELSE [no awards in list] then:
      *      system throws Exception: "No awards for awarding finishing";
      */
-    private fun getAwardsByLotId(context: GetWinningAwardContext, entities: List<AwardEntity>): List<Award> {
-        val lotId = context.lotId.toString()
-        val awardsByLotId = entities.asSequence()
-            .map { entity ->
-                toObject(Award::class.java, entity.jsonData)
-            }
-            .filter { award ->
-                award.relatedLots.contains(lotId)
-            }
+    private fun getAwardsByLotId(lotId: UUID, entities: List<AwardEntity>): List<Award> {
+        val awardsByLotId = entities.toSequenceOfAwards()
+            .filterByLotId(lotId = lotId)
             .toList()
-
         if (awardsByLotId.isEmpty())
             throw ErrorException(error = AWARD_NOT_FOUND, message = "No awards for awarding finishing.")
 
@@ -857,8 +852,8 @@ class AwardServiceImpl(
      *   c. ELSE then:
      *      system throws Exception: "Awarding by lot is not finished";
      */
-    private fun findActiveAward(awards: List<Award>): Award? {
-        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { award ->
+    private fun List<Award>.findActiveAward(): Award? {
+        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = this.groupBy { award ->
             if (award.status != AwardStatus.PENDING)
                 throw ErrorException(error = STATUS)
             award.statusDetails
@@ -882,9 +877,47 @@ class AwardServiceImpl(
         }
 
         val unsuccessfulAwards: List<Award> = awardsByStatusDetails[AwardStatusDetails.UNSUCCESSFUL] ?: emptyList()
-        if (unsuccessfulAwards.size != awards.size)
+        if (unsuccessfulAwards.size != this.size)
             throw ErrorException(error = STATUS_DETAILS)
 
         return null
+    }
+
+    /**
+     * CR-7.1.1.1
+     *
+     * eEvaluation executes next operations:
+     * 1. Finds all awards objects in DB by values of CPID && Stage from the context of Request && ID (lot.ID)
+     *    from the context of comunda;
+     * 2. Selects awards from list (got before) where award.statusDetails == "active" || "unsuccessful";
+     * 3. Returns all awards (selected before) as awards array for response up to next data model:
+     *   - award.statusDetails;
+     *   - award.relatedBid;
+     */
+    override fun getEvaluated(context: GetEvaluatedAwardsContext): List<EvaluatedAward> =
+        awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+            .toSequenceOfAwards()
+            .filterByLotId(lotId = context.lotId)
+            .filter { award ->
+                award.statusDetails == AwardStatusDetails.ACTIVE || award.statusDetails == AwardStatusDetails.UNSUCCESSFUL
+            }
+            .map { award ->
+                EvaluatedAward(
+                    statusDetails = award.statusDetails,
+                    relatedBid = UUID.fromString(award.relatedBid!!)
+                )
+            }
+            .toList()
+
+    private fun List<AwardEntity>.toSequenceOfAwards(): Sequence<Award> = this.asSequence()
+        .map { entity ->
+            toObject(Award::class.java, entity.jsonData)
+        }
+
+    private fun Sequence<Award>.filterByLotId(lotId: UUID): Sequence<Award> {
+        val lotIdAsString = lotId.toString()
+        return this.filter { award ->
+            award.relatedLots.contains(lotIdAsString)
+        }
     }
 }

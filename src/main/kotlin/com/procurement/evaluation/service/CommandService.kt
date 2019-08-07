@@ -5,10 +5,13 @@ import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
+import com.procurement.evaluation.application.service.award.EvaluatedAward
+import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsContext
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.dao.HistoryDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
@@ -343,6 +346,30 @@ class CommandService(
                     data = WinningAwardResponse(
                         award = award?.let {
                             WinningAwardResponse.Award(id = it.id)
+                        }
+                    )
+                )
+            }
+            CommandType.GET_EVALUATED_AWARDS -> {
+                val context = GetEvaluatedAwardsContext(
+                    cpid = getCPID(cm),
+                    stage = getStage(cm),
+                    lotId = getLotId(cm)
+                )
+                val evaluatedAwards: List<EvaluatedAward> = awardService.getEvaluated(context = context)
+                if (log.isDebugEnabled) {
+                    if (evaluatedAwards.isEmpty())
+                        log.debug("Evaluated award was not found.")
+                    else
+                        log.debug("Evaluated awards was found.")
+                }
+                ResponseDto(
+                    data = EvaluatedAwardsResponse(
+                        awards = evaluatedAwards.map { evaluatedAward ->
+                            EvaluatedAwardsResponse.Award(
+                                statusDetails = evaluatedAward.statusDetails,
+                                relatedBid = evaluatedAward.relatedBid
+                            )
                         }
                     )
                 )
