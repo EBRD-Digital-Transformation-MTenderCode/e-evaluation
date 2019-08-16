@@ -17,6 +17,7 @@ import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_
 import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
+import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.model.dto.ocds.Address
 import com.procurement.evaluation.model.dto.ocds.AddressDetails
 import com.procurement.evaluation.model.dto.ocds.Award
@@ -95,6 +96,9 @@ class AwardServiceImpl(
     override fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData {
         val cpid = context.cpid
         val stage = context.stage
+
+        //VR-7.10.9
+        checkNumberSuppliers(suppliers = data.award.suppliers)
 
         // VR-7.10.6
         checkSchemeOfIdentifier(data)
@@ -341,7 +345,6 @@ class AwardServiceImpl(
      *   b. ELSE [there are same ID]
      *        eEvaluation throws Exception: "Supplier Identifiers should be unique in Award";
      */
-
     private fun checkSuppliersIdentifiers(suppliers: List<CreateAwardData.Award.Supplier>) {
         val suppliersIds: MutableSet<String> = mutableSetOf()
         suppliers.forEach { supplier ->
@@ -373,7 +376,6 @@ class AwardServiceImpl(
      *   b. ELSE [awards list = NULL]
      *        validation is successful;
      */
-
     private fun checkSuppliers(lotId: UUID, suppliers: List<CreateAwardData.Award.Supplier>, awards: List<Award>) {
         val lotIdAsString = lotId.toString()
         val awardsByLot = awards.filter {
@@ -398,6 +400,28 @@ class AwardServiceImpl(
             if (supplierId in suppliersIds)
                 throw ErrorException(error = SUPPLIER_IS_NOT_UNIQUE_IN_LOT)
         }
+    }
+
+    /**
+     * VR-7.10.9 supplier (award)
+     *
+     * 1. eEvaluation checks the availability of one Supplier object in award.suppliers array from Request:
+     *   a. IF there is only one Supplier object in Request
+     *      validation is successful;
+     *   b. ELSE system throws Exception:
+     *      "At least one supplier should be defined";
+     */
+    private fun checkNumberSuppliers(suppliers: List<CreateAwardData.Award.Supplier>) {
+        if (suppliers.isEmpty())
+            throw ErrorException(
+                error = WRONG_NUMBER_OF_SUPPLIERS,
+                message = "At least one supplier should be defined."
+            )
+        if (suppliers.size > 1)
+            throw ErrorException(
+                error = WRONG_NUMBER_OF_SUPPLIERS,
+                message = "Only one supplier should by transferred."
+            )
     }
 
     private fun getCreatedAwardData(

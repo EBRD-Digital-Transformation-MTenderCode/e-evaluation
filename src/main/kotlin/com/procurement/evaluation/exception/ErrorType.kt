@@ -27,5 +27,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     SUPPLIER_IS_NOT_UNIQUE_IN_LOT("06.01", "One supplier can not submit more then one offer per lot."),
     INVALID_FORMAT_AWARD_ID("07.01", "Invalid format the award id."),
     INVALID_FORMAT_TOKEN("08.01", "Invalid format the award id."),
-    AWARD_NOT_FOUND("09.01", "Award is not found.");
+    AWARD_NOT_FOUND("09.01", "Award is not found."),
+    WRONG_NUMBER_OF_SUPPLIERS("10.01", "Wrong number of suppliers.");
 }
