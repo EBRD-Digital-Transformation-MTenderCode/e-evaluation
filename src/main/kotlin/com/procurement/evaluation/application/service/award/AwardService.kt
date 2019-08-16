@@ -187,7 +187,7 @@ class AwardServiceImpl(
                                             uri = region.uri
                                         )
                                     },
-                                    locality = detail.region.let { locality ->
+                                    locality = detail.locality.let { locality ->
                                         LocalityDetails(
                                             scheme = locality.scheme,
                                             id = locality.id,
