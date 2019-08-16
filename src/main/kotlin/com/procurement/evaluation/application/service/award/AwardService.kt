@@ -487,12 +487,12 @@ class AwardServiceImpl(
                                             uri = region.uri!!
                                         )
                                     },
-                                    locality = detail.region.let { locality ->
+                                    locality = detail.locality.let { locality ->
                                         CreatedAwardData.Award.Supplier.Address.AddressDetails.Locality(
-                                            scheme = locality.scheme!!,
+                                            scheme = locality.scheme,
                                             id = locality.id,
-                                            description = locality.description!!,
-                                            uri = locality.uri!!
+                                            description = locality.description,
+                                            uri = locality.uri
                                         )
                                     }
                                 )
