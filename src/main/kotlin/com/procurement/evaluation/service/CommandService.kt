@@ -214,7 +214,7 @@ class CommandService(
                                                             uri = region.uri
                                                         )
                                                     },
-                                                    locality = detail.region.let { locality ->
+                                                    locality = detail.locality.let { locality ->
                                                         CreateAwardResponse.Award.Supplier.Address.AddressDetails.Locality(
                                                             scheme = locality.scheme,
                                                             id = locality.id,
