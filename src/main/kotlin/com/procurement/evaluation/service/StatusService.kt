@@ -86,7 +86,7 @@ class StatusService(private val periodService: PeriodService,
                 }
                 awardDao.saveAll(getUpdatedAwardEntities(awardEntities, awards))
             }
-            TENDERING, CLARIFICATION, EMPTY -> {
+            TENDERING, CLARIFICATION, NEGOTIATION, EMPTY -> {
                 val dto = toObject(CancellationRq::class.java, cm.data)
                 updatedAwards = getUnsuccessfulAwards(dto.lots)
                 awardDao.saveAll(getAwardEntities(updatedAwards, cpId, owner, stage))
