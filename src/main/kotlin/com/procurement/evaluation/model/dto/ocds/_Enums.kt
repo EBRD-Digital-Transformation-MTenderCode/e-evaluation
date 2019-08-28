@@ -86,6 +86,7 @@ enum class Phase(@JsonValue val value: String) {
     AWARDING("awarding"),
     TENDERING("tendering"),
     CLARIFICATION("clarification"),
+    NEGOTIATION("negotiation"),
     EMPTY("empty");
 
     override fun toString(): String {
