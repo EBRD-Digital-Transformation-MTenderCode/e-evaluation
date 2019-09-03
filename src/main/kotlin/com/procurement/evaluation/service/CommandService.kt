@@ -1,5 +1,7 @@
 package com.procurement.evaluation.service
 
+import com.procurement.evaluation.application.service.award.AwardCancellationContext
+import com.procurement.evaluation.application.service.award.AwardCancellationData
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
@@ -13,6 +15,8 @@ import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
+import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
+import com.procurement.evaluation.infrastructure.dto.award.cancel.response.AwardCancellationResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
@@ -21,6 +25,11 @@ import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
+import com.procurement.evaluation.model.dto.bpe.cpid
+import com.procurement.evaluation.model.dto.bpe.owner
+import com.procurement.evaluation.model.dto.bpe.phase
+import com.procurement.evaluation.model.dto.bpe.stage
+import com.procurement.evaluation.model.dto.bpe.startDate
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory
@@ -325,7 +334,40 @@ class CommandService(
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
             CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
             CommandType.PREPARE_CANCELLATION -> statusService.prepareCancellation(cm)
-            CommandType.AWARDS_CANCELLATION -> statusService.awardsCancellation(cm)
+            CommandType.AWARDS_CANCELLATION -> {
+                val context = AwardCancellationContext(
+                    cpid = cm.cpid,
+                    owner = cm.owner,
+                    stage = cm.stage,
+                    phase = cm.phase,
+                    startDate = cm.startDate
+                )
+                val request = toObject(AwardCancellationRequest::class.java, cm.data)
+                val data = AwardCancellationData(
+                    lots = request.lots.map { lot ->
+                        AwardCancellationData.Lot(id = lot.id)
+                    }
+                )
+                val result = statusService.awardsCancellation(context = context, data = data)
+                if (log.isDebugEnabled)
+                    log.debug("Award was cancelled. Result: ${toJson(result)}")
+                val dataResponse = AwardCancellationResponse(
+                    awards = result.awards.map { award ->
+                        AwardCancellationResponse.Award(
+                            id = award.id,
+                            title = award.title,
+                            description = award.description,
+                            date = award.date,
+                            status = award.status,
+                            statusDetails = award.statusDetails,
+                            relatedLots = award.relatedLots?.toList()
+                        )
+                    }
+                )
+                if (log.isDebugEnabled)
+                    log.debug("Award was cancelled. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
             CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
             CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
