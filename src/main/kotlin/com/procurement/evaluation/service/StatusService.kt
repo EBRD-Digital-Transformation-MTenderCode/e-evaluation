@@ -193,8 +193,8 @@ class StatusService(private val periodService: PeriodService,
     private fun getUnsuccessfulAwards(unSuccessfulLots: List<Lot>): List<Award> {
         return unSuccessfulLots.asSequence().map { lot ->
             Award(
-                    token = generationService.generateRandomUUID().toString(),
-                    id = generationService.getTimeBasedUUID(),
+                    token = generationService.token().toString(),
+                    id = generationService.awardId().toString(),
                     date = localNowUTC(),
                     description = "Other reasons (discontinuation of procedure)",
                     title = "The contract/lot is not awarded",
