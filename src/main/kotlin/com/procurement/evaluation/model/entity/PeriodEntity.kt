@@ -8,7 +8,7 @@ data class PeriodEntity(
 
         val stage: String,
 
-        val awardCriteria: String,
+        val awardCriteria: String?,
 
         var startDate: Date?,
 

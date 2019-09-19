@@ -60,16 +60,11 @@ class PeriodService(private val periodRepository: PeriodDao) {
         periodRepository.save(period)
     }
 
-    fun getAwardCriteria(cpId: String, stage: String): String {
-        val periodEntity = periodRepository.getByCpIdAndStage(cpId, stage)
-        return periodEntity.awardCriteria
-    }
-
     private fun getEntity(cpId: String,
                           stage: String,
                           startDate: Date?,
                           endDate: Date?,
-                          awardCriteria: String
+                          awardCriteria: String?
     ): PeriodEntity {
         return PeriodEntity(
                 cpId = cpId,
