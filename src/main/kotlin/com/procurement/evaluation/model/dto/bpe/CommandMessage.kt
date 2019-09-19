@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -46,6 +47,11 @@ val CommandMessage.phase: Phase
     get() = this.context.phase?.let{
         Phase.fromValue(it)
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'phase' attribute in context.")
+
+val CommandMessage.pmd: ProcurementMethod
+    get() = this.context.pmd?.let {
+        ProcurementMethod.fromString(it)
+    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'pmd' attribute in context.")
 
 val CommandMessage.startDate: LocalDateTime
     get() = this.context.startDate?.toLocalDateTime()
