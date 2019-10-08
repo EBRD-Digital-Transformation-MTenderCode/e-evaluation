@@ -4,6 +4,7 @@ import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.Statement
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardRepository
@@ -178,12 +179,12 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(columnJsonData, updatedAward.jsonData)
             }
 
-        val result = update(statement)
+        val result = executeUpdating(statement)
         if (!result.wasApplied())
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${updatedAward.stage}' and token to the database. Record is already.")
     }
 
-    private fun update(statement: BoundStatement): ResultSet = try {
+    private fun executeUpdating(statement: Statement): ResultSet = try {
         session.execute(statement)
     } catch (exception: Exception) {
         throw SaveEntityException(message = "Error writing updated award to database.", cause = exception)
