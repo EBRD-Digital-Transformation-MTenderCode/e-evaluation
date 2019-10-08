@@ -1,5 +1,6 @@
 package com.procurement.evaluation.infrastructure.repository
 
+import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.HostDistance
@@ -291,6 +292,70 @@ class CassandraAwardRepositoryIT {
 
         val exception = assertThrows<SaveEntityException> {
             awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
+        }
+        assertEquals("Error writing updated award to database.", exception.message)
+    }
+
+    @Test
+    fun updateSome() {
+        insertAward()
+
+        val updatedAwardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            owner = OWNER,
+            status = UPDATED_AWARD_STATUS.value,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            jsonData = UPDATED_JSON_DATA
+        )
+        awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
+
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+
+        assertNotNull(actualFundedAward)
+        assertEquals(updatedAwardEntity, actualFundedAward)
+    }
+
+    @Test
+    fun recordForUpdateSomeNotFound() {
+        val updatedAwardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            owner = OWNER,
+            status = UPDATED_AWARD_STATUS.value,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            jsonData = UPDATED_JSON_DATA
+        )
+        val exception = assertThrows<SaveEntityException> {
+            awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
+        }
+
+        assertEquals(
+            "An error occurred when writing a record(s) of the awards by cpid '$CPID' to the database. Record(s) is not exists.",
+            exception.message
+        )
+    }
+
+    @Test
+    fun errorUpdateSome() {
+        doThrow(RuntimeException())
+            .whenever(session)
+            .execute(any<BatchStatement>())
+
+        val updatedAwardEntity = AwardEntity(
+            cpId = CPID,
+            stage = STAGE,
+            token = TOKEN,
+            owner = OWNER,
+            status = UPDATED_AWARD_STATUS.value,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            jsonData = UPDATED_JSON_DATA
+        )
+
+        val exception = assertThrows<SaveEntityException> {
+            awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
         }
         assertEquals("Error writing updated award to database.", exception.message)
     }

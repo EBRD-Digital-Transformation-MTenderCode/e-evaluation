@@ -13,4 +13,6 @@ interface AwardRepository {
     fun saveNew(cpid: String, award: AwardEntity)
 
     fun update(cpid: String, updatedAward: AwardEntity)
+
+    fun update(cpid: String, updatedAwards: Collection<AwardEntity>)
 }

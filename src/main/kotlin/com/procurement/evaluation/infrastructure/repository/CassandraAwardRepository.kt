@@ -1,5 +1,6 @@
 package com.procurement.evaluation.infrastructure.repository
 
+import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
@@ -173,6 +174,17 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         val result = executeUpdating(statement)
         if (!result.wasApplied())
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${updatedAward.stage}' and token to the database. Record is already.")
+    }
+
+    override fun update(cpid: String, updatedAwards: Collection<AwardEntity>) {
+        val statements = BatchStatement().apply {
+            for (updatedAward in updatedAwards) {
+                add(statementForUpdateAward(cpid = cpid, updatedAward = updatedAward))
+            }
+        }
+        val result = executeUpdating(statements)
+        if (!result.wasApplied())
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
     }
 
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
