@@ -8,6 +8,8 @@ import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
 import com.procurement.evaluation.application.service.award.EvaluatedAward
+import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsContext
+import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsData
 import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsContext
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.dao.HistoryDao
@@ -21,6 +23,8 @@ import com.procurement.evaluation.infrastructure.dto.award.create.request.Create
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
+import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
+import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
@@ -419,6 +423,37 @@ class CommandService(
             CommandType.GET_AWARDS_FOR_AC -> statusService.getAwardsForAc(cm)
             CommandType.GET_LOT_FOR_CHECK -> statusService.getLotForCheck(cm)
             CommandType.GET_AWARD_ID_FOR_CHECK -> statusService.getAwardIdForCheck(cm)
+            CommandType.FINAL_AWARDS_STATUS_BY_LOTS -> {
+                val context = FinalAwardsStatusByLotsContext(
+                    cpid = cm.cpid,
+                    stage = cm.stage
+                )
+                val request = toObject(FinalAwardsStatusByLotsRequest::class.java, cm.data)
+                val data = FinalAwardsStatusByLotsData(
+                    lots = request.lots.map { lot ->
+                        FinalAwardsStatusByLotsData.Lot(
+                            id = lot.id
+                        )
+                    }
+                )
+
+                val result = awardService.finalAwardsStatusByLots(context, data)
+                if (log.isDebugEnabled)
+                    log.debug("Awards were finalized. Result: ${toJson(result)}")
+
+                val dataResponse = FinalAwardsStatusByLotsResponse(
+                    awards = result.awards.map { award ->
+                        FinalAwardsStatusByLotsResponse.Award(
+                            id = award.id,
+                            status = award.status,
+                            statusDetails = award.statusDetails
+                        )
+                    }
+                )
+                if (log.isDebugEnabled)
+                    log.debug("Awards were finalized. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)
