@@ -169,7 +169,14 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     override fun update(cpid: String, updatedAward: AwardEntity) {
-        val statement = preparedUpdatedAwardStatusesCQL.bind()
+        val statement = statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
+        val result = executeUpdating(statement)
+        if (!result.wasApplied())
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${updatedAward.stage}' and token to the database. Record is already.")
+    }
+
+    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
+        preparedUpdatedAwardStatusesCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
                 setString(columnStage, updatedAward.stage)
@@ -178,11 +185,6 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(columnStatusDetails, updatedAward.statusDetails)
                 setString(columnJsonData, updatedAward.jsonData)
             }
-
-        val result = executeUpdating(statement)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${updatedAward.stage}' and token to the database. Record is already.")
-    }
 
     private fun executeUpdating(statement: Statement): ResultSet = try {
         session.execute(statement)
