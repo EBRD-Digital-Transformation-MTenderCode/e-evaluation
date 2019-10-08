@@ -48,6 +48,11 @@ interface AwardService {
     fun getWinning(context: GetWinningAwardContext): WinningAward?
 
     fun getEvaluated(context: GetEvaluatedAwardsContext): List<EvaluatedAward>
+
+    fun finalAwardsStatusByLots(
+        context: FinalAwardsStatusByLotsContext,
+        data: FinalAwardsStatusByLotsData
+    ): FinalizedAwardsStatusByLots
 }
 
 @Service
@@ -944,4 +949,98 @@ class AwardServiceImpl(
             award.relatedLots.contains(lotIdAsString)
         }
     }
+
+    /**
+     * BR-7.9.2 "status" "statusDetails" (Award) (set final status by lots)
+     *
+     * 1. Finds all Awards objects in DB by values of Stage && CPID from the context of Request and saves them as a list to memory;
+     * 2. FOR every lot.ID value from list got in Request, eEvaluation executes next steps:
+     *   a. Selects awards from list (got on step 1) where award.relatedLots == lots.[id] and saves them as a list to memory;
+     *   b. Selects awards from list (got on step 2.a) with award.status == "pending" && award.statusDetails == "unsuccessful" and saves them as a list to memory;
+     *   c. FOR every award from list got on step 2.b:
+     *     i.   Sets award.status == "unsuccessful" && award.statusDetails ==  "empty";
+     *     ii.  Saves updated Award to DB;
+     *     iii. Returns it for Response as award.ID && award.status && award.statusDetails;
+     *   d. Selects awards from list (got on step 2.a) with award.status == "pending" && award.statusDetails == "active" and saves them as a list to memory;
+     *   e. FOR every award from list got on step 2.d:
+     *     i.   Sets award.status == "active" && award.statusDetails ==  "empty";
+     *     ii.  Saves updated Award to DB;
+     *     iii. Returns it for Response as award.ID && award.status && award.statusDetails;
+     */
+    override fun finalAwardsStatusByLots(
+        context: FinalAwardsStatusByLotsContext,
+        data: FinalAwardsStatusByLotsData
+    ): FinalizedAwardsStatusByLots {
+        fun isActive(status: AwardStatus, details: AwardStatusDetails) =
+            status == AwardStatus.PENDING && details == AwardStatusDetails.ACTIVE
+
+        fun isUnsuccessful(status: AwardStatus, details: AwardStatusDetails) =
+            status == AwardStatus.PENDING && details == AwardStatusDetails.UNSUCCESSFUL
+
+        fun isValidStatuses(entity: AwardEntity): Boolean {
+            val status = AwardStatus.fromValue(entity.status)
+            val details = AwardStatusDetails.fromString(entity.statusDetails)
+            return isActive(status, details) || isUnsuccessful(status, details)
+        }
+
+        fun Award.updatingStatuses(): Award = when {
+            isActive(this.status, this.statusDetails) -> this.copy(
+                status = AwardStatus.ACTIVE,
+                statusDetails = AwardStatusDetails.EMPTY
+            )
+            isUnsuccessful(this.status, this.statusDetails) -> this.copy(
+                status = AwardStatus.UNSUCCESSFUL,
+                statusDetails = AwardStatusDetails.EMPTY
+            )
+            else -> throw IllegalStateException("No processing for award with status: '${this.status}' and details: '${this.statusDetails}'.")
+        }
+
+        val lotsIds: Set<UUID> = data.lots.asSequence()
+            .map { it.id }
+            .toSet()
+
+        val updatedAwards = loadAwards(cpid = context.cpid, stage = context.stage)
+            .filter { entity ->
+                isValidStatuses(entity)
+            }
+            .map { entity ->
+                val award = toObject(Award::class.java, entity.jsonData)
+                award to entity
+            }
+            .filter { (award, _) ->
+                award.relatedLots.any { lotsIds.contains(UUID.fromString(it)) }
+            }
+            .map { (award, entity) ->
+                val updatedAward = award.updatingStatuses()
+
+                val updatedEntity = entity.copy(
+                    status = updatedAward.status.value,
+                    statusDetails = updatedAward.statusDetails.value,
+                    jsonData = toJson(updatedAward)
+                )
+
+                updatedAward to updatedEntity
+            }
+            .toMap()
+
+        awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwards.values)
+
+        return FinalizedAwardsStatusByLots(
+            awards = updatedAwards.keys.map { award ->
+                FinalizedAwardsStatusByLots.Award(
+                    id = UUID.fromString(award.id),
+                    status = award.status,
+                    statusDetails = award.statusDetails
+                )
+            }
+        )
+    }
+
+    private fun loadAwards(cpid: String, stage: String): Sequence<AwardEntity> =
+        awardRepository.findBy(cpid = cpid, stage = stage)
+            .takeIf {
+                it.isNotEmpty()
+            }
+            ?.asSequence()
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
 }
