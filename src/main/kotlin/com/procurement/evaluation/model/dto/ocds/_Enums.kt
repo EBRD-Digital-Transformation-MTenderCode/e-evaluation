@@ -56,6 +56,17 @@ enum class AwardStatusDetails(@JsonValue val value: String) {
     override fun toString(): String {
         return this.value
     }
+
+    companion object {
+        private val CONSTANTS: Map<String, AwardStatusDetails> = values().associateBy { it.value }
+
+        fun fromString(value: String): AwardStatusDetails = CONSTANTS[value]
+            ?: throw EnumException(
+                enumType = AwardStatusDetails::class.java.name,
+                value = value,
+                values = values().toString()
+            )
+    }
 }
 
 enum class AwardCriteria(@JsonValue val value: String) {
