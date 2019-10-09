@@ -978,7 +978,7 @@ class AwardServiceImpl(
             status == AwardStatus.PENDING && details == AwardStatusDetails.UNSUCCESSFUL
 
         fun isValidStatuses(entity: AwardEntity): Boolean {
-            val status = AwardStatus.fromValue(entity.status)
+            val status = AwardStatus.fromString(entity.status)
             val details = AwardStatusDetails.fromString(entity.statusDetails)
             return isActive(status, details) || isUnsuccessful(status, details)
         }

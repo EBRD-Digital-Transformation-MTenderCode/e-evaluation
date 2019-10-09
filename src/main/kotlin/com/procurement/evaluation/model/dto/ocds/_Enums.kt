@@ -34,15 +34,14 @@ enum class AwardStatus(@JsonValue val value: String) {
     }
 
     companion object {
-        private val CONSTANTS = HashMap<String, AwardStatus>()
+        private val CONSTANTS: Map<String, AwardStatus> = values().associateBy { it.value.toUpperCase() }
 
-        init {
-            AwardStatus.values().forEach { CONSTANTS[it.value] = it }
-        }
-
-        fun fromValue(v: String): AwardStatus {
-            return CONSTANTS[v] ?: throw EnumException(AwardStatus::class.java.name, v, values().toString())
-        }
+        fun fromString(value: String): AwardStatus = CONSTANTS[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = AwardStatus::class.java.name,
+                value = value,
+                values = values().toString()
+            )
     }
 }
 
@@ -58,9 +57,9 @@ enum class AwardStatusDetails(@JsonValue val value: String) {
     }
 
     companion object {
-        private val CONSTANTS: Map<String, AwardStatusDetails> = values().associateBy { it.value }
+        private val CONSTANTS: Map<String, AwardStatusDetails> = values().associateBy { it.value.toUpperCase() }
 
-        fun fromString(value: String): AwardStatusDetails = CONSTANTS[value]
+        fun fromString(value: String): AwardStatusDetails = CONSTANTS[value.toUpperCase()]
             ?: throw EnumException(
                 enumType = AwardStatusDetails::class.java.name,
                 value = value,
