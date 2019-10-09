@@ -53,6 +53,8 @@ interface AwardService {
         context: FinalAwardsStatusByLotsContext,
         data: FinalAwardsStatusByLotsData
     ): FinalizedAwardsStatusByLots
+
+    fun completeAwarding(context: CompleteAwardingContext): CompletedAwarding
 }
 
 @Service
@@ -1043,4 +1045,16 @@ class AwardServiceImpl(
             }
             ?.asSequence()
             ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+    /**
+     * BR-7.4.7 awardPeriod (awardPeriod.endDate)
+     * 1. Sets value of Stage parameter == EV and saves it to memory;
+     * 2. Finds awardPeriod object in DB by values of CPID from the context of Request and Stage set before;
+     * 3. Sets awardPeriod.endDate == startDate value from the context of Request and adds it for Response;
+     */
+    override fun completeAwarding(context: CompleteAwardingContext): CompletedAwarding {
+        val endDate = context.startDate
+        awardPeriodRepository.saveEnd(cpid = context.cpid, stage = "EV", end = endDate)
+        return CompletedAwarding(awardPeriod = CompletedAwarding.AwardPeriod(endDate = endDate))
+    }
 }
