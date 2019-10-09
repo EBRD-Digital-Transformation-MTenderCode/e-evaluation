@@ -3,6 +3,7 @@ package com.procurement.evaluation.infrastructure.repository
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.Statement
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
@@ -19,6 +20,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         private const val columnCpid = "cp_id"
         private const val columnStage = "stage"
         private const val columnStartDate = "start_date"
+        private const val columnEndDate = "end_date"
 
         private const val FIND_BY_CPID_AND_STAGE_CQL = """
                SELECT $columnStartDate
@@ -37,10 +39,19 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                VALUES(?, ?, ?) 
                IF NOT EXISTS
             """
+
+        private const val SAVE_END_DATE_CQL = """
+               UPDATE $keySpace.$tableName
+                  SET $columnEndDate=?
+                WHERE $columnCpid=?
+                  AND $columnStage=?
+               IF EXISTS
+            """
     }
 
     private val preparedFindByCpidAndStageCQL = session.prepare(FIND_BY_CPID_AND_STAGE_CQL)
     private val preparedSaveNewStartDateCQL = session.prepare(SAVE_NEW_START_DATE_CQL)
+    private val preparedSaveEndDateCQL = session.prepare(SAVE_END_DATE_CQL)
 
     override fun findStartDateBy(cpid: String, stage: String): LocalDateTime? {
         val query = preparedFindByCpidAndStageCQL.bind()
@@ -79,5 +90,24 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         session.execute(statement)
     } catch (exception: Exception) {
         throw SaveEntityException(message = "Error writing start date of the award period.", cause = exception)
+    }
+
+    override fun saveEnd(cpid: String, stage: String, end: LocalDateTime) {
+        val statement = preparedSaveEndDateCQL.bind()
+            .apply {
+                setString(columnCpid, cpid)
+                setString(columnStage, stage)
+                setTimestamp(columnEndDate, end.toCassandraTimestamp())
+            }
+
+        val result = saveEnd(statement)
+        if (!result.wasApplied())
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the end award period '$end' by cpid '$cpid' and stage '$stage' to the database. Record is not exists.")
+    }
+
+    private fun saveEnd(statement: Statement): ResultSet = try {
+        session.execute(statement)
+    } catch (exception: Exception) {
+        throw SaveEntityException(message = "Error writing updated end period to database.", cause = exception)
     }
 }

@@ -6,4 +6,6 @@ interface AwardPeriodRepository {
     fun findStartDateBy(cpid: String, stage: String): LocalDateTime?
 
     fun saveNewStart(cpid: String, stage: String, start: LocalDateTime)
+
+    fun saveEnd(cpid: String, stage: String, end: LocalDateTime)
 }

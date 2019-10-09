@@ -15,6 +15,7 @@ import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.infrastructure.tools.toCassandraTimestamp
+import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -36,6 +37,7 @@ class CassandraAwardPeriodRepositoryIT {
         private const val STAGE = "EV"
         private const val AWARD_CRITERIA = "awardCriteria"
         private val START_DATE = LocalDateTime.now()
+        private val END_DATE = START_DATE.plusMinutes(15)
     }
 
     @Autowired
@@ -133,6 +135,40 @@ class CassandraAwardPeriodRepositoryIT {
         assertEquals("Error writing start date of the award period.", exception.message)
     }
 
+    @Test
+    fun saveEnd() {
+        insertAwardPeriod()
+
+        awardPeriodRepository.saveEnd(cpid = CPID, stage = STAGE, end = END_DATE)
+
+        val actualFundedAwardPeriodEndDate = findAwardPeriodEnd()
+        assertNotNull(actualFundedAwardPeriodEndDate)
+        assertEquals(END_DATE, actualFundedAwardPeriodEndDate)
+    }
+
+    @Test
+    fun errorAwardPeriodNotExists() {
+        val exception = assertThrows<SaveEntityException> {
+            awardPeriodRepository.saveEnd(cpid = CPID, stage = STAGE, end = END_DATE)
+        }
+        assertEquals(
+            "An error occurred when writing a record(s) of the end award period '$END_DATE' by cpid '$CPID' and stage '$STAGE' to the database. Record is not exists.",
+            exception.message
+        )
+    }
+
+    @Test
+    fun errorSaveEnd() {
+        doThrow(RuntimeException())
+            .whenever(session)
+            .execute(any<BoundStatement>())
+
+        val exception = assertThrows<SaveEntityException> {
+            awardPeriodRepository.saveEnd(cpid = CPID, stage = STAGE, end = END_DATE)
+        }
+        assertEquals("Error writing updated end period to database.", exception.message)
+    }
+
     private fun createKeyspace() {
         session.execute("CREATE KEYSPACE ocds WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
     }
@@ -165,5 +201,17 @@ class CassandraAwardPeriodRepositoryIT {
             .value("start_date", START_DATE.toCassandraTimestamp())
             .value("end_date", endDate?.toCassandraTimestamp())
         session.execute(rec)
+    }
+
+    private fun findAwardPeriodEnd(): LocalDateTime? {
+        val query = QueryBuilder.select("end_date")
+            .from("ocds", "evaluation_period")
+            .where(QueryBuilder.eq("cp_id", CPID))
+            .and(QueryBuilder.eq("stage", STAGE))
+
+        return session.execute(query)
+            .one()
+            ?.getTimestamp("end_date")
+            ?.toLocalDateTime()
     }
 }
