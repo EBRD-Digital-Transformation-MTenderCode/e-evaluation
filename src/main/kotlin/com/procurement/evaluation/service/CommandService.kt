@@ -3,6 +3,8 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
 import com.procurement.evaluation.application.service.award.AwardCancellationData
 import com.procurement.evaluation.application.service.award.AwardService
+import com.procurement.evaluation.application.service.award.CompleteAwardingContext
+import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
@@ -452,6 +454,25 @@ class CommandService(
                 )
                 if (log.isDebugEnabled)
                     log.debug("Awards were finalized. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
+            CommandType.COMPLETE_AWARDING -> {
+                val context = CompleteAwardingContext(
+                    cpid = cm.cpid,
+                    startDate = cm.startDate
+                )
+
+                val result = awardService.completeAwarding(context)
+                if (log.isDebugEnabled)
+                    log.debug("Award was completed. Result: ${toJson(result)}")
+
+                val dataResponse = CompletedAwarding(
+                    awardPeriod = CompletedAwarding.AwardPeriod(
+                        endDate = result.awardPeriod.endDate
+                    )
+                )
+                if (log.isDebugEnabled)
+                    log.debug("Award was completed. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
             }
         }
