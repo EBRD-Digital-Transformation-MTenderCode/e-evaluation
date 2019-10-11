@@ -2,8 +2,10 @@ package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
@@ -1001,7 +1003,8 @@ class AwardServiceImpl(
             .map { it.id }
             .toSet()
 
-        val updatedAwards = loadAwards(cpid = context.cpid, stage = context.stage)
+        val stage = getStage(context)
+        val updatedAwards = loadAwards(cpid = context.cpid, stage = stage)
             .filter { entity ->
                 isValidStatuses(entity)
             }
@@ -1036,6 +1039,19 @@ class AwardServiceImpl(
                 )
             }
         )
+    }
+
+    private fun getStage(context: FinalAwardsStatusByLotsContext): String = when (context.pmd) {
+        ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+        ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+        ProcurementMethod.MV, ProcurementMethod.TEST_MV -> "EV"
+
+        ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+        ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+        ProcurementMethod.OP, ProcurementMethod.TEST_OP -> "NP"
+
+        ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+        ProcurementMethod.FA, ProcurementMethod.TEST_FA -> throw ErrorException(ErrorType.INVALID_PMD)
     }
 
     private fun loadAwards(cpid: String, stage: String): Sequence<AwardEntity> =

@@ -34,6 +34,7 @@ import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.bpe.cpid
 import com.procurement.evaluation.model.dto.bpe.owner
 import com.procurement.evaluation.model.dto.bpe.phase
+import com.procurement.evaluation.model.dto.bpe.pmd
 import com.procurement.evaluation.model.dto.bpe.stage
 import com.procurement.evaluation.model.dto.bpe.startDate
 import com.procurement.evaluation.utils.toJson
@@ -428,7 +429,7 @@ class CommandService(
             CommandType.FINAL_AWARDS_STATUS_BY_LOTS -> {
                 val context = FinalAwardsStatusByLotsContext(
                     cpid = cm.cpid,
-                    stage = cm.stage
+                    pmd = cm.pmd
                 )
                 val request = toObject(FinalAwardsStatusByLotsRequest::class.java, cm.data)
                 val data = FinalAwardsStatusByLotsData(
