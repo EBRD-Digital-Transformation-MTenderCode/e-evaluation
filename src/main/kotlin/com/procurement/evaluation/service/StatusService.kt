@@ -48,18 +48,7 @@ class StatusService(private val periodService: PeriodService,
     fun setFinalStatuses(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-        val stage = when (cm.pmd) {
-            ProcurementMethod.OT, ProcurementMethod.TEST_OT,
-            ProcurementMethod.SV, ProcurementMethod.TEST_SV,
-            ProcurementMethod.MV, ProcurementMethod.TEST_MV -> "EV"
-
-            ProcurementMethod.DA, ProcurementMethod.TEST_DA,
-            ProcurementMethod.NP, ProcurementMethod.TEST_NP,
-            ProcurementMethod.OP, ProcurementMethod.TEST_OP -> "NP"
-
-            ProcurementMethod.RT, ProcurementMethod.TEST_RT,
-            ProcurementMethod.FA, ProcurementMethod.TEST_FA -> throw ErrorException(ErrorType.INVALID_PMD)
-        }
+        val stage = getStage(cm.pmd)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
         val awards = getAwardsFromEntities(awardEntities)
@@ -238,7 +227,7 @@ class StatusService(private val periodService: PeriodService,
 
     fun endAwardPeriod(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = "EV"
+        val stage = getStage(cm.pmd)
         val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
         return ResponseDto(data = EndAwardPeriodRs(awardPeriod))
@@ -370,5 +359,18 @@ class StatusService(private val periodService: PeriodService,
                 statusDetails = award.statusDetails.value,
                 owner = owner,
                 jsonData = toJson(award))
+    }
+
+    private fun getStage(pmd: ProcurementMethod): String = when (pmd) {
+        ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+        ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+        ProcurementMethod.MV, ProcurementMethod.TEST_MV -> "EV"
+
+        ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+        ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+        ProcurementMethod.OP, ProcurementMethod.TEST_OP -> "NP"
+
+        ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+        ProcurementMethod.FA, ProcurementMethod.TEST_FA -> throw ErrorException(ErrorType.INVALID_PMD)
     }
 }
