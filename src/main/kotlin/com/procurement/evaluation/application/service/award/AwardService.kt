@@ -592,7 +592,7 @@ class AwardServiceImpl(
         )
 
         val updatedAwardEntity = awardEntity.copy(
-            statusDetails = award.statusDetails.toString(),
+            statusDetails = updatedAward.statusDetails.toString(),
             jsonData = toJson(updatedAward)
         )
 
