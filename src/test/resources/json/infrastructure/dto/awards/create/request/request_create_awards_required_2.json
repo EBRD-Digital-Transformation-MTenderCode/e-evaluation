@@ -1,113 +1,90 @@
 {
-  "id":"43234010-604e-11e9-a93c-87ed6a3fe877",
-  "command":"createAwards",
-  "context":{
-    "operationId":"d561d7ea-64bf-11e1-adc0-fa7ae01b8742",
-    "requestId":"43234010-604e-11e9-a93c-87ed6a3fe877",
-    "cpid":"ocds-t1s2t3-MD-1555418219328",
-    "ocid":"ocds-t1s2t3-MD-1555418219328-EV-1555418219350",
-    "stage":"EV",
-    "prevStage":"EV",
-    "processType":"tenderPeriodEnd",
-    "operationType":"tenderPeriodEndEv",
-    "phase":"tendering",
-    "owner":"445f6851-c908-407d-9b45-14b92f3e964b",
-    "country":"MD",
-    "language":"ro",
-    "pmd":"OT",
-    "token":"2e7098dc-5132-46cf-82a9-369d19971e55",
-    "startDate":"2019-04-16T13:48:06Z",
-    "timeStamp":1555422486161,
-    "isAuction":false
-  },
-  "data":{
-    "awardCriteria":"priceOnly",
-    "awardCriteriaDetails":"award.awardCriteriaDetails",
-    "bids":[
-      {
-        "id":"123e4567-e89b-12d3-a456-426655440000",
-        "date":"2019-03-02T08:00:00Z",
-        "status":"pending",
-        "statusDetails": "bid[0].statusDetails",
-        "tenderers":[
-          {
-            "id":"bid[0].tenderers[0].id",
-            "name":"bid[0].tenderers[0].name",
-            "identifier":{
-              "scheme":"bid[0].tenderers[0].identifier.scheme",
-              "id":"bid[0].tenderers[0].identifier.id",
-              "legalName":"bid[0].tenderers[0].identifier.legalName",
-              "uri":"bid[0].tenderers[0].identifier.uri"
-            },
-            "address": {
-              "streetAddress": "bid[0].tenderers[0].address.streetAddress",
-              "addressDetails": {
-                "country": {
-                  "scheme": "bid[0].tenderers[0].address.addressDetails.country.scheme",
-                  "id": "bid[0].tenderers[0].address.addressDetails.country.id",
-                  "description": "bid[0].tenderers[0].address.addressDetails.country.description",
-                  "uri": "bid[0].tenderers[0].address.addressDetails.country.uri"
-                },
-                "region": {
-                  "scheme": "bid[0].tenderers[0].address.addressDetails.region.scheme",
-                  "id": "bid[0].tenderers[0].address.addressDetails.region.id",
-                  "description": "bid[0].tenderers[0].address.addressDetails.region.description",
-                  "uri": "bid[0].tenderers[0].address.addressDetails.region.uri"
-                },
-                "locality": {
-                  "scheme": "bid[0].tenderers[0].address.addressDetails.locality.scheme",
-                  "id": "bid[0].tenderers[0].address.addressDetails.locality.id",
-                  "description": "bid[0].tenderers[0].address.addressDetails.locality.description"
-                }
+  "awardCriteria": "priceOnly",
+  "awardCriteriaDetails": "award.awardCriteriaDetails",
+  "bids": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426655440000",
+      "date": "2019-03-02T08:00:00Z",
+      "status": "pending",
+      "statusDetails": "bid[0].statusDetails",
+      "tenderers": [
+        {
+          "id": "bid[0].tenderers[0].id",
+          "name": "bid[0].tenderers[0].name",
+          "identifier": {
+            "scheme": "bid[0].tenderers[0].identifier.scheme",
+            "id": "bid[0].tenderers[0].identifier.id",
+            "legalName": "bid[0].tenderers[0].identifier.legalName",
+            "uri": "bid[0].tenderers[0].identifier.uri"
+          },
+          "address": {
+            "streetAddress": "bid[0].tenderers[0].address.streetAddress",
+            "addressDetails": {
+              "country": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.country.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.country.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.country.description",
+                "uri": "bid[0].tenderers[0].address.addressDetails.country.uri"
+              },
+              "region": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.region.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.region.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.region.description",
+                "uri": "bid[0].tenderers[0].address.addressDetails.region.uri"
+              },
+              "locality": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.locality.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.locality.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.locality.description"
               }
-            },
-            "contactPoint": {
-              "name": "bid[0].tenderers[0].contactPoint.name",
-              "email": "bid[0].tenderers[0].contactPoint.email",
-              "telephone": "bid[0].tenderers[0].contactPoint.telephone"
-            },
-            "persones":[
-              {
-                "title": "bid[0].tenderers[0].persones[0].title",
-                "name": "bid[0].tenderers[0].persones[0].title",
-                "identifier": {
-                  "scheme": "bid[0].tenderers[0].persones[0].identifier.scheme",
-                  "id": "bid[0].tenderers[0].persones[0].identifier.id"
-                },
-                "businessFunctions": [
-                  {
-                    "id": "bid[0].tenderers[0].persones[0].businessFunctions[0].id",
-                    "type": "authority",
-                    "jobTitle": "Chief Executive Officer",
-                    "period": {
-                      "startDate": "2019-03-15T11:54:13Z"
-                    }
-                  }
-                ]
-              }
-            ],
-            "details":{
-              "typeOfSupplier":"company",
-              "mainEconomicActivities":[
-                "bid[0].tenderers[0].details.mainEconomicActivities[0]"
-              ],
-              "scale":"sme"
             }
+          },
+          "contactPoint": {
+            "name": "bid[0].tenderers[0].contactPoint.name",
+            "email": "bid[0].tenderers[0].contactPoint.email",
+            "telephone": "bid[0].tenderers[0].contactPoint.telephone"
+          },
+          "persones": [
+            {
+              "title": "bid[0].tenderers[0].persones[0].title",
+              "name": "bid[0].tenderers[0].persones[0].title",
+              "identifier": {
+                "scheme": "bid[0].tenderers[0].persones[0].identifier.scheme",
+                "id": "bid[0].tenderers[0].persones[0].identifier.id"
+              },
+              "businessFunctions": [
+                {
+                  "id": "bid[0].tenderers[0].persones[0].businessFunctions[0].id",
+                  "type": "authority",
+                  "jobTitle": "Chief Executive Officer",
+                  "period": {
+                    "startDate": "2019-03-15T11:54:13Z"
+                  }
+                }
+              ]
+            }
+          ],
+          "details": {
+            "typeOfSupplier": "company",
+            "mainEconomicActivities": [
+              "bid[0].tenderers[0].details.mainEconomicActivities[0]"
+            ],
+            "scale": "sme"
           }
-        ],
-        "value":{
-          "amount":"10.05",
-          "currency":"MDL"
-        },
-        "relatedLots":[
-          "bid[0].relatedLots[0]"
-        ]
-      }
-    ],
-    "lots":[
-      {
-        "id":"123e4567-e89b-12d3-a456-426655440000"
-      }
-    ]
-  }
+        }
+      ],
+      "value": {
+        "amount": "10.05",
+        "currency": "MDL"
+      },
+      "relatedLots": [
+        "bid[0].relatedLots[0]"
+      ]
+    }
+  ],
+  "lots": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426655440000"
+    }
+  ]
 }
