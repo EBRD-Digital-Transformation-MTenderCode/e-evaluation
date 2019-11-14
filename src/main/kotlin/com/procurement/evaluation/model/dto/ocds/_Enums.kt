@@ -114,3 +114,109 @@ enum class Phase(@JsonValue val value: String) {
         }
     }
 }
+
+enum class BusinessFunctionType(@JsonValue val value: String) {
+    AUTHORITY("authority"),
+    PROCUREMENT_OFFICER("procurementOfficer"),
+    CONTRACT_POINT("contactPoint"),
+    TECHNICAL_EVALUATOR("technicalEvaluator"),
+    TECHNICAL_OPENER("technicalOpener"),
+    PRICE_OPENER("priceOpener"),
+    PRICE_EVALUATOR("priceEvaluator");
+
+    override fun toString(): String = value
+
+    companion object {
+        private val elements: Map<String, BusinessFunctionType> = values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): BusinessFunctionType = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = BusinessFunctionType::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
+    }
+}
+
+enum class SupplierType(@JsonValue val value: String) {
+    COMPANY("company"),
+    INDIVIDUAL("individual");
+
+    override fun toString(): String = value
+
+    companion object {
+        private val elements: Map<String, SupplierType> = values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): SupplierType = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = SupplierType::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
+    }
+}
+
+enum class BidStatusType(@JsonValue val value: String) {
+    PENDING("pending"),
+    DISQUALIFIED("disqualified"),
+    VALID("valid"),
+    WITHDRAWN("withdrawn"),
+    INVITED("invited");
+
+    override fun toString(): String = value
+
+    companion object {
+        private val elements: Map<String, BidStatusType> = values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): BidStatusType = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = BidStatusType::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
+    }
+}
+
+enum class BidStatusDetailsType(@JsonValue val value: String) {
+    PENDING("pending"),
+    DISQUALIFIED("disqualified"),
+    VALID("valid"),
+    WITHDRAWN("withdrawn"),
+    INVITED("invited");
+
+    override fun toString(): String = value
+
+    companion object {
+        private val elements: Map<String, BidStatusDetailsType> = values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): BidStatusDetailsType = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = BidStatusDetailsType::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
+    }
+}
+
+enum class BidDocumentType(@JsonValue val value: String) {
+
+    SUBMISSION_DOCUMENTS("submissionDocuments"),
+    ILLUSTRATION("illustration"),
+    X_COMMERCIAL_OFFER("x_commercialOffer"),
+    X_QUALIFICATION_DOCUMENTS("x_qualificationDocuments"),
+    X_ELIGIBILITY_DOCUMENTS("x_eligibilityDocuments"),
+    X_TECHNICAL_DOCUMENTS("x_technicalDocuments");
+
+    override fun toString(): String = value
+
+    companion object {
+        private val elements: Map<String, BidDocumentType> = values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): BidDocumentType = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = BidDocumentType::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
+    }
+}
