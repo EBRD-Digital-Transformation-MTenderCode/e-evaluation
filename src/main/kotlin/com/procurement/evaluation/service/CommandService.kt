@@ -7,6 +7,8 @@ import com.procurement.evaluation.application.service.award.CompleteAwardingCont
 import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
+import com.procurement.evaluation.application.service.award.CreateAwardsContext
+import com.procurement.evaluation.application.service.award.CreateAwardsData
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
 import com.procurement.evaluation.application.service.award.EvaluatedAward
@@ -27,6 +29,7 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.Eval
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
+import com.procurement.evaluation.infrastructure.dto.awards.create.request.CreateAwardsRequest
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
@@ -334,7 +337,285 @@ class CommandService(
                     log.debug("Award was evaluate. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
             }
-            CommandType.CREATE_AWARDS -> createAwardService.createAwards(cm)
+            CommandType.CREATE_AWARDS -> {
+                val context = CreateAwardsContext(
+                    cpid = getCPID(cm),
+                    stage = getStage(cm),
+                    owner = getOwner(cm),
+                    startDate = getStartDate(cm),
+                    ocid =  getOCID(cm)
+                )
+                val request = toObject(CreateAwardsRequest::class.java, cm.data)
+                val data = CreateAwardsData(
+                    awardCriteria = request.awardCriteria,
+                    awardCriteriaDetails = request.awardCriteriaDetails,
+                    bids = request.bids.map { bid ->
+                        CreateAwardsData.Bid(
+                            id = bid.id,
+                            status = bid.status,
+                            date = bid.date,
+                            documents = bid.documents?.map { document ->
+                                CreateAwardsData.Bid.Document(
+                                    id = document.id,
+                                    description = document.description,
+                                    documentType = document.documentType,
+                                    relatedLots = document.relatedLots,
+                                    title = document.title
+                                )
+                            },
+                            relatedLots = bid.relatedLots,
+                            requirementResponses = bid.requirementResponses?.map { requirementResponse ->
+                                CreateAwardsData.Bid.RequirementResponse(
+                                    id = requirementResponse.id,
+                                    title = requirementResponse.title,
+                                    description = requirementResponse.description,
+                                    period = requirementResponse.period?.let { period ->
+                                        CreateAwardsData.Bid.RequirementResponse.Period(
+                                            startDate = period.startDate,
+                                            endDate = period.endDate
+                                        )
+                                    },
+                                    requirement = requirementResponse.requirement.let { requirement ->
+                                        CreateAwardsData.Bid.RequirementResponse.Requirement(
+                                            id = requirement.id
+                                        )
+                                    },
+                                    value = requirementResponse.value
+                                )
+                            },
+                            value = bid.value.let { value ->
+                                CreateAwardsData.Bid.Value(
+                                    amount = value.amount,
+                                    currency = value.currency
+                                )
+                            },
+                            statusDetails = bid.statusDetails,
+                            tenderers = bid.tenderers.map { tenderer ->
+                                CreateAwardsData.Bid.Tenderer(
+                                    id = tenderer.id,
+                                    additionalIdentifiers = tenderer.additionalIdentifiers?.map { additionalIdentifier ->
+                                        CreateAwardsData.Bid.Tenderer.AdditionalIdentifier(
+                                            id = additionalIdentifier.id,
+                                            legalName = additionalIdentifier.legalName,
+                                            scheme = additionalIdentifier.scheme,
+                                            uri = additionalIdentifier.uri
+                                        )
+                                    },
+                                    address = tenderer.address.let { address ->
+                                        CreateAwardsData.Bid.Tenderer.Address(
+                                            streetAddress = address.streetAddress,
+                                            postalCode = address.postalCode,
+                                            addressDetails = address.addressDetails.let { addressDetails ->
+                                                CreateAwardsData.Bid.Tenderer.Address.AddressDetails(
+                                                    country = addressDetails.country.let { country ->
+                                                        CreateAwardsData.Bid.Tenderer.Address.AddressDetails.Country(
+                                                            id = country.id,
+                                                            uri = country.uri,
+                                                            scheme = country.scheme,
+                                                            description = country.description
+                                                        )
+                                                    },
+                                                    locality = addressDetails.locality.let { locality ->
+                                                        CreateAwardsData.Bid.Tenderer.Address.AddressDetails.Locality(
+                                                            id = locality.id,
+                                                            description = locality.description,
+                                                            scheme = locality.scheme,
+                                                            uri = locality.uri
+                                                        )
+                                                    },
+                                                    region = addressDetails.region.let { region ->
+                                                        CreateAwardsData.Bid.Tenderer.Address.AddressDetails.Region(
+                                                            id = region.id,
+                                                            uri = region.uri,
+                                                            scheme = region.scheme,
+                                                            description = region.description
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        )
+                                    },
+                                    contactPoint = tenderer.contactPoint.let { contactPoint ->
+                                        CreateAwardsData.Bid.Tenderer.ContactPoint(
+                                            name = contactPoint.name,
+                                            email = contactPoint.email,
+                                            faxNumber = contactPoint.faxNumber,
+                                            telephone = contactPoint.telephone,
+                                            url = contactPoint.url
+                                        )
+                                    },
+                                    name = tenderer.name,
+                                    details = tenderer.details.let { details ->
+                                        CreateAwardsData.Bid.Tenderer.Details(
+                                            typeOfSupplier = details.typeOfSupplier,
+                                            bankAccounts = details.bankAccounts?.map { bankAccount ->
+                                                CreateAwardsData.Bid.Tenderer.Details.BankAccount(
+                                                    description = bankAccount.description,
+                                                    identifier = bankAccount.identifier.let { identifier ->
+                                                        CreateAwardsData.Bid.Tenderer.Details.BankAccount.Identifier(
+                                                            id = identifier.id,
+                                                            scheme = identifier.scheme
+                                                        )
+                                                    },
+                                                    address = bankAccount.address.let { address ->
+                                                        CreateAwardsData.Bid.Tenderer.Details.BankAccount.Address(
+                                                            streetAddress = address.streetAddress,
+                                                            postalCode = address.postalCode,
+                                                            addressDetails = address.addressDetails.let { addressDetails ->
+                                                                CreateAwardsData.Bid.Tenderer.Details.BankAccount.Address.AddressDetails(
+                                                                    country = addressDetails.country.let { country ->
+                                                                        CreateAwardsData.Bid.Tenderer.Details.BankAccount.Address.AddressDetails.Country(
+                                                                            id = country.id,
+                                                                            scheme = country.scheme,
+                                                                            description = country.description,
+                                                                            uri = country.uri
+                                                                        )
+                                                                    },
+                                                                    region = addressDetails.region.let { region ->
+                                                                        CreateAwardsData.Bid.Tenderer.Details.BankAccount.Address.AddressDetails.Region(
+                                                                            id = region.id,
+                                                                            uri = region.uri,
+                                                                            description = region.description,
+                                                                            scheme = region.scheme
+                                                                        )
+                                                                    },
+                                                                    locality = addressDetails.locality.let { locality ->
+                                                                        CreateAwardsData.Bid.Tenderer.Details.BankAccount.Address.AddressDetails.Locality(
+                                                                            id = locality.id,
+                                                                            scheme = locality.scheme,
+                                                                            description = locality.description,
+                                                                            uri = locality.uri
+                                                                        )
+                                                                    }
+                                                                )
+                                                            }
+                                                        )
+                                                    },
+                                                    accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
+                                                        CreateAwardsData.Bid.Tenderer.Details.BankAccount.AccountIdentification(
+                                                            id = accountIdentification.id,
+                                                            scheme = accountIdentification.scheme
+                                                        )
+                                                    },
+                                                    additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers?.map { additionalAccountIdentifier ->
+                                                        CreateAwardsData.Bid.Tenderer.Details.BankAccount.AdditionalAccountIdentifier(
+                                                            id = additionalAccountIdentifier.id,
+                                                            scheme = additionalAccountIdentifier.scheme
+                                                        )
+                                                    },
+                                                    bankName = bankAccount.bankName
+                                                )
+                                            },
+                                            legalForm = details.legalForm?.let { legalForm ->
+                                                CreateAwardsData.Bid.Tenderer.Details.LegalForm(
+                                                    id = legalForm.id,
+                                                    scheme = legalForm.scheme,
+                                                    uri = legalForm.uri,
+                                                    description = legalForm.description
+                                                )
+                                            },
+                                            mainEconomicActivities = details.mainEconomicActivities,
+                                            permits = details.permits?.map { permit ->
+                                                CreateAwardsData.Bid.Tenderer.Details.Permit(
+                                                    id = permit.id,
+                                                    scheme = permit.scheme,
+                                                    url = permit.url,
+                                                    permitDetails = permit.permitDetails.let { permitDetail ->
+                                                        CreateAwardsData.Bid.Tenderer.Details.Permit.PermitDetails(
+                                                            issuedBy = permitDetail.issuedBy.let { issuedBy ->
+                                                                CreateAwardsData.Bid.Tenderer.Details.Permit.PermitDetails.IssuedBy(
+                                                                    id = issuedBy.id,
+                                                                    name = issuedBy.name
+                                                                )
+                                                            },
+                                                            issuedThought = permitDetail.issuedThought.let { issuedThought ->
+                                                                CreateAwardsData.Bid.Tenderer.Details.Permit.PermitDetails.IssuedThought(
+                                                                    id = issuedThought.id,
+                                                                    name = issuedThought.name
+                                                                )
+                                                            },
+                                                            validityPeriod = permitDetail.validityPeriod.let { validityPeriod ->
+                                                                CreateAwardsData.Bid.Tenderer.Details.Permit.PermitDetails.ValidityPeriod(
+                                                                    startDate = validityPeriod.startDate,
+                                                                    endDate = validityPeriod.endDate
+                                                                )
+                                                            }
+                                                        )
+                                                    }
+                                                )
+                                            },
+                                            scale = details.scale
+                                        )
+                                    },
+                                    identifier = tenderer.identifier.let { identifier ->
+                                        CreateAwardsData.Bid.Tenderer.Identifier(
+                                            id = identifier.id,
+                                            scheme = identifier.scheme,
+                                            uri = identifier.uri,
+                                            legalName = identifier.legalName
+                                        )
+                                    },
+                                    persones = tenderer.persones?.map { person ->
+                                        CreateAwardsData.Bid.Tenderer.Person(
+                                            identifier = person.identifier.let {identifier ->
+                                                CreateAwardsData.Bid.Tenderer.Person.Identifier(
+                                                    id = identifier.id,
+                                                    scheme = identifier.scheme,
+                                                    uri = identifier.uri
+                                                )
+                                            },
+                                            name = person.name,
+                                            title = person.title,
+                                            businessFunctions = person.businessFunctions.map { businessFunction ->
+                                                CreateAwardsData.Bid.Tenderer.Person.BusinessFunction(
+                                                    id = businessFunction.id,
+                                                    period = businessFunction.period.let { period ->
+                                                        CreateAwardsData.Bid.Tenderer.Person.BusinessFunction.Period(
+                                                            startDate = period.startDate
+                                                        )
+                                                    },
+                                                    documents = businessFunction.documents?.map { document ->
+                                                        CreateAwardsData.Bid.Tenderer.Person.BusinessFunction.Document(
+                                                            id = document.id,
+                                                            title = document.title,
+                                                            description = document.description,
+                                                            documentType = document.documentType
+                                                        )
+                                                    },
+                                                    jobTitle = businessFunction.jobTitle,
+                                                    type = businessFunction.type
+                                                )
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        )
+                    },
+                    conversions = request.conversions?.map { conversion ->
+                        CreateAwardsData.Conversion(
+                            id = conversion.id,
+                            description = conversion.description,
+                            coefficients = conversion.coefficients.map { coefficient ->
+                                CreateAwardsData.Conversion.Coefficient(
+                                    id = coefficient.id,
+                                    value = coefficient.value,
+                                    coefficient = coefficient.coefficient
+                                )
+                            },
+                            rationale = conversion.rationale,
+                            relatedItem = conversion.relatedItem,
+                            relatesTo = conversion.relatesTo
+                        )
+                    },
+                    lots = request.lots.map { lot ->
+                        CreateAwardsData.Lot(
+                            id = lot.id
+                        )
+                    }
+                )
+                createAwardService.createAwards(context, data)
+            }
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)
             CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
@@ -483,6 +764,9 @@ class CommandService(
 
     private fun getCPID(cm: CommandMessage): String = cm.context.cpid
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'cpid' attribute in context.")
+
+    private fun getOCID(cm: CommandMessage): String = cm.context.ocid
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'ocid' attribute in context.")
 
     private fun getStage(cm: CommandMessage): String = cm.context.stage
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'stage' attribute in context.")
