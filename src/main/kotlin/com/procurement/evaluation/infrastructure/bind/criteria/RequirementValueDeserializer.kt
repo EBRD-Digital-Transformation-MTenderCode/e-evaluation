@@ -24,12 +24,12 @@ class RequirementValueDeserializer : JsonDeserializer<RequirementRsValue>() {
         deserializationContext: DeserializationContext
     ): RequirementRsValue {
         return when (jsonParser.currentToken) {
-            JsonToken.VALUE_STRING       -> deserialize(jsonParser.text)
-            JsonToken.VALUE_FALSE        -> deserialize(false)
-            JsonToken.VALUE_TRUE         -> deserialize(true)
-            JsonToken.VALUE_NUMBER_INT   -> deserialize(jsonParser.longValue)
+            JsonToken.VALUE_STRING -> deserialize(jsonParser.text)
+            JsonToken.VALUE_FALSE -> deserialize(false)
+            JsonToken.VALUE_TRUE -> deserialize(true)
+            JsonToken.VALUE_NUMBER_INT -> deserialize(jsonParser.longValue)
             JsonToken.VALUE_NUMBER_FLOAT -> deserialize(BigDecimal(jsonParser.text))
-            else                         -> throw RequirementValueException(
+            else -> throw RequirementValueException(
                 requirementValue = jsonParser.text,
                 description = "Invalid type"
             )

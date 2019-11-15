@@ -22,8 +22,8 @@ class RequirementValueSerializer : JsonSerializer<RequirementRsValue>() {
         provider: SerializerProvider
     ) =
         when (requirementValue) {
-            is RequirementRsValue.AsString  -> jsonGenerator.writeString(serialize(requirementValue))
-            is RequirementRsValue.AsNumber  -> jsonGenerator.writeNumber(serialize(requirementValue))
+            is RequirementRsValue.AsString -> jsonGenerator.writeString(serialize(requirementValue))
+            is RequirementRsValue.AsNumber -> jsonGenerator.writeNumber(serialize(requirementValue))
             is RequirementRsValue.AsBoolean -> jsonGenerator.writeBoolean(serialize(requirementValue))
             is RequirementRsValue.AsInteger -> jsonGenerator.writeNumber(serialize(requirementValue))
         }
