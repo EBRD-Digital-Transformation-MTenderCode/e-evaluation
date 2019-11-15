@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.procurement.evaluation.application.model.data.CoefficientRate
 import com.procurement.evaluation.application.model.data.CoefficientValue
 import com.procurement.evaluation.application.model.data.RequirementRsValue
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
@@ -43,7 +44,7 @@ data class CreateAwardsRequest(
         data class Coefficient(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
             @param:JsonProperty("value") @field:JsonProperty("value") val value: CoefficientValue,
-            @param:JsonProperty("coefficient") @field:JsonProperty("coefficient") val coefficient: Double
+            @param:JsonProperty("coefficient") @field:JsonProperty("coefficient") val coefficient: CoefficientRate
         )
     }
 

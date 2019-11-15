@@ -1,5 +1,6 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.application.model.data.CoefficientRate
 import com.procurement.evaluation.application.model.data.CoefficientValue
 import com.procurement.evaluation.application.model.data.RequirementRsValue
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
@@ -30,7 +31,7 @@ data class CreateAwardsData(
         data class Coefficient(
             val id: String,
             val value: CoefficientValue,
-            val coefficient: Double
+            val coefficient: CoefficientRate
         )
     }
 
