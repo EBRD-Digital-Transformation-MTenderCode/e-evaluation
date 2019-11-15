@@ -7,6 +7,8 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.SupplierType
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 data class CreateAwardsData(
     val awardCriteria: AwardCriteria,
@@ -25,14 +27,14 @@ data class CreateAwardsData(
     ) {
         data class Coefficient(
             val id: String,
-            val value: Float,
+            val value: BigDecimal,
             val coefficient: Double
         )
     }
 
     data class Bid(
         val id: String,
-        val date: String,
+        val date: LocalDateTime,
         val status: BidStatusType,
         val statusDetails: BidStatusDetailsType,
         val tenderers: List<Tenderer>,
@@ -243,7 +245,7 @@ data class CreateAwardsData(
         }
 
         data class Value(
-            val amount: Float,
+            val amount: BigDecimal,
             val currency: String
         )
 

@@ -14,6 +14,8 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.SupplierType
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 data class CreateAwardsRequest(
     @param:JsonProperty("awardCriteria") @field:JsonProperty("awardCriteria") val awardCriteria: AwardCriteria,
@@ -38,14 +40,14 @@ data class CreateAwardsRequest(
     ) {
         data class Coefficient(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-            @param:JsonProperty("value") @field:JsonProperty("value") val value: Float,
+            @param:JsonProperty("value") @field:JsonProperty("value") val value: BigDecimal,
             @param:JsonProperty("coefficient") @field:JsonProperty("coefficient") val coefficient: Double
         )
     }
 
     data class Bid(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-        @param:JsonProperty("date") @field:JsonProperty("date") val date: String,
+        @param:JsonProperty("date") @field:JsonProperty("date") val date: LocalDateTime,
         @param:JsonProperty("status") @field:JsonProperty("status") val status: BidStatusType,
         @param:JsonProperty("statusDetails") @field:JsonProperty("statusDetails") val statusDetails: BidStatusDetailsType,
         @param:JsonProperty("tenderers") @field:JsonProperty("tenderers") val tenderers: List<Tenderer>,
@@ -305,7 +307,7 @@ data class CreateAwardsRequest(
         }
 
         data class Value(
-            @param:JsonProperty("amount") @field:JsonProperty("amount") val amount: Float,
+            @param:JsonProperty("amount") @field:JsonProperty("amount") val amount: BigDecimal,
             @param:JsonProperty("currency") @field:JsonProperty("currency") val currency: String
         )
 
