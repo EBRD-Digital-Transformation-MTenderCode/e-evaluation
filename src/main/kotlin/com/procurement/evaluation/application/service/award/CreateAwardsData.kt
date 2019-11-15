@@ -2,6 +2,7 @@ package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.model.data.RequirementRsValue
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
+import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.BidDocumentType
 import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
@@ -12,7 +13,7 @@ import java.time.LocalDateTime
 
 data class CreateAwardsData(
     val awardCriteria: AwardCriteria,
-    val awardCriteriaDetails: String,
+    val awardCriteriaDetails: AwardCriteriaDetails,
     val conversions: List<Conversion>?,
     val bids: List<Bid>,
     val lots: List<Lot>

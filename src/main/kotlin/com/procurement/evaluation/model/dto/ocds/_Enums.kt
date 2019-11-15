@@ -91,6 +91,25 @@ enum class AwardCriteria(@JsonValue val value: String) {
     }
 }
 
+enum class AwardCriteriaDetails(@JsonValue val value: String) {
+
+    AUTOMATED("automated"),
+    MANUAL("manual");
+
+    override fun toString(): String = value
+
+    companion object {
+        private val elements: Map<String, AwardCriteriaDetails> = values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): AwardCriteriaDetails = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = AwardCriteriaDetails::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
+    }
+}
+
 enum class Phase(@JsonValue val value: String) {
     AWARDING("awarding"),
     TENDERING("tendering"),

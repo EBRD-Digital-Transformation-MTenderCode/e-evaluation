@@ -9,6 +9,7 @@ import com.procurement.evaluation.application.model.data.RequirementRsValue
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
+import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.BidDocumentType
 import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
@@ -19,7 +20,7 @@ import java.time.LocalDateTime
 
 data class CreateAwardsRequest(
     @param:JsonProperty("awardCriteria") @field:JsonProperty("awardCriteria") val awardCriteria: AwardCriteria,
-    @param:JsonProperty("awardCriteriaDetails") @field:JsonProperty("awardCriteriaDetails") val awardCriteriaDetails: String,
+    @param:JsonProperty("awardCriteriaDetails") @field:JsonProperty("awardCriteriaDetails") val awardCriteriaDetails: AwardCriteriaDetails,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @param:JsonProperty("conversions") @field:JsonProperty("conversions") val conversions: List<Conversion>?,
