@@ -8,6 +8,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.evaluation.application.model.data.CoefficientRate
 import com.procurement.evaluation.application.model.data.CoefficientValue
 import com.procurement.evaluation.application.model.data.RequirementRsValue
+import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateDeserializer
+import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateSerializer
+import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
+import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueSerializer
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
@@ -39,11 +43,16 @@ data class CreateAwardsRequest(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
+        @JsonDeserialize(using = CoefficientValueDeserializer::class)
+        @JsonSerialize(using = CoefficientValueSerializer::class)
         @param:JsonProperty("coefficients") @field:JsonProperty("coefficients") val coefficients: List<Coefficient>
     ) {
         data class Coefficient(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
             @param:JsonProperty("value") @field:JsonProperty("value") val value: CoefficientValue,
+
+            @JsonDeserialize(using = CoefficientRateDeserializer::class)
+            @JsonSerialize(using = CoefficientRateSerializer::class)
             @param:JsonProperty("coefficient") @field:JsonProperty("coefficient") val coefficient: CoefficientRate
         )
     }
