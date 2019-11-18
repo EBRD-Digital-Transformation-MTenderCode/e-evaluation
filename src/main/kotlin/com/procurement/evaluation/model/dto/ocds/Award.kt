@@ -2,6 +2,7 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class Award @JsonCreator constructor(
@@ -27,6 +28,9 @@ data class Award @JsonCreator constructor(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         val value: Value?,
 
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        val weightedValue: WeightedValue?,
+
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         val relatedLots: List<String>,
 
@@ -45,3 +49,9 @@ data class Award @JsonCreator constructor(
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         var items: List<Item>?
 )
+{
+        data class WeightedValue(
+                val amount: BigDecimal,
+                val currency: String
+        )
+}
