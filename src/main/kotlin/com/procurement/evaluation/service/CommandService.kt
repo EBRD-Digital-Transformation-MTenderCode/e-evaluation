@@ -343,7 +343,7 @@ class CommandService(
                     stage = getStage(cm),
                     owner = getOwner(cm),
                     startDate = getStartDate(cm),
-                    ocid =  getOCID(cm)
+                    ocid = getOCID(cm)
                 )
                 val request = toObject(CreateAwardsRequest::class.java, cm.data)
                 val data = CreateAwardsData(
@@ -359,10 +359,10 @@ class CommandService(
                                     id = document.id,
                                     description = document.description,
                                     documentType = document.documentType,
-                                    relatedLots = document.relatedLots,
+                                    relatedLots = document.relatedLots ?: emptyList(),
                                     title = document.title
                                 )
-                            },
+                            } ?: emptyList(),
                             relatedLots = bid.relatedLots,
                             requirementResponses = bid.requirementResponses?.map { requirementResponse ->
                                 CreateAwardsData.Bid.RequirementResponse(
@@ -382,7 +382,7 @@ class CommandService(
                                     },
                                     value = requirementResponse.value
                                 )
-                            },
+                            } ?: emptyList(),
                             value = bid.value.let { value ->
                                 CreateAwardsData.Bid.Value(
                                     amount = value.amount,
@@ -400,7 +400,7 @@ class CommandService(
                                             scheme = additionalIdentifier.scheme,
                                             uri = additionalIdentifier.uri
                                         )
-                                    },
+                                    } ?: emptyList(),
                                     address = tenderer.address.let { address ->
                                         CreateAwardsData.Bid.Tenderer.Address(
                                             streetAddress = address.streetAddress,
@@ -502,10 +502,10 @@ class CommandService(
                                                             id = additionalAccountIdentifier.id,
                                                             scheme = additionalAccountIdentifier.scheme
                                                         )
-                                                    },
+                                                    } ?: emptyList(),
                                                     bankName = bankAccount.bankName
                                                 )
-                                            },
+                                            } ?: emptyList(),
                                             legalForm = details.legalForm?.let { legalForm ->
                                                 CreateAwardsData.Bid.Tenderer.Details.LegalForm(
                                                     id = legalForm.id,
@@ -543,7 +543,7 @@ class CommandService(
                                                         )
                                                     }
                                                 )
-                                            },
+                                            } ?: emptyList(),
                                             scale = details.scale
                                         )
                                     },
@@ -557,7 +557,7 @@ class CommandService(
                                     },
                                     persones = tenderer.persones?.map { person ->
                                         CreateAwardsData.Bid.Tenderer.Person(
-                                            identifier = person.identifier.let {identifier ->
+                                            identifier = person.identifier.let { identifier ->
                                                 CreateAwardsData.Bid.Tenderer.Person.Identifier(
                                                     id = identifier.id,
                                                     scheme = identifier.scheme,
@@ -581,13 +581,13 @@ class CommandService(
                                                             description = document.description,
                                                             documentType = document.documentType
                                                         )
-                                                    },
+                                                    } ?: emptyList(),
                                                     jobTitle = businessFunction.jobTitle,
                                                     type = businessFunction.type
                                                 )
                                             }
                                         )
-                                    }
+                                    } ?: emptyList()
                                 )
                             }
                         )
@@ -607,14 +607,14 @@ class CommandService(
                             relatedItem = conversion.relatedItem,
                             relatesTo = conversion.relatesTo
                         )
-                    },
+                    } ?: emptyList(),
                     lots = request.lots.map { lot ->
                         CreateAwardsData.Lot(
                             id = lot.id
                         )
                     }
                 )
-                createAwardService.createAwards(context, data)
+                createAwardService.createAwards(context = context, data = data)
             }
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)

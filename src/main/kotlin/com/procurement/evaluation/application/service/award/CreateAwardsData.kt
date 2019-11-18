@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 data class CreateAwardsData(
     val awardCriteria: AwardCriteria,
     val awardCriteriaDetails: AwardCriteriaDetails,
-    val conversions: List<Conversion>?,
+    val conversions: List<Conversion>,
     val bids: List<Bid>,
     val lots: List<Lot>
 ) {
@@ -42,18 +42,18 @@ data class CreateAwardsData(
         val statusDetails: BidStatusDetailsType,
         val tenderers: List<Tenderer>,
         val value: Value,
-        val documents: List<Document>?,
-        val requirementResponses: List<RequirementResponse>?,
+        val documents: List<Document>,
+        val requirementResponses: List<RequirementResponse>,
         val relatedLots: List<String>
     ) {
         data class Tenderer(
             val id: String,
             val name: String,
             val identifier: Identifier,
-            val additionalIdentifiers: List<AdditionalIdentifier>?,
+            val additionalIdentifiers: List<AdditionalIdentifier>,
             val address: Address,
             val contactPoint: ContactPoint,
-            val persones: List<Person>?,
+            val persones: List<Person>,
 
             val details: Details
         ) {
@@ -129,7 +129,7 @@ data class CreateAwardsData(
                     val type: BusinessFunctionType,
                     val jobTitle: String,
                     val period: Period,
-                    val documents: List<Document>?
+                    val documents: List<Document>
                 ) {
                     data class Period(
                         val startDate: String
@@ -148,8 +148,8 @@ data class CreateAwardsData(
                 val typeOfSupplier: SupplierType,
                 val mainEconomicActivities: List<String>,
                 val scale: String,
-                val permits: List<Permit>?,
-                val bankAccounts: List<BankAccount>?,
+                val permits: List<Permit>,
+                val bankAccounts: List<BankAccount>,
                 val legalForm: LegalForm?
             ) {
                 data class Permit(
@@ -187,7 +187,7 @@ data class CreateAwardsData(
                     val identifier: Identifier,
                     val accountIdentification: AccountIdentification,
 
-                    val additionalAccountIdentifiers: List<AdditionalAccountIdentifier>?
+                    val additionalAccountIdentifiers: List<AdditionalAccountIdentifier>
                 ) {
                     data class Address(
                         val streetAddress: String,
@@ -257,7 +257,7 @@ data class CreateAwardsData(
             val id: String,
             val title: String?,
             val description: String?,
-            val relatedLots: List<String>?
+            val relatedLots: List<String>
         )
 
         data class RequirementResponse(
