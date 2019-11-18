@@ -24,10 +24,10 @@ data class AwardByBidExtended(
         val id: String,
         val name: String,
         val identifier: Identifier,
-        val additionalIdentifiers: List<AdditionalIdentifier>?,
+        val additionalIdentifiers: List<AdditionalIdentifier>,
         val address: Address,
         val contactPoint: ContactPoint,
-        val persones: List<Person>?
+        val persones: List<Person>
 
     ) {
         data class Identifier(
@@ -102,7 +102,7 @@ data class AwardByBidExtended(
                 val type: BusinessFunctionType,
                 val jobTitle: String,
                 val period: Period,
-                val documents: List<Document>?
+                val documents: List<Document>
             ) {
                 data class Period(
                     val startDate: String
@@ -124,7 +124,7 @@ data class AwardByBidExtended(
             val identifier: Identifier,
             val accountIdentification: AccountIdentification,
 
-            val additionalAccountIdentifiers: List<AdditionalAccountIdentifier>?
+            val additionalAccountIdentifiers: List<AdditionalAccountIdentifier>
         ) {
             data class Address(
                 val streetAddress: String,
