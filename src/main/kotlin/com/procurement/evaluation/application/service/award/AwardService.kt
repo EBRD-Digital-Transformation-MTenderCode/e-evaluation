@@ -1,5 +1,7 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.application.model.data.CoefficientValue
+import com.procurement.evaluation.application.model.data.RequirementRsValue
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.model.ProcurementMethod
@@ -20,9 +22,12 @@ import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
+import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Address
 import com.procurement.evaluation.model.dto.ocds.AddressDetails
 import com.procurement.evaluation.model.dto.ocds.Award
+import com.procurement.evaluation.model.dto.ocds.AwardCriteria
+import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.ContactPoint
@@ -36,14 +41,18 @@ import com.procurement.evaluation.model.dto.ocds.RegionDetails
 import com.procurement.evaluation.model.dto.ocds.Value
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
+import com.procurement.evaluation.utils.containsAny
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 
 interface AwardService {
     fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData
+
+    fun create(context: CreateAwardsContext, data: CreateAwardsData): CreatedAwardData
 
     fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
 
@@ -1072,5 +1081,312 @@ class AwardServiceImpl(
         val endDate = context.startDate
         awardPeriodRepository.saveEnd(cpid = context.cpid, stage = "EV", end = endDate)
         return CompletedAwarding(awardPeriod = CompletedAwarding.AwardPeriod(endDate = endDate))
+    }
+
+    override fun create(context: CreateAwardsContext, data: CreateAwardsData): ResponseDto {
+        val matchedBids = data.bids
+            .asSequence()
+            .filter { bid ->
+                bid.relatedLots.containsAny(data.lots)
+            }
+            .toList()
+
+        val createdAwards = matchedBids.map { generateAward(it, context, data) }
+
+        //TODO: change
+        return ResponseDto()
+    }
+
+    private fun generateAward(bid: CreateAwardsData.Bid, context: CreateAwardsContext, data: CreateAwardsData) =
+        Award(
+            id = generationService.awardId().toString(),
+            status = AwardStatus.PENDING,
+            statusDetails = AwardStatusDetails.EMPTY,
+            relatedBid = bid.id,
+            relatedLots = bid.relatedLots,
+            value = bid.value.let { value ->
+                Value(
+                    amount = value.amount,
+                    currency = value.currency
+                )
+            },
+            suppliers = bid.tenderers.map { tenderer ->
+                OrganizationReference(
+                    id = tenderer.id,
+                    name = tenderer.name,
+                    identifier = tenderer.identifier.let { identifier ->
+                        Identifier(
+                            id = identifier.id,
+                            uri = identifier.uri,
+                            scheme = identifier.scheme,
+                            legalName = identifier.legalName
+                        )
+                    },
+                    additionalIdentifiers = tenderer.additionalIdentifiers.map { additionalIdentifier ->
+                        Identifier(
+                            id = additionalIdentifier.id,
+                            legalName = additionalIdentifier.legalName,
+                            scheme = additionalIdentifier.scheme,
+                            uri = additionalIdentifier.uri
+                        )
+                    }.toMutableList(),
+                    address = tenderer.address.let { address ->
+                        Address(
+                            streetAddress = address.streetAddress,
+                            postalCode = address.postalCode,
+                            addressDetails = address.addressDetails.let { addressDetails ->
+                                AddressDetails(
+                                    country = addressDetails.country.let { country ->
+                                        CountryDetails(
+                                            id = country.id,
+                                            uri = country.uri,
+                                            scheme = country.scheme,
+                                            description = country.description
+                                        )
+                                    },
+                                    locality = addressDetails.locality.let { locality ->
+                                        LocalityDetails(
+                                            id = locality.id,
+                                            description = locality.description,
+                                            scheme = locality.scheme,
+                                            uri = locality.uri
+                                        )
+                                    },
+                                    region = addressDetails.region.let { region ->
+                                        RegionDetails(
+                                            id = region.id,
+                                            uri = region.uri,
+                                            scheme = region.scheme,
+                                            description = region.description
+                                        )
+                                    }
+                                )
+                            }
+                        )
+                    },
+                    contactPoint = tenderer.contactPoint.let { contactPoint ->
+                        ContactPoint(
+                            name = contactPoint.name,
+                            email = contactPoint.email,
+                            faxNumber = contactPoint.faxNumber,
+                            telephone = contactPoint.telephone,
+                            url = contactPoint.url
+                        )
+                    },
+                    persones = tenderer.persones.map { person ->
+                        OrganizationReference.Person(
+                            identifier = person.identifier.let { identifier ->
+                                OrganizationReference.Person.Identifier(
+                                    id = identifier.id,
+                                    scheme = identifier.scheme,
+                                    uri = identifier.uri
+                                )
+                            },
+                            name = person.name,
+                            title = person.title,
+                            businessFunctions = person.businessFunctions.map { businessFunction ->
+                                OrganizationReference.Person.BusinessFunction(
+                                    id = businessFunction.id,
+                                    period = businessFunction.period.let { period ->
+                                        OrganizationReference.Person.BusinessFunction.Period(
+                                            startDate = period.startDate
+                                        )
+                                    },
+                                    documents = businessFunction.documents.map { document ->
+                                        OrganizationReference.Person.BusinessFunction.Document(
+                                            id = document.id,
+                                            title = document.title,
+                                            description = document.description,
+                                            documentType = document.documentType
+                                        )
+                                    },
+                                    jobTitle = businessFunction.jobTitle,
+                                    type = businessFunction.type
+                                )
+                            }
+                        )
+                    },
+                    details = tenderer.details.let { details ->
+                        Details(
+                            typeOfSupplier = details.typeOfSupplier,
+                            bankAccounts = details.bankAccounts.map { bankAccount ->
+                                Details.BankAccount(
+                                    description = bankAccount.description,
+                                    identifier = bankAccount.identifier.let { identifier ->
+                                        Details.BankAccount.Identifier(
+                                            id = identifier.id,
+                                            scheme = identifier.scheme
+                                        )
+                                    },
+                                    address = bankAccount.address.let { address ->
+                                        Details.BankAccount.Address(
+                                            streetAddress = address.streetAddress,
+                                            postalCode = address.postalCode,
+                                            addressDetails = address.addressDetails.let { addressDetails ->
+                                                Details.BankAccount.Address.AddressDetails(
+                                                    country = addressDetails.country.let { country ->
+                                                        Details.BankAccount.Address.AddressDetails.Country(
+                                                            id = country.id,
+                                                            scheme = country.scheme,
+                                                            description = country.description,
+                                                            uri = country.uri
+                                                        )
+                                                    },
+                                                    region = addressDetails.region.let { region ->
+                                                        Details.BankAccount.Address.AddressDetails.Region(
+                                                            id = region.id,
+                                                            uri = region.uri,
+                                                            description = region.description,
+                                                            scheme = region.scheme
+                                                        )
+                                                    },
+                                                    locality = addressDetails.locality.let { locality ->
+                                                        Details.BankAccount.Address.AddressDetails.Locality(
+                                                            id = locality.id,
+                                                            scheme = locality.scheme,
+                                                            description = locality.description,
+                                                            uri = locality.uri
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        )
+                                    },
+                                    accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
+                                        Details.BankAccount.AccountIdentification(
+                                            id = accountIdentification.id,
+                                            scheme = accountIdentification.scheme
+                                        )
+                                    },
+                                    additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
+                                        Details.BankAccount.AdditionalAccountIdentifier(
+                                            id = additionalAccountIdentifier.id,
+                                            scheme = additionalAccountIdentifier.scheme
+                                        )
+                                    },
+                                    bankName = bankAccount.bankName
+                                )
+                            },
+                            legalForm = details.legalForm?.let { legalForm ->
+                                Details.LegalForm(
+                                    id = legalForm.id,
+                                    scheme = legalForm.scheme,
+                                    uri = legalForm.uri,
+                                    description = legalForm.description
+                                )
+                            },
+                            mainEconomicActivities = details.mainEconomicActivities,
+                            permits = details.permits.map { permit ->
+                                Details.Permit(
+                                    id = permit.id,
+                                    scheme = permit.scheme,
+                                    url = permit.url,
+                                    permitDetails = permit.permitDetails.let { permitDetail ->
+                                        Details.Permit.PermitDetails(
+                                            issuedBy = permitDetail.issuedBy.let { issuedBy ->
+                                                Details.Permit.PermitDetails.IssuedBy(
+                                                    id = issuedBy.id,
+                                                    name = issuedBy.name
+                                                )
+                                            },
+                                            issuedThought = permitDetail.issuedThought.let { issuedThought ->
+                                                Details.Permit.PermitDetails.IssuedThought(
+                                                    id = issuedThought.id,
+                                                    name = issuedThought.name
+                                                )
+                                            },
+                                            validityPeriod = permitDetail.validityPeriod.let { validityPeriod ->
+                                                Details.Permit.PermitDetails.ValidityPeriod(
+                                                    startDate = validityPeriod.startDate,
+                                                    endDate = validityPeriod.endDate
+                                                )
+                                            }
+                                        )
+                                    }
+                                )
+                            },
+                            scale = details.scale
+                        )
+                    }
+                )
+            },
+            date = context.startDate,
+            bidDate = bid.date,
+            weightedValue = calculateWeightedValue(bid, data),
+            token = generationService.generateRandomUUID().toString(),  //TODO: not sure about this
+            description = null,
+            title = null,
+            documents = null,
+            items = null
+        )
+
+    private fun calculateWeightedValue(
+        bid: CreateAwardsData.Bid,
+        data: CreateAwardsData
+    ): Award.WeightedValue {
+        when (data.awardCriteria) {
+            AwardCriteria.PRICE_ONLY -> {
+                when (data.awardCriteriaDetails) {
+                    AwardCriteriaDetails.AUTOMATED -> Unit
+                    AwardCriteriaDetails.MANUAL -> throw RuntimeException()
+                }
+            }
+            AwardCriteria.COST_ONLY -> {
+                when (data.awardCriteriaDetails) {
+                    AwardCriteriaDetails.MANUAL -> Unit
+                    AwardCriteriaDetails.AUTOMATED -> countAwardWeightedValue(bid, data)
+                }
+            }
+            AwardCriteria.QUALITY_ONLY -> {
+                when (data.awardCriteriaDetails) {
+                    AwardCriteriaDetails.MANUAL -> Unit
+                    AwardCriteriaDetails.AUTOMATED -> countAwardWeightedValue(bid, data)
+                }
+            }
+            AwardCriteria.RATED_CRITERIA -> {
+                when (data.awardCriteriaDetails) {
+                    AwardCriteriaDetails.MANUAL -> Unit
+                    AwardCriteriaDetails.AUTOMATED -> countAwardWeightedValue(bid, data)
+                }
+            }
+        }
+    }
+
+    private fun countAwardWeightedValue(
+        bid: CreateAwardsData.Bid,
+        data: CreateAwardsData
+    ): Award.WeightedValue {
+        val requirementResponsesIds = bid.requirementResponses.map { it.id }
+        val conventions = data.conversions
+            .asSequence()
+            .filter { conversion ->
+                conversion.relatesTo == "requirement"
+                    && requirementResponsesIds.contains(conversion.relatedItem)
+            }
+            .toList()
+        val coefficientValues = conventions.flatMap { it.coefficients }.map { it.value }
+        val coefficientValuesBoolean = mutableListOf<Boolean>()
+        val coefficientValuesInteger = mutableListOf<Long>()
+        val coefficientValuesNumber = mutableListOf<BigDecimal>()
+        val coefficientValuesString = mutableListOf<String>()
+        coefficientValues.asSequence().forEach {
+            when (it) {
+                is CoefficientValue.AsBoolean -> coefficientValuesBoolean.add(it.value)
+                is CoefficientValue.AsString -> coefficientValuesString.add(it.value)
+                is CoefficientValue.AsNumber -> coefficientValuesNumber.add(it.value)
+                is CoefficientValue.AsInteger -> coefficientValuesInteger.add(it.value)
+            }
+        }
+
+        val coincidedValues = bid.requirementResponses
+            .asSequence()
+            .filter { requirementResponse ->
+                when (requirementResponse.value) {
+                    is RequirementRsValue.AsBoolean -> coefficientValuesBoolean.contains(requirementResponse.value.value)
+                    is RequirementRsValue.AsNumber -> coefficientValuesNumber.contains(requirementResponse.value.value)
+                    is RequirementRsValue.AsInteger -> coefficientValuesInteger.contains(requirementResponse.value.value)
+                    is RequirementRsValue.AsString -> coefficientValuesString.contains(requirementResponse.value.value)
+                }
+            }
     }
 }
