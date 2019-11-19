@@ -4,20 +4,36 @@ import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
-import com.procurement.evaluation.model.dto.*
+import com.procurement.evaluation.model.dto.BidsData
+import com.procurement.evaluation.model.dto.CreateAwardsAuctionEndRq
+import com.procurement.evaluation.model.dto.CreateAwardsAuctionRq
+import com.procurement.evaluation.model.dto.CreateAwardsRq
+import com.procurement.evaluation.model.dto.CreateAwardsRs
+import com.procurement.evaluation.model.dto.FirstBid
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
-import com.procurement.evaluation.model.dto.ocds.*
+import com.procurement.evaluation.model.dto.ocds.Award
+import com.procurement.evaluation.model.dto.ocds.AwardCriteria
+import com.procurement.evaluation.model.dto.ocds.AwardStatus
+import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
+import com.procurement.evaluation.model.dto.ocds.Bid
+import com.procurement.evaluation.model.dto.ocds.Lot
 import com.procurement.evaluation.model.entity.AwardEntity
-import com.procurement.evaluation.utils.*
+import com.procurement.evaluation.utils.containsAny
+import com.procurement.evaluation.utils.localNowUTC
+import com.procurement.evaluation.utils.toJson
+import com.procurement.evaluation.utils.toLocal
+import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class CreateAwardService(private val rulesService: RulesService,
-                         private val periodService: PeriodService,
-                         private val awardDao: AwardDao,
-                         private val generationService: GenerationService) {
+class CreateAwardService(
+    private val rulesService: RulesService,
+    private val periodService: PeriodService,
+    private val awardDao: AwardDao,
+    private val generationService: GenerationService
+) {
 
     fun createAwards(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
@@ -99,10 +115,10 @@ class CreateAwardService(private val rulesService: RulesService,
 
         val unsuccessfulLotsSet = getUnsuccessfulLotsFromAwardEntities(awardEntities)
         val successfulLotsSet = getRelatedLotsIdFromBids(dto.bids).asSequence()
-                .filter { !unsuccessfulLotsSet.contains(it) }.toHashSet()
+            .filter { !unsuccessfulLotsSet.contains(it) }.toHashSet()
         val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
         val auctionResultList = dto.tender.electronicAuctions.details.asSequence()
-                .flatMap { it.electronicAuctionResult.asSequence() }.toList()
+            .flatMap { it.electronicAuctionResult.asSequence() }.toList()
         for (bid in successfulBidsList) {
             for (res in auctionResultList) {
                 if (bid.id == res.relatedBid) {
@@ -148,22 +164,25 @@ class CreateAwardService(private val rulesService: RulesService,
     private fun getFirstBidsFromAwards(awardCriteria: AwardCriteria, awards: List<Award>): Set<FirstBid>? {
         return if (awardCriteria == AwardCriteria.PRICE_ONLY) {
             awards.asSequence()
-                    .filter { it.status == AwardStatus.PENDING && it.statusDetails == AwardStatusDetails.CONSIDERATION }
-                    .map { FirstBid(it.relatedBid!!) }.toSet()
+                .filter { it.status == AwardStatus.PENDING && it.statusDetails == AwardStatusDetails.CONSIDERATION }
+                .map { FirstBid(it.relatedBid!!) }.toSet()
         } else null
     }
 
     private fun getAwardEntities(awards: List<Award>, cpId: String, owner: String, stage: String): List<AwardEntity> {
         val entities = ArrayList<AwardEntity>()
         awards.asSequence()
-                .forEach { award ->
-                    entities.add(getEntity(
-                            award = award,
-                            cpId = cpId,
-                            stage = stage,
-                            owner = owner,
-                            token = UUID.fromString(award.token)))
-                }
+            .forEach { award ->
+                entities.add(
+                    getEntity(
+                        award = award,
+                        cpId = cpId,
+                        stage = stage,
+                        owner = owner,
+                        token = UUID.fromString(award.token)
+                    )
+                )
+            }
         return entities
     }
 
@@ -174,8 +193,8 @@ class CreateAwardService(private val rulesService: RulesService,
 
     private fun getBidsFromBidsData(bidsData: Set<BidsData>): List<Bid> {
         return bidsData.asSequence()
-                .flatMap { it.bids.asSequence() }
-                .toList()
+            .flatMap { it.bids.asSequence() }
+            .toList()
     }
 
     private fun getRelatedLotsIdFromBids(bids: List<Bid>): List<String> {
@@ -196,17 +215,19 @@ class CreateAwardService(private val rulesService: RulesService,
 
     private fun getUnsuccessfulLots(uniqueLots: Map<String, Int>, minNumberOfBids: Int): HashSet<String> {
         return uniqueLots.asSequence()
-                .filter { it.value < minNumberOfBids }
-                .map { it.key }
-                .toHashSet()
+            .filter { it.value < minNumberOfBids }
+            .map { it.key }
+            .toHashSet()
     }
 
-    private fun addUnsuccessfulLots(lotsFromTender: HashSet<String>,
-                                    successfulLots: HashSet<String>,
-                                    unsuccessfulLots: HashSet<String>) {
+    private fun addUnsuccessfulLots(
+        lotsFromTender: HashSet<String>,
+        successfulLots: HashSet<String>,
+        unsuccessfulLots: HashSet<String>
+    ) {
         lotsFromTender.asSequence()
-                .filter { !successfulLots.contains(it) && !unsuccessfulLots.contains(it) }
-                .toCollection(unsuccessfulLots)
+            .filter { !successfulLots.contains(it) && !unsuccessfulLots.contains(it) }
+            .toCollection(unsuccessfulLots)
     }
 
     private fun getLotsDto(lots: HashSet<String>): List<Lot> {
@@ -220,40 +241,44 @@ class CreateAwardService(private val rulesService: RulesService,
     private fun getSuccessfulAwards(successfulBids: List<Bid>): List<Award> {
         return successfulBids.asSequence().map { bid ->
             Award(
-                    token = generationService.generateRandomUUID().toString(),
-                    id = generationService.getTimeBasedUUID(),
-                    date = localNowUTC(),
-                    description = null,
-                    title = null,
-                    status = AwardStatus.PENDING,
-                    statusDetails = AwardStatusDetails.EMPTY,
-                    value = bid.value,
-                    relatedLots = bid.relatedLots,
-                    relatedBid = bid.id,
-                    bidDate = bid.date,
-                    suppliers = bid.tenderers,
-                    documents = null,
-                    items = null)
+                token = generationService.generateRandomUUID().toString(),
+                id = generationService.getTimeBasedUUID(),
+                date = localNowUTC(),
+                description = null,
+                title = null,
+                status = AwardStatus.PENDING,
+                statusDetails = AwardStatusDetails.EMPTY,
+                value = bid.value,
+                relatedLots = bid.relatedLots,
+                relatedBid = bid.id,
+                bidDate = bid.date,
+                suppliers = bid.tenderers,
+                documents = null,
+                items = null,
+                weightedValue = null
+            )
         }.toList()
     }
 
     private fun getUnsuccessfulAwards(unSuccessfulLots: HashSet<String>): List<Award> {
         return unSuccessfulLots.asSequence().map { lot ->
             Award(
-                    token = generationService.generateRandomUUID().toString(),
-                    id = generationService.getTimeBasedUUID(),
-                    date = localNowUTC(),
-                    description = "Other reasons (discontinuation of procedure)",
-                    title = "The contract/lot is not awarded",
-                    status = AwardStatus.UNSUCCESSFUL,
-                    statusDetails = AwardStatusDetails.EMPTY,
-                    value = null,
-                    relatedLots = listOf(lot),
-                    relatedBid = null,
-                    bidDate = null,
-                    suppliers = null,
-                    documents = null,
-                    items = null)
+                token = generationService.generateRandomUUID().toString(),
+                id = generationService.getTimeBasedUUID(),
+                date = localNowUTC(),
+                description = "Other reasons (discontinuation of procedure)",
+                title = "The contract/lot is not awarded",
+                status = AwardStatus.UNSUCCESSFUL,
+                statusDetails = AwardStatusDetails.EMPTY,
+                value = null,
+                relatedLots = listOf(lot),
+                relatedBid = null,
+                bidDate = null,
+                suppliers = null,
+                documents = null,
+                items = null,
+                weightedValue = null
+            )
         }.toList()
     }
 
@@ -261,10 +286,10 @@ class CreateAwardService(private val rulesService: RulesService,
         val lotIds = awards.asSequence().flatMap { it.relatedLots.asSequence() }.toSet()
         lotIds.forEach { lotId ->
             awards.asSequence()
-                    .filter { it.relatedLots.contains(lotId) }
-                    .sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
-                    .firstOrNull()
-                    ?.let { award -> award.statusDetails = AwardStatusDetails.CONSIDERATION }
+                .filter { it.relatedLots.contains(lotId) }
+                .sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
+                .firstOrNull()
+                ?.let { award -> award.statusDetails = AwardStatusDetails.CONSIDERATION }
         }
 //        when (awardCriteria) {
 //            AwardCriteria.PRICE_ONLY -> {
@@ -278,18 +303,21 @@ class CreateAwardService(private val rulesService: RulesService,
 //        }
     }
 
-    private fun getEntity(award: Award,
-                          cpId: String,
-                          stage: String,
-                          owner: String,
-                          token: UUID): AwardEntity {
+    private fun getEntity(
+        award: Award,
+        cpId: String,
+        stage: String,
+        owner: String,
+        token: UUID
+    ): AwardEntity {
         return AwardEntity(
-                cpId = cpId,
-                stage = stage,
-                token = token,
-                status = award.status.value,
-                statusDetails = award.statusDetails.value,
-                owner = owner,
-                jsonData = toJson(award))
+            cpId = cpId,
+            stage = stage,
+            token = token,
+            status = award.status.value,
+            statusDetails = award.statusDetails.value,
+            owner = owner,
+            jsonData = toJson(award)
+        )
     }
 }

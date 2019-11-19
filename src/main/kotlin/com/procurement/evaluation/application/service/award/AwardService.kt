@@ -227,11 +227,20 @@ class AwardServiceImpl(
                             url = contactPoint.url
                         )
                     },
-                    details = Details(scale = supplier.details.scale)
+                    details = Details(
+                        scale = supplier.details.scale,
+                        permits = null,
+                        mainEconomicActivities = null,
+                        legalForm = null,
+                        bankAccounts = null,
+                        typeOfSupplier = null
+                    ),
+                    persones = null
                 )
             },
             documents = null,
-            items = null
+            items = null,
+            weightedValue = null
         )
 
         val prevAwardPeriodStart = awardPeriodRepository.findStartDateBy(cpid = cpid, stage = stage)
