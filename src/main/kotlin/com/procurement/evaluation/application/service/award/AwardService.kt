@@ -1344,36 +1344,24 @@ class AwardServiceImpl(
         bid: CreateAwardsData.Bid,
         data: CreateAwardsData
     ): Award.WeightedValue? =
-        when (data.awardCriteria) {
-            AwardCriteria.PRICE_ONLY -> {
-                when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.AUTOMATED -> null
-                    AwardCriteriaDetails.MANUAL -> throw ErrorException(
+        when (data.awardCriteriaDetails) {
+            AwardCriteriaDetails.MANUAL -> {
+                when (data.awardCriteria) {
+                    AwardCriteria.PRICE_ONLY -> throw ErrorException(
                         ErrorType.STATUS_DETAILS,
-                        "Cannot calculate weighted value for award with award criteria - $data.awardCriteria - " +
-                            "and award criteria details - $data.awardCriteriaDetails - based on bid $bid.id"
+                        "Cannot calculate weighted value for award with award criteria: $data.awardCriteria " +
+                            "and award criteria details: $data.awardCriteriaDetails, based on bid $bid.id"
                     )
+                    AwardCriteria.COST_ONLY, AwardCriteria.QUALITY_ONLY, AwardCriteria.RATED_CRITERIA -> null
                 }
             }
-            AwardCriteria.COST_ONLY -> {
-                when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.MANUAL -> null
-                    AwardCriteriaDetails.AUTOMATED -> calculateWeightedValue(bid, data)
+            AwardCriteriaDetails.AUTOMATED -> {
+                when (data.awardCriteria) {
+                    AwardCriteria.PRICE_ONLY -> null
+                    AwardCriteria.COST_ONLY, AwardCriteria.QUALITY_ONLY, AwardCriteria.RATED_CRITERIA ->
+                        calculateWeightedValue(bid, data)
                 }
             }
-            AwardCriteria.QUALITY_ONLY -> {
-                when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.MANUAL -> null
-                    AwardCriteriaDetails.AUTOMATED -> calculateWeightedValue(bid, data)
-                }
-            }
-            AwardCriteria.RATED_CRITERIA -> {
-                when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.MANUAL -> null
-                    AwardCriteriaDetails.AUTOMATED -> calculateWeightedValue(bid, data)
-                }
-            }
-
         }
 
     private fun calculateWeightedValue(
