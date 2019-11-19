@@ -9,6 +9,7 @@ import com.procurement.evaluation.model.dto.ocds.BidDocumentType
 import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
+import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.SupplierType
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -22,7 +23,7 @@ data class CreateAwardsData(
 ) {
     data class Conversion(
         val id: String,
-        val relatesTo: String,
+        val relatesTo: ConversionsRelatesTo,
         val relatedItem: String,
         val rationale: String,
         val description: String?,

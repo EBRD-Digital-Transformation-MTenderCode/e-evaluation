@@ -239,3 +239,20 @@ enum class BidDocumentType(@JsonValue val value: String) {
             )
     }
 }
+
+enum class ConversionsRelatesTo(@JsonValue val value: String) {
+    REQUIREMENT("requirement");
+
+    override fun toString(): String = value
+
+    companion object {
+        private val elements: Map<String, ConversionsRelatesTo> = values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): ConversionsRelatesTo = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = ConversionsRelatesTo::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
+    }
+}

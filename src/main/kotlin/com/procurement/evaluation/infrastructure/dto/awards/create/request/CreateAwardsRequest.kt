@@ -20,6 +20,7 @@ import com.procurement.evaluation.model.dto.ocds.BidDocumentType
 import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
+import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.SupplierType
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -36,7 +37,7 @@ data class CreateAwardsRequest(
 ) {
     data class Conversion(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-        @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: String,
+        @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: ConversionsRelatesTo,
         @param:JsonProperty("relatedItem") @field:JsonProperty("relatedItem") val relatedItem: String,
         @param:JsonProperty("rationale") @field:JsonProperty("rationale") val rationale: String,
 
