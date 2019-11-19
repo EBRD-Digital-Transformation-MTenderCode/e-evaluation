@@ -47,6 +47,7 @@ import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDateTime
 import java.util.*
 
@@ -1404,6 +1405,7 @@ class AwardServiceImpl(
 
         val amount = coincidedCoefficients.asSequence().map { it.coefficient.rate }
             .fold(bid.value.amount) { composition, element -> composition.multiply(element) }
+            .setScale(2, RoundingMode.HALF_UP)
         return Award.WeightedValue(amount = amount, currency = bid.value.currency)
     }
 }
