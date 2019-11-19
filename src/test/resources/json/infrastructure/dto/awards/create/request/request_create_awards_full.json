@@ -1,6 +1,6 @@
 {
   "awardCriteria": "priceOnly",
-  "awardCriteriaDetails": "award.awardCriteriaDetails",
+  "awardCriteriaDetails": "manual",
   "conversions": [
     {
       "id": "conversion-1557946336820",
@@ -9,21 +9,13 @@
       "rationale": "Number of years for product guarantee",
       "description": "data.conversions[0].description",
       "coefficients": [
+
         {
           "id": "coefficient-1557947503428",
-          "value": 1,
-          "coefficient": 1
-        },
-        {
-          "id": "coefficient-1557947503428",
-          "value": 2,
+          "value": 2.00,
           "coefficient": 0.85
-        },
-        {
-          "id": "coefficient-1557947503428",
-          "value": 3,
-          "coefficient": 0.7
         }
+
       ]
     }
   ],

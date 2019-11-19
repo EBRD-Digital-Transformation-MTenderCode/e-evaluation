@@ -1,6 +1,6 @@
 {
   "awardCriteria": "priceOnly",
-  "awardCriteriaDetails": "award.awardCriteriaDetails",
+  "awardCriteriaDetails": "manual",
   "conversions": [
     {
       "id": "conversion-1557946336820",
