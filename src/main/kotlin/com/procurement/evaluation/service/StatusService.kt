@@ -266,7 +266,8 @@ class StatusService(private val periodService: PeriodService,
         bidDate = null,
         suppliers = null,
         documents = null,
-        items = null
+        items = null,
+        weightedValue = null
     )
 
     private fun getAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
