@@ -147,6 +147,17 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     override fun saveNew(cpid: String, award: AwardEntity) {
+        val statement = statementForAwardSave(cpid, award)
+
+        val result = saveNew(statement)
+        if (!result.wasApplied())
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${award.stage}' to the database. Record is already.")
+    }
+
+    private fun statementForAwardSave(
+        cpid: String,
+        award: AwardEntity
+    ): BoundStatement {
         val statement = preparedSaveNewAwardCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
@@ -157,16 +168,30 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(columnStatusDetails, award.statusDetails)
                 setString(columnJsonData, award.jsonData)
             }
-
-        val result = saveNew(statement)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${award.stage}' to the database. Record is already.")
+        return statement
     }
 
     private fun saveNew(statement: BoundStatement): ResultSet = try {
         session.execute(statement)
     } catch (exception: Exception) {
         throw SaveEntityException(message = "Error writing new award to database.", cause = exception)
+    }
+
+    override fun saveAll(cpid: String, awards: List<AwardEntity>){
+        val statements = BatchStatement().apply {
+            for (award in awards) {
+                add(statementForAwardSave(cpid = cpid, award = award))
+            }
+        }
+        val result = saveNewAwards(statements)
+        if (!result.wasApplied())
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award(s) by cpid '$cpid' to the database.")
+    }
+
+    private fun saveNewAwards(statement: BatchStatement): ResultSet = try {
+        session.execute(statement)
+    } catch (exception: Exception) {
+        throw SaveEntityException(message = "Error writing new award(s) to database.", cause = exception)
     }
 
     override fun update(cpid: String, updatedAward: AwardEntity) {
