@@ -1368,12 +1368,11 @@ class AwardServiceImpl(
         bid: CreateAwardsData.Bid,
         data: CreateAwardsData
     ): Award.WeightedValue {
-        val requirementResponsesIds = bid.requirementResponses.map { it.id }
         val conventions = data.conversions
             .asSequence()
             .filter { conversion ->
                 conversion.relatesTo == ConversionsRelatesTo.REQUIREMENT
-                    && requirementResponsesIds.contains(conversion.relatedItem)
+                    && bid.requirementResponses[0].requirement.id == conversion.relatedItem
             }
             .toList()
 
