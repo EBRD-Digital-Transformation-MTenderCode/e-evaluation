@@ -34,41 +34,6 @@ class CreateAwardService(
     private val awardDao: AwardDao,
     private val generationService: GenerationService
 ) {
-
-    fun createAwards(cm: CommandMessage): ResponseDto {
-        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
-        val country = cm.context.country ?: throw ErrorException(CONTEXT)
-        val pmd = cm.context.pmd ?: throw ErrorException(CONTEXT)
-        val awardCriteria = cm.context.awardCriteria ?: throw ErrorException(CONTEXT)
-        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-        val dto = toObject(CreateAwardsRq::class.java, cm.data)
-
-        val minNumberOfBids = rulesService.getRulesMinBids(country, pmd)
-        val relatedLotsFromBids = getRelatedLotsIdFromBids(dto.bids)
-        val lotsFromTenderSet = getLotsFromTender(dto.lots)
-        val uniqueLotsMap = getUniqueLotsMap(relatedLotsFromBids)
-        val successfulLotsSet = getSuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        val unsuccessfulLotsSet = getUnsuccessfulLots(uniqueLotsMap, minNumberOfBids)
-        addUnsuccessfulLots(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
-        val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
-        val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(awardCriteria))
-        val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
-        val awards = successfulAwardsList + unsuccessfulAwardsList
-
-        val awardPeriod = if (successfulAwardsList.isEmpty()) {
-            periodService.savePeriod(cpId, stage, startDate, startDate, awardCriteria)
-        } else {
-            periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
-        }
-        awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
-        val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        val firstBids = getFirstBidsFromAwards(AwardCriteria.fromValue(awardCriteria), successfulAwardsList)
-        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids))
-    }
-
     fun createAwardsAuction(cm: CommandMessage): ResponseDto {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)

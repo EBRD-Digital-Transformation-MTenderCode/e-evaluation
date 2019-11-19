@@ -614,7 +614,7 @@ class CommandService(
                         )
                     }
                 )
-                createAwardService.createAwards(context = context, data = data)
+                awardService.create(context = context, data = data)
             }
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)
