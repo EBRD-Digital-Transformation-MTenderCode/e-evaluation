@@ -31,6 +31,7 @@ import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.ContactPoint
+import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.CountryDetails
 import com.procurement.evaluation.model.dto.ocds.Details
 import com.procurement.evaluation.model.dto.ocds.Document
@@ -52,7 +53,7 @@ import java.util.*
 interface AwardService {
     fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData
 
-    fun create(context: CreateAwardsContext, data: CreateAwardsData): CreatedAwardData
+    fun create(context: CreateAwardsContext, data: CreateAwardsData): ResponseDto
 
     fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
 
@@ -1092,8 +1093,18 @@ class AwardServiceImpl(
             .toList()
 
         val createdAwards = matchedBids.map { generateAward(it, context, data) }
-
-        //TODO: change
+        val entities = createdAwards.asSequence().map { award ->
+            AwardEntity(
+                cpId = context.cpid,
+                stage = context.stage,
+                token = UUID.fromString(award.token),
+                statusDetails = award.statusDetails.value,
+                status = award.status.value,
+                owner = context.owner,
+                jsonData = toJson(award)
+            )
+        }.toList()
+        awardRepository.saveAll(context.cpid, entities)
         return ResponseDto()
     }
 
@@ -1312,7 +1323,7 @@ class AwardServiceImpl(
             },
             date = context.startDate,
             bidDate = bid.date,
-            weightedValue = calculateWeightedValue(bid, data),
+            weightedValue = getWeightedValue(bid, data),
             token = generationService.generateRandomUUID().toString(),  //TODO: not sure about this
             description = null,
             title = null,
@@ -1320,39 +1331,43 @@ class AwardServiceImpl(
             items = null
         )
 
-    private fun calculateWeightedValue(
+    private fun getWeightedValue(
         bid: CreateAwardsData.Bid,
         data: CreateAwardsData
-    ): Award.WeightedValue {
+    ): Award.WeightedValue? =
         when (data.awardCriteria) {
             AwardCriteria.PRICE_ONLY -> {
                 when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.AUTOMATED -> Unit
-                    AwardCriteriaDetails.MANUAL -> throw RuntimeException()
+                    AwardCriteriaDetails.AUTOMATED -> null
+                    AwardCriteriaDetails.MANUAL -> throw ErrorException(
+                        ErrorType.STATUS_DETAILS,
+                        "Cannot calculate weighted value for award with award criteria - $data.awardCriteria - " +
+                            "and award criteria details - $data.awardCriteriaDetails - based on bid $bid.id"
+                    )
                 }
             }
             AwardCriteria.COST_ONLY -> {
                 when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.MANUAL -> Unit
-                    AwardCriteriaDetails.AUTOMATED -> countAwardWeightedValue(bid, data)
+                    AwardCriteriaDetails.MANUAL -> null
+                    AwardCriteriaDetails.AUTOMATED -> calculateWeightedValue(bid, data)
                 }
             }
             AwardCriteria.QUALITY_ONLY -> {
                 when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.MANUAL -> Unit
-                    AwardCriteriaDetails.AUTOMATED -> countAwardWeightedValue(bid, data)
+                    AwardCriteriaDetails.MANUAL -> null
+                    AwardCriteriaDetails.AUTOMATED -> calculateWeightedValue(bid, data)
                 }
             }
             AwardCriteria.RATED_CRITERIA -> {
                 when (data.awardCriteriaDetails) {
-                    AwardCriteriaDetails.MANUAL -> Unit
-                    AwardCriteriaDetails.AUTOMATED -> countAwardWeightedValue(bid, data)
+                    AwardCriteriaDetails.MANUAL -> null
+                    AwardCriteriaDetails.AUTOMATED -> calculateWeightedValue(bid, data)
                 }
             }
-        }
-    }
 
-    private fun countAwardWeightedValue(
+        }
+
+    private fun calculateWeightedValue(
         bid: CreateAwardsData.Bid,
         data: CreateAwardsData
     ): Award.WeightedValue {
@@ -1360,33 +1375,39 @@ class AwardServiceImpl(
         val conventions = data.conversions
             .asSequence()
             .filter { conversion ->
-                conversion.relatesTo == "requirement"
+                conversion.relatesTo == ConversionsRelatesTo.REQUIREMENT
                     && requirementResponsesIds.contains(conversion.relatedItem)
             }
             .toList()
-        val coefficientValues = conventions.flatMap { it.coefficients }.map { it.value }
-        val coefficientValuesBoolean = mutableListOf<Boolean>()
-        val coefficientValuesInteger = mutableListOf<Long>()
-        val coefficientValuesNumber = mutableListOf<BigDecimal>()
-        val coefficientValuesString = mutableListOf<String>()
-        coefficientValues.asSequence().forEach {
+
+        val responsesRsValues = bid.requirementResponses.map { it.value }
+        val responsesRsValuesBoolean = mutableListOf<Boolean>()
+        val responsesRsValuesInteger = mutableListOf<Long>()
+        val responsesRsValuesNumber = mutableListOf<BigDecimal>()
+        val responsesRsValuesString = mutableListOf<String>()
+        responsesRsValues.asSequence().forEach {
             when (it) {
-                is CoefficientValue.AsBoolean -> coefficientValuesBoolean.add(it.value)
-                is CoefficientValue.AsString -> coefficientValuesString.add(it.value)
-                is CoefficientValue.AsNumber -> coefficientValuesNumber.add(it.value)
-                is CoefficientValue.AsInteger -> coefficientValuesInteger.add(it.value)
+                is RequirementRsValue.AsBoolean -> responsesRsValuesBoolean.add(it.value)
+                is RequirementRsValue.AsString -> responsesRsValuesString.add(it.value)
+                is RequirementRsValue.AsNumber -> responsesRsValuesNumber.add(it.value)
+                is RequirementRsValue.AsInteger -> responsesRsValuesInteger.add(it.value)
             }
         }
 
-        val coincidedValues = bid.requirementResponses
+        val coincidedCoefficients = conventions
             .asSequence()
-            .filter { requirementResponse ->
-                when (requirementResponse.value) {
-                    is RequirementRsValue.AsBoolean -> coefficientValuesBoolean.contains(requirementResponse.value.value)
-                    is RequirementRsValue.AsNumber -> coefficientValuesNumber.contains(requirementResponse.value.value)
-                    is RequirementRsValue.AsInteger -> coefficientValuesInteger.contains(requirementResponse.value.value)
-                    is RequirementRsValue.AsString -> coefficientValuesString.contains(requirementResponse.value.value)
+            .flatMap { it.coefficients.asSequence() }
+            .filter { coefficient ->
+                when (coefficient.value) {
+                    is CoefficientValue.AsBoolean -> responsesRsValuesBoolean.contains(coefficient.value.value)
+                    is CoefficientValue.AsNumber -> responsesRsValuesNumber.contains(coefficient.value.value)
+                    is CoefficientValue.AsInteger -> responsesRsValuesInteger.contains(coefficient.value.value)
+                    is CoefficientValue.AsString -> responsesRsValuesString.contains(coefficient.value.value)
                 }
-            }
+            }.toList()
+
+        val amount = coincidedCoefficients.asSequence().map { it.coefficient.rate }
+            .fold(bid.value.amount) { composition, element -> composition * element }
+        return Award.WeightedValue(amount = amount, currency = bid.value.currency)
     }
 }
