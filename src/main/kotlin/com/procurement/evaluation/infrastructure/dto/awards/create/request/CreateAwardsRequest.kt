@@ -43,13 +43,13 @@ data class CreateAwardsRequest(
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
-
-        @JsonDeserialize(using = CoefficientValueDeserializer::class)
-        @JsonSerialize(using = CoefficientValueSerializer::class)
         @param:JsonProperty("coefficients") @field:JsonProperty("coefficients") val coefficients: List<Coefficient>
     ) {
         data class Coefficient(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+
+            @JsonDeserialize(using = CoefficientValueDeserializer::class)
+            @JsonSerialize(using = CoefficientValueSerializer::class)
             @param:JsonProperty("value") @field:JsonProperty("value") val value: CoefficientValue,
 
             @JsonDeserialize(using = CoefficientRateDeserializer::class)
