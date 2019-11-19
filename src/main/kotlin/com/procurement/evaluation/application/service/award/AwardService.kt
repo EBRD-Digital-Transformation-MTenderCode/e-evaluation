@@ -1333,7 +1333,7 @@ class AwardServiceImpl(
             date = context.startDate,
             bidDate = bid.date,
             weightedValue = getWeightedValue(bid, data),
-            token = generationService.generateRandomUUID().toString(),  //TODO: not sure about this
+            token = generationService.token().toString(),
             description = null,
             title = null,
             documents = null,
@@ -1403,7 +1403,7 @@ class AwardServiceImpl(
             }.toList()
 
         val amount = coincidedCoefficients.asSequence().map { it.coefficient.rate }
-            .fold(bid.value.amount) { composition, element -> composition * element }
+            .fold(bid.value.amount) { composition, element -> composition.multiply(element) }
         return Award.WeightedValue(amount = amount, currency = bid.value.currency)
     }
 }
