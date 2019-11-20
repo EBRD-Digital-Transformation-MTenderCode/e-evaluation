@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.procurement.evaluation.application.model.data.CoefficientValue
+import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.infrastructure.exception.CoefficientValueException
 import java.io.IOException
 import java.math.BigDecimal

@@ -1,7 +1,7 @@
 package com.procurement.evaluation.application.service.award
 
-import com.procurement.evaluation.application.model.data.CoefficientValue
-import com.procurement.evaluation.application.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.data.CoefficientValue
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.model.ProcurementMethod
@@ -1488,8 +1488,8 @@ class AwardServiceImpl(
                 else
                     false
             }
-            is RequirementRsValue.AsString -> coef is CoefficientValue.AsString
-            is RequirementRsValue.AsNumber -> coef is CoefficientValue.AsNumber
+            is RequirementRsValue.AsString  -> coef is CoefficientValue.AsString
+            is RequirementRsValue.AsNumber  -> coef is CoefficientValue.AsNumber
             is RequirementRsValue.AsInteger -> coef is CoefficientValue.AsInteger
         }
     }

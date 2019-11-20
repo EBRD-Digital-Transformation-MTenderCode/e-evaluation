@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.procurement.evaluation.application.model.data.CoefficientRate
-import com.procurement.evaluation.application.model.data.CoefficientValue
-import com.procurement.evaluation.application.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.data.CoefficientRate
+import com.procurement.evaluation.domain.model.data.CoefficientValue
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateDeserializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateSerializer

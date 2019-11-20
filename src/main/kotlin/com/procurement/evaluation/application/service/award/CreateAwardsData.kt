@@ -1,8 +1,8 @@
 package com.procurement.evaluation.application.service.award
 
-import com.procurement.evaluation.application.model.data.CoefficientRate
-import com.procurement.evaluation.application.model.data.CoefficientValue
-import com.procurement.evaluation.application.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.data.CoefficientRate
+import com.procurement.evaluation.domain.model.data.CoefficientValue
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails

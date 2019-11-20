@@ -1,4 +1,4 @@
-package com.procurement.evaluation.application.model.data
+package com.procurement.evaluation.domain.model.data
 
 import java.math.BigDecimal
 

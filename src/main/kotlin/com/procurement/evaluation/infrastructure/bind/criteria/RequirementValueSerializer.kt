@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.procurement.evaluation.application.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import java.io.IOException
 
 class RequirementValueSerializer : JsonSerializer<RequirementRsValue>() {
@@ -22,8 +22,8 @@ class RequirementValueSerializer : JsonSerializer<RequirementRsValue>() {
         provider: SerializerProvider
     ) =
         when (requirementValue) {
-            is RequirementRsValue.AsString -> jsonGenerator.writeString(serialize(requirementValue))
-            is RequirementRsValue.AsNumber -> jsonGenerator.writeNumber(serialize(requirementValue))
+            is RequirementRsValue.AsString  -> jsonGenerator.writeString(serialize(requirementValue))
+            is RequirementRsValue.AsNumber  -> jsonGenerator.writeNumber(serialize(requirementValue))
             is RequirementRsValue.AsBoolean -> jsonGenerator.writeBoolean(serialize(requirementValue))
             is RequirementRsValue.AsInteger -> jsonGenerator.writeNumber(serialize(requirementValue))
         }

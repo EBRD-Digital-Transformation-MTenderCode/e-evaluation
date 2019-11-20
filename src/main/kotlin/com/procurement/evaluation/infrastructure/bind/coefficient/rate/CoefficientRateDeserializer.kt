@@ -5,14 +5,16 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.procurement.evaluation.application.model.data.CoefficientRate
+import com.procurement.evaluation.domain.model.data.CoefficientRate
 import com.procurement.evaluation.infrastructure.exception.CoefficientException
 import java.io.IOException
 import java.math.BigDecimal
 
 class CoefficientRateDeserializer : JsonDeserializer<CoefficientRate>() {
     companion object {
-        fun deserialize(value: BigDecimal): CoefficientRate = CoefficientRate(rate = value)
+        fun deserialize(value: BigDecimal): CoefficientRate = CoefficientRate(
+            rate = value
+        )
     }
 
     @Throws(IOException::class, JsonProcessingException::class)

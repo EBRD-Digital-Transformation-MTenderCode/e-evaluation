@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.procurement.evaluation.application.model.data.CoefficientValue
+import com.procurement.evaluation.domain.model.data.CoefficientValue
 import java.io.IOException
 
 class CoefficientValueSerializer : JsonSerializer<CoefficientValue>() {
@@ -22,12 +22,12 @@ class CoefficientValueSerializer : JsonSerializer<CoefficientValue>() {
         provider: SerializerProvider
     ) =
         when (coefficientValue) {
-            is CoefficientValue.AsString -> jsonGenerator.writeString(
+            is CoefficientValue.AsString  -> jsonGenerator.writeString(
                 serialize(
                     coefficientValue
                 )
             )
-            is CoefficientValue.AsNumber -> jsonGenerator.writeNumber(
+            is CoefficientValue.AsNumber  -> jsonGenerator.writeNumber(
                 serialize(
                     coefficientValue
                 )
