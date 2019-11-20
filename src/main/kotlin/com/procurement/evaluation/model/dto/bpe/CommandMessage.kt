@@ -26,6 +26,10 @@ val CommandMessage.cpid: String
     get() = this.context.cpid
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'cpid' attribute in context.")
 
+val CommandMessage.ocid: String
+    get() = this.context.ocid
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'ocid' attribute in context.")
+
 val CommandMessage.token: UUID
     get() = this.context.token?.let { id ->
         try {
