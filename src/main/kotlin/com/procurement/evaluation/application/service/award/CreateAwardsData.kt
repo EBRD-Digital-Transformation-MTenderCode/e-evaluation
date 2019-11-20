@@ -3,6 +3,7 @@ package com.procurement.evaluation.application.service.award
 import com.procurement.evaluation.application.model.data.CoefficientRate
 import com.procurement.evaluation.application.model.data.CoefficientValue
 import com.procurement.evaluation.application.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.BidDocumentType
@@ -11,7 +12,6 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.SupplierType
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class CreateAwardsData(
@@ -42,7 +42,7 @@ data class CreateAwardsData(
         val status: BidStatusType,
         val statusDetails: BidStatusDetailsType,
         val tenderers: List<Tenderer>,
-        val value: Value,
+        val value: Money,
         val documents: List<Document>,
         val requirementResponses: List<RequirementResponse>,
         val relatedLots: List<String>
@@ -247,11 +247,6 @@ data class CreateAwardsData(
                 )
             }
         }
-
-        data class Value(
-            val amount: BigDecimal,
-            val currency: String
-        )
 
         data class Document(
             val documentType: BidDocumentType,

@@ -1,6 +1,5 @@
 package com.procurement.evaluation.infrastructure.dto.awards.create.request
 
-
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -8,12 +7,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.evaluation.application.model.data.CoefficientRate
 import com.procurement.evaluation.application.model.data.CoefficientValue
 import com.procurement.evaluation.application.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateDeserializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateSerializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueSerializer
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
+import com.procurement.evaluation.infrastructure.bind.money.MoneyDeserializer
+import com.procurement.evaluation.infrastructure.bind.money.MoneySerializer
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.BidDocumentType
@@ -22,7 +24,6 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.SupplierType
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class CreateAwardsRequest(
@@ -64,7 +65,10 @@ data class CreateAwardsRequest(
         @param:JsonProperty("status") @field:JsonProperty("status") val status: BidStatusType,
         @param:JsonProperty("statusDetails") @field:JsonProperty("statusDetails") val statusDetails: BidStatusDetailsType,
         @param:JsonProperty("tenderers") @field:JsonProperty("tenderers") val tenderers: List<Tenderer>,
-        @param:JsonProperty("value") @field:JsonProperty("value") val value: Value,
+
+        @JsonDeserialize(using = MoneyDeserializer::class)
+        @JsonSerialize(using = MoneySerializer::class)
+        @param:JsonProperty("value") @field:JsonProperty("value") val value: Money,
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @param:JsonProperty("documents") @field:JsonProperty("documents") val documents: List<Document>?,
@@ -318,11 +322,6 @@ data class CreateAwardsRequest(
                 )
             }
         }
-
-        data class Value(
-            @param:JsonProperty("amount") @field:JsonProperty("amount") val amount: BigDecimal,
-            @param:JsonProperty("currency") @field:JsonProperty("currency") val currency: String
-        )
 
         data class Document(
             @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: BidDocumentType,

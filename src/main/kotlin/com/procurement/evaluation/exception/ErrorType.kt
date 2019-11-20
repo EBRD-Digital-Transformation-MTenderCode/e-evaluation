@@ -29,5 +29,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_FORMAT_TOKEN("08.01", "Invalid format the award id."),
     AWARD_NOT_FOUND("09.01", "Award is not found."),
     WRONG_NUMBER_OF_SUPPLIERS("10.01", "Wrong number of suppliers."),
-    INVALID_PMD("11.01", "Invalid pmd.");
+    INVALID_PMD("11.01", "Invalid pmd."),
+    IS_EMPTY("12.01", "List is empty.");
 }
