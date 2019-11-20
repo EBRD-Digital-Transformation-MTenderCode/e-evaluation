@@ -157,19 +157,16 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     private fun statementForAwardSave(
         cpid: String,
         award: AwardEntity
-    ): BoundStatement {
-        val statement = preparedSaveNewAwardCQL.bind()
-            .apply {
-                setString(columnCpid, cpid)
-                setString(columnStage, award.stage)
-                setUUID(columnToken, award.token)
-                setString(columnOwner, award.owner)
-                setString(columnStatus, award.status)
-                setString(columnStatusDetails, award.statusDetails)
-                setString(columnJsonData, award.jsonData)
-            }
-        return statement
-    }
+    ): BoundStatement = preparedSaveNewAwardCQL.bind()
+        .apply {
+            setString(columnCpid, cpid)
+            setString(columnStage, award.stage)
+            setUUID(columnToken, award.token)
+            setString(columnOwner, award.owner)
+            setString(columnStatus, award.status)
+            setString(columnStatusDetails, award.statusDetails)
+            setString(columnJsonData, award.jsonData)
+        }
 
     private fun saveNew(statement: BoundStatement): ResultSet = try {
         session.execute(statement)
@@ -177,7 +174,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         throw SaveEntityException(message = "Error writing new award to database.", cause = exception)
     }
 
-    override fun saveAll(cpid: String, awards: List<AwardEntity>){
+    override fun saveAll(cpid: String, awards: List<AwardEntity>) {
         val statements = BatchStatement().apply {
             for (award in awards) {
                 add(statementForAwardSave(cpid = cpid, award = award))
