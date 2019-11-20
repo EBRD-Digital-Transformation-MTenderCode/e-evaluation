@@ -1114,8 +1114,8 @@ class AwardServiceImpl(
             }
 
         val createdAwards = matchedBids.map { bid ->
-            val isCalculateWeightedValue = data.isCalculateWeightedValue(bid)
-            val weightedValue = if (isCalculateWeightedValue)
+            val canCalculateWeightedValue = data.canCalculateWeightedValue(bid)
+            val weightedValue = if (canCalculateWeightedValue)
                 calculateWeightedValue(bid, conversionsByRelatedItem)
             else
                 null
@@ -1384,7 +1384,7 @@ class AwardServiceImpl(
             items = null
         )
 
-    private fun CreateAwardsData.isCalculateWeightedValue(
+    private fun CreateAwardsData.canCalculateWeightedValue(
         bid: CreateAwardsData.Bid
     ): Boolean =
         when (this.awardCriteriaDetails) {
@@ -1392,8 +1392,8 @@ class AwardServiceImpl(
                 when (this.awardCriteria) {
                     AwardCriteria.PRICE_ONLY -> throw ErrorException(
                         ErrorType.STATUS_DETAILS,
-                        "Cannot calculate weighted value for award with award criteria: $this.awardCriteria " +
-                            "and award criteria details: $this.awardCriteriaDetails, based on bid $bid.id"
+                        "Cannot calculate weighted value for award with award criteria: '${this.awardCriteria}' " +
+                            "and award criteria details: '${this.awardCriteriaDetails}', based on bid '${bid.id}'"
                     )
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
@@ -1415,7 +1415,7 @@ class AwardServiceImpl(
         bid: CreateAwardsData.Bid,
         conversionsByRelatedItem: Map<String, CreateAwardsData.Conversion>
     ): Money? {
-        val lll = bid.requirementResponses
+        val coefficientRates = bid.requirementResponses
             .asSequence()
             .flatMap { response ->
                 conversionsByRelatedItem[response.requirement.id]
@@ -1433,51 +1433,12 @@ class AwardServiceImpl(
             }
             .toList()
 
-        return if (lll.isNotEmpty()) {
-            val amount = lll.fold(bid.value.amount, { acc, rate -> acc.multiply(rate.rate) })
+        return if (coefficientRates.isNotEmpty()) {
+            val amount = coefficientRates.fold(bid.value.amount, { acc, rate -> acc.multiply(rate.rate) })
                 .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
             Money(amount = amount, currency = bid.value.currency)
         } else
             null
-/*
-        val conventions = data.conversions
-            .asSequence()
-            .filter { conversion ->
-
-                && bid.requirementResponses[0].requirement.id == conversion.relatedItem
-            }
-            .toList()
-
-        val responsesRsValues = bid.requirementResponses.map { it.value }
-        val responsesRsValuesBoolean = mutableListOf<Boolean>()
-        val responsesRsValuesInteger = mutableListOf<Long>()
-        val responsesRsValuesNumber = mutableListOf<BigDecimal>()
-        val responsesRsValuesString = mutableListOf<String>()
-        responsesRsValues.asSequence().forEach {
-            when (it) {
-                is RequirementRsValue.AsBoolean -> responsesRsValuesBoolean.add(it.value)
-                is RequirementRsValue.AsString -> responsesRsValuesString.add(it.value)
-                is RequirementRsValue.AsNumber -> responsesRsValuesNumber.add(it.value)
-                is RequirementRsValue.AsInteger -> responsesRsValuesInteger.add(it.value)
-            }
-        }
-
-        val coincidedCoefficients = conventions
-            .asSequence()
-            .flatMap { it.coefficients.asSequence() }
-            .filter { coefficient ->
-                when (coefficient.value) {
-                    is CoefficientValue.AsBoolean -> responsesRsValuesBoolean.contains(coefficient.value.value)
-                    is CoefficientValue.AsNumber -> responsesRsValuesNumber.contains(coefficient.value.value)
-                    is CoefficientValue.AsInteger -> responsesRsValuesInteger.contains(coefficient.value.value)
-                    is CoefficientValue.AsString -> responsesRsValuesString.contains(coefficient.value.value)
-                }
-            }.toList()
-
-        val amount = coincidedCoefficients.asSequence().map { it.coefficient.rate }
-            .fold(bid.value.amount) { composition, element -> composition.multiply(element) }
-            .setScale(2, RoundingMode.HALF_UP)
-        return Award.WeightedValue(amount = amount, currency = bid.value.currency)*/
     }
 
     private fun compare(coef: CoefficientValue, req: RequirementRsValue): Boolean {
@@ -1488,9 +1449,24 @@ class AwardServiceImpl(
                 else
                     false
             }
-            is RequirementRsValue.AsString  -> coef is CoefficientValue.AsString
-            is RequirementRsValue.AsNumber  -> coef is CoefficientValue.AsNumber
-            is RequirementRsValue.AsInteger -> coef is CoefficientValue.AsInteger
+            is RequirementRsValue.AsString -> {
+                if (coef is CoefficientValue.AsString)
+                    req.value == coef.value
+                else
+                    false
+            }
+            is RequirementRsValue.AsNumber -> {
+                if (coef is CoefficientValue.AsNumber)
+                    req.value == coef.value
+                else
+                    false
+            }
+            is RequirementRsValue.AsInteger -> {
+                if (coef is CoefficientValue.AsInteger)
+                    req.value == coef.value
+                else
+                    false
+            }
         }
     }
 }
