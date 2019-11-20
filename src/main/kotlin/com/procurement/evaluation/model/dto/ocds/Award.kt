@@ -29,7 +29,7 @@ data class Award @JsonCreator constructor(
         val value: Value?,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        val weightedValue: WeightedValue?,
+        val weightedValue: Value?,
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         val relatedLots: List<String>,
@@ -49,9 +49,3 @@ data class Award @JsonCreator constructor(
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         var items: List<Item>?
 )
-{
-        data class WeightedValue(
-                val amount: BigDecimal,
-                val currency: String
-        )
-}
