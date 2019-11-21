@@ -1,9 +1,11 @@
 package com.procurement.evaluation.infrastructure.dto.awards.create.request
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
+import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import org.junit.jupiter.api.Test
 
-class CreateAwardsRequestTest : AbstractDTOTestBase<CreateAwardsRequest>(CreateAwardsRequest::class.java) {
+class CreateAwardsRequestTest : AbstractDTOTestBase<CreateAwardsRequest>(
+    CreateAwardsRequest::class.java) {
 
     @Test
     fun fully() {

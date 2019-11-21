@@ -8,7 +8,6 @@ import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.CreateAwardsContext
-import com.procurement.evaluation.application.service.award.CreateAwardsData
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
 import com.procurement.evaluation.application.service.award.EvaluatedAward
@@ -29,8 +28,8 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.Eval
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
-import com.procurement.evaluation.infrastructure.dto.awards.create.request.CreateAwardsRequest
-import com.procurement.evaluation.infrastructure.dto.awards.create.response.CreateAwardsResponse
+import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
+import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage

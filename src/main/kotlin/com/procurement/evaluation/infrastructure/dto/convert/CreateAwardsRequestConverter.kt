@@ -3,7 +3,7 @@ package com.procurement.evaluation.infrastructure.dto.convert
 import com.procurement.evaluation.application.service.award.CreateAwardsData
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.infrastructure.dto.awards.create.request.CreateAwardsRequest
+import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import com.procurement.evaluation.lib.errorIfEmpty
 import com.procurement.evaluation.lib.mapIfNotEmpty
 import com.procurement.evaluation.lib.orThrow

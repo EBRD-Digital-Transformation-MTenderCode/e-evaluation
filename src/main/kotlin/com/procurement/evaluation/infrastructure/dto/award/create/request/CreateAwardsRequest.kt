@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.dto.awards.create.request
+package com.procurement.evaluation.infrastructure.dto.award.create.request
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
