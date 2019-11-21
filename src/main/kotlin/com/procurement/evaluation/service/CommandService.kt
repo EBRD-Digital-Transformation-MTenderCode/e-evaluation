@@ -16,38 +16,36 @@ import com.procurement.evaluation.application.service.award.FinalAwardsStatusByL
 import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsContext
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.dao.HistoryDao
-import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
 import com.procurement.evaluation.infrastructure.dto.award.cancel.response.AwardCancellationResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
+import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
+import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
-import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
-import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
-import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
+import com.procurement.evaluation.model.dto.bpe.awardId
 import com.procurement.evaluation.model.dto.bpe.cpid
+import com.procurement.evaluation.model.dto.bpe.lotId
 import com.procurement.evaluation.model.dto.bpe.ocid
 import com.procurement.evaluation.model.dto.bpe.owner
 import com.procurement.evaluation.model.dto.bpe.phase
 import com.procurement.evaluation.model.dto.bpe.pmd
 import com.procurement.evaluation.model.dto.bpe.stage
 import com.procurement.evaluation.model.dto.bpe.startDate
+import com.procurement.evaluation.model.dto.bpe.token
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.util.*
 
 @Service
 class CommandService(
@@ -70,11 +68,11 @@ class CommandService(
         val response = when (cm.command) {
             CommandType.CREATE_AWARD -> {
                 val context = CreateAwardContext(
-                    cpid = getCPID(cm),
-                    stage = getStage(cm),
-                    owner = getOwner(cm),
-                    startDate = getStartDate(cm),
-                    lotId = getLotId(cm)
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    owner = cm.owner,
+                    startDate = cm.startDate,
+                    lotId = cm.lotId
                 )
 
                 val request = toObject(CreateAwardRequest::class.java, cm.data)
@@ -272,12 +270,12 @@ class CommandService(
             }
             CommandType.EVALUATE_AWARD -> {
                 val context = EvaluateAwardContext(
-                    cpid = getCPID(cm),
-                    stage = getStage(cm),
-                    token = getToken(cm),
-                    owner = getOwner(cm),
-                    startDate = getStartDate(cm),
-                    awardId = getAwardId(cm)
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    token = cm.token,
+                    owner = cm.owner,
+                    startDate = cm.startDate,
+                    awardId = cm.awardId
                 )
 
                 val request = toObject(EvaluateAwardRequest::class.java, cm.data)
@@ -402,9 +400,9 @@ class CommandService(
             CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
             CommandType.GET_WINNING_AWARD -> {
                 val context = GetWinningAwardContext(
-                    cpid = getCPID(cm),
-                    stage = getStage(cm),
-                    lotId = getLotId(cm)
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    lotId = cm.lotId
                 )
                 val award = awardService.getWinning(context = context)
                 if (log.isDebugEnabled) {
@@ -423,9 +421,9 @@ class CommandService(
             }
             CommandType.GET_EVALUATED_AWARDS -> {
                 val context = GetEvaluatedAwardsContext(
-                    cpid = getCPID(cm),
-                    stage = getStage(cm),
-                    lotId = getLotId(cm)
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    lotId = cm.lotId
                 )
                 val evaluatedAwards: List<EvaluatedAward> = awardService.getEvaluated(context = context)
                 if (log.isDebugEnabled) {
@@ -502,48 +500,4 @@ class CommandService(
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)
     }
-
-    private fun getCPID(cm: CommandMessage): String = cm.context.cpid
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'cpid' attribute in context.")
-
-    private fun getOCID(cm: CommandMessage): String = cm.context.ocid
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'ocid' attribute in context.")
-
-    private fun getStage(cm: CommandMessage): String = cm.context.stage
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'stage' attribute in context.")
-
-    private fun getStartDate(cm: CommandMessage): LocalDateTime = cm.context.startDate?.toLocalDateTime()
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'startDate' attribute in context.")
-
-    private fun getToken(cm: CommandMessage): UUID = cm.context.token
-        ?.let { id ->
-            try {
-                UUID.fromString(id)
-            } catch (exception: Exception) {
-                throw ErrorException(error = ErrorType.INVALID_FORMAT_TOKEN)
-            }
-        } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'token' attribute in context.")
-
-    private fun getOwner(cm: CommandMessage): String = cm.context.owner
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'owner' attribute in context.")
-
-    private fun getLotId(cm: CommandMessage): UUID = cm.context.id
-        ?.let { id ->
-            try {
-                UUID.fromString(id)
-            } catch (exception: Exception) {
-                throw ErrorException(error = ErrorType.INVALID_FORMAT_LOT_ID)
-            }
-        }
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'token' attribute in context.")
-
-    private fun getAwardId(cm: CommandMessage): UUID = cm.context.id
-        ?.let { id ->
-            try {
-                UUID.fromString(id)
-            } catch (exception: Exception) {
-                throw ErrorException(error = ErrorType.INVALID_FORMAT_AWARD_ID)
-            }
-        }
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
 }
