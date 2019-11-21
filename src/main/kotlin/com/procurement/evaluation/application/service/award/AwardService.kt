@@ -55,7 +55,7 @@ import java.util.*
 interface AwardService {
     fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData
 
-    fun create(context: CreateAwardsContext, data: CreateAwardsData): ResponseDto
+    fun create(context: CreateAwardsContext, data: CreateAwardsData): CreatedAwardsResult
 
     fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
 
@@ -1095,7 +1095,7 @@ class AwardServiceImpl(
         return CompletedAwarding(awardPeriod = CompletedAwarding.AwardPeriod(endDate = endDate))
     }
 
-    override fun create(context: CreateAwardsContext, data: CreateAwardsData): ResponseDto {
+    override fun create(context: CreateAwardsContext, data: CreateAwardsData): CreatedAwardsResult {
         val lotsIds: Set<String> = data.lots.toSetBy { it.id }
         val matchedBids = data.bids
             .asSequence()
@@ -1133,7 +1133,7 @@ class AwardServiceImpl(
             )
         }
         awardRepository.saveAll(context.cpid, entities)
-        return ResponseDto()
+        return CreatedAwardsResult()
     }
 
     private fun generateAward(bid: CreateAwardsData.Bid, context: CreateAwardsContext, weightedValue: Money?) =

@@ -30,6 +30,7 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.Eva
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
 import com.procurement.evaluation.infrastructure.dto.awards.create.request.CreateAwardsRequest
+import com.procurement.evaluation.infrastructure.dto.awards.create.response.CreateAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
@@ -348,7 +349,14 @@ class CommandService(
                     ocid = cm.ocid
                 )
                 val request = toObject(CreateAwardsRequest::class.java, cm.data)
-                awardService.create(context = context, data = request.convert())
+                val result = awardService.create(context = context, data = request.convert())
+                if (log.isDebugEnabled)
+                    log.debug("Awards were created. Result: ${toJson(result)}")
+
+                val dataResponse = CreateAwardsResponse()
+                if (log.isDebugEnabled)
+                    log.debug("Awards were created. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
             }
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)
