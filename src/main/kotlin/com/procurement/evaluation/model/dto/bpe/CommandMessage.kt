@@ -52,6 +52,10 @@ val CommandMessage.phase: Phase
         Phase.fromValue(it)
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'phase' attribute in context.")
 
+val CommandMessage.country: String
+    get() = this.context.country
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'country' attribute in context.")
+
 val CommandMessage.pmd: ProcurementMethod
     get() = this.context.pmd?.let {
         ProcurementMethod.fromString(it)
