@@ -15,6 +15,8 @@ import com.procurement.evaluation.application.service.award.FinalAwardsStatusByL
 import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsData
 import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsContext
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
+import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsContext
+import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.dao.HistoryDao
 import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
@@ -29,10 +31,13 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.Eva
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
+import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.GetUnsuccessfulLotsRequest
+import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response.GetUnsuccessfulLotsResponse
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.bpe.awardId
+import com.procurement.evaluation.model.dto.bpe.country
 import com.procurement.evaluation.model.dto.bpe.cpid
 import com.procurement.evaluation.model.dto.bpe.lotId
 import com.procurement.evaluation.model.dto.bpe.ocid
@@ -53,7 +58,8 @@ class CommandService(
     private val createAwardService: CreateAwardService,
     private val updateAwardService: UpdateAwardService,
     private val statusService: StatusService,
-    private val awardService: AwardService
+    private val awardService: AwardService,
+    private val lotService: LotService
 ) {
 
     companion object {
@@ -494,6 +500,23 @@ class CommandService(
                 )
                 if (log.isDebugEnabled)
                     log.debug("Award was completed. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
+
+            CommandType.GET_UNSUCCESSFUL_LOTS -> {
+                val context = GetUnsuccessfulLotsContext(
+                    country = cm.country,
+                    pmd = cm.pmd
+                )
+                val request = toObject(GetUnsuccessfulLotsRequest::class.java, cm.data)
+                val result = lotService.getUnsuccessfulLots(context = context, data = request.convert())
+                if (log.isDebugEnabled)
+                    log.debug("Unsuccessful lots. Result: ${toJson(result)}")
+
+                val dataResponse: GetUnsuccessfulLotsResponse = result.convert()
+                if (log.isDebugEnabled)
+                    log.debug("Unsuccessful lots. Response: ${toJson(dataResponse)}")
+
                 ResponseDto(data = dataResponse)
             }
         }

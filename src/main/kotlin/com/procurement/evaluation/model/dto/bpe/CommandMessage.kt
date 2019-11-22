@@ -125,7 +125,8 @@ enum class CommandType(private val value: String) {
     GET_LOT_FOR_CHECK("getLotForCheck"),
     GET_AWARD_ID_FOR_CHECK("getAwardIdForCheck"),
     FINAL_AWARDS_STATUS_BY_LOTS("finalAwardsStatusByLots"),
-    COMPLETE_AWARDING("completeAwarding");
+    COMPLETE_AWARDING("completeAwarding"),
+    GET_UNSUCCESSFUL_LOTS("getUnsuccessfulLots");
 
     @JsonValue
     fun value(): String {
