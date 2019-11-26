@@ -19,3 +19,11 @@ val Money.asValue: Value
             currency = money.currency
         )
     }
+
+val Value.asMoney: Money
+    get() = this.let { money ->
+        Money(
+            amount = money.amount,
+            currency = money.currency!!
+        )
+    }
