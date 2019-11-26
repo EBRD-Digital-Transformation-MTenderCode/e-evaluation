@@ -48,7 +48,8 @@ data class SetAwardForEvaluationResponse(
 
         @JsonDeserialize(using = MoneyDeserializer::class)
         @JsonSerialize(using = MoneySerializer::class)
-        @field:JsonProperty("weightedValue") @param:JsonProperty("weightedValue") val weightedValue: Money
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("weightedValue") @param:JsonProperty("weightedValue") val weightedValue: Money?
     ) {
 
         data class Supplier(
