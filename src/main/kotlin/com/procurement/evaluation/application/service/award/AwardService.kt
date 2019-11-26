@@ -1,11 +1,15 @@
 package com.procurement.evaluation.application.service.award
 
-import com.procurement.evaluation.domain.model.data.CoefficientValue
-import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.model.ProcurementMethod
+import com.procurement.evaluation.domain.model.Token
+import com.procurement.evaluation.domain.model.award.AwardId
+import com.procurement.evaluation.domain.model.bid.BidId
+import com.procurement.evaluation.domain.model.data.CoefficientValue
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.document.DocumentId
+import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -24,7 +28,6 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.lib.toSetBy
-import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Address
 import com.procurement.evaluation.model.dto.ocds.AddressDetails
 import com.procurement.evaluation.model.dto.ocds.Award
@@ -42,6 +45,7 @@ import com.procurement.evaluation.model.dto.ocds.LocalityDetails
 import com.procurement.evaluation.model.dto.ocds.OrganizationReference
 import com.procurement.evaluation.model.dto.ocds.RegionDetails
 import com.procurement.evaluation.model.dto.ocds.Value
+import com.procurement.evaluation.model.dto.ocds.asMoney
 import com.procurement.evaluation.model.dto.ocds.asValue
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
@@ -69,6 +73,11 @@ interface AwardService {
     ): FinalizedAwardsStatusByLots
 
     fun completeAwarding(context: CompleteAwardingContext): CompletedAwarding
+
+    fun setAwardForEvaluation(
+        context: SetAwardForEvaluationContext,
+        data: SetAwardForEvaluationData
+    ): SetAwardForEvaluationResult
 }
 
 @Service
@@ -1136,6 +1145,154 @@ class AwardServiceImpl(
         return CreatedAwardsResult()
     }
 
+    override fun setAwardForEvaluation(
+        context: SetAwardForEvaluationContext,
+        data: SetAwardForEvaluationData
+    ): SetAwardForEvaluationResult {
+
+        val awardEntityByAwardId: MutableMap<AwardId, AwardEntity> = mutableMapOf()
+        val awards: MutableList<Award> = mutableListOf()
+        awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+            .forEach { entity ->
+                val award: Award = toObject(Award::class.java, entity.jsonData)
+                val prev = awardEntityByAwardId.put(LotId.fromString(award.id), entity)
+                if (prev != null)
+                    throw ErrorException(
+                        error = ErrorType.INVALID_AWARD_ID,
+                        message = "The duplicate of the award identifier '${award.id}' by cpid: '${context.cpid}' and stage: '${context.stage}'."
+                    )
+
+                awards.add(award)
+            }
+
+        val ratingAwards: List<Award> = groupingAwardsByLotId(awards = awards)
+            .asSequence()
+            .flatMap { (_, awards) ->
+                awards.rating(awardCriteria = data.awardCriteria, awardCriteriaDetails = data.awardCriteriaDetails)
+                    .asSequence()
+            }
+            .toList()
+
+        val updatedAwardEntities = ratingAwards.asSequence()
+            .map { award ->
+                val awardId = AwardId.fromString(award.id)
+                val entity = awardEntityByAwardId.getValue(awardId)
+                entity.copy(
+                    status = award.status.value,
+                    statusDetails = award.statusDetails.value,
+                    jsonData = toJson(award)
+                )
+            }
+            .toList()
+
+        val result = SetAwardForEvaluationResult(
+            awards = ratingAwards.map { award ->
+                SetAwardForEvaluationResult.Award(
+                    id = AwardId.fromString(award.id),
+                    token = Token.fromString(award.token!!),
+                    date = award.date!!,
+                    status = award.status,
+                    statusDetails = award.statusDetails,
+                    relatedLots = award.relatedLots.map { LotId.fromString(it) },
+                    relatedBid = BidId.fromString(award.relatedBid!!),
+                    value = award.value!!.asMoney,
+                    suppliers = award.suppliers!!.map { supplier ->
+                        SetAwardForEvaluationResult.Award.Supplier(
+                            id = supplier.id,
+                            name = supplier.name
+                        )
+                    },
+                    weightedValue = award.weightedValue?.asMoney
+                )
+            }
+        )
+
+        awardRepository.saveAll(cpid = context.cpid, awards = updatedAwardEntities)
+        return result
+    }
+
+    private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
+        mutableMapOf<LotId, MutableList<Award>>()
+            .apply {
+                awards.forEach { award ->
+                    award.relatedLots.forEach { lotId ->
+                        this.computeIfAbsent(LotId.fromString(lotId)) { mutableListOf() }
+                            .apply { add(award) }
+                    }
+                }
+            }
+
+    private fun List<Award>.rating(
+        awardCriteria: AwardCriteria,
+        awardCriteriaDetails: AwardCriteriaDetails
+    ): List<Award> {
+        return when (awardCriteriaDetails) {
+            AwardCriteriaDetails.AUTOMATED -> {
+                when (awardCriteria) {
+                    AwardCriteria.COST_ONLY,
+                    AwardCriteria.QUALITY_ONLY,
+                    AwardCriteria.RATED_CRITERIA -> {
+                        //BR-1.4.1.4, BR-1.4.1.5
+                        ratingByWeightedValue(awards = this)
+                    }
+
+                    AwardCriteria.PRICE_ONLY -> throw ErrorException(error = ErrorType.INVALID_COMBINATION_AWARD_CRITERIA_AND_AWARD_CRITERIA_DETAILS)
+                }
+            }
+
+            AwardCriteriaDetails.MANUAL -> {
+                when (awardCriteria) {
+                    AwardCriteria.COST_ONLY,
+                    AwardCriteria.QUALITY_ONLY,
+                    AwardCriteria.RATED_CRITERIA,
+                    AwardCriteria.PRICE_ONLY -> {
+                        //BR-1.4.1.6, BR-1.4.1.5
+                        ratingByValue(awards = this)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * BR-1.4.1.4
+     * Если оценка будет производится с учетом неценовых критериев (awardCriteria), то наиболее выгодным предложением
+     * (Bids) по лоту следует считать то, которое формирует наименьшее значение приведенной цены (weightedValue).
+     *
+     * BR-1.4.1.5
+     * Если есть два и больше предложения (Bids) в рамках одного лота (Lots) с одинаковыми значениями ставки (Amount)
+     * или приведенной цены предложения, больший приоритет при рассмотрении Заказчик должен отдать тому предложению,
+     * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
+     */
+    private fun ratingByWeightedValue(awards: List<Award>): List<Award> =
+        awaiting(awards.sortedWith(weightedValueComparator))
+
+    /**
+     * BR-1.4.1.6
+     * Если оценка производится исключительно с учетом цены (awardCriteria) предложения (Bids), то наиболее выгодным
+     * предложением по лоту следует считать то, которое обладает наименьшим значением ставки (Amount).
+     *
+     * BR-1.4.1.5
+     * Если есть два и больше предложения (Bids) в рамках одного лота (Lots) с одинаковыми значениями ставки (Amount)
+     * или приведенной цены предложения, больший приоритет при рассмотрении Заказчик должен отдать тому предложению,
+     * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
+     */
+    private fun ratingByValue(awards: List<Award>): List<Award> = awaiting(awards.sortedWith(valueComparator))
+
+    private fun awaiting(sortedAwards: List<Award>): List<Award> {
+        val result = mutableListOf<Award>()
+        val iterator = sortedAwards.iterator()
+        if (!iterator.hasNext())
+            return result
+        val awaitingAward = iterator.next()
+            .copy(statusDetails = AwardStatusDetails.AWAITING)
+        result.add(awaitingAward)
+        while (iterator.hasNext()) {
+            result.add(iterator.next())
+        }
+        return result
+    }
+
     private fun generateAward(bid: CreateAwardsData.Bid, context: CreateAwardsContext, weightedValue: Money?) =
         Award(
             id = generationService.awardId().toString(),
@@ -1469,4 +1626,20 @@ class AwardServiceImpl(
             }
         }
     }
+}
+
+private val weightedValueComparator = Comparator<Award> { left, right ->
+    val result = left.weightedValue!!.amount.compareTo(right.weightedValue!!.amount)
+    if (result != 0) {
+        left.bidDate!!.compareTo(right.bidDate)
+    } else
+        result
+}
+
+private val valueComparator = Comparator<Award> { left, right ->
+    val result = left.value!!.amount.compareTo(right.value!!.amount)
+    if (result != 0) {
+        left.bidDate!!.compareTo(right.bidDate)
+    } else
+        result
 }

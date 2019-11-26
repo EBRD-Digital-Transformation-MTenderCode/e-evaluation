@@ -15,6 +15,7 @@ import com.procurement.evaluation.application.service.award.FinalAwardsStatusByL
 import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsData
 import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsContext
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
+import com.procurement.evaluation.application.service.award.SetAwardForEvaluationContext
 import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsContext
 import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.dao.HistoryDao
@@ -27,7 +28,9 @@ import com.procurement.evaluation.infrastructure.dto.award.create.request.Create
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
+import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.SetAwardForEvaluationRequest
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
+import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.SetAwardForEvaluationResponse
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
@@ -516,6 +519,23 @@ class CommandService(
                 val dataResponse: GetUnsuccessfulLotsResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Unsuccessful lots. Response: ${toJson(dataResponse)}")
+
+                ResponseDto(data = dataResponse)
+            }
+            CommandType.SET_AWARD_FOR_EVALUATION -> {
+                val context = SetAwardForEvaluationContext(
+                    cpid = cm.cpid,
+                    ocid = cm.ocid,
+                    stage = cm.stage
+                )
+                val request = toObject(SetAwardForEvaluationRequest::class.java, cm.data)
+                val result = awardService.setAwardForEvaluation(context = context, data = request.convert())
+                if (log.isDebugEnabled)
+                    log.debug("Set award for evaluation. Result: ${toJson(result)}")
+
+                val dataResponse: SetAwardForEvaluationResponse = result.convert()
+                if (log.isDebugEnabled)
+                    log.debug("Set award for evaluation. Response: ${toJson(dataResponse)}")
 
                 ResponseDto(data = dataResponse)
             }
