@@ -78,6 +78,10 @@ interface AwardService {
         context: SetAwardForEvaluationContext,
         data: SetAwardForEvaluationData
     ): SetAwardForEvaluationResult
+
+    fun startAwardPeriod(
+        context: StartAwardPeriodContext
+    ): StartAwardPeriodResult
 }
 
 @Service
@@ -1210,6 +1214,16 @@ class AwardServiceImpl(
         awardRepository.saveAll(cpid = context.cpid, awards = updatedAwardEntities)
         return result
     }
+
+    override fun startAwardPeriod(context: StartAwardPeriodContext): StartAwardPeriodResult {
+        awardPeriodRepository.saveNewStart(cpid = context.cpid, stage = context.stage, start = context.startDate)
+        return StartAwardPeriodResult(
+            StartAwardPeriodResult.AwardPeriod(
+                startDate = context.startDate
+            )
+        )
+    }
+
 
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
         mutableMapOf<LotId, MutableList<Award>>()
