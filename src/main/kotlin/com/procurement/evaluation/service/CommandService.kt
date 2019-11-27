@@ -16,9 +16,13 @@ import com.procurement.evaluation.application.service.award.FinalAwardsStatusByL
 import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsContext
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.application.service.award.SetAwardForEvaluationContext
+import com.procurement.evaluation.application.service.award.StartAwardPeriodContext
 import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsContext
 import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.dao.HistoryDao
+import com.procurement.evaluation.domain.model.ProcurementMethod
+import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
@@ -33,6 +37,7 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.Eva
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.SetAwardForEvaluationResponse
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
+import com.procurement.evaluation.infrastructure.dto.award.period.start.StartAwardPeriodResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.GetUnsuccessfulLotsRequest
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response.GetUnsuccessfulLotsResponse
@@ -539,6 +544,39 @@ class CommandService(
 
                 ResponseDto(data = dataResponse)
             }
+
+            CommandType.START_AWARD_PERIOD -> {
+                when (cm.pmd) {
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
+                        val context = StartAwardPeriodContext(
+                            cpid = cm.cpid,
+                            stage = cm.stage,
+                            startDate = cm.startDate
+                        )
+                        val result = awardService.startAwardPeriod(context = context)
+                        if (log.isDebugEnabled)
+                            log.debug("Start award period. Result: ${toJson(result)}")
+
+                        val dataResponse: StartAwardPeriodResponse = result.convert()
+                        if (log.isDebugEnabled)
+                            log.debug("Start award period. Response: ${toJson(dataResponse)}")
+
+                        ResponseDto(data = dataResponse)
+                    }
+
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> {
+                        throw ErrorException(ErrorType.INVALID_PMD)
+                    }
+
+                }
+            }
+
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)
