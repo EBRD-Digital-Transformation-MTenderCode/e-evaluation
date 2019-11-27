@@ -65,6 +65,10 @@ val CommandMessage.startDate: LocalDateTime
     get() = this.context.startDate?.toLocalDateTime()
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'startDate' attribute in context.")
 
+val CommandMessage.operationType: String
+    get() = this.context.operationType
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'operationType' attribute in context.")
+
 val CommandMessage.lotId: UUID
     get() = this.context.id?.let {
         try {
@@ -127,7 +131,8 @@ enum class CommandType(private val value: String) {
     FINAL_AWARDS_STATUS_BY_LOTS("finalAwardsStatusByLots"),
     COMPLETE_AWARDING("completeAwarding"),
     GET_UNSUCCESSFUL_LOTS("getUnsuccessfulLots"),
-    SET_AWARD_FOR_EVALUATION("setAwardForEvaluation");
+    SET_AWARD_FOR_EVALUATION("setAwardForEvaluation"),
+    CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards");
 
     @JsonValue
     fun value(): String {
