@@ -9,6 +9,7 @@ import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.document.DocumentId
+import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.exception.ErrorException
@@ -78,6 +79,11 @@ interface AwardService {
         context: SetAwardForEvaluationContext,
         data: SetAwardForEvaluationData
     ): SetAwardForEvaluationResult
+
+    fun createUnsuccessfulAwards(
+        context: CreateUnsuccessfulAwardsContext,
+        data: CreateUnsuccessfulAwardsData
+    ): CreateUnsuccessfulAwardsResult
 }
 
 @Service
@@ -1209,6 +1215,98 @@ class AwardServiceImpl(
 
         awardRepository.saveAll(cpid = context.cpid, awards = updatedAwardEntities)
         return result
+    }
+
+    override fun createUnsuccessfulAwards(
+        context: CreateUnsuccessfulAwardsContext,
+        data: CreateUnsuccessfulAwardsData
+    ): CreateUnsuccessfulAwardsResult {
+        fun CreateUnsuccessfulAwardsResult.Award.toAwardDb(): Award {
+            return Award(
+                id = this.id.toString(),
+                title = this.title,
+                description = this.description,
+                status = this.status,
+                statusDetails = this.statusDetails,
+                relatedLots = this.relatedLots.map { it.toString() },
+                date = this.date,
+                token = null,
+                value = null,
+                items = null,
+                bidDate = null,
+                documents = null,
+                suppliers = null,
+                relatedBid = null,
+                weightedValue = null
+            )
+        }
+
+        fun Award.toEntity(): AwardEntity {
+            return AwardEntity(
+                cpId = context.cpid,
+                stage = context.stage,
+                owner = context.owner,
+                token = context.token,
+                status = this.status.value,
+                statusDetails = this.statusDetails.value,
+                jsonData = toJson(this)
+            )
+        }
+
+        fun Award.toResultObject(): CreateUnsuccessfulAwardsResult.Award {
+            return CreateUnsuccessfulAwardsResult.Award(
+                id = UUID.fromString(this.id),
+                title = this.title!!,
+                description = this.description!!,
+                status = this.status,
+                statusDetails = this.statusDetails,
+                date = this.date!!,
+                relatedLots = this.relatedLots.map { UUID.fromString(it) }
+            )
+        }
+
+        fun defineStatusDetails(operationType: String): AwardStatusDetails {
+            return when(OperationType.fromString(operationType)) {
+                OperationType.TENDER_UNSUCCESSFUL,
+                OperationType.TENDER_PERIOD_END_EV,
+                OperationType.TENDER_PERIOD_END_AUCTION -> AwardStatusDetails.NO_OFFERS_RECEIVED
+                OperationType.CANCEL_TENDER_EV          -> AwardStatusDetails.LOT_CANCELLED
+            }
+        }
+
+        val unsuccessfulAwardsEntities = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+
+        val unsuccessfulAwardsForResponse = if (unsuccessfulAwardsEntities.isEmpty()) {
+            data.lots.asSequence()
+                .map { lot ->
+                    CreateUnsuccessfulAwardsResult.Award(
+                        id = generationService.awardId(),
+                        status = AwardStatus.UNSUCCESSFUL,
+                        statusDetails = defineStatusDetails(context.operationType),
+                        relatedLots = listOf(lot.id),
+                        date = context.startDate,
+                        title = "The contract/lot is not awarded",
+                        description = "Other reasons (discontinuation of procedure)"
+                    )
+                }
+                .map { award -> award.toAwardDb()}
+                .map { awardDb -> awardDb.toEntity() }
+                .toList()
+                .let { unsuccessfulAwardEntities->
+                    awardRepository.saveAll(context.cpid, unsuccessfulAwardEntities)
+                    unsuccessfulAwardEntities
+                }
+
+        } else {
+            unsuccessfulAwardsEntities
+        }
+
+        return unsuccessfulAwardsForResponse.asSequence()
+            .map { awardEntity -> toObject(Award::class.java, awardEntity.jsonData) }
+            .map { award -> award.toResultObject()}
+            .toList()
+            .let { awards -> CreateUnsuccessfulAwardsResult(awards = awards) }
+
     }
 
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
