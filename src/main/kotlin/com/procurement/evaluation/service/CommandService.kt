@@ -8,6 +8,7 @@ import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.CreateAwardsContext
+import com.procurement.evaluation.application.service.award.CreateUnsuccessfulAwardsContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
 import com.procurement.evaluation.application.service.award.EvaluatedAward
@@ -19,6 +20,9 @@ import com.procurement.evaluation.application.service.award.SetAwardForEvaluatio
 import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsContext
 import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.dao.HistoryDao
+import com.procurement.evaluation.domain.model.ProcurementMethod
+import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
@@ -33,6 +37,8 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.Eva
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.SetAwardForEvaluationResponse
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
+import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.request.CreateUnsuccessfulAwardsRequest
+import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.response.CreateUnsuccessfulAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.GetUnsuccessfulLotsRequest
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response.GetUnsuccessfulLotsResponse
@@ -44,6 +50,7 @@ import com.procurement.evaluation.model.dto.bpe.country
 import com.procurement.evaluation.model.dto.bpe.cpid
 import com.procurement.evaluation.model.dto.bpe.lotId
 import com.procurement.evaluation.model.dto.bpe.ocid
+import com.procurement.evaluation.model.dto.bpe.operationType
 import com.procurement.evaluation.model.dto.bpe.owner
 import com.procurement.evaluation.model.dto.bpe.phase
 import com.procurement.evaluation.model.dto.bpe.pmd
@@ -538,6 +545,41 @@ class CommandService(
                     log.debug("Set award for evaluation. Response: ${toJson(dataResponse)}")
 
                 ResponseDto(data = dataResponse)
+            }
+            CommandType.CREATE_UNSUCCESSFUL_AWARDS -> {
+                when (cm.pmd) {
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> {
+                        val context = CreateUnsuccessfulAwardsContext(
+                            operationType = cm.operationType,
+                            startDate = cm.startDate,
+                            cpid = cm.cpid,
+                            stage = cm.stage,
+                            owner = cm.owner,
+                            token = cm.token
+                        )
+                        val request = toObject(CreateUnsuccessfulAwardsRequest::class.java, cm.data)
+                        val result = awardService.createUnsuccessfulAwards(context = context, data = request.convert())
+                        if (log.isDebugEnabled)
+                            log.debug("Set award for evaluation. Result: ${toJson(result)}")
+
+                        val dataResponse: CreateUnsuccessfulAwardsResponse = result.convert()
+                        if (log.isDebugEnabled)
+                            log.debug("Set award for evaluation. Response: ${toJson(dataResponse)}")
+
+                        ResponseDto(data = dataResponse)
+                    }
+
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA -> {
+                        throw ErrorException(ErrorType.INVALID_PMD)
+                    }
+
+                }
             }
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
