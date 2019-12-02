@@ -1288,39 +1288,30 @@ class AwardServiceImpl(
             }
         }
 
-        val unsuccessfulAwardsEntities = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+        val unsuccessfulAwardsForSaving = data.lots.asSequence()
+            .map { lot ->
+                CreateUnsuccessfulAwardsResult.Award(
+                    id = generationService.awardId(),
+                    status = AwardStatus.UNSUCCESSFUL,
+                    statusDetails = defineStatusDetails(context.operationType),
+                    relatedLots = listOf(lot.id),
+                    date = context.startDate,
+                    title = "The contract/lot is not awarded",
+                    description = "Other reasons (discontinuation of procedure)"
+                )
+            }
+            .map { award -> award.toAwardDb() }
+            .map { awardDb -> awardDb.toEntity() }
+            .toList()
 
-        val unsuccessfulAwardsForResponse = if (unsuccessfulAwardsEntities.isEmpty()) {
-            data.lots.asSequence()
-                .map { lot ->
-                    CreateUnsuccessfulAwardsResult.Award(
-                        id = generationService.awardId(),
-                        status = AwardStatus.UNSUCCESSFUL,
-                        statusDetails = defineStatusDetails(context.operationType),
-                        relatedLots = listOf(lot.id),
-                        date = context.startDate,
-                        title = "The contract/lot is not awarded",
-                        description = "Other reasons (discontinuation of procedure)"
-                    )
-                }
-                .map { award -> award.toAwardDb()}
-                .map { awardDb -> awardDb.toEntity() }
-                .toList()
-                .let { unsuccessfulAwardEntities->
-                    awardRepository.saveAll(context.cpid, unsuccessfulAwardEntities)
-                    unsuccessfulAwardEntities
-                }
-
-        } else {
-            unsuccessfulAwardsEntities
-        }
-
-        return unsuccessfulAwardsForResponse.asSequence()
+        val unsuccessfulAwardsForResponse = unsuccessfulAwardsForSaving.asSequence()
             .map { awardEntity -> toObject(Award::class.java, awardEntity.jsonData) }
             .map { award -> award.toResultObject()}
             .toList()
             .let { awards -> CreateUnsuccessfulAwardsResult(awards = awards) }
 
+        awardRepository.saveAll(context.cpid, unsuccessfulAwardsForSaving)
+        return unsuccessfulAwardsForResponse
     }
 
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
