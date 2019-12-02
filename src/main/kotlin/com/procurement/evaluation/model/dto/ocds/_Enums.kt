@@ -51,7 +51,9 @@ enum class AwardStatusDetails(@JsonValue val value: String) {
     UNSUCCESSFUL("unsuccessful"),
     CONSIDERATION("consideration"),
     EMPTY("empty"),
-    AWAITING("awaiting");
+    AWAITING("awaiting"),
+    NO_OFFERS_RECEIVED("noOffersReceived"),
+    LOT_CANCELLED("lotCancelled");
 
     override fun toString(): String {
         return this.value

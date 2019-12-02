@@ -1,0 +1,15 @@
+{
+  "awards": [
+    {
+      "id": "df3be679-eb4f-4bcc-be8c-b9c6fdeb0a3f",
+      "date": "2019-11-27T18:16:20Z",
+      "title": "awards[0].title",
+      "description": "awards[0].description",
+      "status": "unsuccessful",
+      "statusDetails": "noOffersReceived",
+      "relatedLots": [
+        "0e087392-b76a-48fd-9a16-ec5d81eb6667"
+      ]
+    }
+  ]
+}

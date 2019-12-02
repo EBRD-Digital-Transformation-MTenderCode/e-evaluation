@@ -8,6 +8,7 @@ import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.CreateAwardsContext
+import com.procurement.evaluation.application.service.award.CreateUnsuccessfulAwardsContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardData
 import com.procurement.evaluation.application.service.award.EvaluatedAward
@@ -38,6 +39,8 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.Set
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
 import com.procurement.evaluation.infrastructure.dto.award.period.start.StartAwardPeriodResponse
+import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.request.CreateUnsuccessfulAwardsRequest
+import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.response.CreateUnsuccessfulAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.GetUnsuccessfulLotsRequest
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response.GetUnsuccessfulLotsResponse
@@ -49,6 +52,7 @@ import com.procurement.evaluation.model.dto.bpe.country
 import com.procurement.evaluation.model.dto.bpe.cpid
 import com.procurement.evaluation.model.dto.bpe.lotId
 import com.procurement.evaluation.model.dto.bpe.ocid
+import com.procurement.evaluation.model.dto.bpe.operationType
 import com.procurement.evaluation.model.dto.bpe.owner
 import com.procurement.evaluation.model.dto.bpe.phase
 import com.procurement.evaluation.model.dto.bpe.pmd
@@ -577,6 +581,41 @@ class CommandService(
                 }
             }
 
+            CommandType.CREATE_UNSUCCESSFUL_AWARDS -> {
+                when (cm.pmd) {
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> {
+                        val context = CreateUnsuccessfulAwardsContext(
+                            operationType = cm.operationType,
+                            startDate = cm.startDate,
+                            cpid = cm.cpid,
+                            stage = cm.stage,
+                            owner = cm.owner,
+                            token = cm.token
+                        )
+                        val request = toObject(CreateUnsuccessfulAwardsRequest::class.java, cm.data)
+                        val result = awardService.createUnsuccessfulAwards(context = context, data = request.convert())
+                        if (log.isDebugEnabled)
+                            log.debug("Set award for evaluation. Result: ${toJson(result)}")
+
+                        val dataResponse: CreateUnsuccessfulAwardsResponse = result.convert()
+                        if (log.isDebugEnabled)
+                            log.debug("Set award for evaluation. Response: ${toJson(dataResponse)}")
+
+                        ResponseDto(data = dataResponse)
+                    }
+
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA -> {
+                        throw ErrorException(ErrorType.INVALID_PMD)
+                    }
+
+                }
+            }
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
         return toObject(ResponseDto::class.java, historyEntity.jsonData)
