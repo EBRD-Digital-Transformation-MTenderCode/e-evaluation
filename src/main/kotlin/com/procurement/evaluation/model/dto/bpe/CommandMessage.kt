@@ -132,8 +132,7 @@ enum class CommandType(private val value: String) {
     COMPLETE_AWARDING("completeAwarding"),
     GET_UNSUCCESSFUL_LOTS("getUnsuccessfulLots"),
     SET_AWARD_FOR_EVALUATION("setAwardForEvaluation"),
-    START_AWARD_PERIOD("startAwardPeriod");
-    SET_AWARD_FOR_EVALUATION("setAwardForEvaluation"),
+    START_AWARD_PERIOD("startAwardPeriod"),
     CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards");
 
     @JsonValue
