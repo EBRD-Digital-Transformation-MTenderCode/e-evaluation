@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.domain.model.ProcurementMethod
+import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -65,9 +66,10 @@ val CommandMessage.startDate: LocalDateTime
     get() = this.context.startDate?.toLocalDateTime()
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'startDate' attribute in context.")
 
-val CommandMessage.operationType: String
-    get() = this.context.operationType
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'operationType' attribute in context.")
+val CommandMessage.operationType: OperationType
+    get() = this.context.operationType?.let {
+        OperationType.fromString(it)
+    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'operationType' attribute in context.")
 
 val CommandMessage.lotId: UUID
     get() = this.context.id?.let {

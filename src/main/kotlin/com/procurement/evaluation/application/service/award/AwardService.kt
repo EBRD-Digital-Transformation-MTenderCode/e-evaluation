@@ -1279,8 +1279,8 @@ class AwardServiceImpl(
             )
         }
 
-        fun defineStatusDetails(operationType: String): AwardStatusDetails {
-            return when(OperationType.fromString(operationType)) {
+        fun defineStatusDetails(operationType: OperationType): AwardStatusDetails {
+            return when(operationType) {
                 OperationType.TENDER_UNSUCCESSFUL,
                 OperationType.TENDER_PERIOD_END_EV,
                 OperationType.TENDER_PERIOD_END_AUCTION -> AwardStatusDetails.NO_OFFERS_RECEIVED
