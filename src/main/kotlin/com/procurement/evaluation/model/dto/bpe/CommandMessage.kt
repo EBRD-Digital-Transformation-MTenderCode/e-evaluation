@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.enums.OperationType
+import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -72,10 +73,10 @@ val CommandMessage.operationType: OperationType
         OperationType.fromString(it)
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'operationType' attribute in context.")
 
-val CommandMessage.lotId: UUID
+val CommandMessage.lotId: LotId
     get() = this.context.id?.let {
         try {
-            UUID.fromString(id)
+            LotId.fromString(id)
         } catch (exception: Exception) {
             throw ErrorException(error = ErrorType.INVALID_FORMAT_LOT_ID)
         }
