@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
+import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.exception.EnumException
@@ -14,7 +15,6 @@ import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
-import java.util.*
 
 data class CommandMessage @JsonCreator constructor(
 
@@ -82,10 +82,10 @@ val CommandMessage.lotId: LotId
         }
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
 
-val CommandMessage.awardId: UUID
+val CommandMessage.awardId: AwardId
     get() = this.context.id?.let {
         try {
-            UUID.fromString(id)
+            AwardId.fromString(id)
         } catch (exception: Exception) {
             throw ErrorException(error = ErrorType.INVALID_FORMAT_AWARD_ID)
         }
