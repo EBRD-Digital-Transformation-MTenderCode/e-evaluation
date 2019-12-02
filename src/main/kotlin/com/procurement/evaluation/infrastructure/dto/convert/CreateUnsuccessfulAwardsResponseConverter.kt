@@ -12,7 +12,7 @@ fun CreateUnsuccessfulAwardsResult.convert() = CreateUnsuccessfulAwardsResponse(
             status = award.status,
             statusDetails = award.statusDetails,
             date = award.date,
-            relatedLots = award.relatedLots
+            relatedLots = award.relatedLots.toList()
         )
     }
 )
