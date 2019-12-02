@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.domain.model.ProcurementMethod
+import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
@@ -31,10 +32,10 @@ val CommandMessage.ocid: String
     get() = this.context.ocid
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'ocid' attribute in context.")
 
-val CommandMessage.token: UUID
+val CommandMessage.token: Token
     get() = this.context.token?.let { id ->
         try {
-            UUID.fromString(id)
+            Token.fromString(id)
         } catch (exception: Exception) {
             throw ErrorException(error = ErrorType.INVALID_FORMAT_TOKEN)
         }
