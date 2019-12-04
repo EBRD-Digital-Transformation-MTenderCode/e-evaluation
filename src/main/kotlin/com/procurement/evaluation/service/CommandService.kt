@@ -3,6 +3,7 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
 import com.procurement.evaluation.application.service.award.AwardCancellationData
 import com.procurement.evaluation.application.service.award.AwardService
+import com.procurement.evaluation.application.service.award.CheckAwardStatusContext
 import com.procurement.evaluation.application.service.award.CompleteAwardingContext
 import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
@@ -63,6 +64,7 @@ import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class CommandService(
@@ -414,6 +416,24 @@ class CommandService(
                 ResponseDto(data = dataResponse)
             }
             CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
+            CommandType.CHECK_AWARD_STATUS -> {
+                val context = CheckAwardStatusContext(
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    token = cm.token,
+                    owner = UUID.fromString(cm.owner),
+                    awardId = cm.awardId
+                )
+                val result = awardService.checkStatus(context)
+
+                if (log.isDebugEnabled)
+                    log.debug("Checked award status. Result: ${toJson(result)}")
+
+                val dataResponse = CreateAwardsResponse()
+                if (log.isDebugEnabled)
+                    log.debug("Checked award status. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
             CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
             CommandType.GET_WINNING_AWARD -> {

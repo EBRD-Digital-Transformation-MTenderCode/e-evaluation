@@ -88,6 +88,8 @@ interface AwardService {
         context: CreateUnsuccessfulAwardsContext,
         data: CreateUnsuccessfulAwardsData
     ): CreateUnsuccessfulAwardsResult
+
+    fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult
 }
 
 @Service
@@ -1293,6 +1295,34 @@ class AwardServiceImpl(
         )
         awardRepository.saveAll(cpid = context.cpid, awards = awardsEntities)
         return response
+    }
+
+    override fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult {
+        val award = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
+            ?.also { entity ->
+                entity.checkOwner(context.owner)
+            }
+            ?.let { entity ->
+                toObject(Award::class.java, entity.jsonData)
+            }
+            ?.takeIf { award ->
+                award.id == context.awardId.toString()
+            }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        if (award.status != AwardStatus.PENDING)
+            throw ErrorException(
+                error = STATUS,
+                message = "Award has invalid status: '${award.status}'. Require status: '${AwardStatus.PENDING}'"
+            )
+
+        if (award.statusDetails == AwardStatusDetails.AWAITING)
+            throw ErrorException(
+                error = STATUS_DETAILS,
+                message = "Award has invalid status details: '${award.statusDetails}'. Require status details: '${AwardStatusDetails.AWAITING}'"
+            )
+
+        return CheckAwardStatusResult()
     }
 
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
