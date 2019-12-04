@@ -18,9 +18,9 @@ import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS
 import com.procurement.evaluation.exception.ErrorType.INVALID_TOKEN
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
-import com.procurement.evaluation.exception.ErrorType.STATUS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
@@ -930,7 +930,7 @@ class AwardServiceImpl(
     private fun List<Award>.findActiveAward(): Award? {
         val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = this.groupBy { award ->
             if (award.status != AwardStatus.PENDING)
-                throw ErrorException(error = STATUS)
+                throw ErrorException(error = INVALID_STATUS)
             award.statusDetails
         }
 
@@ -1312,7 +1312,7 @@ class AwardServiceImpl(
 
         if (award.status != AwardStatus.PENDING)
             throw ErrorException(
-                error = STATUS,
+                error = INVALID_STATUS,
                 message = "Award has invalid status: '${award.status}'. Require status: '${AwardStatus.PENDING}'"
             )
 
