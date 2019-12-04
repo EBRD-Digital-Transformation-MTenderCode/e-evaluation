@@ -7,8 +7,8 @@ import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.ID
 import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
-import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.model.dto.AwardByBid
 import com.procurement.evaluation.model.dto.AwardByBidRq
@@ -300,7 +300,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
 
     private fun verifyRequestStatusDetails(statusDetails: AwardStatusDetails) {
         if (!(statusDetails == AwardStatusDetails.ACTIVE || statusDetails == AwardStatusDetails.UNSUCCESSFUL))
-            throw ErrorException(STATUS_DETAILS)
+            throw ErrorException(INVALID_STATUS_DETAILS)
     }
 
 }

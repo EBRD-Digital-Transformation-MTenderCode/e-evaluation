@@ -19,9 +19,9 @@ import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS
+import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.INVALID_TOKEN
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
-import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
@@ -685,7 +685,7 @@ class AwardServiceImpl(
                 if (isNotAcceptableStatusDetails(awards))
                     throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
             }
-            else -> throw ErrorException(error = STATUS_DETAILS)
+            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
         }
     }
 
@@ -834,7 +834,7 @@ class AwardServiceImpl(
                 }
             }
 
-            else -> throw ErrorException(error = STATUS_DETAILS)
+            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
         }
     }
 
@@ -944,7 +944,7 @@ class AwardServiceImpl(
                     transform = { award -> award.id }
                 )
                 throw ErrorException(
-                    error = STATUS_DETAILS,
+                    error = INVALID_STATUS_DETAILS,
                     message = "More than one award has an active status details[$idsBadAwards]"
                 )
             }
@@ -953,7 +953,7 @@ class AwardServiceImpl(
 
         val unsuccessfulAwards: List<Award> = awardsByStatusDetails[AwardStatusDetails.UNSUCCESSFUL] ?: emptyList()
         if (unsuccessfulAwards.size != this.size)
-            throw ErrorException(error = STATUS_DETAILS)
+            throw ErrorException(error = INVALID_STATUS_DETAILS)
 
         return null
     }
@@ -1318,7 +1318,7 @@ class AwardServiceImpl(
 
         if (award.statusDetails == AwardStatusDetails.AWAITING)
             throw ErrorException(
-                error = STATUS_DETAILS,
+                error = INVALID_STATUS_DETAILS,
                 message = "Award has invalid status details: '${award.statusDetails}'. Require status details: '${AwardStatusDetails.AWAITING}'"
             )
 
@@ -1662,7 +1662,7 @@ class AwardServiceImpl(
             AwardCriteriaDetails.MANUAL -> {
                 when (this.awardCriteria) {
                     AwardCriteria.PRICE_ONLY -> throw ErrorException(
-                        ErrorType.STATUS_DETAILS,
+                        ErrorType.INVALID_STATUS_DETAILS,
                         "Cannot calculate weighted value for award with award criteria: '${this.awardCriteria}' " +
                             "and award criteria details: '${this.awardCriteriaDetails}', based on bid '${bid.id}'"
                     )
