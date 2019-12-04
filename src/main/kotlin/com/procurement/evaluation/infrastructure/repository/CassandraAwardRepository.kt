@@ -180,9 +180,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 add(statementForAwardSave(cpid = cpid, award = award))
             }
         }
-        val result = saveNewAwards(statements)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award(s) by cpid '$cpid' to the database.")
+        saveNewAwards(statements)
     }
 
     private fun saveNewAwards(statement: BatchStatement): ResultSet = try {
