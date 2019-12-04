@@ -2,6 +2,7 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
+import java.time.LocalDateTime
 
 data class OrganizationReference @JsonCreator constructor(
 
@@ -47,7 +48,7 @@ data class OrganizationReference @JsonCreator constructor(
             val documents: List<Document>?
         ) {
             data class Period(
-                val startDate: String
+                val startDate: LocalDateTime
             )
 
             data class Document(

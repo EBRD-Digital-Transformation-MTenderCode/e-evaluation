@@ -1477,7 +1477,7 @@ class AwardServiceImpl(
                                             period = businessFunction.period
                                                 .let { period ->
                                                     OrganizationReference.Person.BusinessFunction.Period(
-                                                        startDate = period.startDate.toString()
+                                                        startDate = period.startDate
                                                     )
                                                 },
                                             documents = businessFunction.documents
