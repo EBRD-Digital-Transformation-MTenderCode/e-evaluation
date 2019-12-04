@@ -204,7 +204,8 @@ enum class BidStatusDetailsType(@JsonValue val value: String) {
     DISQUALIFIED("disqualified"),
     VALID("valid"),
     WITHDRAWN("withdrawn"),
-    INVITED("invited");
+    INVITED("invited"),
+    EMPTY("empty");
 
     override fun toString(): String = value
 
