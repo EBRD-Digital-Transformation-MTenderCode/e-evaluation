@@ -1320,11 +1320,11 @@ class AwardServiceImpl(
                         ratingByWeightedValue(awards = this)
                     }
 
-                    AwardCriteria.PRICE_ONLY -> throw ErrorException(error = ErrorType.INVALID_COMBINATION_AWARD_CRITERIA_AND_AWARD_CRITERIA_DETAILS)
+                    AwardCriteria.PRICE_ONLY     -> ratingByValue(awards = this)
                 }
             }
 
-            AwardCriteriaDetails.MANUAL -> {
+            AwardCriteriaDetails.MANUAL    -> {
                 when (awardCriteria) {
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
