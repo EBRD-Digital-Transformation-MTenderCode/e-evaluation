@@ -18,13 +18,13 @@ import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_TOKEN
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
 import com.procurement.evaluation.exception.ErrorType.STATUS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
-import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
@@ -604,7 +604,7 @@ class AwardServiceImpl(
 
         //VR-7.10.1
         if (context.token != awardEntity.token)
-            throw ErrorException(error = TOKEN)
+            throw ErrorException(error = INVALID_TOKEN)
 
         //VR-7.10.2
         if (context.owner != awardEntity.owner)
