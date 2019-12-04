@@ -17,7 +17,7 @@ import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
-import com.procurement.evaluation.exception.ErrorType.OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
 import com.procurement.evaluation.exception.ErrorType.STATUS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
@@ -608,7 +608,7 @@ class AwardServiceImpl(
 
         //VR-7.10.2
         if (context.owner != awardEntity.owner)
-            throw ErrorException(error = OWNER)
+            throw ErrorException(error = INVALID_OWNER)
 
         val award = toObject(Award::class.java, awardEntity.jsonData)
 

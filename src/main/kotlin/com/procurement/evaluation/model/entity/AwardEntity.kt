@@ -22,6 +22,6 @@ data class AwardEntity(
     var jsonData: String
 ) {
     fun checkOwner(owner: Owner) {
-        if (this.owner != owner.toString()) throw ErrorException(error = ErrorType.OWNER)
+        if (this.owner != owner.toString()) throw ErrorException(error = ErrorType.INVALID_OWNER)
     }
 }

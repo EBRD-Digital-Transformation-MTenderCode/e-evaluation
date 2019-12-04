@@ -3,7 +3,7 @@ package com.procurement.evaluation.exception
 enum class ErrorType constructor(val code: String, val message: String) {
     JSON_TYPE("00.00", "Invalid type: "),
     DATA_NOT_FOUND("00.01", "Award not found."),
-    OWNER("00.02", "Invalid owner."),
+    INVALID_OWNER("00.02", "Invalid owner."),
     STATUS("00.03", "Invalid status of award"),
     STATUS_DETAILS("00.04", "Invalid status details of award"),
     ID("00.05", "Invalid id of award"),
