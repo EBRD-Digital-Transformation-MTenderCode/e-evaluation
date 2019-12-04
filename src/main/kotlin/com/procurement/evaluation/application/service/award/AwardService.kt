@@ -1477,7 +1477,7 @@ class AwardServiceImpl(
                                             period = businessFunction.period
                                                 .let { period ->
                                                     OrganizationReference.Person.BusinessFunction.Period(
-                                                        startDate = period.startDate
+                                                        startDate = period.startDate.toString()
                                                     )
                                                 },
                                             documents = businessFunction.documents
@@ -1602,8 +1602,8 @@ class AwardServiceImpl(
                                                         validityPeriod = permitDetail.validityPeriod
                                                             .let { validityPeriod ->
                                                                 Details.Permit.PermitDetails.ValidityPeriod(
-                                                                    startDate = validityPeriod.startDate,
-                                                                    endDate = validityPeriod.endDate
+                                                                    startDate = validityPeriod.startDate.toString(),
+                                                                    endDate = validityPeriod.endDate.toString()
                                                                 )
                                                             }
                                                     )

@@ -133,7 +133,7 @@ data class CreateAwardsData(
                     val documents: List<Document>
                 ) {
                     data class Period(
-                        val startDate: String
+                        val startDate: LocalDateTime
                     )
 
                     data class Document(
@@ -175,8 +175,8 @@ data class CreateAwardsData(
                         )
 
                         data class ValidityPeriod(
-                            val startDate: String,
-                            val endDate: String?
+                            val startDate: LocalDateTime,
+                            val endDate: LocalDateTime?
                         )
                     }
                 }
@@ -269,8 +269,8 @@ data class CreateAwardsData(
             )
 
             data class Period(
-                val startDate: String,
-                val endDate: String
+                val startDate: LocalDateTime,
+                val endDate: LocalDateTime
             )
         }
     }

@@ -14,6 +14,8 @@ import com.procurement.evaluation.infrastructure.bind.coefficient.value.Coeffici
 import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueSerializer
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
+import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeDeserializer
+import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeSerializer
 import com.procurement.evaluation.infrastructure.bind.money.MoneyDeserializer
 import com.procurement.evaluation.infrastructure.bind.money.MoneySerializer
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
@@ -61,7 +63,11 @@ data class CreateAwardsRequest(
 
     data class Bid(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+
+        @JsonDeserialize(using = JsonDateTimeDeserializer::class)
+        @JsonSerialize(using = JsonDateTimeSerializer::class)
         @param:JsonProperty("date") @field:JsonProperty("date") val date: LocalDateTime,
+
         @param:JsonProperty("status") @field:JsonProperty("status") val status: BidStatusType,
         @param:JsonProperty("statusDetails") @field:JsonProperty("statusDetails") val statusDetails: BidStatusDetailsType,
         @param:JsonProperty("tenderers") @field:JsonProperty("tenderers") val tenderers: List<Tenderer>,
@@ -187,7 +193,9 @@ data class CreateAwardsRequest(
                     @param:JsonProperty("documents") @field:JsonProperty("documents") val documents: List<Document>?
                 ) {
                     data class Period(
-                        @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: String
+                        @JsonDeserialize(using = JsonDateTimeDeserializer::class)
+                        @JsonSerialize(using = JsonDateTimeSerializer::class)
+                        @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: LocalDateTime
                     )
 
                     data class Document(
@@ -240,10 +248,14 @@ data class CreateAwardsRequest(
                         )
 
                         data class ValidityPeriod(
-                            @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: String,
+                            @JsonDeserialize(using = JsonDateTimeDeserializer::class)
+                            @JsonSerialize(using = JsonDateTimeSerializer::class)
+                            @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: LocalDateTime,
 
                             @JsonInclude(JsonInclude.Include.NON_NULL)
-                            @param:JsonProperty("endDate") @field:JsonProperty("endDate") val endDate: String?
+                            @JsonDeserialize(using = JsonDateTimeDeserializer::class)
+                            @JsonSerialize(using = JsonDateTimeSerializer::class)
+                            @param:JsonProperty("endDate") @field:JsonProperty("endDate") val endDate: LocalDateTime?
                         )
                     }
                 }
@@ -357,8 +369,13 @@ data class CreateAwardsRequest(
             )
 
             data class Period(
-                @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: String,
-                @param:JsonProperty("endDate") @field:JsonProperty("endDate") val endDate: String
+                @JsonDeserialize(using = JsonDateTimeDeserializer::class)
+                @JsonSerialize(using = JsonDateTimeSerializer::class)
+                @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: LocalDateTime,
+
+                @JsonDeserialize(using = JsonDateTimeDeserializer::class)
+                @JsonSerialize(using = JsonDateTimeSerializer::class)
+                @param:JsonProperty("endDate") @field:JsonProperty("endDate") val endDate: LocalDateTime
             )
         }
     }
