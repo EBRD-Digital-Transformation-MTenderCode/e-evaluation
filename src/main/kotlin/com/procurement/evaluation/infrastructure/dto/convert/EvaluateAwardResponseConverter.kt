@@ -29,13 +29,13 @@ fun EvaluatedAwardData.convert() = EvaluateAwardResponse(
                         )
                     },
                 documents = award.documents
-                    ?.map { document ->
+                    .map { document ->
                         EvaluateAwardResponse.Award.Document(
                             id = document.id,
                             title = document.title,
                             description = document.description,
                             relatedLots = document.relatedLots
-                                ?.toList(),
+                                .toList(),
                             documentType = document.documentType
                         )
                     }

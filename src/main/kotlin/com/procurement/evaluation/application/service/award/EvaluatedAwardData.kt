@@ -18,7 +18,7 @@ class EvaluatedAwardData(val award: Award) {
         val relatedLots: List<UUID>,
         val value: Value,
         val suppliers: List<Supplier>,
-        val documents: List<Document>?
+        val documents: List<Document>
     ) {
 
         data class Value(
@@ -36,7 +36,7 @@ class EvaluatedAwardData(val award: Award) {
             val id: DocumentId,
             val title: String?,
             val description: String?,
-            val relatedLots: List<UUID>?
+            val relatedLots: List<UUID>
         )
     }
 }

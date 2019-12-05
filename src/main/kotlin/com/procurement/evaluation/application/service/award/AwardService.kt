@@ -847,29 +847,35 @@ class AwardServiceImpl(
             description = updatedAward.description,
             status = updatedAward.status,
             statusDetails = updatedAward.statusDetails,
-            relatedLots = updatedAward.relatedLots.map { UUID.fromString(it) },
-            value = updatedAward.value!!.let { value ->
-                EvaluatedAwardData.Award.Value(
-                    amount = value.amount,
-                    currency = value.currency!!
-                )
-            },
-            suppliers = updatedAward.suppliers!!.map { supplier ->
-                EvaluatedAwardData.Award.Supplier(
-                    id = supplier.id,
-                    name = supplier.name
-                )
-            },
-            documents = updatedAward.documents?.map { document ->
-                EvaluatedAwardData.Award.Document(
-                    id = document.id,
-                    documentType = document.documentType,
-                    title = document.title,
-                    description = document.description,
-                    relatedLots = document.relatedLots?.map { UUID.fromString(it) }
-                )
-            }
-
+            relatedLots = updatedAward.relatedLots
+                .map { UUID.fromString(it) },
+            value = updatedAward.value!!
+                .let { value ->
+                    EvaluatedAwardData.Award.Value(
+                        amount = value.amount,
+                        currency = value.currency!!
+                    )
+                },
+            suppliers = updatedAward.suppliers!!
+                .map { supplier ->
+                    EvaluatedAwardData.Award.Supplier(
+                        id = supplier.id,
+                        name = supplier.name
+                    )
+                },
+            documents = updatedAward.documents
+                ?.map { document ->
+                    EvaluatedAwardData.Award.Document(
+                        id = document.id,
+                        documentType = document.documentType,
+                        title = document.title,
+                        description = document.description,
+                        relatedLots = document.relatedLots
+                            ?.map { UUID.fromString(it) }
+                            .orEmpty()
+                    )
+                }
+                .orEmpty()
         )
     )
 
