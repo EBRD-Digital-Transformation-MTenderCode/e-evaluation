@@ -3,10 +3,10 @@ package com.procurement.evaluation.application.service.award
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.lot.LotId
+import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.DocumentType
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 class EvaluateAwardResult(val award: Award) {
@@ -17,15 +17,10 @@ class EvaluateAwardResult(val award: Award) {
         val status: AwardStatus,
         val statusDetails: AwardStatusDetails,
         val relatedLots: List<LotId>,
-        val value: Value,
+        val value: Money,
         val suppliers: List<Supplier>,
         val documents: List<Document>
     ) {
-
-        data class Value(
-            val amount: BigDecimal,
-            val currency: String
-        )
 
         data class Supplier(
             val id: String,

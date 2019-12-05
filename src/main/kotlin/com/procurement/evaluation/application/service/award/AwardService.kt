@@ -848,13 +848,7 @@ class AwardServiceImpl(
             statusDetails = updatedAward.statusDetails,
             relatedLots = updatedAward.relatedLots
                 .map { LotId.fromString(it) },
-            value = updatedAward.value!!
-                .let { value ->
-                    EvaluateAwardResult.Award.Value(
-                        amount = value.amount,
-                        currency = value.currency!!
-                    )
-                },
+            value = updatedAward.value!!.asMoney,
             suppliers = updatedAward.suppliers!!
                 .map { supplier ->
                     EvaluateAwardResult.Award.Supplier(
