@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.document.DocumentId
+import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.infrastructure.bind.amount.AmountDeserializer
 import com.procurement.evaluation.infrastructure.bind.amount.AmountSerializer
 import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeDeserializer
@@ -16,13 +18,12 @@ import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.DocumentType
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.*
 
 data class EvaluateAwardResponse(
     @field:JsonProperty("award") @param:JsonProperty("award") val award: Award
 ) {
     data class Award(
-        @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
+        @field:JsonProperty("id") @param:JsonProperty("id") val id: AwardId,
 
         @JsonDeserialize(using = JsonDateTimeDeserializer::class)
         @JsonSerialize(using = JsonDateTimeSerializer::class)
@@ -33,7 +34,7 @@ data class EvaluateAwardResponse(
 
         @field:JsonProperty("status") @param:JsonProperty("status") val status: AwardStatus,
         @field:JsonProperty("statusDetails") @param:JsonProperty("statusDetails") val statusDetails: AwardStatusDetails,
-        @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<UUID>,
+        @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<LotId>,
         @field:JsonProperty("value") @param:JsonProperty("value") val value: Value,
         @field:JsonProperty("suppliers") @param:JsonProperty("suppliers") val suppliers: List<Supplier>,
 
@@ -67,7 +68,7 @@ data class EvaluateAwardResponse(
 
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
             @JsonSetter(nulls = Nulls.AS_EMPTY)
-            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<UUID> = emptyList()
+            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<LotId> = emptyList()
         )
     }
 }

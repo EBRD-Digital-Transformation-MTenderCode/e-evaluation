@@ -1,21 +1,22 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.document.DocumentId
+import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.DocumentType
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.*
 
 class EvaluateAwardResult(val award: Award) {
     data class Award(
-        val id: UUID,
+        val id: AwardId,
         val date: LocalDateTime,
         val description: String?,
         val status: AwardStatus,
         val statusDetails: AwardStatusDetails,
-        val relatedLots: List<UUID>,
+        val relatedLots: List<LotId>,
         val value: Value,
         val suppliers: List<Supplier>,
         val documents: List<Document>
@@ -36,7 +37,7 @@ class EvaluateAwardResult(val award: Award) {
             val id: DocumentId,
             val title: String?,
             val description: String?,
-            val relatedLots: List<UUID>
+            val relatedLots: List<LotId>
         )
     }
 }

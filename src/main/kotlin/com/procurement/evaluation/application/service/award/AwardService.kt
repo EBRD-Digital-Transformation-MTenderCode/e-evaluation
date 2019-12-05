@@ -615,7 +615,7 @@ class AwardServiceImpl(
         val award = toObject(Award::class.java, awardEntity.jsonData)
 
         //VR-7.10.1
-        if (context.awardId != UUID.fromString(award.id))
+        if (context.awardId != AwardId.fromString(award.id))
             throw ErrorException(error = AWARD_NOT_FOUND)
 
         //VR-7.10.4
@@ -677,7 +677,7 @@ class AwardServiceImpl(
                         toObject(Award::class.java, entity.jsonData)
                     }
                     .filter {
-                        if (UUID.fromString(it.id) == context.awardId)
+                        if (AwardId.fromString(it.id) == context.awardId)
                             false
                         else
                             lots.containsAll(it.relatedLots)
@@ -705,16 +705,16 @@ class AwardServiceImpl(
      *        eEvaluation throws Exception;
      */
     private fun checkDocuments(data: EvaluateAwardData, award: Award) {
-        val relatedLotsFromDocuments: Set<UUID> = data.award.documents
+        val relatedLotsFromDocuments: Set<LotId> = data.award.documents
             .asSequence()
             .flatMap { it.relatedLots.asSequence() }
             .toSet()
 
         if (relatedLotsFromDocuments.isNotEmpty()) {
-            val relatedLotsFromAward = award.relatedLots
+            val relatedLotsFromAward: Set<LotId> = award.relatedLots
                 .asSequence()
                 .map { relatedLot ->
-                    UUID.fromString(relatedLot)
+                    LotId.fromString(relatedLot)
                 }
                 .toSet()
 
@@ -841,13 +841,13 @@ class AwardServiceImpl(
 
     private fun getEvaluatedAwardData(updatedAward: Award) = EvaluateAwardResult(
         award = EvaluateAwardResult.Award(
-            id = UUID.fromString(updatedAward.id),
+            id = AwardId.fromString(updatedAward.id),
             date = updatedAward.date!!,
             description = updatedAward.description,
             status = updatedAward.status,
             statusDetails = updatedAward.statusDetails,
             relatedLots = updatedAward.relatedLots
-                .map { UUID.fromString(it) },
+                .map { LotId.fromString(it) },
             value = updatedAward.value!!
                 .let { value ->
                     EvaluateAwardResult.Award.Value(
@@ -870,7 +870,7 @@ class AwardServiceImpl(
                         title = document.title,
                         description = document.description,
                         relatedLots = document.relatedLots
-                            ?.map { UUID.fromString(it) }
+                            ?.map { LotId.fromString(it) }
                             .orEmpty()
                     )
                 }
