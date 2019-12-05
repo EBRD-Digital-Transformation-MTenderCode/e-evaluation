@@ -9,14 +9,14 @@ class EvaluateAwardData(val award: Award) {
     data class Award(
         val statusDetails: AwardStatusDetails,
         val description: String?,
-        val documents: List<Document>?
+        val documents: List<Document>
     ) {
 
         data class Document(
             val id: DocumentId,
             val title: String?,
             val description: String?,
-            val relatedLots: List<UUID>?,
+            val relatedLots: List<UUID>,
             val documentType: DocumentType
         )
     }

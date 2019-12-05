@@ -706,10 +706,9 @@ class AwardServiceImpl(
      */
     private fun checkDocuments(data: EvaluateAwardData, award: Award) {
         val relatedLotsFromDocuments: Set<UUID> = data.award.documents
-            ?.asSequence()
-            ?.flatMap { it.relatedLots?.asSequence() ?: emptySequence() }
-            ?.toSet()
-            ?: emptySet()
+            .asSequence()
+            .flatMap { it.relatedLots.asSequence() }
+            .toSet()
 
         if (relatedLotsFromDocuments.isNotEmpty()) {
             val relatedLotsFromAward = award.relatedLots
@@ -761,7 +760,7 @@ class AwardServiceImpl(
      */
     private fun updateDocuments(data: EvaluateAwardData, award: Award): List<Document> {
         val requestDocumentsById: Map<DocumentId, EvaluateAwardData.Award.Document> =
-            data.award.documents?.associateBy { it.id } ?: emptyMap()
+            data.award.documents.associateBy { it.id }
         if (requestDocumentsById.isEmpty())
             return award.documents ?: emptyList()
 
@@ -790,7 +789,7 @@ class AwardServiceImpl(
         documentType = document.documentType,
         title = document.title,
         description = document.description,
-        relatedLots = document.relatedLots?.asSequence()?.map { it.toString() }?.toHashSet()
+        relatedLots = document.relatedLots.asSequence().map { it.toString() }.toHashSet()
     )
 
     /**
