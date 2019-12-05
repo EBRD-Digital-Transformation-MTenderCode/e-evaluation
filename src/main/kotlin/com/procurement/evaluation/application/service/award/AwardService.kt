@@ -1151,7 +1151,7 @@ class AwardServiceImpl(
                 jsonData = toJson(award)
             )
         }
-        awardRepository.saveAll(context.cpid, entities)
+        awardRepository.saveNew(context.cpid, entities)
         return CreatedAwardsResult()
     }
 
@@ -1217,7 +1217,7 @@ class AwardServiceImpl(
             }
         )
 
-        awardRepository.saveAll(cpid = context.cpid, awards = updatedAwardEntities)
+        awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwardEntities)
         return result
     }
 
@@ -1291,7 +1291,7 @@ class AwardServiceImpl(
 
             }
         )
-        awardRepository.saveAll(cpid = context.cpid, awards = awardsEntities)
+        awardRepository.saveNew(cpid = context.cpid, awards = awardsEntities)
         return response
     }
 
