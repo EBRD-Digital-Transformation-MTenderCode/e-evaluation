@@ -1655,7 +1655,7 @@ class AwardServiceImpl(
     private fun calculateWeightedValue(
         bid: CreateAwardsData.Bid,
         conversionsByRelatedItem: Map<String, CreateAwardsData.Conversion>
-    ): Money? {
+    ): Money {
         val coefficientRates = bid.requirementResponses
             .asSequence()
             .flatMap { response ->
@@ -1679,7 +1679,7 @@ class AwardServiceImpl(
                 .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
             Money(amount = amount, currency = bid.value.currency)
         } else
-            null
+            bid.value
     }
 
     private fun compare(coef: CoefficientValue, req: RequirementRsValue): Boolean {
