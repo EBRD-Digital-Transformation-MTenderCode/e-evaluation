@@ -62,7 +62,7 @@ interface AwardService {
 
     fun create(context: CreateAwardsContext, data: CreateAwardsData): CreatedAwardsResult
 
-    fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
+    fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluateAwardResult
 
     fun getWinning(context: GetWinningAwardContext): WinningAward?
 
@@ -598,7 +598,7 @@ class AwardServiceImpl(
      *   - Award.date;
      *   - Award.documents;
      */
-    override fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData {
+    override fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluateAwardResult {
         val cpid = context.cpid
 
         val awardEntity = awardRepository.findBy(cpid = cpid, stage = context.stage, token = context.token)
@@ -840,8 +840,8 @@ class AwardServiceImpl(
         }
     }
 
-    private fun getEvaluatedAwardData(updatedAward: Award): EvaluatedAwardData = EvaluatedAwardData(
-        award = EvaluatedAwardData.Award(
+    private fun getEvaluatedAwardData(updatedAward: Award) = EvaluateAwardResult(
+        award = EvaluateAwardResult.Award(
             id = UUID.fromString(updatedAward.id),
             date = updatedAward.date!!,
             description = updatedAward.description,
@@ -851,21 +851,21 @@ class AwardServiceImpl(
                 .map { UUID.fromString(it) },
             value = updatedAward.value!!
                 .let { value ->
-                    EvaluatedAwardData.Award.Value(
+                    EvaluateAwardResult.Award.Value(
                         amount = value.amount,
                         currency = value.currency!!
                     )
                 },
             suppliers = updatedAward.suppliers!!
                 .map { supplier ->
-                    EvaluatedAwardData.Award.Supplier(
+                    EvaluateAwardResult.Award.Supplier(
                         id = supplier.id,
                         name = supplier.name
                     )
                 },
             documents = updatedAward.documents
                 ?.map { document ->
-                    EvaluatedAwardData.Award.Document(
+                    EvaluateAwardResult.Award.Document(
                         id = document.id,
                         documentType = document.documentType,
                         title = document.title,

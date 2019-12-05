@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 
-class EvaluatedAwardData(val award: Award) {
+class EvaluateAwardResult(val award: Award) {
     data class Award(
         val id: UUID,
         val date: LocalDateTime,

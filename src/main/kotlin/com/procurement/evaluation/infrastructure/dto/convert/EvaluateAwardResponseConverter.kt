@@ -1,9 +1,9 @@
 package com.procurement.evaluation.infrastructure.dto.convert
 
-import com.procurement.evaluation.application.service.award.EvaluatedAwardData
+import com.procurement.evaluation.application.service.award.EvaluateAwardResult
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
 
-fun EvaluatedAwardData.convert() = EvaluateAwardResponse(
+fun EvaluateAwardResult.convert() = EvaluateAwardResponse(
     award = this.award
         .let { award ->
             EvaluateAwardResponse.Award(
