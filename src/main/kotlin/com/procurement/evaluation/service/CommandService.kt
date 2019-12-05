@@ -11,7 +11,6 @@ import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.CreateAwardsContext
 import com.procurement.evaluation.application.service.award.CreateUnsuccessfulAwardsContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
-import com.procurement.evaluation.application.service.award.EvaluateAwardData
 import com.procurement.evaluation.application.service.award.EvaluatedAward
 import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsContext
 import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsData
@@ -301,60 +300,11 @@ class CommandService(
                 )
 
                 val request = toObject(EvaluateAwardRequest::class.java, cm.data)
-                val data = EvaluateAwardData(
-                    award = request.award.let { award ->
-                        EvaluateAwardData.Award(
-                            statusDetails = award.statusDetails,
-                            description = award.description,
-                            documents = award.documents?.map { document ->
-                                EvaluateAwardData.Award.Document(
-                                    id = document.id,
-                                    title = document.title,
-                                    description = document.description,
-                                    relatedLots = document.relatedLots?.toList(),
-                                    documentType = document.documentType
-                                )
-                            }
-                        )
-                    }
-                )
-                val result = awardService.evaluate(context, data)
+                val result = awardService.evaluate(context, request.convert())
                 if (log.isDebugEnabled)
                     log.debug("Award was evaluate. Result: ${toJson(result)}")
 
-                val dataResponse = EvaluateAwardResponse(
-                    award = result.award.let { award ->
-                        EvaluateAwardResponse.Award(
-                            id = award.id,
-                            date = award.date,
-                            description = award.description,
-                            status = award.status,
-                            statusDetails = award.statusDetails,
-                            relatedLots = award.relatedLots.toList(),
-                            value = award.value.let { value ->
-                                EvaluateAwardResponse.Award.Value(
-                                    amount = value.amount,
-                                    currency = value.currency
-                                )
-                            },
-                            suppliers = award.suppliers.map { supplier ->
-                                EvaluateAwardResponse.Award.Supplier(
-                                    id = supplier.id,
-                                    name = supplier.name
-                                )
-                            },
-                            documents = award.documents?.map { document ->
-                                EvaluateAwardResponse.Award.Document(
-                                    id = document.id,
-                                    title = document.title,
-                                    description = document.description,
-                                    relatedLots = document.relatedLots?.toList(),
-                                    documentType = document.documentType
-                                )
-                            }
-                        )
-                    }
-                )
+                val dataResponse: EvaluateAwardResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Award was evaluate. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
