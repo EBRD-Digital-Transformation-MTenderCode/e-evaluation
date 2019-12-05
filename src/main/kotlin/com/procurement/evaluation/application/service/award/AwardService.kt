@@ -1155,7 +1155,7 @@ class AwardServiceImpl(
                 jsonData = toJson(award)
             )
         }
-        awardRepository.saveAll(context.cpid, entities)
+        awardRepository.saveNew(context.cpid, entities)
         return CreatedAwardsResult()
     }
 
@@ -1221,7 +1221,7 @@ class AwardServiceImpl(
             }
         )
 
-        awardRepository.saveAll(cpid = context.cpid, awards = updatedAwardEntities)
+        awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwardEntities)
         return result
     }
 
@@ -1295,7 +1295,7 @@ class AwardServiceImpl(
 
             }
         )
-        awardRepository.saveAll(cpid = context.cpid, awards = awardsEntities)
+        awardRepository.saveNew(cpid = context.cpid, awards = awardsEntities)
         return response
     }
 
@@ -1388,11 +1388,11 @@ class AwardServiceImpl(
                         ratingByWeightedValue(awards = this)
                     }
 
-                    AwardCriteria.PRICE_ONLY -> throw ErrorException(error = ErrorType.INVALID_COMBINATION_AWARD_CRITERIA_AND_AWARD_CRITERIA_DETAILS)
+                    AwardCriteria.PRICE_ONLY     -> ratingByValue(awards = this)
                 }
             }
 
-            AwardCriteriaDetails.MANUAL -> {
+            AwardCriteriaDetails.MANUAL    -> {
                 when (awardCriteria) {
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
