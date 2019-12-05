@@ -90,6 +90,8 @@ interface AwardService {
     ): CreateUnsuccessfulAwardsResult
 
     fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult
+
+    fun startConsideration(context: StartConsiderationContext): StartConsiderationResult
 }
 
 @Service
@@ -1323,6 +1325,42 @@ class AwardServiceImpl(
             )
 
         return CheckAwardStatusResult()
+    }
+
+    override fun startConsideration(context: StartConsiderationContext): StartConsiderationResult {
+        val awardEntity = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
+            ?.also { entity ->
+                entity.checkOwner(context.owner)
+            }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        val award = toObject(Award::class.java, awardEntity.jsonData)
+            .takeIf { award ->
+                award.id == context.awardId.toString()
+            }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        //FReq-1.4.3.1
+        val updatedAward = award.copy(
+            statusDetails = AwardStatusDetails.CONSIDERATION
+        )
+
+        val updatedAwardEntity = awardEntity.copy(
+            statusDetails = updatedAward.statusDetails.value,
+            jsonData = toJson(updatedAward)
+        )
+
+        val result = StartConsiderationResult(
+            award = StartConsiderationResult.Award(
+                id = AwardId.fromString(award.id),
+                statusDetails = award.statusDetails,
+                relatedLots = award.relatedLots.map { LotId.fromString(it) }
+            )
+        )
+
+        awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+
+        return result
     }
 
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =

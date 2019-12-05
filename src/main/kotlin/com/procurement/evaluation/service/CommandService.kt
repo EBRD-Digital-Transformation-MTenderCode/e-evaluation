@@ -19,6 +19,7 @@ import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsCo
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.application.service.award.SetAwardForEvaluationContext
 import com.procurement.evaluation.application.service.award.StartAwardPeriodContext
+import com.procurement.evaluation.application.service.award.StartConsiderationContext
 import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsContext
 import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.dao.HistoryDao
@@ -29,6 +30,7 @@ import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsRespon
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
 import com.procurement.evaluation.infrastructure.dto.award.cancel.response.AwardCancellationResponse
+import com.procurement.evaluation.infrastructure.dto.award.consideration.response.StartConsiderationResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
@@ -635,6 +637,24 @@ class CommandService(
                     }
 
                 }
+            }
+            CommandType.START_CONSIDERATION -> {
+                val context = StartConsiderationContext(
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    token = cm.token,
+                    owner = UUID.fromString(cm.owner),
+                    awardId = cm.awardId
+                )
+                val result = awardService.startConsideration(context)
+
+                if (log.isDebugEnabled)
+                    log.debug("Started consideration. Result: ${toJson(result)}")
+
+                val dataResponse: StartConsiderationResponse = result.convert()
+                if (log.isDebugEnabled)
+                    log.debug("Started consideration. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
             }
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
