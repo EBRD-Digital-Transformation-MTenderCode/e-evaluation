@@ -1714,7 +1714,7 @@ class AwardServiceImpl(
 
 private val weightedValueComparator = Comparator<Award> { left, right ->
     val result = left.weightedValue!!.amount.compareTo(right.weightedValue!!.amount)
-    if (result != 0) {
+    if (result == 0) {
         left.bidDate!!.compareTo(right.bidDate)
     } else
         result
@@ -1722,7 +1722,7 @@ private val weightedValueComparator = Comparator<Award> { left, right ->
 
 private val valueComparator = Comparator<Award> { left, right ->
     val result = left.value!!.amount.compareTo(right.value!!.amount)
-    if (result != 0) {
+    if (result == 0) {
         left.bidDate!!.compareTo(right.bidDate)
     } else
         result
