@@ -32,5 +32,7 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_PMD("11.01", "Invalid pmd."),
     IS_EMPTY("12.01", "List is empty."),
     INVALID_AWARD_ID("13.01", "Invalid award id."),
-    INVALID_COMBINATION_AWARD_CRITERIA_AND_AWARD_CRITERIA_DETAILS("14.01", "Invalid combination award criteria and award criteria details.");
+    INVALID_COMBINATION_AWARD_CRITERIA_AND_AWARD_CRITERIA_DETAILS("14.01", "Invalid combination award criteria and award criteria details."),
+    INVALID_STAGE("15.01", "Invalid stage."),
+    DUPLICATE_ID("16.01", "Duplicate id.");
 }
