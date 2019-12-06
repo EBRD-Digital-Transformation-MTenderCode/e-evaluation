@@ -848,6 +848,7 @@ class AwardServiceImpl(
             statusDetails = updatedAward.statusDetails,
             relatedLots = updatedAward.relatedLots
                 .map { LotId.fromString(it) },
+            relatedBid = updatedAward.relatedBid?.let { BidId.fromString(it) },
             value = updatedAward.value!!.asMoney,
             suppliers = updatedAward.suppliers!!
                 .map { supplier ->

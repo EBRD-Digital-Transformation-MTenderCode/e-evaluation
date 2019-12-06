@@ -1,6 +1,7 @@
 package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.domain.model.award.AwardId
+import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
@@ -17,6 +18,7 @@ class EvaluateAwardResult(val award: Award) {
         val status: AwardStatus,
         val statusDetails: AwardStatusDetails,
         val relatedLots: List<LotId>,
+        val relatedBid: BidId?,
         val value: Money,
         val suppliers: List<Supplier>,
         val documents: List<Document>

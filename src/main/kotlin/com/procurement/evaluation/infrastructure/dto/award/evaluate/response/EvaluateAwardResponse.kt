@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.evaluation.domain.model.award.AwardId
+import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
@@ -35,6 +36,9 @@ data class EvaluateAwardResponse(
         @field:JsonProperty("status") @param:JsonProperty("status") val status: AwardStatus,
         @field:JsonProperty("statusDetails") @param:JsonProperty("statusDetails") val statusDetails: AwardStatusDetails,
         @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<LotId>,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: BidId?,
 
         @JsonDeserialize(using = MoneyDeserializer::class)
         @JsonSerialize(using = MoneySerializer::class)

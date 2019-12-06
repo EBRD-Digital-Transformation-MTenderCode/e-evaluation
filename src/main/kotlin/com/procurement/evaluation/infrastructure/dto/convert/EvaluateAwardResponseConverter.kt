@@ -14,6 +14,7 @@ fun EvaluateAwardResult.convert() = EvaluateAwardResponse(
                 statusDetails = award.statusDetails,
                 relatedLots = award.relatedLots
                     .toList(),
+                relatedBid = award.relatedBid,
                 value = award.value,
                 suppliers = award.suppliers
                     .map { supplier ->
