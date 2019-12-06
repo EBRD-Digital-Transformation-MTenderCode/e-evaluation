@@ -642,7 +642,7 @@ class AwardServiceImpl(
 
         awardRepository.update(cpid = cpid, updatedAward = updatedAwardEntity)
 
-        return getEvaluatedAwardData(updatedAward = updatedAward)
+        return getEvaluateAwardResult(updatedAward = updatedAward)
     }
 
     /**
@@ -839,7 +839,7 @@ class AwardServiceImpl(
         }
     }
 
-    private fun getEvaluatedAwardData(updatedAward: Award) = EvaluateAwardResult(
+    private fun getEvaluateAwardResult(updatedAward: Award) = EvaluateAwardResult(
         award = EvaluateAwardResult.Award(
             id = AwardId.fromString(updatedAward.id),
             date = updatedAward.date!!,
