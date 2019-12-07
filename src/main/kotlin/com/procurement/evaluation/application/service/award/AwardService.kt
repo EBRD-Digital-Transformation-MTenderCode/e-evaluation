@@ -1258,7 +1258,7 @@ class AwardServiceImpl(
                     statusDetails = defineStatusDetails(context.operationType),
                     relatedLots = listOf(lot.id.toString()),
                     date = context.startDate,
-                    token = null,
+                    token = generationService.token().toString(),
                     value = null,
                     items = null,
                     bidDate = null,
