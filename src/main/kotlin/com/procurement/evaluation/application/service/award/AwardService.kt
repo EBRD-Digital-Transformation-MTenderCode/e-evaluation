@@ -1178,7 +1178,11 @@ class AwardServiceImpl(
         val ratingAwards: List<Award> = groupingAwardsByLotId(awards = awards)
             .asSequence()
             .flatMap { (_, awards) ->
-                awards.rating(awardCriteria = data.awardCriteria, awardCriteriaDetails = data.awardCriteriaDetails)
+                val ratedAwards = awards.rating(
+                    awardCriteria = data.awardCriteria,
+                    awardCriteriaDetails = data.awardCriteriaDetails
+                )
+                selectAward(ratedAwards)
                     .asSequence()
             }
             .toList()
@@ -1320,11 +1324,11 @@ class AwardServiceImpl(
                         ratingByWeightedValue(awards = this)
                     }
 
-                    AwardCriteria.PRICE_ONLY     -> ratingByValue(awards = this)
+                    AwardCriteria.PRICE_ONLY -> ratingByValue(awards = this)
                 }
             }
 
-            AwardCriteriaDetails.MANUAL    -> {
+            AwardCriteriaDetails.MANUAL -> {
                 when (awardCriteria) {
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
@@ -1349,7 +1353,7 @@ class AwardServiceImpl(
      * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
      */
     private fun ratingByWeightedValue(awards: List<Award>): List<Award> =
-        awaiting(awards.sortedWith(weightedValueComparator))
+        awards.sortedWith(weightedValueComparator)
 
     /**
      * BR-1.4.1.6
@@ -1361,20 +1365,26 @@ class AwardServiceImpl(
      * или приведенной цены предложения, больший приоритет при рассмотрении Заказчик должен отдать тому предложению,
      * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
      */
-    private fun ratingByValue(awards: List<Award>): List<Award> = awaiting(awards.sortedWith(valueComparator))
+    private fun ratingByValue(awards: List<Award>): List<Award> = awards.sortedWith(valueComparator)
 
-    private fun awaiting(sortedAwards: List<Award>): List<Award> {
-        val result = mutableListOf<Award>()
-        val iterator = sortedAwards.iterator()
-        if (!iterator.hasNext())
-            return result
-        val awaitingAward = iterator.next()
-            .copy(statusDetails = AwardStatusDetails.AWAITING)
-        result.add(awaitingAward)
-        while (iterator.hasNext()) {
-            result.add(iterator.next())
+    private fun selectAward(sortedAwards: List<Award>): List<Award> {
+        fun Award.isSuitable(): Boolean =
+            this.status == AwardStatus.PENDING && this.statusDetails == AwardStatusDetails.EMPTY
+
+        fun Award.select(): Award = this.copy(statusDetails = AwardStatusDetails.AWAITING)
+
+        var awardIsSelected = false
+        return sortedAwards.map { award ->
+            if (awardIsSelected)
+                award
+            else {
+                if (award.isSuitable()) {
+                    awardIsSelected = true
+                    award.select()
+                } else
+                    award
+            }
         }
-        return result
     }
 
     private fun generateAward(bid: CreateAwardsData.Bid, context: CreateAwardsContext, weightedValue: Money?) =
