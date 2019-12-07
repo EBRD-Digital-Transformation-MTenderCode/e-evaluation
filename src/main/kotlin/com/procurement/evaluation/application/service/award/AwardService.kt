@@ -1208,7 +1208,7 @@ class AwardServiceImpl(
                     status = award.status,
                     statusDetails = award.statusDetails,
                     relatedLots = award.relatedLots.map { LotId.fromString(it) },
-                    relatedBid = BidId.fromString(award.relatedBid!!),
+                    relatedBid = award.relatedBid?.let { BidId.fromString(it) },
                     value = award.value!!.asMoney,
                     suppliers = award.suppliers!!.map { supplier ->
                         SetAwardForEvaluationResult.Award.Supplier(

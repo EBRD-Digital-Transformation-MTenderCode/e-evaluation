@@ -37,7 +37,8 @@ data class SetAwardForEvaluationResponse(
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<LotId>,
 
-        @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: BidId,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: BidId?,
 
         @JsonDeserialize(using = MoneyDeserializer::class)
         @JsonSerialize(using = MoneySerializer::class)
