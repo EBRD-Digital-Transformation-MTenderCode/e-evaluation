@@ -1290,6 +1290,7 @@ class AwardServiceImpl(
             awards = awardsByUnsuccessfulLots.map { award ->
                 CreateUnsuccessfulAwardsResult.Award(
                     id = UUID.fromString(award.id),
+                    token = Token.fromString(award.token!!),
                     title = award.title!!,
                     description = award.description!!,
                     status = award.status,

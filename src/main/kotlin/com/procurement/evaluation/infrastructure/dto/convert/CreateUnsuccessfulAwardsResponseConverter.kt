@@ -7,6 +7,7 @@ fun CreateUnsuccessfulAwardsResult.convert() = CreateUnsuccessfulAwardsResponse(
     awards = this.awards.map { award ->
         CreateUnsuccessfulAwardsResponse.Award(
             id = award.id,
+            token = award.token,
             title = award.title,
             description = award.description,
             status = award.status,
