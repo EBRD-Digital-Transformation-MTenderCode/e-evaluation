@@ -1204,18 +1204,23 @@ class AwardServiceImpl(
                 SetAwardForEvaluationResult.Award(
                     id = AwardId.fromString(award.id),
                     token = Token.fromString(award.token!!),
+                    title = award.title,
                     date = award.date!!,
                     status = award.status,
                     statusDetails = award.statusDetails,
-                    relatedLots = award.relatedLots.map { LotId.fromString(it) },
-                    relatedBid = award.relatedBid?.let { BidId.fromString(it) },
-                    value = award.value!!.asMoney,
-                    suppliers = award.suppliers!!.map { supplier ->
-                        SetAwardForEvaluationResult.Award.Supplier(
-                            id = supplier.id,
-                            name = supplier.name
-                        )
-                    },
+                    relatedLots = award.relatedLots
+                        .map { LotId.fromString(it) },
+                    relatedBid = award.relatedBid
+                        ?.let { BidId.fromString(it) },
+                    value = award.value?.asMoney,
+                    suppliers = award.suppliers
+                        ?.map { supplier ->
+                            SetAwardForEvaluationResult.Award.Supplier(
+                                id = supplier.id,
+                                name = supplier.name
+                            )
+                        }
+                        .orEmpty(),
                     weightedValue = award.weightedValue?.asMoney
                 )
             }

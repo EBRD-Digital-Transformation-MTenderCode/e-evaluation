@@ -8,16 +8,6 @@
       "statusDetails": "active",
       "relatedLots": [
         "5085f4da-70ed-4403-809c-fb3d30850cd3"
-      ],
-      "value": {
-        "amount": 100.21,
-        "currency": "MDL"
-      },
-      "suppliers": [
-        {
-          "id": "award[0].suppliers[0].id",
-          "name": "award[0].suppliers[0].name"
-        }
       ]
     }
   ]

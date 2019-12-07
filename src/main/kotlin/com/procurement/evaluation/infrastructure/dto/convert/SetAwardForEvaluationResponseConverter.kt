@@ -8,6 +8,7 @@ fun SetAwardForEvaluationResult.convert() = SetAwardForEvaluationResponse(
         SetAwardForEvaluationResponse.Award(
             id = award.id,
             token = award.token,
+            title = award.title,
             date = award.date,
             status = award.status,
             statusDetails = award.statusDetails,

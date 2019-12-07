@@ -3,6 +3,7 @@
     {
       "id": "3421ba89-1b50-4667-9f54-7824cfc3ccc9",
       "token": "2b574563-f217-4119-bcae-354b1a6f9656",
+      "title": "award[0].title",
       "date": "2019-08-10T11:10:20Z",
       "status": "pending",
       "statusDetails": "active",
