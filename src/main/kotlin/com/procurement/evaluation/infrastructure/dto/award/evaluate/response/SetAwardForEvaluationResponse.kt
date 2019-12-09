@@ -27,6 +27,9 @@ data class SetAwardForEvaluationResponse(
         @field:JsonProperty("id") @param:JsonProperty("id") val id: AwardId,
         @field:JsonProperty("token") @param:JsonProperty("token") val token: Token,
 
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("title") @param:JsonProperty("title") val title: String?,
+
         @JsonDeserialize(using = JsonDateTimeDeserializer::class)
         @JsonSerialize(using = JsonDateTimeSerializer::class)
         @field:JsonProperty("date") @param:JsonProperty("date") val date: LocalDateTime,
@@ -37,14 +40,16 @@ data class SetAwardForEvaluationResponse(
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<LotId>,
 
-        @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: BidId,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: BidId?,
 
         @JsonDeserialize(using = MoneyDeserializer::class)
         @JsonSerialize(using = MoneySerializer::class)
-        @field:JsonProperty("value") @param:JsonProperty("value") val value: Money,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("value") @param:JsonProperty("value") val value: Money?,
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
-        @field:JsonProperty("suppliers") @param:JsonProperty("suppliers") val suppliers: List<Supplier>,
+        @field:JsonProperty("suppliers") @param:JsonProperty("suppliers") val suppliers: List<Supplier> = emptyList(),
 
         @JsonDeserialize(using = MoneyDeserializer::class)
         @JsonSerialize(using = MoneySerializer::class)

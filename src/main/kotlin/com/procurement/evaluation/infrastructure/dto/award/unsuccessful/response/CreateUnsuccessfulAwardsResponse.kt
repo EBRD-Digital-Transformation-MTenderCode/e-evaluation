@@ -1,6 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.award.unsuccessful.response
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
@@ -12,6 +13,7 @@ data class CreateUnsuccessfulAwardsResponse(
 ) {
     data class Award(
         @field:JsonProperty("id") @param:JsonProperty("id") val id: AwardId,
+        @field:JsonProperty("token") @param:JsonProperty("token") val token: Token,
         @field:JsonProperty("date") @param:JsonProperty("date") val date: LocalDateTime,
         @field:JsonProperty("title") @param:JsonProperty("title") val title: String,
         @field:JsonProperty("description") @param:JsonProperty("description") val description: String,

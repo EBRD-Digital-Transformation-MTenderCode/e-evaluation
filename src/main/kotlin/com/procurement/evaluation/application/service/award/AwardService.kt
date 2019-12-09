@@ -1204,7 +1204,11 @@ class AwardServiceImpl(
         val ratingAwards: List<Award> = groupingAwardsByLotId(awards = awards)
             .asSequence()
             .flatMap { (_, awards) ->
-                awards.rating(awardCriteria = data.awardCriteria, awardCriteriaDetails = data.awardCriteriaDetails)
+                val ratedAwards = awards.rating(
+                    awardCriteria = data.awardCriteria,
+                    awardCriteriaDetails = data.awardCriteriaDetails
+                )
+                selectAward(ratedAwards)
                     .asSequence()
             }
             .toList()
@@ -1226,18 +1230,23 @@ class AwardServiceImpl(
                 SetAwardForEvaluationResult.Award(
                     id = AwardId.fromString(award.id),
                     token = Token.fromString(award.token!!),
+                    title = award.title,
                     date = award.date!!,
                     status = award.status,
                     statusDetails = award.statusDetails,
-                    relatedLots = award.relatedLots.map { LotId.fromString(it) },
-                    relatedBid = BidId.fromString(award.relatedBid!!),
-                    value = award.value!!.asMoney,
-                    suppliers = award.suppliers!!.map { supplier ->
-                        SetAwardForEvaluationResult.Award.Supplier(
-                            id = supplier.id,
-                            name = supplier.name
-                        )
-                    },
+                    relatedLots = award.relatedLots
+                        .map { LotId.fromString(it) },
+                    relatedBid = award.relatedBid
+                        ?.let { BidId.fromString(it) },
+                    value = award.value?.asMoney,
+                    suppliers = award.suppliers
+                        ?.map { supplier ->
+                            SetAwardForEvaluationResult.Award.Supplier(
+                                id = supplier.id,
+                                name = supplier.name
+                            )
+                        }
+                        .orEmpty(),
                     weightedValue = award.weightedValue?.asMoney
                 )
             }
@@ -1280,7 +1289,7 @@ class AwardServiceImpl(
                     statusDetails = defineStatusDetails(context.operationType),
                     relatedLots = listOf(lot.id.toString()),
                     date = context.startDate,
-                    token = null,
+                    token = generationService.token().toString(),
                     value = null,
                     items = null,
                     bidDate = null,
@@ -1307,6 +1316,7 @@ class AwardServiceImpl(
             awards = awardsByUnsuccessfulLots.map { award ->
                 CreateUnsuccessfulAwardsResult.Award(
                     id = UUID.fromString(award.id),
+                    token = Token.fromString(award.token!!),
                     title = award.title!!,
                     description = award.description!!,
                     status = award.status,
@@ -1439,7 +1449,7 @@ class AwardServiceImpl(
      * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
      */
     private fun ratingByWeightedValue(awards: List<Award>): List<Award> =
-        awaiting(awards.sortedWith(weightedValueComparator))
+        awards.sortedWith(weightedValueComparator)
 
     /**
      * BR-1.4.1.6
@@ -1451,20 +1461,26 @@ class AwardServiceImpl(
      * или приведенной цены предложения, больший приоритет при рассмотрении Заказчик должен отдать тому предложению,
      * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
      */
-    private fun ratingByValue(awards: List<Award>): List<Award> = awaiting(awards.sortedWith(valueComparator))
+    private fun ratingByValue(awards: List<Award>): List<Award> = awards.sortedWith(valueComparator)
 
-    private fun awaiting(sortedAwards: List<Award>): List<Award> {
-        val result = mutableListOf<Award>()
-        val iterator = sortedAwards.iterator()
-        if (!iterator.hasNext())
-            return result
-        val awaitingAward = iterator.next()
-            .copy(statusDetails = AwardStatusDetails.AWAITING)
-        result.add(awaitingAward)
-        while (iterator.hasNext()) {
-            result.add(iterator.next())
+    private fun selectAward(sortedAwards: List<Award>): List<Award> {
+        fun Award.isSuitable(): Boolean =
+            this.status == AwardStatus.PENDING && this.statusDetails == AwardStatusDetails.EMPTY
+
+        fun Award.select(): Award = this.copy(statusDetails = AwardStatusDetails.AWAITING)
+
+        var awardIsSelected = false
+        return sortedAwards.map { award ->
+            if (awardIsSelected)
+                award
+            else {
+                if (award.isSuitable()) {
+                    awardIsSelected = true
+                    award.select()
+                } else
+                    award
+            }
         }
-        return result
     }
 
     private fun generateAward(bid: CreateAwardsData.Bid, context: CreateAwardsContext, weightedValue: Money?) =

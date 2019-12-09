@@ -16,12 +16,13 @@ data class SetAwardForEvaluationResult(
     data class Award(
         val id: AwardId,
         val token: Token,
+        val title: String?,
         val date: LocalDateTime,
         val status: AwardStatus,
         val statusDetails: AwardStatusDetails,
         val relatedLots: List<LotId>,
-        val relatedBid: BidId,
-        val value: Money,
+        val relatedBid: BidId?,
+        val value: Money?,
         val suppliers: List<Supplier>,
         val weightedValue: Money?
     ) {

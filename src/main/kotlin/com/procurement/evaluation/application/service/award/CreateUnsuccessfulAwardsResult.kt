@@ -1,5 +1,6 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
@@ -11,6 +12,7 @@ data class CreateUnsuccessfulAwardsResult(
 ) {
     data class Award(
         val id: AwardId,
+        val token: Token,
         val date: LocalDateTime,
         val title: String,
         val description: String,
