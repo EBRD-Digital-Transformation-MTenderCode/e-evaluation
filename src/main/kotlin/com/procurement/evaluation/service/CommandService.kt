@@ -3,6 +3,7 @@ package com.procurement.evaluation.service
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
 import com.procurement.evaluation.application.service.award.AwardCancellationData
 import com.procurement.evaluation.application.service.award.AwardService
+import com.procurement.evaluation.application.service.award.CheckAwardStatusContext
 import com.procurement.evaluation.application.service.award.CompleteAwardingContext
 import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
@@ -18,6 +19,7 @@ import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsCo
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.application.service.award.SetAwardForEvaluationContext
 import com.procurement.evaluation.application.service.award.StartAwardPeriodContext
+import com.procurement.evaluation.application.service.award.StartConsiderationContext
 import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsContext
 import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.dao.HistoryDao
@@ -28,6 +30,7 @@ import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsRespon
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
 import com.procurement.evaluation.infrastructure.dto.award.cancel.response.AwardCancellationResponse
+import com.procurement.evaluation.infrastructure.dto.award.consideration.response.StartConsiderationResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
@@ -63,6 +66,7 @@ import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class CommandService(
@@ -414,6 +418,24 @@ class CommandService(
                 ResponseDto(data = dataResponse)
             }
             CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
+            CommandType.CHECK_AWARD_STATUS -> {
+                val context = CheckAwardStatusContext(
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    token = cm.token,
+                    owner = UUID.fromString(cm.owner),
+                    awardId = cm.awardId
+                )
+                val result = awardService.checkStatus(context)
+
+                if (log.isDebugEnabled)
+                    log.debug("Checked award status. Result: ${toJson(result)}")
+
+                val dataResponse = CreateAwardsResponse()
+                if (log.isDebugEnabled)
+                    log.debug("Checked award status. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
             CommandType.SET_INITIAL_AWARDS_STATUS -> updateAwardService.setInitialAwardsStatuses(cm)
             CommandType.GET_WINNING_AWARD -> {
@@ -615,6 +637,24 @@ class CommandService(
                     }
 
                 }
+            }
+            CommandType.START_CONSIDERATION -> {
+                val context = StartConsiderationContext(
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    token = cm.token,
+                    owner = UUID.fromString(cm.owner),
+                    awardId = cm.awardId
+                )
+                val result = awardService.startConsideration(context)
+
+                if (log.isDebugEnabled)
+                    log.debug("Started consideration. Result: ${toJson(result)}")
+
+                val dataResponse: StartConsiderationResponse = result.convert()
+                if (log.isDebugEnabled)
+                    log.debug("Started consideration. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
             }
         }
         historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)

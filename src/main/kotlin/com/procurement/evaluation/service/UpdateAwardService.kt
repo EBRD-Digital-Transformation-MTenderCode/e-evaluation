@@ -2,11 +2,26 @@ package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType.*
-import com.procurement.evaluation.model.dto.*
+import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
+import com.procurement.evaluation.exception.ErrorType.CONTEXT
+import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
+import com.procurement.evaluation.exception.ErrorType.ID
+import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
+import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
+import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
+import com.procurement.evaluation.model.dto.AwardByBid
+import com.procurement.evaluation.model.dto.AwardByBidRq
+import com.procurement.evaluation.model.dto.AwardByBidRs
+import com.procurement.evaluation.model.dto.SetInitialAwardsStatusesRq
+import com.procurement.evaluation.model.dto.SetInitialAwardsStatusesRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
-import com.procurement.evaluation.model.dto.ocds.*
+import com.procurement.evaluation.model.dto.ocds.Award
+import com.procurement.evaluation.model.dto.ocds.AwardCriteria
+import com.procurement.evaluation.model.dto.ocds.AwardStatus
+import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
+import com.procurement.evaluation.model.dto.ocds.Document
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toLocal
@@ -29,7 +44,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
         val dto = toObject(AwardByBidRq::class.java, cm.data)
 
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
-        if (awardEntity.owner != owner) throw ErrorException(OWNER)
+        if (awardEntity.owner != owner) throw ErrorException(INVALID_OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         validation(awardByBid, awardId, dto)
         val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
@@ -285,7 +300,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
 
     private fun verifyRequestStatusDetails(statusDetails: AwardStatusDetails) {
         if (!(statusDetails == AwardStatusDetails.ACTIVE || statusDetails == AwardStatusDetails.UNSUCCESSFUL))
-            throw ErrorException(STATUS_DETAILS)
+            throw ErrorException(INVALID_STATUS_DETAILS)
     }
 
 }

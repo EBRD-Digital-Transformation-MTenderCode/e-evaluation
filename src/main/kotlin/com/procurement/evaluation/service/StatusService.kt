@@ -239,7 +239,7 @@ class StatusService(private val periodService: PeriodService,
         val token = cm.context.token ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
         val awardEntity = awardDao.getByCpIdAndStageAndToken(cpId, stage, UUID.fromString(token))
-        if (awardEntity.owner != owner) throw ErrorException(ErrorType.OWNER)
+        if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         return ResponseDto(data = GetLotForCheckRs(awardByBid.relatedLots[0]))
     }

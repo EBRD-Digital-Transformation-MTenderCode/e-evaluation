@@ -17,14 +17,14 @@ import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
-import com.procurement.evaluation.exception.ErrorType.OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS
+import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
+import com.procurement.evaluation.exception.ErrorType.INVALID_TOKEN
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
-import com.procurement.evaluation.exception.ErrorType.STATUS
-import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
-import com.procurement.evaluation.exception.ErrorType.TOKEN
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
@@ -88,6 +88,10 @@ interface AwardService {
         context: CreateUnsuccessfulAwardsContext,
         data: CreateUnsuccessfulAwardsData
     ): CreateUnsuccessfulAwardsResult
+
+    fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult
+
+    fun startConsideration(context: StartConsiderationContext): StartConsiderationResult
 }
 
 @Service
@@ -602,11 +606,11 @@ class AwardServiceImpl(
 
         //VR-7.10.1
         if (context.token != awardEntity.token)
-            throw ErrorException(error = TOKEN)
+            throw ErrorException(error = INVALID_TOKEN)
 
         //VR-7.10.2
         if (context.owner != awardEntity.owner)
-            throw ErrorException(error = OWNER)
+            throw ErrorException(error = INVALID_OWNER)
 
         val award = toObject(Award::class.java, awardEntity.jsonData)
 
@@ -683,7 +687,7 @@ class AwardServiceImpl(
                 if (isNotAcceptableStatusDetails(awards))
                     throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
             }
-            else -> throw ErrorException(error = STATUS_DETAILS)
+            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
         }
     }
 
@@ -832,7 +836,7 @@ class AwardServiceImpl(
                 }
             }
 
-            else -> throw ErrorException(error = STATUS_DETAILS)
+            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
         }
     }
 
@@ -928,7 +932,7 @@ class AwardServiceImpl(
     private fun List<Award>.findActiveAward(): Award? {
         val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = this.groupBy { award ->
             if (award.status != AwardStatus.PENDING)
-                throw ErrorException(error = STATUS)
+                throw ErrorException(error = INVALID_STATUS)
             award.statusDetails
         }
 
@@ -942,7 +946,7 @@ class AwardServiceImpl(
                     transform = { award -> award.id }
                 )
                 throw ErrorException(
-                    error = STATUS_DETAILS,
+                    error = INVALID_STATUS_DETAILS,
                     message = "More than one award has an active status details[$idsBadAwards]"
                 )
             }
@@ -951,7 +955,7 @@ class AwardServiceImpl(
 
         val unsuccessfulAwards: List<Award> = awardsByStatusDetails[AwardStatusDetails.UNSUCCESSFUL] ?: emptyList()
         if (unsuccessfulAwards.size != this.size)
-            throw ErrorException(error = STATUS_DETAILS)
+            throw ErrorException(error = INVALID_STATUS_DETAILS)
 
         return null
     }
@@ -1305,6 +1309,70 @@ class AwardServiceImpl(
         return response
     }
 
+    override fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult {
+        val award = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
+            ?.also { entity ->
+                entity.checkOwner(context.owner)
+            }
+            ?.let { entity ->
+                toObject(Award::class.java, entity.jsonData)
+            }
+            ?.takeIf { award ->
+                award.id == context.awardId.toString()
+            }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        if (award.status != AwardStatus.PENDING)
+            throw ErrorException(
+                error = INVALID_STATUS,
+                message = "Award has invalid status: '${award.status}'. Require status: '${AwardStatus.PENDING}'"
+            )
+
+        if (award.statusDetails == AwardStatusDetails.AWAITING)
+            throw ErrorException(
+                error = INVALID_STATUS_DETAILS,
+                message = "Award has invalid status details: '${award.statusDetails}'. Require status details: '${AwardStatusDetails.AWAITING}'"
+            )
+
+        return CheckAwardStatusResult()
+    }
+
+    override fun startConsideration(context: StartConsiderationContext): StartConsiderationResult {
+        val awardEntity = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
+            ?.also { entity ->
+                entity.checkOwner(context.owner)
+            }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        val award = toObject(Award::class.java, awardEntity.jsonData)
+            .takeIf { award ->
+                award.id == context.awardId.toString()
+            }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        //FReq-1.4.3.1
+        val updatedAward = award.copy(
+            statusDetails = AwardStatusDetails.CONSIDERATION
+        )
+
+        val updatedAwardEntity = awardEntity.copy(
+            statusDetails = updatedAward.statusDetails.value,
+            jsonData = toJson(updatedAward)
+        )
+
+        val result = StartConsiderationResult(
+            award = StartConsiderationResult.Award(
+                id = AwardId.fromString(award.id),
+                statusDetails = award.statusDetails,
+                relatedLots = award.relatedLots.map { LotId.fromString(it) }
+            )
+        )
+
+        awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+
+        return result
+    }
+
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
         mutableMapOf<LotId, MutableList<Award>>()
             .apply {
@@ -1648,7 +1716,7 @@ class AwardServiceImpl(
             AwardCriteriaDetails.MANUAL -> {
                 when (this.awardCriteria) {
                     AwardCriteria.PRICE_ONLY -> throw ErrorException(
-                        ErrorType.STATUS_DETAILS,
+                        ErrorType.INVALID_STATUS_DETAILS,
                         "Cannot calculate weighted value for award with award criteria: '${this.awardCriteria}' " +
                             "and award criteria details: '${this.awardCriteriaDetails}', based on bid '${bid.id}'"
                     )

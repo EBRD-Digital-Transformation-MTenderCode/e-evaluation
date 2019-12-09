@@ -125,6 +125,7 @@ enum class CommandType(private val value: String) {
     CREATE_AWARDS_AUCTION("createAwardsAuction"),
     CREATE_AWARDS_AUCTION_END("createAwardsAuctionEnd"),
     CHECK_AWARD_VALUE("checkAwardValue"),
+    CHECK_AWARD_STATUS("checkAwardStatus"),
     END_AWARD_PERIOD("endAwardPeriod"),
     SET_INITIAL_AWARDS_STATUS("setInitialAwardsStatus"),
     GET_WINNING_AWARD("getWinAward"),
@@ -137,7 +138,8 @@ enum class CommandType(private val value: String) {
     GET_UNSUCCESSFUL_LOTS("getUnsuccessfulLots"),
     SET_AWARD_FOR_EVALUATION("setAwardForEvaluation"),
     START_AWARD_PERIOD("startAwardPeriod"),
-    CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards");
+    CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards"),
+    START_CONSIDERATION("startConsideration");
 
     @JsonValue
     fun value(): String {
