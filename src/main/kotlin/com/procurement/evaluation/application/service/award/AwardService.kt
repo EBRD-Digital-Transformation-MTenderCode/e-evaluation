@@ -1310,17 +1310,20 @@ class AwardServiceImpl(
     }
 
     override fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult {
-        val award = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
-            ?.also { entity ->
-                entity.checkOwner(context.owner)
-            }
-            ?.let { entity ->
-                toObject(Award::class.java, entity.jsonData)
-            }
-            ?.takeIf { award ->
-                award.id == context.awardId.toString()
-            }
-            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+        val awardEntity = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
+            ?: throw ErrorException(
+                error = AWARD_NOT_FOUND,
+                message = "Record of the award by cpid '${context.cpid}', stage '${context.stage}' and token '${context.token}' not found."
+            )
+
+        awardEntity.checkOwner(context.owner)
+
+        val award = toObject(Award::class.java, awardEntity.jsonData)
+        if (award.id != context.awardId.toString())
+            throw ErrorException(
+                error = AWARD_NOT_FOUND,
+                message = "Award by id '${context.awardId} not found. Id award from entity is '${award.id}'."
+            )
 
         if (award.status != AwardStatus.PENDING)
             throw ErrorException(
