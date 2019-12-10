@@ -8,7 +8,7 @@ import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 
 data class GetNextAwardResponse(
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @field:JsonProperty("award") @param:JsonProperty("award") val award: Award?
+    @field:JsonProperty("nextAwardForUpdate") @param:JsonProperty("nextAwardForUpdate") val award: Award?
 ) {
 
     data class Award(
