@@ -15,6 +15,7 @@ import com.procurement.evaluation.application.service.award.EvaluatedAward
 import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsContext
 import com.procurement.evaluation.application.service.award.FinalAwardsStatusByLotsData
 import com.procurement.evaluation.application.service.award.GetEvaluatedAwardsContext
+import com.procurement.evaluation.application.service.award.GetNextAwardContext
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.application.service.award.SetAwardForEvaluationContext
 import com.procurement.evaluation.application.service.award.StartAwardPeriodContext
@@ -40,6 +41,7 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.Eva
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.SetAwardForEvaluationResponse
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
+import com.procurement.evaluation.infrastructure.dto.award.next.GetNextAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.period.start.StartAwardPeriodResponse
 import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.request.CreateUnsuccessfulAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.response.CreateUnsuccessfulAwardsResponse
@@ -604,6 +606,21 @@ class CommandService(
                 val dataResponse: StartConsiderationResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Started consideration. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
+            CommandType.GET_NEXT_AWARD -> {
+                val context = GetNextAwardContext(
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    awardId = cm.awardId
+                )
+                val result = awardService.getNext(context)
+                if (log.isDebugEnabled)
+                    log.debug("Get next award. Result: ${toJson(result)}")
+
+                val dataResponse: GetNextAwardResponse = result.convert()
+                if (log.isDebugEnabled)
+                    log.debug("Get next award. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
             }
         }

@@ -94,6 +94,8 @@ interface AwardService {
     fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult
 
     fun startConsideration(context: StartConsiderationContext): StartConsiderationResult
+
+    fun getNext(context: GetNextAwardContext): GetNextAwardResult
 }
 
 @Service
@@ -1395,6 +1397,105 @@ class AwardServiceImpl(
         return result
     }
 
+    override fun getNext(context: GetNextAwardContext): GetNextAwardResult {
+        val allAwardsToEntities: Map<Award, AwardEntity> =
+            awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+                .takeIf { it.isNotEmpty() }
+                ?.asSequence()
+                ?.map { entity ->
+                    val award = toObject(Award::class.java, entity.jsonData)
+                    award to entity
+                }
+                ?.toMap()
+                ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        val award: Award = allAwardsToEntities.keys
+            .find { AwardId.fromString(it.id) == context.awardId }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        val relatedLots: Set<LotId> = award.relatedLots.toSetBy { LotId.fromString(it) }
+        val awardsToEntities: Map<Award, AwardEntity> = allAwardsToEntities.filter { (award, _) ->
+            relatedLots.containsAll(award.relatedLots.map { AwardId.fromString(it) })
+        }
+
+        val updatedAward: Award? = when (award.statusDetails) {
+            AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
+            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
+
+            AwardStatusDetails.PENDING,
+            AwardStatusDetails.CONSIDERATION,
+            AwardStatusDetails.EMPTY,
+            AwardStatusDetails.AWAITING,
+            AwardStatusDetails.NO_OFFERS_RECEIVED,
+            AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
+                error = INVALID_STATUS_DETAILS,
+                message = "Invalid status details of award from request (${award.statusDetails.value})."
+            )
+        }
+
+        return if (updatedAward != null) {
+            val result = GetNextAwardResult(
+                award = GetNextAwardResult.Award(
+                    id = AwardId.fromString(updatedAward.id),
+                    statusDetails = updatedAward.statusDetails,
+                    relatedBid = AwardId.fromString(updatedAward.relatedBid!!)
+                )
+            )
+            val awardEntitiesByAwardId: Map<AwardId, AwardEntity> = awardsToEntities.asSequence()
+                .associateBy(keySelector = { AwardId.fromString(it.key.id) }, valueTransform = { it.value })
+            val updatedAwardEntity = awardEntitiesByAwardId.getValue(AwardId.fromString(updatedAward.id))
+                .let {
+                    it.copy(status = it.status, statusDetails = it.statusDetails, jsonData = toJson(it))
+                }
+            awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+
+            result
+        } else
+            GetNextAwardResult(award = null)
+    }
+
+    private fun getAwardForUnsuccessfulStatusDetails(awards: Collection<Award>): Award? {
+        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
+        val existsActive = awardsByStatusDetails.existsActive
+        val existsConsideration = awardsByStatusDetails.existsConsideration
+        val existsAwaiting = awardsByStatusDetails.existsAwaiting
+        val existsEmpty = awardsByStatusDetails.existsEmpty
+
+        if (existsActive || existsConsideration || existsAwaiting) return null
+        if (!existsActive && !existsConsideration && !existsAwaiting && !existsEmpty) return null
+        if (!existsActive && !existsConsideration && !existsAwaiting && existsEmpty)
+            return ratingByValueOrWeightedValue(awards)
+                .first { it.statusDetails == AwardStatusDetails.EMPTY }
+                .copy(statusDetails = AwardStatusDetails.AWAITING)
+
+        return null
+    }
+
+    private fun getAwardForActiveStatusDetails(awards: Collection<Award>): Award? {
+        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
+        val existsConsideration = awardsByStatusDetails.existsConsideration
+        val existsAwaiting = awardsByStatusDetails.existsAwaiting
+
+        return if (existsConsideration || existsAwaiting) {
+            ratingByValueOrWeightedValue(awards)
+                .first { it.statusDetails == AwardStatusDetails.CONSIDERATION || it.statusDetails == AwardStatusDetails.AWAITING }
+                .copy(statusDetails = AwardStatusDetails.AWAITING)
+        } else
+            null
+    }
+
+    private val Map<AwardStatusDetails, List<Award>>.existsActive: Boolean
+        get() = this[AwardStatusDetails.ACTIVE]?.isNotEmpty() ?: false
+
+    private val Map<AwardStatusDetails, List<Award>>.existsConsideration: Boolean
+        get() = this[AwardStatusDetails.CONSIDERATION]?.isNotEmpty() ?: false
+
+    private val Map<AwardStatusDetails, List<Award>>.existsAwaiting: Boolean
+        get() = this[AwardStatusDetails.AWAITING]?.isNotEmpty() ?: false
+
+    private val Map<AwardStatusDetails, List<Award>>.existsEmpty: Boolean
+        get() = this[AwardStatusDetails.EMPTY]?.isNotEmpty() ?: false
+
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
         mutableMapOf<LotId, MutableList<Award>>()
             .apply {
@@ -1462,6 +1563,9 @@ class AwardServiceImpl(
      * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
      */
     private fun ratingByValue(awards: List<Award>): List<Award> = awards.sortedWith(valueComparator)
+
+    private fun ratingByValueOrWeightedValue(awards: Collection<Award>): List<Award> =
+        awards.sortedWith(valueOrWeightedValueComparator)
 
     private fun selectAward(sortedAwards: List<Award>): List<Award> {
         fun Award.isSuitable(): Boolean =
@@ -1828,6 +1932,17 @@ private val weightedValueComparator = Comparator<Award> { left, right ->
 
 private val valueComparator = Comparator<Award> { left, right ->
     val result = left.value!!.amount.compareTo(right.value!!.amount)
+    if (result == 0) {
+        left.bidDate!!.compareTo(right.bidDate)
+    } else
+        result
+}
+
+private val valueOrWeightedValueComparator = Comparator<Award> { left, right ->
+    val leftValue = left.weightedValue?.amount ?: left.value!!.amount
+    val rightValue = right.weightedValue?.amount ?: right.value!!.amount
+
+    val result = leftValue.compareTo(rightValue)
     if (result == 0) {
         left.bidDate!!.compareTo(right.bidDate)
     } else

@@ -139,7 +139,8 @@ enum class CommandType(private val value: String) {
     SET_AWARD_FOR_EVALUATION("setAwardForEvaluation"),
     START_AWARD_PERIOD("startAwardPeriod"),
     CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards"),
-    START_CONSIDERATION("startConsideration");
+    START_CONSIDERATION("startConsideration"),
+    GET_NEXT_AWARD("getNextAward");
 
     @JsonValue
     fun value(): String {
