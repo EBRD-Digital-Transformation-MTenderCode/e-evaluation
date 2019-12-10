@@ -76,7 +76,7 @@ val CommandMessage.operationType: OperationType
 val CommandMessage.lotId: LotId
     get() = this.context.id?.let {
         try {
-            LotId.fromString(id)
+            LotId.fromString(it)
         } catch (exception: Exception) {
             throw ErrorException(error = ErrorType.INVALID_FORMAT_LOT_ID)
         }
@@ -85,7 +85,7 @@ val CommandMessage.lotId: LotId
 val CommandMessage.awardId: AwardId
     get() = this.context.id?.let {
         try {
-            AwardId.fromString(id)
+            AwardId.fromString(it)
         } catch (exception: Exception) {
             throw ErrorException(error = ErrorType.INVALID_FORMAT_AWARD_ID)
         }
