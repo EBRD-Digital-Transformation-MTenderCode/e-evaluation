@@ -1331,7 +1331,7 @@ class AwardServiceImpl(
                 message = "Award has invalid status: '${award.status}'. Require status: '${AwardStatus.PENDING}'"
             )
 
-        if (award.statusDetails == AwardStatusDetails.AWAITING)
+        if (award.statusDetails != AwardStatusDetails.AWAITING)
             throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
                 message = "Award has invalid status details: '${award.statusDetails}'. Require status details: '${AwardStatusDetails.AWAITING}'"
