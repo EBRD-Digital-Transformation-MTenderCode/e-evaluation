@@ -1365,9 +1365,9 @@ class AwardServiceImpl(
 
         val result = StartConsiderationResult(
             award = StartConsiderationResult.Award(
-                id = AwardId.fromString(award.id),
-                statusDetails = award.statusDetails,
-                relatedLots = award.relatedLots.map { LotId.fromString(it) }
+                id = AwardId.fromString(updatedAward.id),
+                statusDetails = updatedAward.statusDetails,
+                relatedLots = updatedAward.relatedLots.map { LotId.fromString(it) }
             )
         )
 
