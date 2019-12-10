@@ -1448,7 +1448,11 @@ class AwardServiceImpl(
                 .associateBy(keySelector = { AwardId.fromString(it.key.id) }, valueTransform = { it.value })
             val updatedAwardEntity = awardEntitiesByAwardId.getValue(AwardId.fromString(updatedAward.id))
                 .let {
-                    it.copy(status = it.status, statusDetails = it.statusDetails, jsonData = toJson(updatedAward))
+                    it.copy(
+                        status = updatedAward.status.value,
+                        statusDetails = updatedAward.statusDetails.value,
+                        jsonData = toJson(updatedAward)
+                    )
                 }
             awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
 
