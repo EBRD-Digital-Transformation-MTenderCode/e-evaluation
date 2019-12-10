@@ -1,12 +1,14 @@
 package com.procurement.evaluation.infrastructure.dto.award.next
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 
 data class GetNextAwardResponse(
-    @field:JsonProperty("award") @param:JsonProperty("award") val award: Award
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @field:JsonProperty("award") @param:JsonProperty("award") val award: Award?
 ) {
 
     data class Award(

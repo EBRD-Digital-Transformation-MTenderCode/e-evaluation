@@ -10,4 +10,9 @@ class GetNextAwardResponseTest : AbstractDTOTestBase<GetNextAwardResponse>(GetNe
     fun fully() {
         testBindingAndMapping("json/infrastructure/dto/award/next/response/response_get_next_award_full.json")
     }
+
+    @Test
+    fun required1() {
+        testBindingAndMapping("json/infrastructure/dto/award/next/response/response_get_next_award_required_1.json")
+    }
 }
