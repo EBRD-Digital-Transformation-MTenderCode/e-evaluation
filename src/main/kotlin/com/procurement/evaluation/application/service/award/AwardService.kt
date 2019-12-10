@@ -1322,7 +1322,7 @@ class AwardServiceImpl(
         if (award.id != context.awardId.toString())
             throw ErrorException(
                 error = AWARD_NOT_FOUND,
-                message = "Award by id '${context.awardId} not found. Id award from entity is '${award.id}'."
+                message = "Award by id '${context.awardId} not found."
             )
 
         if (award.status != AwardStatus.PENDING)
