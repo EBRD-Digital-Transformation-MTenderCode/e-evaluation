@@ -29,6 +29,7 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.lib.toSetBy
+import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address
 import com.procurement.evaluation.model.dto.ocds.AddressDetails
 import com.procurement.evaluation.model.dto.ocds.Award
@@ -41,6 +42,7 @@ import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.CountryDetails
 import com.procurement.evaluation.model.dto.ocds.Details
 import com.procurement.evaluation.model.dto.ocds.Document
+import com.procurement.evaluation.model.dto.ocds.DocumentType
 import com.procurement.evaluation.model.dto.ocds.Identifier
 import com.procurement.evaluation.model.dto.ocds.LocalityDetails
 import com.procurement.evaluation.model.dto.ocds.OrganizationReference
@@ -62,7 +64,7 @@ interface AwardService {
 
     fun create(context: CreateAwardsContext, data: CreateAwardsData): CreatedAwardsResult
 
-    fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData
+    fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluateAwardResult
 
     fun getWinning(context: GetWinningAwardContext): WinningAward?
 
@@ -92,6 +94,8 @@ interface AwardService {
     fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult
 
     fun startConsideration(context: StartConsiderationContext): StartConsiderationResult
+
+    fun getNext(context: GetNextAwardContext): GetNextAwardResult
 }
 
 @Service
@@ -598,7 +602,7 @@ class AwardServiceImpl(
      *   - Award.date;
      *   - Award.documents;
      */
-    override fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluatedAwardData {
+    override fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluateAwardResult {
         val cpid = context.cpid
 
         val awardEntity = awardRepository.findBy(cpid = cpid, stage = context.stage, token = context.token)
@@ -615,23 +619,24 @@ class AwardServiceImpl(
         val award = toObject(Award::class.java, awardEntity.jsonData)
 
         //VR-7.10.1
-        if (context.awardId != UUID.fromString(award.id))
+        if (context.awardId != AwardId.fromString(award.id))
             throw ErrorException(error = AWARD_NOT_FOUND)
 
-        //VR-7.10.4
+        //FVR-7.1.2.1.4
         checkStatusDetails(context = context, data = data, award = award)
 
-        //VR-7.10.5
+        //FVR-7.1.2.2.1, FVR-7.1.2.2.2, FVR-7.1.2.2.3, FVR-7.1.2.2.4
         checkDocuments(data = data, award = award)
 
+        //FR-7.1.2.1.1
         val updatedDocuments = updateDocuments(data = data, award = award)
 
         val updatedAward = award.copy(
             description = data.award.description,
-            //BR-7.10.5
+            //FR-7.1.2.1.1
             documents = updatedDocuments,
-            //BR-7.10.6
-            statusDetails = statusDetails(data = data, award = award),
+
+            statusDetails = data.award.statusDetails,
             date = context.startDate
         )
 
@@ -642,80 +647,127 @@ class AwardServiceImpl(
 
         awardRepository.update(cpid = cpid, updatedAward = updatedAwardEntity)
 
-        return getEvaluatedAwardData(updatedAward = updatedAward)
+        return getEvaluateAwardResult(updatedAward = updatedAward)
     }
 
-    /**
-     * VR-7.10.4 statusDetails (award)
-     *
-     * 1. Checks award.statusDetails in Award from Request:
-     *   a. IF award.statusDetails == "unsuccessful" in Request
-     *      validation is successful;
-     *   b. ELSE IF (award.statusDetails == "active" in Request)
-     *      eEvaluation executes next steps:
-     *        i.  Selects all Award objects in DB related to one proceeded Lot beside Award from Request;
-     *        ii. Checks award.statusDetails in all selected Awards found previously:
-     *          1. IF award.statusDetails != "active" in all Awards
-     *             validation is successful;
-     *          2. ELSE
-     *             eEvaluation throws Exception: "Lot has already received successful award";
-     *   c. ELSE IF (award.statusDetails != "active" || "unsuccessful")
-     *      eEvaluation throws Exception: "Invalid status value";
-     */
     private fun checkStatusDetails(
         context: EvaluateAwardContext,
         data: EvaluateAwardData,
         award: Award
     ) {
-        when {
-            data.award.statusDetails == AwardStatusDetails.UNSUCCESSFUL -> return
-            data.award.statusDetails == AwardStatusDetails.ACTIVE -> {
-                val lots = award.relatedLots.toSet()
-                val awards = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
-                    .asSequence()
-                    .map { entity ->
-                        toObject(Award::class.java, entity.jsonData)
-                    }
-                    .filter {
-                        if (UUID.fromString(it.id) == context.awardId)
-                            false
-                        else
-                            lots.containsAll(it.relatedLots)
-                    }
-                    .toList()
-
-                if (isNotAcceptableStatusDetails(awards))
-                    throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
+        when (data.award.statusDetails) {
+            AwardStatusDetails.UNSUCCESSFUL -> {
+                checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
             }
-            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
+            AwardStatusDetails.ACTIVE -> {
+                checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
+                checkRelatedAwards(context = context, award = award)
+            }
+
+            AwardStatusDetails.PENDING,
+            AwardStatusDetails.CONSIDERATION,
+            AwardStatusDetails.EMPTY,
+            AwardStatusDetails.AWAITING,
+            AwardStatusDetails.NO_OFFERS_RECEIVED,
+            AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
+                error = INVALID_STATUS_DETAILS,
+                message = "Invalid status details of award from request (${data.award.statusDetails.value})."
+            )
         }
+    }
+
+    private fun checkStatusDetailsForStage(stage: String, statusDetails: AwardStatusDetails) {
+        when (stage) {
+            "EV" -> {
+                when (statusDetails) {
+                    AwardStatusDetails.UNSUCCESSFUL,
+                    AwardStatusDetails.ACTIVE,
+                    AwardStatusDetails.CONSIDERATION -> Unit
+
+                    AwardStatusDetails.PENDING,
+                    AwardStatusDetails.EMPTY,
+                    AwardStatusDetails.AWAITING,
+                    AwardStatusDetails.NO_OFFERS_RECEIVED,
+                    AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
+                        error = INVALID_STATUS_DETAILS,
+                        message = "Invalid status details of award from database (${statusDetails.value}) by stage 'EV'."
+                    )
+                }
+            }
+            "NP" -> {
+                when (statusDetails) {
+                    AwardStatusDetails.UNSUCCESSFUL,
+                    AwardStatusDetails.ACTIVE,
+                    AwardStatusDetails.EMPTY -> Unit
+
+                    AwardStatusDetails.CONSIDERATION,
+                    AwardStatusDetails.PENDING,
+                    AwardStatusDetails.AWAITING,
+                    AwardStatusDetails.NO_OFFERS_RECEIVED,
+                    AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
+                        error = INVALID_STATUS_DETAILS,
+                        message = "Invalid status details of award from database (${statusDetails.value}) by stage 'NP'."
+                    )
+                }
+            }
+            else -> throw ErrorException(error = ErrorType.INVALID_STAGE)
+        }
+    }
+
+    private fun checkRelatedAwards(context: EvaluateAwardContext, award: Award) {
+        val lots = award.relatedLots.toSet()
+        val relatedAwards = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+            .asSequence()
+            .map { entity ->
+                toObject(Award::class.java, entity.jsonData)
+            }
+            .filter {
+                if (AwardId.fromString(it.id) == context.awardId)
+                    false
+                else
+                    lots.containsAll(it.relatedLots)
+            }
+            .toList()
+
+        if (isNotAcceptableStatusDetails(relatedAwards))
+            throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
     }
 
     private fun isNotAcceptableStatusDetails(awards: List<Award>) =
         awards.any { award -> award.statusDetails == AwardStatusDetails.ACTIVE }
 
-    /**
-     * VR-7.10.5 Documents.relatedLots (award)
-     *
-     * Checks Documents.relatedLots in all Award.Documents objects from Request:
-     *   a. IF award.documents.relatedLots from Request include value of award.relatedLots field
-     *      from saved version of Award,
-     *        validation is successful;
-     *   b. ELSE
-     *        eEvaluation throws Exception;
-     */
     private fun checkDocuments(data: EvaluateAwardData, award: Award) {
-        val relatedLotsFromDocuments: Set<UUID> = data.award.documents
-            ?.asSequence()
-            ?.flatMap { it.relatedLots?.asSequence() ?: emptySequence() }
-            ?.toSet()
-            ?: emptySet()
+        val documentIdsIsNotUnique = !data.award.documents.uniqueBy { it.id }
+        if (documentIdsIsNotUnique)
+            throw throw ErrorException(error = ErrorType.DUPLICATE_ID, message = "Ids of documents are not unique.")
+
+        data.award.documents.forEach { document ->
+            when (document.documentType) {
+                DocumentType.AWARD_NOTICE,
+                DocumentType.EVALUATION_REPORTS,
+                DocumentType.SHORTLISTED_FIRMS,
+                DocumentType.WINNING_BID,
+                DocumentType.COMPLAINTS,
+                DocumentType.BIDDERS,
+                DocumentType.CONFLICT_OF_INTEREST,
+                DocumentType.CANCELLATION_DETAILS,
+                DocumentType.CONTRACT_DRAFT,
+                DocumentType.CONTRACT_ARRANGEMENTS,
+                DocumentType.CONTRACT_SCHEDULE,
+                DocumentType.SUBMISSION_DOCUMENTS -> Unit
+            }
+        }
+
+        val relatedLotsFromDocuments: Set<LotId> = data.award.documents
+            .asSequence()
+            .flatMap { it.relatedLots.asSequence() }
+            .toSet()
 
         if (relatedLotsFromDocuments.isNotEmpty()) {
-            val relatedLotsFromAward = award.relatedLots
+            val relatedLotsFromAward: Set<LotId> = award.relatedLots
                 .asSequence()
                 .map { relatedLot ->
-                    UUID.fromString(relatedLot)
+                    LotId.fromString(relatedLot)
                 }
                 .toSet()
 
@@ -724,63 +776,34 @@ class AwardServiceImpl(
         }
     }
 
-    /**
-     * BR-7.10.5 Documents (Update Case)
-     *
-     * eEvaluation analyzes the availability of Documents object in Request:
-     * 1. IF there NO Documents object in Request,
-     *      eEvaluation checks the availability of Documents object in DB:
-     *        a. IF there are NO Documents in DB
-     *             eEvaluation doesn't execute any operations;
-     *        b. ELSE (Documents are presented in saved version of Award)
-     *             eEvaluation rewrites Documents in new version of Award in DB and includes them for Response;
-     * 2. ELSE (Documents are presented in Request),
-     *      eEvaluation checks the availability of Documents object in DB:
-     *        a. IF there are NO Documents in DB, eEvaluation executes next operations:
-     *          i. Saves Documents objects in new version of Award in DB and includes them for Response;
-     *        b. ELSE (Documents are presented in saved version of Award)
-     *             eEvaluation executes next operations:
-     *               i. Compares set of Documents.ID from Request and set of Documents.ID from DB;
-     *                 1. IF there are new Documents.ID from Request (that are not presented in DB)
-     *                      eEvaluation executes next operations:
-     *                       a. Determines all new documents objects from Request after comparison;
-     *                       b. Adds Documents objects (determined on step 2.b.i.1.a) in new version of Award in DB;
-     *                       c. Determines all documents objects from Request that are presented in Documents section in DB;
-     *                       d. Updates saved versions of Documents (determined on step 2.b.i.1.c) getting the values from next fields of Documents objects from Request:
-     *                         i.   Document.title;
-     *                         ii.  Document.description;
-     *                         iii. Document.documentType;
-     *                       e. Includes updated and renewed Documents object to Award for Response;
-     *                 2. ELSE (there are NO new Documents.ID from Request)
-     *                      eEvaluation executes next operations:
-     *                        a. Updates saved versions of Documents getting the values from next fields of Documents objects from Request:
-     *                          i.   Document.title;
-     *                          ii.  Document.description;
-     *                          iii. Document.documentType;
-     *                        b. Includes updated Documents object to Award for Response;
-     */
     private fun updateDocuments(data: EvaluateAwardData, award: Award): List<Document> {
-        val requestDocumentsById: Map<DocumentId, EvaluateAwardData.Award.Document> =
-            data.award.documents?.associateBy { it.id } ?: emptyMap()
+        val requestDocumentsById: Map<DocumentId, EvaluateAwardData.Award.Document> = data.award.documents
+            .associateBy { it.id }
         if (requestDocumentsById.isEmpty())
             return award.documents ?: emptyList()
 
-        val awardDocumentsById: Map<DocumentId, Document> = award.documents?.associateBy { it.id } ?: emptyMap()
+        val awardDocumentsById: Map<DocumentId, Document> = award.documents
+            ?.associateBy { it.id }
+            ?: emptyMap()
         return if (awardDocumentsById.isEmpty())
-            requestDocumentsById.values.map {
-                convertToDocument(it)
-            }
+            requestDocumentsById.values
+                .map {
+                    convertToDocument(it)
+                }
         else {
             val documentIds: Set<DocumentId> = requestDocumentsById.keys + awardDocumentsById.keys
             documentIds.map { id ->
                 requestDocumentsById[id]
                     ?.let { requestDocument ->
-                        awardDocumentsById[id]?.copy(
-                            title = requestDocument.title,
-                            description = requestDocument.description,
-                            documentType = requestDocument.documentType
-                        ) ?: convertToDocument(requestDocument)
-                    } ?: awardDocumentsById.getValue(id)
+                        awardDocumentsById[id]
+                            ?.copy(
+                                title = requestDocument.title,
+                                description = requestDocument.description,
+                                documentType = requestDocument.documentType
+                            )
+                            ?: convertToDocument(requestDocument)
+                    }
+                    ?: awardDocumentsById.getValue(id)
             }
         }
     }
@@ -790,7 +813,7 @@ class AwardServiceImpl(
         documentType = document.documentType,
         title = document.title,
         description = document.description,
-        relatedLots = document.relatedLots?.asSequence()?.map { it.toString() }?.toHashSet()
+        relatedLots = document.relatedLots.asSequence().map { it.toString() }.toHashSet()
     )
 
     /**
@@ -840,36 +863,37 @@ class AwardServiceImpl(
         }
     }
 
-    private fun getEvaluatedAwardData(updatedAward: Award): EvaluatedAwardData = EvaluatedAwardData(
-        award = EvaluatedAwardData.Award(
-            id = UUID.fromString(updatedAward.id),
+    private fun getEvaluateAwardResult(updatedAward: Award) = EvaluateAwardResult(
+        award = EvaluateAwardResult.Award(
+            id = AwardId.fromString(updatedAward.id),
             date = updatedAward.date!!,
             description = updatedAward.description,
             status = updatedAward.status,
             statusDetails = updatedAward.statusDetails,
-            relatedLots = updatedAward.relatedLots.map { UUID.fromString(it) },
-            value = updatedAward.value!!.let { value ->
-                EvaluatedAwardData.Award.Value(
-                    amount = value.amount,
-                    currency = value.currency!!
-                )
-            },
-            suppliers = updatedAward.suppliers!!.map { supplier ->
-                EvaluatedAwardData.Award.Supplier(
-                    id = supplier.id,
-                    name = supplier.name
-                )
-            },
-            documents = updatedAward.documents?.map { document ->
-                EvaluatedAwardData.Award.Document(
-                    id = document.id,
-                    documentType = document.documentType,
-                    title = document.title,
-                    description = document.description,
-                    relatedLots = document.relatedLots?.map { UUID.fromString(it) }
-                )
-            }
-
+            relatedLots = updatedAward.relatedLots
+                .map { LotId.fromString(it) },
+            relatedBid = updatedAward.relatedBid?.let { BidId.fromString(it) },
+            value = updatedAward.value!!.asMoney,
+            suppliers = updatedAward.suppliers!!
+                .map { supplier ->
+                    EvaluateAwardResult.Award.Supplier(
+                        id = supplier.id,
+                        name = supplier.name
+                    )
+                },
+            documents = updatedAward.documents
+                ?.map { document ->
+                    EvaluateAwardResult.Award.Document(
+                        id = document.id,
+                        documentType = document.documentType,
+                        title = document.title,
+                        description = document.description,
+                        relatedLots = document.relatedLots
+                            ?.map { LotId.fromString(it) }
+                            .orEmpty()
+                    )
+                }
+                .orEmpty()
         )
     )
 
@@ -1376,6 +1400,105 @@ class AwardServiceImpl(
         return result
     }
 
+    override fun getNext(context: GetNextAwardContext): GetNextAwardResult {
+        val allAwardsToEntities: Map<Award, AwardEntity> =
+            awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+                .takeIf { it.isNotEmpty() }
+                ?.asSequence()
+                ?.map { entity ->
+                    val award = toObject(Award::class.java, entity.jsonData)
+                    award to entity
+                }
+                ?.toMap()
+                ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        val award: Award = allAwardsToEntities.keys
+            .find { AwardId.fromString(it.id) == context.awardId }
+            ?: throw ErrorException(error = AWARD_NOT_FOUND)
+
+        val relatedLots: Set<LotId> = award.relatedLots.toSetBy { LotId.fromString(it) }
+        val awardsToEntities: Map<Award, AwardEntity> = allAwardsToEntities.filter { (award, _) ->
+            relatedLots.containsAll(award.relatedLots.map { AwardId.fromString(it) })
+        }
+
+        val updatedAward: Award? = when (award.statusDetails) {
+            AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
+            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
+
+            AwardStatusDetails.PENDING,
+            AwardStatusDetails.CONSIDERATION,
+            AwardStatusDetails.EMPTY,
+            AwardStatusDetails.AWAITING,
+            AwardStatusDetails.NO_OFFERS_RECEIVED,
+            AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
+                error = INVALID_STATUS_DETAILS,
+                message = "Invalid status details of award from request (${award.statusDetails.value})."
+            )
+        }
+
+        return if (updatedAward != null) {
+            val result = GetNextAwardResult(
+                award = GetNextAwardResult.Award(
+                    id = AwardId.fromString(updatedAward.id),
+                    statusDetails = updatedAward.statusDetails,
+                    relatedBid = AwardId.fromString(updatedAward.relatedBid!!)
+                )
+            )
+            val awardEntitiesByAwardId: Map<AwardId, AwardEntity> = awardsToEntities.asSequence()
+                .associateBy(keySelector = { AwardId.fromString(it.key.id) }, valueTransform = { it.value })
+            val updatedAwardEntity = awardEntitiesByAwardId.getValue(AwardId.fromString(updatedAward.id))
+                .let {
+                    it.copy(status = it.status, statusDetails = it.statusDetails, jsonData = toJson(it))
+                }
+            awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+
+            result
+        } else
+            GetNextAwardResult(award = null)
+    }
+
+    private fun getAwardForUnsuccessfulStatusDetails(awards: Collection<Award>): Award? {
+        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
+        val existsActive = awardsByStatusDetails.existsActive
+        val existsConsideration = awardsByStatusDetails.existsConsideration
+        val existsAwaiting = awardsByStatusDetails.existsAwaiting
+        val existsEmpty = awardsByStatusDetails.existsEmpty
+
+        if (existsActive || existsConsideration || existsAwaiting) return null
+        if (!existsActive && !existsConsideration && !existsAwaiting && !existsEmpty) return null
+        if (!existsActive && !existsConsideration && !existsAwaiting && existsEmpty)
+            return ratingByValueOrWeightedValue(awards)
+                .first { it.statusDetails == AwardStatusDetails.EMPTY }
+                .copy(statusDetails = AwardStatusDetails.AWAITING)
+
+        return null
+    }
+
+    private fun getAwardForActiveStatusDetails(awards: Collection<Award>): Award? {
+        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
+        val existsConsideration = awardsByStatusDetails.existsConsideration
+        val existsAwaiting = awardsByStatusDetails.existsAwaiting
+
+        return if (existsConsideration || existsAwaiting) {
+            ratingByValueOrWeightedValue(awards)
+                .first { it.statusDetails == AwardStatusDetails.CONSIDERATION || it.statusDetails == AwardStatusDetails.AWAITING }
+                .copy(statusDetails = AwardStatusDetails.AWAITING)
+        } else
+            null
+    }
+
+    private val Map<AwardStatusDetails, List<Award>>.existsActive: Boolean
+        get() = this[AwardStatusDetails.ACTIVE]?.isNotEmpty() ?: false
+
+    private val Map<AwardStatusDetails, List<Award>>.existsConsideration: Boolean
+        get() = this[AwardStatusDetails.CONSIDERATION]?.isNotEmpty() ?: false
+
+    private val Map<AwardStatusDetails, List<Award>>.existsAwaiting: Boolean
+        get() = this[AwardStatusDetails.AWAITING]?.isNotEmpty() ?: false
+
+    private val Map<AwardStatusDetails, List<Award>>.existsEmpty: Boolean
+        get() = this[AwardStatusDetails.EMPTY]?.isNotEmpty() ?: false
+
     private fun groupingAwardsByLotId(awards: List<Award>): Map<LotId, List<Award>> =
         mutableMapOf<LotId, MutableList<Award>>()
             .apply {
@@ -1443,6 +1566,9 @@ class AwardServiceImpl(
      * последнее обновление (bidDate) которого произошло раньше, чем во всех остальных предложениях.
      */
     private fun ratingByValue(awards: List<Award>): List<Award> = awards.sortedWith(valueComparator)
+
+    private fun ratingByValueOrWeightedValue(awards: Collection<Award>): List<Award> =
+        awards.sortedWith(valueOrWeightedValueComparator)
 
     private fun selectAward(sortedAwards: List<Award>): List<Award> {
         fun Award.isSuitable(): Boolean =
@@ -1809,6 +1935,17 @@ private val weightedValueComparator = Comparator<Award> { left, right ->
 
 private val valueComparator = Comparator<Award> { left, right ->
     val result = left.value!!.amount.compareTo(right.value!!.amount)
+    if (result == 0) {
+        left.bidDate!!.compareTo(right.bidDate)
+    } else
+        result
+}
+
+private val valueOrWeightedValueComparator = Comparator<Award> { left, right ->
+    val leftValue = left.weightedValue?.amount ?: left.value!!.amount
+    val rightValue = right.weightedValue?.amount ?: right.value!!.amount
+
+    val result = leftValue.compareTo(rightValue)
     if (result == 0) {
         left.bidDate!!.compareTo(right.bidDate)
     } else

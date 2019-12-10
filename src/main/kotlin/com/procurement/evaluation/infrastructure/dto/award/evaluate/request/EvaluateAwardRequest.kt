@@ -3,9 +3,9 @@ package com.procurement.evaluation.infrastructure.dto.award.evaluate.request
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.domain.model.document.DocumentId
+import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.DocumentType
-import java.util.*
 
 data class EvaluateAwardRequest(
     @field:JsonProperty("award") @param:JsonProperty("award") val award: Award
@@ -30,7 +30,7 @@ data class EvaluateAwardRequest(
             @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
 
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<UUID>?,
+            @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<LotId>?,
             @field:JsonProperty("documentType") @param:JsonProperty("documentType") val documentType: DocumentType
         )
     }
