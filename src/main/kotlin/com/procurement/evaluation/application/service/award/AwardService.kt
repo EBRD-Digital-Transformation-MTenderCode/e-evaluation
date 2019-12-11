@@ -1486,7 +1486,7 @@ class AwardServiceImpl(
         return if (existsConsideration || existsAwaiting) {
             ratingByValueOrWeightedValue(awards)
                 .first { it.statusDetails == AwardStatusDetails.CONSIDERATION || it.statusDetails == AwardStatusDetails.AWAITING }
-                .copy(statusDetails = AwardStatusDetails.AWAITING)
+                .copy(statusDetails = AwardStatusDetails.EMPTY)
         } else
             null
     }
