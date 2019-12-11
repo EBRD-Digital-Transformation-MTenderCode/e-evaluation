@@ -1307,7 +1307,7 @@ class AwardServiceImpl(
                 cpId = context.cpid,
                 stage = context.stage,
                 owner = context.owner,
-                token = context.token,
+                token = Token.fromString(award.token!!),
                 status = award.status.value,
                 statusDetails = award.statusDetails.value,
                 jsonData = toJson(award)
