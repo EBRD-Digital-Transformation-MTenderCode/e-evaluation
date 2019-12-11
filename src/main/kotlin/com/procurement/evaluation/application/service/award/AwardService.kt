@@ -1216,6 +1216,9 @@ class AwardServiceImpl(
             .toList()
 
         val updatedAwardEntities = ratingAwards.asSequence()
+            .filter { award ->
+                award.status == AwardStatus.PENDING && award.statusDetails == AwardStatusDetails.AWAITING
+            }
             .map { award ->
                 val awardId = AwardId.fromString(award.id)
                 val entity = awardEntityByAwardId.getValue(awardId)
@@ -1228,30 +1231,38 @@ class AwardServiceImpl(
             .toList()
 
         val result = SetAwardForEvaluationResult(
-            awards = ratingAwards.map { award ->
-                SetAwardForEvaluationResult.Award(
-                    id = AwardId.fromString(award.id),
-                    token = Token.fromString(award.token!!),
-                    title = award.title,
-                    date = award.date!!,
-                    status = award.status,
-                    statusDetails = award.statusDetails,
-                    relatedLots = award.relatedLots
-                        .map { LotId.fromString(it) },
-                    relatedBid = award.relatedBid
-                        ?.let { BidId.fromString(it) },
-                    value = award.value?.asMoney,
-                    suppliers = award.suppliers
-                        ?.map { supplier ->
-                            SetAwardForEvaluationResult.Award.Supplier(
-                                id = supplier.id,
-                                name = supplier.name
-                            )
-                        }
-                        .orEmpty(),
-                    weightedValue = award.weightedValue?.asMoney
-                )
-            }
+            awards = ratingAwards.asSequence()
+                .filter { award ->
+                    award.status == AwardStatus.PENDING &&
+                        (award.statusDetails == AwardStatusDetails.EMPTY
+                            || award.statusDetails == AwardStatusDetails.AWAITING)
+
+                }
+                .map { award ->
+                    SetAwardForEvaluationResult.Award(
+                        id = AwardId.fromString(award.id),
+                        token = Token.fromString(award.token!!),
+                        title = award.title,
+                        date = award.date!!,
+                        status = award.status,
+                        statusDetails = award.statusDetails,
+                        relatedLots = award.relatedLots
+                            .map { LotId.fromString(it) },
+                        relatedBid = award.relatedBid
+                            ?.let { BidId.fromString(it) },
+                        value = award.value?.asMoney,
+                        suppliers = award.suppliers
+                            ?.map { supplier ->
+                                SetAwardForEvaluationResult.Award.Supplier(
+                                    id = supplier.id,
+                                    name = supplier.name
+                                )
+                            }
+                            .orEmpty(),
+                        weightedValue = award.weightedValue?.asMoney
+                    )
+                }
+                .toList()
         )
 
         awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwardEntities)
