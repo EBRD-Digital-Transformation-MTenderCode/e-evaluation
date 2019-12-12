@@ -1,0 +1,101 @@
+{
+  "awardCriteria": "priceOnly",
+  "awardCriteriaDetails": "manual",
+  "bids": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426655440000",
+      "date": "2019-03-02T08:00:00Z",
+      "status": "pending",
+      "statusDetails": "valid",
+      "tenderers": [
+        {
+          "id": "bid[0].tenderers[0].id",
+          "name": "bid[0].tenderers[0].name",
+          "identifier": {
+            "scheme": "bid[0].tenderers[0].identifier.scheme",
+            "id": "bid[0].tenderers[0].identifier.id",
+            "legalName": "bid[0].tenderers[0].identifier.legalName",
+            "uri": "bid[0].tenderers[0].identifier.uri"
+          },
+          "address": {
+            "streetAddress": "bid[0].tenderers[0].address.streetAddress",
+            "addressDetails": {
+              "country": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.country.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.country.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.country.description",
+                "uri": "bid[0].tenderers[0].address.addressDetails.country.uri"
+              },
+              "region": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.region.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.region.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.region.description",
+                "uri": "bid[0].tenderers[0].address.addressDetails.region.uri"
+              },
+              "locality": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.locality.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.locality.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.locality.description"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "bid[0].tenderers[0].contactPoint.name",
+            "email": "bid[0].tenderers[0].contactPoint.email",
+            "telephone": "bid[0].tenderers[0].contactPoint.telephone"
+          },
+          "details": {
+            "typeOfSupplier": "company",
+            "mainEconomicActivities": [
+              "bid[0].tenderers[0].details.mainEconomicActivities[0]"
+            ],
+            "scale": "sme"
+          }
+        }
+      ],
+      "value": {
+        "amount": 10.05,
+        "currency": "MDL"
+      },
+      "relatedLots": [
+        "c15501a1-8be0-4734-bd5c-000000000888"
+      ]
+    }
+  ],
+  "lots": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426655440000"
+    }
+  ],
+  "electronicAuctions": {
+    "details": [
+      {
+        "id": "c15501a1-8be0-4734-bd5c-000000000888",
+        "relatedLot": "39614de2-c348-11e8-987b-a7ad59777db6",
+        "electronicAuctionResult": [
+          {
+            "relatedBid": "a80b61e0-c348-11e8-b9a8-dd319bd9bbdf",
+            "value": {
+              "amount": 981.0,
+              "currency": "MDL"
+            }
+          },
+          {
+            "relatedBid": "fcecd630-c63b-11e8-a76b-31c7a0ba1585",
+            "value": {
+              "amount": 980.0,
+              "currency": "MDL"
+            }
+          },
+          {
+            "relatedBid": "d80449c0-cc80-11e8-bfb9-f9c4db0b58fc",
+            "value": {
+              "amount": 990.0,
+              "currency": "MDL"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
