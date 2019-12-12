@@ -13,6 +13,7 @@ import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
+import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
@@ -90,6 +91,15 @@ val CommandMessage.awardId: AwardId
             throw ErrorException(error = ErrorType.INVALID_FORMAT_AWARD_ID)
         }
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
+
+val CommandMessage.awardCriteria: AwardCriteria
+    get() = this.context.awardCriteria?.let {
+        try {
+            AwardCriteria.fromValue(it)
+        } catch (exception: Exception) {
+            throw ErrorException(error = ErrorType.AWARD_CRITERIA)
+        }
+    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'awardCriteria' attribute in context.")
 
 data class Context @JsonCreator constructor(
         val operationId: String,
