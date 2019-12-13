@@ -1163,7 +1163,11 @@ class AwardServiceImpl(
             }
 
         val createdAwards = matchedBids.map { bid ->
-            val canCalculateWeightedValue = data.canCalculateWeightedValue(bid)
+            val canCalculateWeightedValue = canCalculateWeightedValue(
+                data.awardCriteria,
+                data.awardCriteriaDetails,
+                BidId.fromString(bid.id)
+            )
             val weightedValue = if (canCalculateWeightedValue)
                 calculateWeightedValue(bid, conversionsByRelatedItem)
             else
@@ -1208,7 +1212,11 @@ class AwardServiceImpl(
             .associateBy { it.relatedLot }
 
         val createdAwards = matchedBids.map { bid ->
-            val canCalculateWeightedValue = data.canCalculateWeightedValue(bid)
+            val canCalculateWeightedValue = canCalculateWeightedValue(
+                data.awardCriteria,
+                data.awardCriteriaDetails,
+                bid.id
+            )
             val weightedValue = if (canCalculateWeightedValue)
                 calculateWeightedValue(bid, conversionsByRelatedItem)
             else
@@ -2170,16 +2178,18 @@ class AwardServiceImpl(
             items = null
         )
 
-    private fun CreateAwardsData.canCalculateWeightedValue(
-        bid: CreateAwardsData.Bid
+    private fun canCalculateWeightedValue(
+        awardCriteria: AwardCriteria,
+        awardCriteriaDetails: AwardCriteriaDetails,
+        bidId: BidId
     ): Boolean =
-        when (this.awardCriteriaDetails) {
+        when (awardCriteriaDetails) {
             AwardCriteriaDetails.MANUAL -> {
-                when (this.awardCriteria) {
+                when (awardCriteria) {
                     AwardCriteria.PRICE_ONLY -> throw ErrorException(
                         ErrorType.INVALID_STATUS_DETAILS,
-                        "Cannot calculate weighted value for award with award criteria: '${this.awardCriteria}' " +
-                            "and award criteria details: '${this.awardCriteriaDetails}', based on bid '${bid.id}'"
+                        "Cannot calculate weighted value for award with award criteria: '${awardCriteria}' " +
+                            "and award criteria details: '${awardCriteriaDetails}', based on bid '${bidId}'"
                     )
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
@@ -2187,35 +2197,7 @@ class AwardServiceImpl(
                 }
             }
             AwardCriteriaDetails.AUTOMATED -> {
-                when (this.awardCriteria) {
-                    AwardCriteria.PRICE_ONLY -> false
-
-                    AwardCriteria.COST_ONLY,
-                    AwardCriteria.QUALITY_ONLY,
-                    AwardCriteria.RATED_CRITERIA -> true
-                }
-            }
-        }
-
-
-    private fun CreateAwardsAuctionEndData.canCalculateWeightedValue(
-        bid: CreateAwardsAuctionEndData.Bid
-    ): Boolean =
-        when (this.awardCriteriaDetails) {
-            AwardCriteriaDetails.MANUAL -> {
-                when (this.awardCriteria) {
-                    AwardCriteria.PRICE_ONLY -> throw ErrorException(
-                        ErrorType.INVALID_STATUS_DETAILS,
-                        "Cannot calculate weighted value for award with award criteria: '${this.awardCriteria}' " +
-                            "and award criteria details: '${this.awardCriteriaDetails}', based on bid '${bid.id}'"
-                    )
-                    AwardCriteria.COST_ONLY,
-                    AwardCriteria.QUALITY_ONLY,
-                    AwardCriteria.RATED_CRITERIA -> false
-                }
-            }
-            AwardCriteriaDetails.AUTOMATED -> {
-                when (this.awardCriteria) {
+                when (awardCriteria) {
                     AwardCriteria.PRICE_ONLY -> false
 
                     AwardCriteria.COST_ONLY,
