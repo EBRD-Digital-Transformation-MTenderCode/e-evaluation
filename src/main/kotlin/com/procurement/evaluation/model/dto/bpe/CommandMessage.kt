@@ -92,14 +92,6 @@ val CommandMessage.awardId: AwardId
         }
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
 
-val CommandMessage.awardCriteria: AwardCriteria
-    get() = this.context.awardCriteria?.let {
-        try {
-            AwardCriteria.fromValue(it)
-        } catch (exception: Exception) {
-            throw ErrorException(error = ErrorType.AWARD_CRITERIA)
-        }
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'awardCriteria' attribute in context.")
 
 data class Context @JsonCreator constructor(
         val operationId: String,

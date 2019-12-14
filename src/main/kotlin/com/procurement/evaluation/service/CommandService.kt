@@ -57,7 +57,6 @@ import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response.G
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
-import com.procurement.evaluation.model.dto.bpe.awardCriteria
 import com.procurement.evaluation.model.dto.bpe.awardId
 import com.procurement.evaluation.model.dto.bpe.country
 import com.procurement.evaluation.model.dto.bpe.cpid
@@ -342,7 +341,6 @@ class CommandService(
                     cpid = cm.cpid,
                     stage = cm.stage,
                     owner = cm.owner,
-                    awardCriteria = cm.awardCriteria,
                     startDate = cm.startDate
                 )
                 val request = toObject(CreateAwardsAuctionEndRequest::class.java, cm.data)
