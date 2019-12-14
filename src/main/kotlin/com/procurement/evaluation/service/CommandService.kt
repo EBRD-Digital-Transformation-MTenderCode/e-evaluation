@@ -32,6 +32,7 @@ import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsRespon
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
 import com.procurement.evaluation.infrastructure.dto.award.cancel.response.AwardCancellationResponse
+import com.procurement.evaluation.infrastructure.dto.award.check.CheckAwardStatusResponse
 import com.procurement.evaluation.infrastructure.dto.award.consideration.response.StartConsiderationResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.request.CreateAwardsAuctionEndRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.response.CreateAwardsAuctionEndResponse
@@ -403,11 +404,10 @@ class CommandService(
                     awardId = cm.awardId
                 )
                 val result = awardService.checkStatus(context)
-
                 if (log.isDebugEnabled)
                     log.debug("Checked award status. Result: ${toJson(result)}")
 
-                val dataResponse = CreateAwardsResponse()
+                val dataResponse = CheckAwardStatusResponse()
                 if (log.isDebugEnabled)
                     log.debug("Checked award status. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
