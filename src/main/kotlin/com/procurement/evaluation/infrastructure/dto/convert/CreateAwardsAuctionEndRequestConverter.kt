@@ -8,7 +8,7 @@ import com.procurement.evaluation.lib.errorIfEmpty
 import com.procurement.evaluation.lib.mapIfNotEmpty
 import com.procurement.evaluation.lib.orThrow
 
-fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = CreateAwardsAuctionEndData(
+fun CreateAwardsAuctionEndRequest.convert() = CreateAwardsAuctionEndData(
     awardCriteria = this.awardCriteria,
     awardCriteriaDetails = this.awardCriteriaDetails,
     bids = this.bids
@@ -29,11 +29,27 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                             id = document.id,
                             description = document.description,
                             documentType = document.documentType,
-                            relatedLots = document.relatedLots ?: emptyList(),
+                            relatedLots = document.relatedLots
+                                .errorIfEmpty {
+                                    ErrorException(
+                                        error = ErrorType.IS_EMPTY,
+                                        message = "The bid '${bid.id}' contains empty list of the related lots in document."
+                                    )
+                                }
+                                ?.toList()
+                                .orEmpty(),
                             title = document.title
                         )
-                    }.orEmpty(),
-                relatedLots = bid.relatedLots,
+                    }
+                    .orEmpty(),
+                relatedLots = bid.relatedLots
+                    .mapIfNotEmpty { it }
+                    .orThrow {
+                        ErrorException(
+                            error = ErrorType.IS_EMPTY,
+                            message = "The bid '${bid.id}' contains empty list of related lots."
+                        )
+                    },
                 requirementResponses = bid.requirementResponses
                     .errorIfEmpty {
                         ErrorException(
@@ -83,7 +99,8 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                                         scheme = additionalIdentifier.scheme,
                                         uri = additionalIdentifier.uri
                                     )
-                                }.orEmpty(),
+                                }
+                                .orEmpty(),
                             address = tenderer.address
                                 .let { address ->
                                     CreateAwardsAuctionEndData.Bid.Tenderer.Address(
@@ -214,10 +231,12 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                                                                 id = additionalAccountIdentifier.id,
                                                                 scheme = additionalAccountIdentifier.scheme
                                                             )
-                                                        } ?: emptyList(),
+                                                        }
+                                                        .orEmpty(),
                                                     bankName = bankAccount.bankName
                                                 )
-                                            } ?: emptyList(),
+                                            }
+                                            .orEmpty(),
                                         legalForm = details.legalForm
                                             ?.let { legalForm ->
                                                 CreateAwardsAuctionEndData.Bid.Tenderer.Details.LegalForm(
@@ -227,7 +246,14 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                                                     description = legalForm.description
                                                 )
                                             },
-                                        mainEconomicActivities = details.mainEconomicActivities,
+                                        mainEconomicActivities = details.mainEconomicActivities
+                                            .mapIfNotEmpty { it }
+                                            .orThrow {
+                                                ErrorException(
+                                                    error = ErrorType.IS_EMPTY,
+                                                    message = "The bid '${bid.id}' contains empty list of the main economic activities."
+                                                )
+                                            },
                                         permits = details.permits
                                             .errorIfEmpty {
                                                 ErrorException(
@@ -268,7 +294,8 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                                                             )
                                                         }
                                                 )
-                                            } ?: emptyList(),
+                                            }
+                                            .orEmpty(),
                                         scale = details.scale
                                     )
                                 },
@@ -325,7 +352,8 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                                                                 description = document.description,
                                                                 documentType = document.documentType
                                                             )
-                                                        } ?: emptyList(),
+                                                        }
+                                                        .orEmpty(),
                                                     jobTitle = businessFunction.jobTitle,
                                                     type = businessFunction.type
                                                 )
@@ -337,7 +365,8 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                                                 )
                                             }
                                     )
-                                }.orEmpty()
+                                }
+                                .orEmpty()
                         )
                     }
                     .orThrow {
@@ -372,7 +401,8 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                             value = coefficient.value,
                             coefficient = coefficient.coefficient
                         )
-                    }.orThrow {
+                    }
+                    .orThrow {
                         ErrorException(
                             error = ErrorType.IS_EMPTY,
                             message = "Conversion '${conversion.id}' contains empty list of coefficients."
@@ -382,13 +412,15 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                 relatedItem = conversion.relatedItem,
                 relatesTo = conversion.relatesTo
             )
-        }.orEmpty(),
+        }
+        .orEmpty(),
     lots = this.lots
         .mapIfNotEmpty { lot ->
             CreateAwardsAuctionEndData.Lot(
                 id = lot.id
             )
-        }.orThrow {
+        }
+        .orThrow {
             ErrorException(
                 error = ErrorType.IS_EMPTY,
                 message = "Request contains empty list of lots."
@@ -400,7 +432,7 @@ fun CreateAwardsAuctionEndRequest.convert(): CreateAwardsAuctionEndData = Create
                 details = electronicAuctions.details
                     .mapIfNotEmpty { detail ->
                         CreateAwardsAuctionEndData.ElectronicAuctions.Detail(
-                            detail.id,
+                            id = detail.id,
                             relatedLot = detail.relatedLot,
                             electronicAuctionResult = detail.electronicAuctionResult
                                 .mapIfNotEmpty { electronicAuctionResult ->
