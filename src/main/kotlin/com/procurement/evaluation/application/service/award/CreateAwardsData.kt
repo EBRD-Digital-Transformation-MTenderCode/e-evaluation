@@ -11,7 +11,7 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
-import com.procurement.evaluation.model.dto.ocds.SupplierType
+import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.time.LocalDateTime
 
 data class CreateAwardsData(
@@ -146,7 +146,7 @@ data class CreateAwardsData(
             }
 
             data class Details(
-                val typeOfSupplier: SupplierType,
+                val typeOfSupplier: TypeOfSupplier,
                 val mainEconomicActivities: List<String>,
                 val scale: String,
                 val permits: List<Permit>,

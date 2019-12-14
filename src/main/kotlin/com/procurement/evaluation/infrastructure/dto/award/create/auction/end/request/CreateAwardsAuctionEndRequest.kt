@@ -30,7 +30,7 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
-import com.procurement.evaluation.model.dto.ocds.SupplierType
+import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.time.LocalDateTime
 
 data class CreateAwardsAuctionEndRequest(
@@ -216,7 +216,7 @@ data class CreateAwardsAuctionEndRequest(
             }
 
             data class Details(
-                @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: SupplierType,
+                @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: TypeOfSupplier,
                 @param:JsonProperty("mainEconomicActivities") @field:JsonProperty("mainEconomicActivities") val mainEconomicActivities: List<String>,
                 @param:JsonProperty("scale") @field:JsonProperty("scale") val scale: Scale,
 
