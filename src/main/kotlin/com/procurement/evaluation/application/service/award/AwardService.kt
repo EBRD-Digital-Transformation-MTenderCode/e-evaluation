@@ -98,6 +98,11 @@ interface AwardService {
     fun startConsideration(context: StartConsiderationContext): StartConsiderationResult
 
     fun getNext(context: GetNextAwardContext): GetNextAwardResult
+
+    fun setInitialAwardsStatuses(
+        context: SetInitialAwardsStatusContext,
+        data: SetInitialAwardsStatusData
+    ): SetInitialAwardsStatusResult
 }
 
 @Service
@@ -1526,6 +1531,55 @@ class AwardServiceImpl(
             result
         } else
             GetNextAwardResult(award = null)
+    }
+
+    override fun setInitialAwardsStatuses(
+        context: SetInitialAwardsStatusContext,
+        data: SetInitialAwardsStatusData
+    ): SetInitialAwardsStatusResult {
+        val awardEntities = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+
+        val lotId = data.lotId.toString()
+        val updatedEntitiesByAward = awardEntities.asSequence()
+            .map { entity ->
+                val award = toObject(Award::class.java, entity.jsonData)
+                award to entity
+            }
+            .filter { (award, _) ->
+                lotId in award.relatedLots
+            }
+            .map { (award, entity) ->
+                val updatedAward = award.copy(
+                    date = context.startDate,
+                    status = AwardStatus.PENDING,
+                    statusDetails = AwardStatusDetails.EMPTY
+                )
+
+                val updatedEntity: AwardEntity = entity.copy(
+                    status = updatedAward.status.value,
+                    statusDetails = updatedAward.statusDetails.value,
+                    jsonData = toJson(updatedAward)
+                )
+
+                updatedAward to updatedEntity
+            }
+            .toMap()
+
+        val result = SetInitialAwardsStatusResult(
+            awards = updatedEntitiesByAward.keys
+                .map { award ->
+                    SetInitialAwardsStatusResult.Award(
+                        id = AwardId.fromString(award.id),
+                        date = award.date!!,
+                        status = award.status,
+                        statusDetails = award.statusDetails,
+                        relatedBid = BidId.fromString(award.relatedBid!!)
+                    )
+                }
+        )
+
+        awardRepository.update(cpid = context.cpid, updatedAwards = updatedEntitiesByAward.values)
+        return result
     }
 
     private fun getAwardForUnsuccessfulStatusDetails(awards: Collection<Award>): Award? {

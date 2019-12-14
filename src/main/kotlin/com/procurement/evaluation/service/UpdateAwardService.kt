@@ -13,13 +13,10 @@ import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.model.dto.AwardByBid
 import com.procurement.evaluation.model.dto.AwardByBidRq
 import com.procurement.evaluation.model.dto.AwardByBidRs
-import com.procurement.evaluation.model.dto.SetInitialAwardsStatusesRq
-import com.procurement.evaluation.model.dto.SetInitialAwardsStatusesRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
-import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.Document
 import com.procurement.evaluation.model.entity.AwardEntity
@@ -172,53 +169,6 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                 bidAwarded = bidAwarded)
         )
     }
-
-    fun setInitialAwardsStatuses(cm: CommandMessage): ResponseDto {
-        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val awardCriteria = AwardCriteria.fromValue(cm.context.awardCriteria ?: throw ErrorException(CONTEXT))
-        val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-        val dto = toObject(SetInitialAwardsStatusesRq::class.java, cm.data)
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-
-        val awardFromEntitiesSet: MutableSet<Award> = mutableSetOf()
-        val awardIdToEntityMap: MutableMap<String, AwardEntity> = mutableMapOf()
-        awardEntities.forEach { entity ->
-            val award = toObject(Award::class.java, entity.jsonData)
-            if (award.relatedLots.contains(dto.lotId)) {
-                awardIdToEntityMap[award.id] = entity
-                awardFromEntitiesSet.add(award)
-            }
-        }
-
-        val rangedListAwards = sortAwardsByCriteria(awardFromEntitiesSet, awardCriteria)
-        for ((index, value) in rangedListAwards.withIndex()) {
-            if (index == 0) {
-                value.apply {
-                    statusDetails = AwardStatusDetails.CONSIDERATION
-                }
-            } else {
-                value.apply {
-                    statusDetails = AwardStatusDetails.EMPTY
-                }
-            }
-            value.apply {
-                status = AwardStatus.PENDING
-                date = dateTime
-
-            }
-            awardIdToEntityMap[value.id]!!.apply {
-                jsonData = toJson(value)
-            }
-            awardDao.save(awardIdToEntityMap[value.id]!!)
-
-        }
-
-        return ResponseDto(data = SetInitialAwardsStatusesRs(
-                awards = rangedListAwards
-        ))
-    }
-
 
     private fun saveAward(award: Award, awardEntity: AwardEntity?) {
         if (awardEntity != null) {
