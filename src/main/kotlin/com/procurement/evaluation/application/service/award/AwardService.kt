@@ -1312,7 +1312,6 @@ class AwardServiceImpl(
                 .map { award ->
                     SetAwardForEvaluationResult.Award(
                         id = AwardId.fromString(award.id),
-                        token = Token.fromString(award.token!!),
                         title = award.title,
                         date = award.date!!,
                         status = award.status,

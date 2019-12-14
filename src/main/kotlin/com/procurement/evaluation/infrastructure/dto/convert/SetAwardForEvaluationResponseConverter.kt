@@ -7,7 +7,6 @@ fun SetAwardForEvaluationResult.convert() = SetAwardForEvaluationResponse(
     awards = this.awards.map { award ->
         SetAwardForEvaluationResponse.Award(
             id = award.id,
-            token = award.token,
             title = award.title,
             date = award.date,
             status = award.status,
