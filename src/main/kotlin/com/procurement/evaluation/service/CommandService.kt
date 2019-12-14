@@ -32,13 +32,12 @@ import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsRespon
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
 import com.procurement.evaluation.infrastructure.dto.award.cancel.response.AwardCancellationResponse
+import com.procurement.evaluation.infrastructure.dto.award.check.CheckAwardStatusResponse
 import com.procurement.evaluation.infrastructure.dto.award.consideration.response.StartConsiderationResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.request.CreateAwardsAuctionEndRequest
-import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.response.CreateAwardsAuctionEndResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
-import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.SetAwardForEvaluationRequest
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
@@ -330,7 +329,7 @@ class CommandService(
                 if (log.isDebugEnabled)
                     log.debug("Awards were created. Result: ${toJson(result)}")
 
-                val dataResponse = CreateAwardsResponse()
+                val dataResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Awards were created. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
@@ -346,11 +345,11 @@ class CommandService(
                 val request = toObject(CreateAwardsAuctionEndRequest::class.java, cm.data)
                 val result = awardService.createAwardsAuctionEnd(context = context, data = request.convert())
                 if (log.isDebugEnabled)
-                    log.debug("Awards were created. Result: ${toJson(result)}")
+                    log.debug("Awards were created (auction period end). Result: ${toJson(result)}")
 
-                val dataResponse = CreateAwardsAuctionEndResponse()
+                val dataResponse = result.convert()
                 if (log.isDebugEnabled)
-                    log.debug("Awards were created. Response: ${toJson(dataResponse)}")
+                    log.debug("Awards were created (auction period end). Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)
             }
             CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
@@ -401,11 +400,10 @@ class CommandService(
                     awardId = cm.awardId
                 )
                 val result = awardService.checkStatus(context)
-
                 if (log.isDebugEnabled)
                     log.debug("Checked award status. Result: ${toJson(result)}")
 
-                val dataResponse = CreateAwardsResponse()
+                val dataResponse = CheckAwardStatusResponse()
                 if (log.isDebugEnabled)
                     log.debug("Checked award status. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)

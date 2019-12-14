@@ -1,6 +1,5 @@
 package com.procurement.evaluation.application.service.award
 
-import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.lot.LotId
@@ -15,7 +14,6 @@ data class SetAwardForEvaluationResult(
 
     data class Award(
         val id: AwardId,
-        val token: Token,
         val title: String?,
         val date: LocalDateTime,
         val status: AwardStatus,

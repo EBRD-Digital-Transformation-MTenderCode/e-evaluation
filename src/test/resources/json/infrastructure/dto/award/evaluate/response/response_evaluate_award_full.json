@@ -29,6 +29,10 @@
           "5cc5e65c-2138-4316-aa62-822e723dd2e0"
         ]
       }
-    ]
+    ],
+    "weightedValue": {
+      "amount": 80.22,
+      "currency": "MDL"
+    }
   }
 }

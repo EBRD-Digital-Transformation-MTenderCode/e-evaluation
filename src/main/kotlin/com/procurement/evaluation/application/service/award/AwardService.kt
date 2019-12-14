@@ -904,7 +904,8 @@ class AwardServiceImpl(
                             .orEmpty()
                     )
                 }
-                .orEmpty()
+                .orEmpty(),
+            weightedValue = updatedAward.weightedValue?.asMoney
         )
     )
 
@@ -1194,8 +1195,18 @@ class AwardServiceImpl(
                 jsonData = toJson(award)
             )
         }
+
+        val result = CreatedAwardsResult(
+            awards = createdAwards.map { award ->
+                CreatedAwardsResult.Award(
+                    token = Token.fromString(award.token!!),
+                    id = AwardId.fromString(award.id)
+                )
+            }
+        )
+
         awardRepository.saveNew(context.cpid, entities)
-        return CreatedAwardsResult()
+        return result
     }
 
     override fun createAwardsAuctionEnd(
@@ -1247,8 +1258,18 @@ class AwardServiceImpl(
                 jsonData = toJson(award)
             )
         }
+
+        val result = CreatedAwardsAuctionEndResult(
+            awards = createdAwards.map { award ->
+                CreatedAwardsAuctionEndResult.Award(
+                    token = Token.fromString(award.token!!),
+                    id = AwardId.fromString(award.id)
+                )
+            }
+        )
+
         awardRepository.saveNew(context.cpid, entities)
-        return CreatedAwardsAuctionEndResult()
+        return result
     }
 
     override fun setAwardForEvaluation(
@@ -1309,7 +1330,6 @@ class AwardServiceImpl(
                 .map { award ->
                     SetAwardForEvaluationResult.Award(
                         id = AwardId.fromString(award.id),
-                        token = Token.fromString(award.token!!),
                         title = award.title,
                         date = award.date!!,
                         status = award.status,
