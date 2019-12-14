@@ -900,7 +900,8 @@ class AwardServiceImpl(
                             .orEmpty()
                     )
                 }
-                .orEmpty()
+                .orEmpty(),
+            weightedValue = updatedAward.weightedValue?.asMoney
         )
     )
 

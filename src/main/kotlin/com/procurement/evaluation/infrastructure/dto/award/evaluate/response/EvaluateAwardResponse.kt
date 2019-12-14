@@ -48,7 +48,12 @@ data class EvaluateAwardResponse(
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @JsonSetter(nulls = Nulls.AS_EMPTY)
-        @field:JsonProperty("documents") @param:JsonProperty("documents") val documents: List<Document> = emptyList()
+        @field:JsonProperty("documents") @param:JsonProperty("documents") val documents: List<Document> = emptyList(),
+
+        @JsonDeserialize(using = MoneyDeserializer::class)
+        @JsonSerialize(using = MoneySerializer::class)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("weightedValue") @param:JsonProperty("weightedValue") val weightedValue: Money?
     ) {
 
         data class Supplier(

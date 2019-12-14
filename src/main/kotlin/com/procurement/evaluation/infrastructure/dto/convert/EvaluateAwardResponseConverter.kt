@@ -33,7 +33,8 @@ fun EvaluateAwardResult.convert() = EvaluateAwardResponse(
                                 .toList(),
                             documentType = document.documentType
                         )
-                    }
+                    },
+                weightedValue = award.weightedValue
             )
         }
 )
