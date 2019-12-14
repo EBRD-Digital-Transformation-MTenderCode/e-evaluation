@@ -1250,8 +1250,18 @@ class AwardServiceImpl(
                 jsonData = toJson(award)
             )
         }
+
+        val result = CreatedAwardsAuctionEndResult(
+            awards = createdAwards.map { award ->
+                CreatedAwardsAuctionEndResult.Award(
+                    token = Token.fromString(award.token!!),
+                    id = AwardId.fromString(award.id)
+                )
+            }
+        )
+
         awardRepository.saveNew(context.cpid, entities)
-        return CreatedAwardsAuctionEndResult()
+        return result
     }
 
     override fun setAwardForEvaluation(
