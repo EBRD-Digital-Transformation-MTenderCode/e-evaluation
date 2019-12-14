@@ -8,6 +8,7 @@ import com.procurement.evaluation.application.service.award.CompleteAwardingCont
 import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
+import com.procurement.evaluation.application.service.award.CreateAwardsAuctionEndContext
 import com.procurement.evaluation.application.service.award.CreateAwardsContext
 import com.procurement.evaluation.application.service.award.CreateUnsuccessfulAwardsContext
 import com.procurement.evaluation.application.service.award.EvaluateAwardContext
@@ -31,6 +32,8 @@ import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
 import com.procurement.evaluation.infrastructure.dto.award.cancel.response.AwardCancellationResponse
 import com.procurement.evaluation.infrastructure.dto.award.consideration.response.StartConsiderationResponse
+import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.request.CreateAwardsAuctionEndRequest
+import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.response.CreateAwardsAuctionEndResponse
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
@@ -51,6 +54,7 @@ import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response.G
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.ResponseDto
+import com.procurement.evaluation.model.dto.bpe.awardCriteria
 import com.procurement.evaluation.model.dto.bpe.awardId
 import com.procurement.evaluation.model.dto.bpe.country
 import com.procurement.evaluation.model.dto.bpe.cpid
@@ -330,7 +334,24 @@ class CommandService(
                 ResponseDto(data = dataResponse)
             }
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
-            CommandType.CREATE_AWARDS_AUCTION_END -> createAwardService.createAwardsAuctionEnd(cm)
+            CommandType.CREATE_AWARDS_AUCTION_END -> {
+                val context = CreateAwardsAuctionEndContext(
+                    cpid = cm.cpid,
+                    stage = cm.stage,
+                    owner = cm.owner,
+                    awardCriteria = cm.awardCriteria,
+                    startDate = cm.startDate
+                )
+                val request = toObject(CreateAwardsAuctionEndRequest::class.java, cm.data)
+                val result = awardService.createAwardsAuctionEnd(context = context, data = request.convert())
+                if (log.isDebugEnabled)
+                    log.debug("Awards were created. Result: ${toJson(result)}")
+
+                val dataResponse = CreateAwardsAuctionEndResponse()
+                if (log.isDebugEnabled)
+                    log.debug("Awards were created. Response: ${toJson(dataResponse)}")
+                ResponseDto(data = dataResponse)
+            }
             CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
             CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)

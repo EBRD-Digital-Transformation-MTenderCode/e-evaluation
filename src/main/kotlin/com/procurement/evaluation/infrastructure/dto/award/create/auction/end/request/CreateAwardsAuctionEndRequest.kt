@@ -1,13 +1,20 @@
-package com.procurement.evaluation.infrastructure.dto.award.create.request
+package com.procurement.evaluation.infrastructure.dto.award.create.auction.end.request
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.data.CoefficientRate
 import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.document.DocumentId
+import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
+import com.procurement.evaluation.domain.model.enums.Scale
+import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.model.requirement.RequirementId
+import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateDeserializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateSerializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
@@ -28,7 +35,7 @@ import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.time.LocalDateTime
 
-data class CreateAwardsRequest(
+data class CreateAwardsAuctionEndRequest(
     @param:JsonProperty("awardCriteria") @field:JsonProperty("awardCriteria") val awardCriteria: AwardCriteria,
     @param:JsonProperty("awardCriteriaDetails") @field:JsonProperty("awardCriteriaDetails") val awardCriteriaDetails: AwardCriteriaDetails,
 
@@ -36,7 +43,8 @@ data class CreateAwardsRequest(
     @param:JsonProperty("conversions") @field:JsonProperty("conversions") val conversions: List<Conversion>?,
 
     @param:JsonProperty("bids") @field:JsonProperty("bids") val bids: List<Bid>,
-    @param:JsonProperty("lots") @field:JsonProperty("lots") val lots: List<Lot>
+    @param:JsonProperty("lots") @field:JsonProperty("lots") val lots: List<Lot>,
+    @field:JsonProperty("electronicAuctions") @param:JsonProperty("electronicAuctions") val electronicAuctions: ElectronicAuctions
 ) {
     data class Conversion(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
@@ -62,7 +70,7 @@ data class CreateAwardsRequest(
     }
 
     data class Bid(
-        @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+        @param:JsonProperty("id") @field:JsonProperty("id") val id: BidId,
 
         @JsonDeserialize(using = JsonDateTimeDeserializer::class)
         @JsonSerialize(using = JsonDateTimeSerializer::class)
@@ -82,7 +90,7 @@ data class CreateAwardsRequest(
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @param:JsonProperty("requirementResponses") @field:JsonProperty("requirementResponses") val requirementResponses: List<RequirementResponse>?,
 
-        @param:JsonProperty("relatedLots") @field:JsonProperty("relatedLots") val relatedLots: List<String>
+        @param:JsonProperty("relatedLots") @field:JsonProperty("relatedLots") val relatedLots: List<LotId>
     ) {
         data class Tenderer(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
@@ -199,8 +207,8 @@ data class CreateAwardsRequest(
                     )
 
                     data class Document(
-                        @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-                        @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: String,
+                        @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId,
+                        @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: BusinessFunctionDocumentType,
                         @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
 
                         @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -212,7 +220,7 @@ data class CreateAwardsRequest(
             data class Details(
                 @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: TypeOfSupplier,
                 @param:JsonProperty("mainEconomicActivities") @field:JsonProperty("mainEconomicActivities") val mainEconomicActivities: List<String>,
-                @param:JsonProperty("scale") @field:JsonProperty("scale") val scale: String,
+                @param:JsonProperty("scale") @field:JsonProperty("scale") val scale: Scale,
 
                 @JsonInclude(JsonInclude.Include.NON_EMPTY)
                 @param:JsonProperty("permits") @field:JsonProperty("permits") val permits: List<Permit>?,
@@ -337,7 +345,7 @@ data class CreateAwardsRequest(
 
         data class Document(
             @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: BidDocumentType,
-            @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId,
 
             @JsonInclude(JsonInclude.Include.NON_NULL)
             @param:JsonProperty("title") @field:JsonProperty("title") val title: String?,
@@ -346,11 +354,11 @@ data class CreateAwardsRequest(
             @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            @param:JsonProperty("relatedLots") @field:JsonProperty("relatedLots") val relatedLots: List<String>?
+            @param:JsonProperty("relatedLots") @field:JsonProperty("relatedLots") val relatedLots: List<LotId>?
         )
 
         data class RequirementResponse(
-            @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: RequirementResponseId,
             @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
 
             @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -365,7 +373,7 @@ data class CreateAwardsRequest(
             @param:JsonProperty("period") @field:JsonProperty("period") val period: Period?
         ) {
             data class Requirement(
-                @param:JsonProperty("id") @field:JsonProperty("id") val id: String
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: RequirementId
             )
 
             data class Period(
@@ -381,6 +389,24 @@ data class CreateAwardsRequest(
     }
 
     data class Lot(
-        @param:JsonProperty("id") @field:JsonProperty("id") val id: String
+        @param:JsonProperty("id") @field:JsonProperty("id") val id: LotId
     )
+
+    data class ElectronicAuctions(
+        @field:JsonProperty("details") @param:JsonProperty("details") val details: List<Detail>
+    ) {
+        data class Detail(
+            @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
+            @field:JsonProperty("relatedLot") @param:JsonProperty("relatedLot") val relatedLot: LotId,
+            @field:JsonProperty("electronicAuctionResult") @param:JsonProperty("electronicAuctionResult") val electronicAuctionResult: List<ElectronicAuctionResult>
+        ) {
+            data class ElectronicAuctionResult(
+                @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: BidId,
+
+                @JsonDeserialize(using = MoneyDeserializer::class)
+                @JsonSerialize(using = MoneySerializer::class)
+                @param:JsonProperty("value") @field:JsonProperty("value") val value: Money
+            )
+        }
+    }
 }

@@ -1,9 +1,15 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.data.CoefficientRate
 import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
+import com.procurement.evaluation.domain.model.enums.Scale
+import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.model.requirement.RequirementId
+import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.BidDocumentType
@@ -14,12 +20,13 @@ import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.time.LocalDateTime
 
-data class CreateAwardsData(
+data class CreateAwardsAuctionEndData(
     val awardCriteria: AwardCriteria,
     val awardCriteriaDetails: AwardCriteriaDetails,
     val conversions: List<Conversion>,
     val bids: List<Bid>,
-    val lots: List<Lot>
+    val lots: List<Lot>,
+    val electronicAuctions: ElectronicAuctions
 ) {
     data class Conversion(
         val id: String,
@@ -37,7 +44,7 @@ data class CreateAwardsData(
     }
 
     data class Bid(
-        val id: String,
+        val id: BidId,
         val date: LocalDateTime,
         val status: BidStatusType,
         val statusDetails: BidStatusDetailsType,
@@ -45,7 +52,7 @@ data class CreateAwardsData(
         val value: Money,
         val documents: List<Document>,
         val requirementResponses: List<RequirementResponse>,
-        val relatedLots: List<String>
+        val relatedLots: List<LotId>
     ) {
         data class Tenderer(
             val id: String,
@@ -55,7 +62,6 @@ data class CreateAwardsData(
             val address: Address,
             val contactPoint: ContactPoint,
             val persones: List<Person>,
-
             val details: Details
         ) {
             data class Identifier(
@@ -138,7 +144,7 @@ data class CreateAwardsData(
 
                     data class Document(
                         val id: String,
-                        val documentType: String,
+                        val documentType: BusinessFunctionDocumentType,
                         val title: String,
                         val description: String?
                     )
@@ -148,7 +154,7 @@ data class CreateAwardsData(
             data class Details(
                 val typeOfSupplier: TypeOfSupplier,
                 val mainEconomicActivities: List<String>,
-                val scale: String,
+                val scale: Scale,
                 val permits: List<Permit>,
                 val bankAccounts: List<BankAccount>,
                 val legalForm: LegalForm?
@@ -187,7 +193,6 @@ data class CreateAwardsData(
                     val address: Address,
                     val identifier: Identifier,
                     val accountIdentification: AccountIdentification,
-
                     val additionalAccountIdentifiers: List<AdditionalAccountIdentifier>
                 ) {
                     data class Address(
@@ -253,11 +258,11 @@ data class CreateAwardsData(
             val id: String,
             val title: String?,
             val description: String?,
-            val relatedLots: List<String>
+            val relatedLots: List<LotId>
         )
 
         data class RequirementResponse(
-            val id: String,
+            val id: RequirementResponseId,
             val title: String,
             val description: String?,
             val value: RequirementRsValue,
@@ -265,7 +270,7 @@ data class CreateAwardsData(
             val period: Period?
         ) {
             data class Requirement(
-                val id: String
+                val id: RequirementId
             )
 
             data class Period(
@@ -276,6 +281,21 @@ data class CreateAwardsData(
     }
 
     data class Lot(
-        val id: String
+        val id: LotId
     )
+
+    data class ElectronicAuctions(
+        val details: List<Detail>
+    ) {
+        data class Detail(
+            val id: String,
+            val relatedLot: LotId,
+            val electronicAuctionResult: List<ElectronicAuctionResult>
+        ) {
+            data class ElectronicAuctionResult(
+                val relatedBid: BidId,
+                val value: Money
+            )
+        }
+    }
 }

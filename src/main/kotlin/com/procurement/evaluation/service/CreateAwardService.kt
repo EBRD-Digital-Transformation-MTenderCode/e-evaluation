@@ -2,12 +2,9 @@ package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.exception.ErrorException
-import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.model.dto.BidsData
-import com.procurement.evaluation.model.dto.CreateAwardsAuctionEndRq
 import com.procurement.evaluation.model.dto.CreateAwardsAuctionRq
-import com.procurement.evaluation.model.dto.CreateAwardsRq
 import com.procurement.evaluation.model.dto.CreateAwardsRs
 import com.procurement.evaluation.model.dto.FirstBid
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
@@ -65,41 +62,6 @@ class CreateAwardService(
         awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         val firstBids = getFirstBidsFromAwards(AwardCriteria.fromValue(awardCriteria), successfulAwardsList)
-        return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids))
-    }
-
-    fun createAwardsAuctionEnd(cm: CommandMessage): ResponseDto {
-        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
-        val awardCriteria = cm.context.awardCriteria ?: throw ErrorException(CONTEXT)
-        val startDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-        val dto = toObject(CreateAwardsAuctionEndRq::class.java, cm.data)
-
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-
-        val unsuccessfulLotsSet = getUnsuccessfulLotsFromAwardEntities(awardEntities)
-        val successfulLotsSet = getRelatedLotsIdFromBids(dto.bids).asSequence()
-            .filter { !unsuccessfulLotsSet.contains(it) }.toHashSet()
-        val successfulBidsList = getSuccessfulBids(dto.bids, successfulLotsSet)
-        val auctionResultList = dto.tender.electronicAuctions.details.asSequence()
-            .flatMap { it.electronicAuctionResult.asSequence() }.toList()
-        for (bid in successfulBidsList) {
-            for (res in auctionResultList) {
-                if (bid.id == res.relatedBid) {
-                    if (bid.value.amount < res.value.amount) {
-                        throw ErrorException(ErrorType.INVALID_AUCTION_RESULT)
-                    }
-                    bid.value = res.value
-                }
-            }
-        }
-        val awards = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(awards, AwardCriteria.fromValue(awardCriteria))
-        val awardPeriod = periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
-        awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
-        val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        val firstBids = getFirstBidsFromAwards(AwardCriteria.fromValue(awardCriteria), awards)
         return ResponseDto(data = CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids))
     }
 

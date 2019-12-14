@@ -1,0 +1,257 @@
+{
+  "awardCriteria": "priceOnly",
+  "awardCriteriaDetails": "manual",
+  "conversions": [
+    {
+      "id": "conversion-1557946336820",
+      "relatesTo": "requirement",
+      "relatedItem": "002-1-2",
+      "rationale": "Number of years for product guarantee",
+      "description": "data.conversions[0].description",
+      "coefficients": [
+
+        {
+          "id": "coefficient-1557947503428",
+          "value": 2.00,
+          "coefficient": 0.85
+        }
+
+      ]
+    }
+  ],
+  "bids": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426655440000",
+      "date": "2019-03-02T08:00:00Z",
+      "status": "pending",
+      "statusDetails": "valid",
+      "tenderers": [
+        {
+          "id": "bid[0].tenderers[0].id",
+          "name": "bid[0].tenderers[0].name",
+          "identifier": {
+            "scheme": "bid[0].tenderers[0].identifier.scheme",
+            "id": "bid[0].tenderers[0].identifier.id",
+            "legalName": "bid[0].tenderers[0].identifier.legalName",
+            "uri": "bid[0].tenderers[0].identifier.uri"
+          },
+          "additionalIdentifiers": [
+            {
+              "scheme": "bid[0].tenderers[0].additionalIdentifiers.scheme",
+              "id": "bid[0].tenderers[0].additionalIdentifiers.id",
+              "legalName": "bid[0].tenderers[0].additionalIdentifiers.legalName",
+              "uri": "bid[0].tenderers[0].additionalIdentifiers.uri"
+            }
+          ],
+          "address": {
+            "streetAddress": "bid[0].tenderers[0].address.streetAddress",
+            "postalCode": "bid[0].tenderers[0].address.postalCode",
+            "addressDetails": {
+              "country": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.country.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.country.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.country.description",
+                "uri": "bid[0].tenderers[0].address.addressDetails.country.uri"
+              },
+              "region": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.region.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.region.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.region.description",
+                "uri": "bid[0].tenderers[0].address.addressDetails.region.uri"
+              },
+              "locality": {
+                "scheme": "bid[0].tenderers[0].address.addressDetails.locality.scheme",
+                "id": "bid[0].tenderers[0].address.addressDetails.locality.id",
+                "description": "bid[0].tenderers[0].address.addressDetails.locality.description",
+                "uri": "bid[0].tenderers[0].address.addressDetails.locality.uri"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "bid[0].tenderers[0].contactPoint.name",
+            "email": "bid[0].tenderers[0].contactPoint.email",
+            "telephone": "bid[0].tenderers[0].contactPoint.telephone",
+            "faxNumber": "bid[0].tenderers[0].contactPoint.faxNumber",
+            "url": "bid[0].tenderers[0].contactPoint.url"
+          },
+          "persones": [
+            {
+              "title": "bid[0].tenderers[0].persones[0].title",
+              "name": "bid[0].tenderers[0].persones[0].title",
+              "identifier": {
+                "scheme": "bid[0].tenderers[0].persones[0].identifier.scheme",
+                "id": "bid[0].tenderers[0].persones[0].identifier.id",
+                "uri": "bid[0].tenderers[0].persones[0].identifier.uri"
+              },
+              "businessFunctions": [
+                {
+                  "id": "bid[0].tenderers[0].persones[0].businessFunctions[0].id",
+                  "type": "authority",
+                  "jobTitle": "Chief Executive Officer",
+                  "period": {
+                    "startDate": "2019-03-15T11:54:13Z"
+                  },
+                  "documents": [
+                    {
+                      "id": "bid[0].tenderers[0].persones[0].businessFunctions[0].documents[0].id",
+                      "documentType": "regulatoryDocument",
+                      "title": "bid[0].tenderers[0].persones[0].businessFunctions[0].documents[0].title",
+                      "description": "bid[0].tenderers[0].persones[0].businessFunctions[0].documents[0].description"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "details": {
+            "typeOfSupplier": "company",
+            "mainEconomicActivities": [
+              "bid[0].tenderers[0].details.mainEconomicActivities[0]"
+            ],
+            "scale": "sme",
+            "permits": [
+              {
+                "scheme": "SRLE",
+                "id": "bid[0].tenderers[0].details.permits[0].id",
+                "url": "bid[0].tenderers[0].details.permits[0].url",
+                "permitDetails": {
+                  "issuedBy": {
+                    "id": "bid[0].tenderers[0].details.permits[0].permitDetails.issuedBy.id",
+                    "name": "bid[0].tenderers[0].details.permits[0].permitDetails.issuedBy.name"
+                  },
+                  "issuedThought": {
+                    "id": "bid[0].tenderers[0].details.permits[0].permitDetails.issuedThought.id",
+                    "name": "bid[0].tenderers[0].details.permits[0].permitDetails.issuedThought.name"
+                  },
+                  "validityPeriod": {
+                    "startDate": "2019-03-16T11:54:13Z",
+                    "endDate": "2019-03-17T11:54:13Z"
+                  }
+                }
+              }
+            ],
+            "bankAccounts": [
+              {
+                "description": "bid[0].tenderers[0].details.bankAccounts[0].description",
+                "bankName": "bid[0].tenderers[0].details.bankAccounts[0].bankName",
+                "address": {
+                  "streetAddress": "bid[0].tenderers[0].details.bankAccounts[0].address.streetAddress",
+                  "postalCode": "bid[0].tenderers[0].details.bankAccounts[0].address.postalCode",
+                  "addressDetails": {
+                    "country": {
+                      "scheme": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.country.scheme",
+                      "id": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.country.id",
+                      "description": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.country.description",
+                      "uri": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.country.uri"
+                    },
+                    "region": {
+                      "scheme": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.region.scheme",
+                      "id": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.region.id",
+                      "description": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.region.description",
+                      "uri": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.region.uri"
+                    },
+                    "locality": {
+                      "scheme": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.locality.scheme",
+                      "id": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.locality.id",
+                      "description": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.locality.description",
+                      "uri": "bid[0].tenderers[0].details.bankAccounts[0].address.addressDetails.locality.uri"
+                    }
+                  }
+                },
+                "identifier": {
+                  "scheme": "UA-MFO",
+                  "id": "300711"
+                },
+                "accountIdentification": {
+                  "scheme": "IBAN",
+                  "id": "2600000625637"
+                },
+                "additionalAccountIdentifiers": [
+                  {
+                    "scheme": "settlement",
+                    "id": "bid[0].tenderers[0].details.bankAccounts[0].additionalAccountIdentifiers.id"
+                  }
+                ]
+              }
+            ],
+            "legalForm": {
+              "scheme": "bid[0].tenderers[0].legalForm.scheme",
+              "id": "bid[0].tenderers[0].legalForm.id",
+              "description": "bid[0].tenderers[0].legalForm.description",
+              "uri": "bid[0].tenderers[0].legalForm.uri"
+            }
+          }
+        }
+      ],
+      "value": {
+        "amount": 10.05,
+        "currency": "MDL"
+      },
+      "documents": [
+        {
+          "documentType": "submissionDocuments",
+          "id": "bid[0].documents[0].id",
+          "title": "bid[0].documents[0].title",
+          "description": "bid[0].documents[0].description",
+          "relatedLots": [
+            "9830e24e-1ce9-11ea-978f-2e728ce88125"
+          ]
+        }
+      ],
+      "requirementResponses": [
+        {
+          "id": "9830e24e-1ce9-11ea-978f-2e728ce88125",
+          "title": "bid[0].requirementResponses[0].title",
+          "description": "bid[0].requirementResponses[0].description",
+          "value": "requirementResponses",
+          "requirement": {
+            "id": "9830e4c4-1ce9-11ea-978f-2e728ce88125"
+          },
+          "period": {
+            "startDate": "2019-03-16T11:54:13Z",
+            "endDate": "2019-03-16T11:54:13Z"
+          }
+        }
+      ],
+      "relatedLots": [
+        "9830e4c4-1ce9-11ea-978f-2e728ce88125"
+      ]
+    }
+  ],
+  "lots": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426655440000"
+    }
+  ],
+  "electronicAuctions": {
+    "details": [
+      {
+        "id": "c15501a1-8be0-4734-bd5c-000000000888",
+        "relatedLot": "39614de2-c348-11e8-987b-a7ad59777db6",
+        "electronicAuctionResult": [
+          {
+            "relatedBid": "a80b61e0-c348-11e8-b9a8-dd319bd9bbdf",
+            "value": {
+              "amount": 981.0,
+              "currency": "MDL"
+            }
+          },
+          {
+            "relatedBid": "fcecd630-c63b-11e8-a76b-31c7a0ba1585",
+            "value": {
+              "amount": 980.0,
+              "currency": "MDL"
+            }
+          },
+          {
+            "relatedBid": "d80449c0-cc80-11e8-bfb9-f9c4db0b58fc",
+            "value": {
+              "amount": 990.0,
+              "currency": "MDL"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

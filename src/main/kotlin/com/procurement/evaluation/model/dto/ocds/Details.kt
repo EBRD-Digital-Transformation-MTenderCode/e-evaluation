@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 data class Details @JsonCreator constructor(
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val typeOfSupplier: SupplierType?,
+    val typeOfSupplier: TypeOfSupplier?,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     val mainEconomicActivities: List<String>?,
