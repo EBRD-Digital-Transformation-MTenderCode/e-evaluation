@@ -39,7 +39,6 @@ import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.re
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardResponse
-import com.procurement.evaluation.infrastructure.dto.award.create.response.CreateAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.SetAwardForEvaluationRequest
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.response.EvaluateAwardResponse
@@ -332,7 +331,7 @@ class CommandService(
                 if (log.isDebugEnabled)
                     log.debug("Awards were created. Result: ${toJson(result)}")
 
-                val dataResponse = CreateAwardsResponse()
+                val dataResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Awards were created. Response: ${toJson(dataResponse)}")
                 ResponseDto(data = dataResponse)

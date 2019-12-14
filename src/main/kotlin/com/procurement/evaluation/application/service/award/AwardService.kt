@@ -1190,8 +1190,18 @@ class AwardServiceImpl(
                 jsonData = toJson(award)
             )
         }
+
+        val result = CreatedAwardsResult(
+            awards = createdAwards.map { award ->
+                CreatedAwardsResult.Award(
+                    token = Token.fromString(award.token!!),
+                    id = AwardId.fromString(award.id)
+                )
+            }
+        )
+
         awardRepository.saveNew(context.cpid, entities)
-        return CreatedAwardsResult()
+        return result
     }
 
 
