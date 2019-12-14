@@ -2039,7 +2039,7 @@ class AwardServiceImpl(
                                                         id = document.id,
                                                         title = document.title,
                                                         description = document.description,
-                                                        documentType = document.documentType
+                                                        documentType = document.documentType.value
                                                     )
                                                 },
                                             jobTitle = businessFunction.jobTitle,

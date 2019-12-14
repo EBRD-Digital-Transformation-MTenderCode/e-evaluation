@@ -4,6 +4,7 @@ import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.data.CoefficientRate
 import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
 import com.procurement.evaluation.domain.model.enums.Scale
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
@@ -143,7 +144,7 @@ data class CreateAwardsAuctionEndData(
 
                     data class Document(
                         val id: String,
-                        val documentType: String,
+                        val documentType: BusinessFunctionDocumentType,
                         val title: String,
                         val description: String?
                     )
@@ -257,7 +258,7 @@ data class CreateAwardsAuctionEndData(
             val id: String,
             val title: String?,
             val description: String?,
-            val relatedLots: List<String>
+            val relatedLots: List<LotId>
         )
 
         data class RequirementResponse(

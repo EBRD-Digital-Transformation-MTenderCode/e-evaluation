@@ -194,7 +194,7 @@
           "title": "bid[0].documents[0].title",
           "description": "bid[0].documents[0].description",
           "relatedLots": [
-            "bid[0].documents[0].relatedLots[0]"
+            "9830e24e-1ce9-11ea-978f-2e728ce88125"
           ]
         }
       ],

@@ -8,6 +8,8 @@ import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.data.CoefficientRate
 import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.document.DocumentId
+import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
 import com.procurement.evaluation.domain.model.enums.Scale
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
@@ -205,8 +207,8 @@ data class CreateAwardsAuctionEndRequest(
                     )
 
                     data class Document(
-                        @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-                        @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: String,
+                        @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId,
+                        @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: BusinessFunctionDocumentType,
                         @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
 
                         @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -343,7 +345,7 @@ data class CreateAwardsAuctionEndRequest(
 
         data class Document(
             @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: BidDocumentType,
-            @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId,
 
             @JsonInclude(JsonInclude.Include.NON_NULL)
             @param:JsonProperty("title") @field:JsonProperty("title") val title: String?,
@@ -352,7 +354,7 @@ data class CreateAwardsAuctionEndRequest(
             @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            @param:JsonProperty("relatedLots") @field:JsonProperty("relatedLots") val relatedLots: List<String>?
+            @param:JsonProperty("relatedLots") @field:JsonProperty("relatedLots") val relatedLots: List<LotId>?
         )
 
         data class RequirementResponse(
