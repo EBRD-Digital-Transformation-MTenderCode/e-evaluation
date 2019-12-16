@@ -6,7 +6,7 @@ import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import java.time.LocalDateTime
 
-data class AwardCancelledData(
+data class AwardCancellationResult(
     val awards: List<Award>
 ) {
     data class Award(

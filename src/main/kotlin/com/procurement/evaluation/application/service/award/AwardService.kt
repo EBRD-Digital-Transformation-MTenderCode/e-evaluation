@@ -110,7 +110,7 @@ interface AwardService {
         data: SetInitialAwardsStatusData
     ): SetInitialAwardsStatusResult
 
-    fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancelledData
+    fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
 }
 
 @Service
@@ -1613,7 +1613,7 @@ class AwardServiceImpl(
         return result
     }
 
-    override fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancelledData =
+    override fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult =
         when (context.phase) {
             Phase.AWARDING,
             Phase.TENDERING,
@@ -1632,9 +1632,9 @@ class AwardServiceImpl(
                         jsonData = toJson(award)
                     )
                 }
-                val result = AwardCancelledData(
+                val result = AwardCancellationResult(
                     awards = unsuccessfulAwards.map { award ->
-                        AwardCancelledData.Award(
+                        AwardCancellationResult.Award(
                             id = AwardId.fromString(award.id),
                             title = award.title,
                             description = award.description,
