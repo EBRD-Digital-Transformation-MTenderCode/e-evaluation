@@ -1,7 +1,7 @@
 package com.procurement.evaluation.service
 
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
-import com.procurement.evaluation.application.service.award.AwardCancellationData
+import com.procurement.evaluation.application.service.award.AwardCancellationResult
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.application.service.award.CheckAwardStatusContext
 import com.procurement.evaluation.application.service.award.CompleteAwardingContext
@@ -51,6 +51,7 @@ import com.procurement.evaluation.infrastructure.dto.award.period.start.StartAwa
 import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.request.CreateUnsuccessfulAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.response.CreateUnsuccessfulAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.convert.convert
+import com.procurement.evaluation.infrastructure.dto.convert.converter
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.GetUnsuccessfulLotsRequest
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response.GetUnsuccessfulLotsResponse
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
@@ -355,39 +356,22 @@ class CommandService(
             CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
             CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
-            CommandType.PREPARE_CANCELLATION -> statusService.prepareCancellation(cm)
             CommandType.AWARDS_CANCELLATION -> {
                 val context = AwardCancellationContext(
                     cpid = cm.cpid,
                     owner = cm.owner,
                     stage = cm.stage,
-                    phase = cm.phase,
-                    startDate = cm.startDate
+                    phase = cm.phase
                 )
-                val request = toObject(AwardCancellationRequest::class.java, cm.data)
-                val data = AwardCancellationData(
-                    lots = request.lots.map { lot ->
-                        AwardCancellationData.Lot(id = lot.id)
-                    }
-                )
-                val result = statusService.awardsCancellation(context = context, data = data)
+                val request: AwardCancellationRequest = toObject(AwardCancellationRequest::class.java, cm.data)
+                val result: AwardCancellationResult = awardService.cancellation(context = context, data = request.converter())
                 if (log.isDebugEnabled)
                     log.debug("Award was cancelled. Result: ${toJson(result)}")
-                val dataResponse = AwardCancellationResponse(
-                    awards = result.awards.map { award ->
-                        AwardCancellationResponse.Award(
-                            id = award.id,
-                            title = award.title,
-                            description = award.description,
-                            date = award.date,
-                            status = award.status,
-                            statusDetails = award.statusDetails,
-                            relatedLots = award.relatedLots?.toList()
-                        )
-                    }
-                )
+
+                val dataResponse: AwardCancellationResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Award was cancelled. Response: ${toJson(dataResponse)}")
+
                 ResponseDto(data = dataResponse)
             }
             CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)

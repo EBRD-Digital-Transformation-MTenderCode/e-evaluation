@@ -1,8 +1,5 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.application.service.award.AwardCancellationContext
-import com.procurement.evaluation.application.service.award.AwardCancellationData
-import com.procurement.evaluation.application.service.award.AwardCancelledData
 import com.procurement.evaluation.dao.AwardDao
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.ErrorException
@@ -12,7 +9,6 @@ import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.model.dto.AwardForCansRs
 import com.procurement.evaluation.model.dto.AwardsForAcRq
 import com.procurement.evaluation.model.dto.AwardsForAcRs
-import com.procurement.evaluation.model.dto.CancellationRs
 import com.procurement.evaluation.model.dto.CheckAwardRq
 import com.procurement.evaluation.model.dto.EndAwardPeriodRs
 import com.procurement.evaluation.model.dto.FinalAward
@@ -25,14 +21,7 @@ import com.procurement.evaluation.model.dto.bpe.pmd
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
-import com.procurement.evaluation.model.dto.ocds.Lot
-import com.procurement.evaluation.model.dto.ocds.Phase.AWARDING
-import com.procurement.evaluation.model.dto.ocds.Phase.CLARIFICATION
-import com.procurement.evaluation.model.dto.ocds.Phase.EMPTY
-import com.procurement.evaluation.model.dto.ocds.Phase.NEGOTIATION
-import com.procurement.evaluation.model.dto.ocds.Phase.TENDERING
 import com.procurement.evaluation.model.entity.AwardEntity
-import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toLocal
 import com.procurement.evaluation.utils.toObject
@@ -61,92 +50,6 @@ class StatusService(private val periodService: PeriodService,
         return ResponseDto(data = FinalStatusesRs(
                 awards = awardsRs,
                 awardPeriod = awardPeriod))
-    }
-
-    fun prepareCancellation(cm: CommandMessage): ResponseDto {
-        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-        if (awardEntities.isEmpty()) return ResponseDto(data = CancellationRs(listOf()))
-        val awards = getAwardsFromEntities(awardEntities)
-        val awardPredicate = getAwardPredicateForPrepareCancellation()
-        val updatedAwards = mutableListOf<Award>()
-        awards.asSequence()
-                .filter(awardPredicate)
-                .forEach { award ->
-                    award.date = dateTime
-                    award.statusDetails = AwardStatusDetails.UNSUCCESSFUL
-                    updatedAwards.add(award)
-                }
-        awardDao.saveAll(getUpdatedAwardEntities(awardEntities, updatedAwards))
-        return ResponseDto(data = CancellationRs(updatedAwards))
-    }
-
-    fun awardsCancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancelledData {
-        when (context.phase) {
-            AWARDING -> {
-                val awardEntities = awardDao.findAllByCpIdAndStage(cpId = context.cpid, stage = context.stage)
-                if (awardEntities.isEmpty()) return AwardCancelledData(awards = emptyList())
-                val awards: List<Award> = getAwardsFromEntities(awardEntities)
-                val awardPredicate = getAwardPredicateForCancellation()
-
-                val updatedAwards = awards.asSequence()
-                    .filter(awardPredicate)
-                    .map { award ->
-                        award.copy(
-                            date = context.startDate,
-                            status = AwardStatus.UNSUCCESSFUL,
-                            statusDetails = AwardStatusDetails.EMPTY
-                        )
-                    }
-                    .toList()
-
-                val newAwards: List<Award> = getUnsuccessfulAwards(data.lots)
-                val persistentAwards = mergeUpdatedAwards(original = awards, updated = updatedAwards) + newAwards
-
-                awardDao.saveAll(getUpdatedAwardEntities(awardEntities, persistentAwards))
-
-                return AwardCancelledData(
-                    awards = (updatedAwards + newAwards).map { award ->
-                        AwardCancelledData.Award(
-                            id = UUID.fromString(award.id),
-                            title = award.title,
-                            description = award.description,
-                            date = award.date,
-                            status = award.status,
-                            statusDetails = award.statusDetails,
-                            relatedLots = award.relatedLots.map { UUID.fromString(it) }
-                        )
-                    }
-                )
-            }
-            TENDERING, CLARIFICATION, NEGOTIATION, EMPTY -> {
-                val updatedAwards = getUnsuccessfulAwards(data.lots)
-                awardDao.saveAll(getAwardEntities(updatedAwards, context.cpid, context.owner, context.stage))
-                return AwardCancelledData(
-                    awards = updatedAwards.map { award ->
-                        AwardCancelledData.Award(
-                            id = UUID.fromString(award.id),
-                            title = award.title,
-                            description = award.description,
-                            date = award.date,
-                            status = award.status,
-                            statusDetails = award.statusDetails,
-                            relatedLots = award.relatedLots.map { UUID.fromString(it) }
-                        )
-                    }
-                )
-            }
-        }
-    }
-
-    private fun mergeUpdatedAwards(original: List<Award>, updated: List<Award>): List<Award> {
-        val updatedAwardsById = updated.associateBy { it.id }
-        return original.map { award ->
-            updatedAwardsById[award.id] ?: award
-        }
     }
 
     fun checkAwardValue(cm: CommandMessage): ResponseDto {
@@ -244,32 +147,6 @@ class StatusService(private val periodService: PeriodService,
         return ResponseDto(data = GetLotForCheckRs(awardByBid.relatedLots[0]))
     }
 
-    private fun getUnsuccessfulAwards(unSuccessfulLots: List<AwardCancellationData.Lot>): List<Award> {
-        return unSuccessfulLots.asSequence()
-            .map { lot ->
-                generateUnsuccessfulAward(lotId = lot.id)
-            }
-            .toList()
-    }
-
-    private fun generateUnsuccessfulAward(lotId: String): Award = Award(
-        token = generationService.token().toString(),
-        id = generationService.awardId().toString(),
-        date = localNowUTC(),
-        description = "Other reasons (discontinuation of procedure)",
-        title = "The contract/lot is not awarded",
-        status = AwardStatus.UNSUCCESSFUL,
-        statusDetails = AwardStatusDetails.EMPTY,
-        value = null,
-        relatedLots = listOf(lotId),
-        relatedBid = null,
-        bidDate = null,
-        suppliers = null,
-        documents = null,
-        items = null,
-        weightedValue = null
-    )
-
     private fun getAwardsFromEntities(awardEntities: List<AwardEntity>): List<Award> {
         return awardEntities.asSequence().map { toObject(Award::class.java, it.jsonData) }.toList()
     }
@@ -289,33 +166,6 @@ class StatusService(private val periodService: PeriodService,
         }
     }
 
-    private fun getUnsuccessfulLotsFromAwards(awards: List<Award>): List<Lot> {
-        val successfulLots = awards.asSequence()
-                .filter { it.status == AwardStatus.ACTIVE }
-                .flatMap { it.relatedLots.asSequence() }
-                .toList()
-        val unsuccessfulLots = awards.asSequence()
-                .filter { it.status == AwardStatus.UNSUCCESSFUL }
-                .flatMap { it.relatedLots.asSequence() }
-                .filter { lot -> !successfulLots.contains(lot) }.toHashSet()
-        return unsuccessfulLots.asSequence().map { Lot(it) }.toList()
-    }
-
-    private fun getAwardPredicateForPrepareCancellation(): (Award) -> Boolean {
-        return { award: Award ->
-            (award.status == AwardStatus.PENDING)
-                    && (award.statusDetails == AwardStatusDetails.EMPTY
-                    || award.statusDetails == AwardStatusDetails.ACTIVE
-                    || award.statusDetails == AwardStatusDetails.CONSIDERATION)
-        }
-    }
-
-    private fun getAwardPredicateForCancellation(): (Award) -> Boolean {
-        return { award: Award ->
-            (award.status == AwardStatus.PENDING) && (award.statusDetails == AwardStatusDetails.UNSUCCESSFUL)
-        }
-    }
-
     private fun getUpdatedAwardEntities(awardEntities: List<AwardEntity>, awards: List<Award>): List<AwardEntity> {
         val entities = ArrayList<AwardEntity>()
         awardEntities.asSequence().forEach { entity ->
@@ -330,20 +180,6 @@ class StatusService(private val periodService: PeriodService,
                                 token = entity.token))
                     }
         }
-        return entities
-    }
-
-    private fun getAwardEntities(awards: List<Award>, cpId: String, owner: String, stage: String): List<AwardEntity> {
-        val entities = ArrayList<AwardEntity>()
-        awards.asSequence()
-                .forEach { award ->
-                    entities.add(getEntity(
-                            award = award,
-                            cpId = cpId,
-                            stage = stage,
-                            owner = owner,
-                            token = UUID.fromString(award.token)))
-                }
         return entities
     }
 

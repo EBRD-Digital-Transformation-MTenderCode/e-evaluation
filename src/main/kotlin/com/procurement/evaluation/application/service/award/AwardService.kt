@@ -47,12 +47,14 @@ import com.procurement.evaluation.model.dto.ocds.DocumentType
 import com.procurement.evaluation.model.dto.ocds.Identifier
 import com.procurement.evaluation.model.dto.ocds.LocalityDetails
 import com.procurement.evaluation.model.dto.ocds.OrganizationReference
+import com.procurement.evaluation.model.dto.ocds.Phase
 import com.procurement.evaluation.model.dto.ocds.RegionDetails
 import com.procurement.evaluation.model.dto.ocds.Value
 import com.procurement.evaluation.model.dto.ocds.asMoney
 import com.procurement.evaluation.model.dto.ocds.asValue
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
+import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
@@ -107,6 +109,8 @@ interface AwardService {
         context: SetInitialAwardsStatusContext,
         data: SetInitialAwardsStatusData
     ): SetInitialAwardsStatusResult
+
+    fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
 }
 
 @Service
@@ -1607,6 +1611,64 @@ class AwardServiceImpl(
 
         awardRepository.update(cpid = context.cpid, updatedAwards = updatedEntitiesByAward.values)
         return result
+    }
+
+    override fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult =
+        when (context.phase) {
+            Phase.AWARDING,
+            Phase.TENDERING,
+            Phase.CLARIFICATION,
+            Phase.NEGOTIATION,
+            Phase.EMPTY -> {
+                val unsuccessfulAwards: List<Award> = generateUnsuccessfulAwards(data.lots)
+                val entities = unsuccessfulAwards.map { award ->
+                    AwardEntity(
+                        cpId = context.cpid,
+                        token = Token.fromString(award.token!!),
+                        owner = context.owner,
+                        stage = context.stage,
+                        status = award.status.value,
+                        statusDetails = award.statusDetails.value,
+                        jsonData = toJson(award)
+                    )
+                }
+                val result = AwardCancellationResult(
+                    awards = unsuccessfulAwards.map { award ->
+                        AwardCancellationResult.Award(
+                            id = AwardId.fromString(award.id),
+                            title = award.title,
+                            description = award.description,
+                            date = award.date,
+                            status = award.status,
+                            statusDetails = award.statusDetails,
+                            relatedLots = award.relatedLots
+                                .map { LotId.fromString(it) }
+                        )
+                    }
+                )
+                awardRepository.saveNew(cpid = context.cpid, awards = entities)
+                result
+            }
+        }
+
+    private fun generateUnsuccessfulAwards(lots: List<AwardCancellationData.Lot>): List<Award> = lots.map { lot ->
+        Award(
+            token = generationService.token().toString(),
+            id = generationService.awardId().toString(),
+            date = localNowUTC(),
+            description = "Other reasons (discontinuation of procedure)",
+            title = "The contract/lot is not awarded",
+            status = AwardStatus.UNSUCCESSFUL,
+            statusDetails = AwardStatusDetails.EMPTY,
+            value = null,
+            relatedLots = listOf(lot.id),
+            relatedBid = null,
+            bidDate = null,
+            suppliers = null,
+            documents = null,
+            items = null,
+            weightedValue = null
+        )
     }
 
     private fun getAwardForUnsuccessfulStatusDetails(awards: Collection<Award>): Award? {

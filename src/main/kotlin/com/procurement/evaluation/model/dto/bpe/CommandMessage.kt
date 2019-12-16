@@ -13,7 +13,6 @@ import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
-import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
@@ -121,7 +120,6 @@ enum class CommandType(private val value: String) {
     CREATE_AWARDS("createAwards"),
     AWARD_BY_BID("awardByBid"),
     SET_FINAL_STATUSES("setFinalStatuses"),
-    PREPARE_CANCELLATION("prepareCancellation"),
     AWARDS_CANCELLATION("awardsCancellation"),
     CREATE_AWARDS_BY_LOT_AUCTION("createAwardsByLotAuction"),
     CREATE_AWARDS_AUCTION("createAwardsAuction"),
