@@ -360,8 +360,7 @@ class CommandService(
                     cpid = cm.cpid,
                     owner = cm.owner,
                     stage = cm.stage,
-                    phase = cm.phase,
-                    startDate = cm.startDate
+                    phase = cm.phase
                 )
                 val request = toObject(AwardCancellationRequest::class.java, cm.data)
                 val data = AwardCancellationData(
