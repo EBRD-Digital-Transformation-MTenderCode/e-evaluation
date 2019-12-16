@@ -369,7 +369,7 @@ class CommandService(
                         AwardCancellationData.Lot(id = lot.id)
                     }
                 )
-                val result = statusService.awardsCancellation(context = context, data = data)
+                val result = awardService.cancellation(context = context, data = data)
                 if (log.isDebugEnabled)
                     log.debug("Award was cancelled. Result: ${toJson(result)}")
                 val dataResponse = AwardCancellationResponse(
