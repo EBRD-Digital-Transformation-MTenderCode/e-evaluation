@@ -2274,7 +2274,7 @@ class AwardServiceImpl(
                     )
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
-                    AwardCriteria.RATED_CRITERIA -> false
+                    AwardCriteria.RATED_CRITERIA -> true
                 }
             }
             AwardCriteriaDetails.AUTOMATED -> {
