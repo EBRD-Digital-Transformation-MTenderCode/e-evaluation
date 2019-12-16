@@ -12,7 +12,6 @@ import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.model.dto.AwardForCansRs
 import com.procurement.evaluation.model.dto.AwardsForAcRq
 import com.procurement.evaluation.model.dto.AwardsForAcRs
-import com.procurement.evaluation.model.dto.CancellationRs
 import com.procurement.evaluation.model.dto.CheckAwardRq
 import com.procurement.evaluation.model.dto.EndAwardPeriodRs
 import com.procurement.evaluation.model.dto.FinalAward
@@ -61,27 +60,6 @@ class StatusService(private val periodService: PeriodService,
         return ResponseDto(data = FinalStatusesRs(
                 awards = awardsRs,
                 awardPeriod = awardPeriod))
-    }
-
-    fun prepareCancellation(cm: CommandMessage): ResponseDto {
-        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
-        val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpId, stage)
-        if (awardEntities.isEmpty()) return ResponseDto(data = CancellationRs(listOf()))
-        val awards = getAwardsFromEntities(awardEntities)
-        val awardPredicate = getAwardPredicateForPrepareCancellation()
-        val updatedAwards = mutableListOf<Award>()
-        awards.asSequence()
-                .filter(awardPredicate)
-                .forEach { award ->
-                    award.date = dateTime
-                    award.statusDetails = AwardStatusDetails.UNSUCCESSFUL
-                    updatedAwards.add(award)
-                }
-        awardDao.saveAll(getUpdatedAwardEntities(awardEntities, updatedAwards))
-        return ResponseDto(data = CancellationRs(updatedAwards))
     }
 
     fun awardsCancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancelledData {

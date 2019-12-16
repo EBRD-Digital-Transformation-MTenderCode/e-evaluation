@@ -355,7 +355,6 @@ class CommandService(
             CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
             CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
-            CommandType.PREPARE_CANCELLATION -> statusService.prepareCancellation(cm)
             CommandType.AWARDS_CANCELLATION -> {
                 val context = AwardCancellationContext(
                     cpid = cm.cpid,
