@@ -13,7 +13,7 @@ fun AwardCancellationResult.convert() = AwardCancellationResponse(
                 date = award.date,
                 status = award.status,
                 statusDetails = award.statusDetails,
-                relatedLots = award.relatedLots?.toList()
+                relatedLots = award.relatedLots.toList()
             )
         }
 )

@@ -16,6 +16,6 @@ data class AwardCancellationResult(
         val date: LocalDateTime?,
         val status: AwardStatus,
         val statusDetails: AwardStatusDetails,
-        val relatedLots: List<LotId>?
+        val relatedLots: List<LotId>
     )
 }
