@@ -12,6 +12,7 @@ import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
@@ -167,41 +168,39 @@ enum class ApiVersion(private val value: String) {
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ResponseDto(
-
-        val errors: List<ResponseErrorDto>? = null,
-        val data: Any? = null,
-        val id: String? = null
+    val errors: List<ResponseErrorDto>? = null,
+    val data: Any? = null,
+    val id: String? = null,
+    val version: ApiVersion? = null
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ResponseErrorDto(
-
-        val code: String,
-        val description: String?
+    val code: String,
+    val description: String?
 )
 
-fun getExceptionResponseDto(exception: Exception): ResponseDto {
-    return ResponseDto(
-            errors = listOf(ResponseErrorDto(
-                    code = "400.07.00",
-                    description = exception.message
-            )))
+fun getExceptionResponseDto(exception: Exception, id: String? = null, version: ApiVersion? = null): ApiErrorResponse {
+    return getApiResponse(id = id, version = version, code = "400.07.00", message = exception.message!!)
 }
 
-fun getErrorExceptionResponseDto(error: ErrorException, id: String? = null): ResponseDto {
-    return ResponseDto(
-            errors = listOf(ResponseErrorDto(
-                    code = "400.07." + error.code,
-                    description = error.msg
-            )),
-            id = id)
+fun getErrorExceptionResponseDto(error: ErrorException, id: String? = null, version: ApiVersion? = null): ApiErrorResponse {
+    return getApiResponse(id, version, error.code, error.message!!)
 }
 
-fun getEnumExceptionResponseDto(error: EnumException, id: String? = null): ResponseDto {
-    return ResponseDto(
-            errors = listOf(ResponseErrorDto(
-                    code = "400.07." + error.code,
-                    description = error.msg
-            )),
-            id = id)
+fun getEnumExceptionResponseDto(error: EnumException, id: String? = null, version: ApiVersion? = null): ApiErrorResponse {
+    return getApiResponse(id, version, error.code, error.message!!)
+}
+
+private fun getApiResponse(id: String? = null, version: ApiVersion? = null, code: String, message: String): ApiErrorResponse {
+    return ApiErrorResponse(
+        errors = listOf(
+            ResponseErrorDto(
+                code = "400.07." + code,
+                description = message
+            )
+        ),
+        id = id,
+        version = version
+    )
 }

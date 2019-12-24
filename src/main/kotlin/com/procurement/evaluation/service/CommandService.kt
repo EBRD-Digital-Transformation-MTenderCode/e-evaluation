@@ -28,6 +28,7 @@ import com.procurement.evaluation.dao.HistoryDao
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.dto.ApiSuccessResponse
 import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
@@ -89,12 +90,12 @@ class CommandService(
         private val log = LoggerFactory.getLogger(CommandService::class.java)
     }
 
-    fun execute(cm: CommandMessage): ResponseDto {
-        var historyEntity = historyDao.getHistory(cm.id, cm.command.value())
+    fun execute(cm: CommandMessage): ApiSuccessResponse {
+        val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
         if (historyEntity != null) {
-            return toObject(ResponseDto::class.java, historyEntity.jsonData)
+            return toObject(ApiSuccessResponse::class.java, historyEntity.jsonData)
         }
-        val response = when (cm.command) {
+        val result = when (cm.command) {
             CommandType.CREATE_AWARD -> {
                 val context = CreateAwardContext(
                     cpid = cm.cpid,
@@ -642,7 +643,8 @@ class CommandService(
                 ResponseDto(data = dataResponse)
             }
         }
-        historyEntity = historyDao.saveHistory(cm.id, cm.command.value(), response)
-        return toObject(ResponseDto::class.java, historyEntity.jsonData)
+        val response = ApiSuccessResponse(id = cm.id, version = cm.version, data = result.data)
+        historyDao.saveHistory(cm.id, cm.command.value(), response)
+        return response
     }
 }

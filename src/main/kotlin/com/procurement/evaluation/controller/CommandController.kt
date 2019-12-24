@@ -2,8 +2,9 @@ package com.procurement.evaluation.controller
 
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse
+import com.procurement.evaluation.infrastructure.dto.ApiResponse
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
-import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.bpe.getEnumExceptionResponseDto
 import com.procurement.evaluation.model.dto.bpe.getErrorExceptionResponseDto
 import com.procurement.evaluation.model.dto.bpe.getExceptionResponseDto
@@ -31,22 +32,30 @@ class CommandController(private val commandService: CommandService) {
     }
 
     @PostMapping
-    fun command(@RequestBody requestBody: String): ResponseEntity<ResponseDto> {
+    fun command(@RequestBody requestBody: String): ResponseEntity<ApiResponse> {
         if (log.isDebugEnabled)
             log.debug("RECEIVED COMMAND: '$requestBody'.")
         val cm: CommandMessage = toObject(CommandMessage::class.java, requestBody)
 
-        val response = commandService.execute(cm)
-
-        if (log.isDebugEnabled)
-            log.debug("RESPONSE (operation-id: '${cm.context.operationId}'): '${toJson(response)}'.")
+        val response = try {
+            commandService.execute(cm).also { response ->
+                if (log.isDebugEnabled)
+                    log.debug("RESPONSE (operation-id: '${cm.context.operationId}'): '${toJson(response)}'.")
+            }
+        } catch (exception: Exception) {
+            when (exception) {
+                is ErrorException -> getErrorExceptionResponseDto(exception, cm.id, cm.version)
+                is EnumException -> getEnumExceptionResponseDto(exception, cm.id, cm.version)
+                else -> getExceptionResponseDto(exception)
+            }
+        }
         return ResponseEntity(response, HttpStatus.OK)
     }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(Exception::class)
-    fun exception(ex: Exception): ResponseDto {
+    fun exception(ex: Exception): ApiErrorResponse {
         log.error("Internal error", ex)
         return when (ex) {
             is ErrorException -> getErrorExceptionResponseDto(ex)

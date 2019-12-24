@@ -1,8 +1,8 @@
 package com.procurement.evaluation.exception
 
-data class EnumException(private val enumType: String, val value: String, val values: String) : RuntimeException() {
-
+data class EnumException(private val enumType: String, val value: String, val values: String) : RuntimeException(
+    "Unknown value for enumType $enumType: $value, Allowed values are $values"
+) {
     val code: String = "00.00"
-    val msg: String = "Unknown value for enumType $enumType: $value, Allowed values are $values"
 }
 
