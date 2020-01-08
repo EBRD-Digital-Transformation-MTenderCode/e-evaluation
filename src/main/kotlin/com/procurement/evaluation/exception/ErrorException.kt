@@ -7,5 +7,5 @@ class ErrorException(error: ErrorType, message: String? = null) : RuntimeExcepti
         else -> error.message + message
     }
 ) {
-    var code: String = error.code
+    val code: String = error.code
 }
