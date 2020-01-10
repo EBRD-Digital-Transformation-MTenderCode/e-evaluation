@@ -1659,7 +1659,7 @@ class AwardServiceImpl(
             Phase.AWARDING -> {
                 throw ErrorException(
                     error = ErrorType.INVALID_PHASE,
-                    message = "AWARD_CANCELLATION can not be executed with phase ${context.phase} "
+                    message = "Command 'awardsCancellation' can not be executed with phase ${context.phase} "
                 )
             }
         }
