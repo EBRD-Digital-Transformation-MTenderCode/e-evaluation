@@ -1613,14 +1613,21 @@ class AwardServiceImpl(
         return result
     }
 
-    override fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult =
+    /**
+     * BR-7.5.8
+     * When StandStill.endDate has come, eEvaluation analyzes the value of phase parameter from context of Request:
+     * 1. IF { phase == "TENDERING" || "CLARIFICATION" || "NEGOTIATION" || "EMPTY" eEvaluation creates Awards by
+     * cancelled Lots by rule BR-7.5.9 and adds them to Response;
+     * 2. IF { phase != "TENDERING" || "CLARIFICATION" || "NEGOTIATION" || "EMPTY", eEvaluation throws Exception
+     */
+    override fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult {
         when (context.phase) {
-            Phase.AWARDING,
             Phase.TENDERING,
             Phase.CLARIFICATION,
             Phase.NEGOTIATION,
             Phase.EMPTY -> {
-                val unsuccessfulAwards: List<Award> = generateUnsuccessfulAwards(data.lots)
+                // BR-7.5.9
+                val unsuccessfulAwards: List<Award> = generateUnsuccessfulAwards(lots = data.lots, context = context)
                 val entities = unsuccessfulAwards.map { award ->
                     AwardEntity(
                         cpId = context.cpid,
@@ -1647,21 +1654,38 @@ class AwardServiceImpl(
                     }
                 )
                 awardRepository.saveNew(cpid = context.cpid, awards = entities)
-                result
+                return result
+            }
+            Phase.AWARDING -> {
+                throw ErrorException(
+                    error = ErrorType.INVALID_PHASE,
+                    message = "Command 'awardsCancellation' can not be executed with phase ${context.phase} "
+                )
             }
         }
+    }
 
-    private fun generateUnsuccessfulAwards(lots: List<AwardCancellationData.Lot>): List<Award> = lots.map { lot ->
+
+    private fun generateUnsuccessfulAwards(
+        lots: List<AwardCancellationData.Lot>,
+        context: AwardCancellationContext
+    ): List<Award> = lots.map { lot ->
         Award(
-            token = generationService.token().toString(),
+            // BR-7.5.1
             id = generationService.awardId().toString(),
-            date = localNowUTC(),
-            description = "Other reasons (discontinuation of procedure)",
-            title = "The contract/lot is not awarded",
+            // BR-7.5.2
+            relatedLots = listOf(lot.id),
+            // BR-7.5.3
             status = AwardStatus.UNSUCCESSFUL,
             statusDetails = AwardStatusDetails.EMPTY,
+            // BR-7.5.4
+            date = context.startDate,
+            // BR-7.5.5
+            title = "The contract/lot is not awarded",
+            // BR-7.5.6
+            description = "Other reasons (discontinuation of procedure)",
+            token = generationService.token().toString(),
             value = null,
-            relatedLots = listOf(lot.id),
             relatedBid = null,
             bidDate = null,
             suppliers = null,
