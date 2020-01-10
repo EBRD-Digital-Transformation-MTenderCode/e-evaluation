@@ -360,6 +360,7 @@ class CommandService(
                 val context = AwardCancellationContext(
                     cpid = cm.cpid,
                     owner = cm.owner,
+                    startDate = cm.startDate,
                     stage = cm.stage,
                     phase = cm.phase
                 )
