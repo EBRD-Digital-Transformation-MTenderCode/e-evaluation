@@ -1,7 +1,6 @@
 package com.procurement.evaluation.model.dto.bpe
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.config.properties.GlobalProperties
@@ -53,9 +52,9 @@ val CommandMessage.stage: String
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'stage' attribute in context.")
 
 val CommandMessage.phase: Phase
-    get() = this.context.phase?.let {
-        Phase.fromValue(it)
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'phase' attribute in context.")
+    get() = this.context.phase
+        ?.let { Phase.fromValue(it) }
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'phase' attribute in context.")
 
 val CommandMessage.country: String
     get() = this.context.country
@@ -166,20 +165,6 @@ enum class ApiVersion(private val value: String) {
     }
 }
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class ResponseDto(
-    val errors: List<ResponseErrorDto>? = null,
-    val data: Any? = null,
-    val id: String? = null,
-    val version: ApiVersion? = null
-)
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class ResponseErrorDto(
-    val code: String,
-    val description: String?
-)
-
 fun errorResponseDto(exception: Exception, id: String, version: ApiVersion): ApiErrorResponse =
     when (exception) {
         is ErrorException -> getApiResponse(
@@ -200,7 +185,7 @@ fun errorResponseDto(exception: Exception, id: String, version: ApiVersion): Api
 private fun getApiResponse(id: String, version: ApiVersion, code: String, message: String): ApiErrorResponse {
     return ApiErrorResponse(
         errors = listOf(
-            ResponseErrorDto(
+            ApiErrorResponse.Error(
                 code = "400.${GlobalProperties.serviceId}." + code,
                 description = message
             )

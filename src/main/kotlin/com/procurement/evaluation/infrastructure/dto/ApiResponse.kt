@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.model.dto.bpe.ApiVersion
-import com.procurement.evaluation.model.dto.bpe.ResponseErrorDto
 
 sealed class ApiResponse {
     abstract val id: String
@@ -9,13 +9,18 @@ sealed class ApiResponse {
 }
 
 class ApiErrorResponse(
-    override val id: String,
-    override val version: ApiVersion,
-    val errors: List<ResponseErrorDto>
-) : ApiResponse()
+    @field:JsonProperty("id") @param:JsonProperty("id") override val id: String,
+    @field:JsonProperty("version") @param:JsonProperty("version") override val version: ApiVersion,
+    @field:JsonProperty("errors") @param:JsonProperty("errors") val errors: List<Error>
+) : ApiResponse() {
+    data class Error(
+        @field:JsonProperty("code") @param:JsonProperty("code") val code: String,
+        @field:JsonProperty("description") @param:JsonProperty("description") val description: String
+    )
+}
 
 class ApiSuccessResponse(
-    override val id: String,
-    override val version: ApiVersion,
-    val data: Any?
+    @field:JsonProperty("id") @param:JsonProperty("id") override val id: String,
+    @field:JsonProperty("version") @param:JsonProperty("version") override val version: ApiVersion,
+    @field:JsonProperty("data") @param:JsonProperty("data") val data: Any
 ) : ApiResponse()
