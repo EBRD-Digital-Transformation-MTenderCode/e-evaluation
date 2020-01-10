@@ -14,7 +14,6 @@ import com.procurement.evaluation.model.dto.AwardByBid
 import com.procurement.evaluation.model.dto.AwardByBidRq
 import com.procurement.evaluation.model.dto.AwardByBidRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
-import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
@@ -30,7 +29,7 @@ import java.util.*
 @Service
 class UpdateAwardService(private val awardDao: AwardDao) {
 
-    fun awardByBid(cm: CommandMessage): ResponseDto {
+    fun awardByBid(cm: CommandMessage): AwardByBidRs {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val token = cm.context.token ?: throw ErrorException(CONTEXT)
@@ -158,7 +157,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
             }
         }
 
-        return ResponseDto(data = AwardByBidRs(
+        return  AwardByBidRs(
                 award = awardByBid,
                 nextAwardForUpdate = nextAwardForUpdate,
                 awardStatusDetails = statusDetails,
@@ -166,7 +165,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                 consideredBidId = consideredBidId,
                 lotId = lotId,
                 lotAwarded = lotAwarded,
-                bidAwarded = bidAwarded)
+                bidAwarded = bidAwarded
         )
     }
 

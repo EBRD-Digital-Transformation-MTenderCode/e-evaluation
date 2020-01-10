@@ -1,9 +1,9 @@
 package com.procurement.evaluation.model.dto.bpe
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.evaluation.config.properties.GlobalProperties
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
@@ -12,17 +12,18 @@ import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
 data class CommandMessage @JsonCreator constructor(
 
-        val id: String,
-        val command: CommandType,
-        val context: Context,
-        val data: JsonNode,
-        val version: ApiVersion
+    val id: String,
+    val command: CommandType,
+    val context: Context,
+    val data: JsonNode,
+    val version: ApiVersion
 )
 
 val CommandMessage.cpid: String
@@ -51,9 +52,9 @@ val CommandMessage.stage: String
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'stage' attribute in context.")
 
 val CommandMessage.phase: Phase
-    get() = this.context.phase?.let{
-        Phase.fromValue(it)
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'phase' attribute in context.")
+    get() = this.context.phase
+        ?.let { Phase.fromValue(it) }
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'phase' attribute in context.")
 
 val CommandMessage.country: String
     get() = this.context.country
@@ -91,26 +92,25 @@ val CommandMessage.awardId: AwardId
         }
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
 
-
 data class Context @JsonCreator constructor(
-        val operationId: String,
-        val requestId: String?,
-        val cpid: String?,
-        val ocid: String?,
-        val stage: String?,
-        val prevStage: String?,
-        val processType: String?,
-        val operationType: String?,
-        val phase: String?,
-        val owner: String?,
-        val country: String?,
-        val language: String?,
-        val pmd: String?,
-        val token: String?,
-        val startDate: String?,
-        val endDate: String?,
-        val id: String?,
-        val awardCriteria: String?
+    val operationId: String,
+    val requestId: String?,
+    val cpid: String?,
+    val ocid: String?,
+    val stage: String?,
+    val prevStage: String?,
+    val processType: String?,
+    val operationType: String?,
+    val phase: String?,
+    val owner: String?,
+    val country: String?,
+    val language: String?,
+    val pmd: String?,
+    val token: String?,
+    val startDate: String?,
+    val endDate: String?,
+    val id: String?,
+    val awardCriteria: String?
 )
 
 enum class CommandType(private val value: String) {
@@ -165,43 +165,32 @@ enum class ApiVersion(private val value: String) {
     }
 }
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class ResponseDto(
+fun errorResponseDto(exception: Exception, id: String, version: ApiVersion): ApiErrorResponse =
+    when (exception) {
+        is ErrorException -> getApiResponse(
+            id = id,
+            version = version,
+            code = exception.code,
+            message = exception.message!!
+        )
+        is EnumException -> getApiResponse(
+            id = id,
+            version = version,
+            code = exception.code,
+            message = exception.message!!
+        )
+        else -> getApiResponse(id = id, version = version, code = "00.00", message = exception.message!!)
+    }
 
-        val errors: List<ResponseErrorDto>? = null,
-        val data: Any? = null,
-        val id: String? = null
-)
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class ResponseErrorDto(
-
-        val code: String,
-        val description: String?
-)
-
-fun getExceptionResponseDto(exception: Exception): ResponseDto {
-    return ResponseDto(
-            errors = listOf(ResponseErrorDto(
-                    code = "400.07.00",
-                    description = exception.message
-            )))
-}
-
-fun getErrorExceptionResponseDto(error: ErrorException, id: String? = null): ResponseDto {
-    return ResponseDto(
-            errors = listOf(ResponseErrorDto(
-                    code = "400.07." + error.code,
-                    description = error.msg
-            )),
-            id = id)
-}
-
-fun getEnumExceptionResponseDto(error: EnumException, id: String? = null): ResponseDto {
-    return ResponseDto(
-            errors = listOf(ResponseErrorDto(
-                    code = "400.07." + error.code,
-                    description = error.msg
-            )),
-            id = id)
+private fun getApiResponse(id: String, version: ApiVersion, code: String, message: String): ApiErrorResponse {
+    return ApiErrorResponse(
+        errors = listOf(
+            ApiErrorResponse.Error(
+                code = "400.${GlobalProperties.serviceId}." + code,
+                description = message
+            )
+        ),
+        id = id,
+        version = version
+    )
 }
