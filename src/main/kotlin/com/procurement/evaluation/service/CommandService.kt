@@ -59,6 +59,8 @@ import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.request.
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.dto.convert.converter
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.GetUnsuccessfulLotsRequest
+import com.procurement.evaluation.lib.mapIfNotEmpty
+import com.procurement.evaluation.lib.orThrow
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.awardId
@@ -113,7 +115,20 @@ class CommandService(
                     mdm = request.mdm.let { mdm ->
                         CreateAwardData.Mdm(
                             scales = mdm.scales.toList(),
-                            schemes = mdm.schemes.toList()
+                            organizationSchemesByCountry = mdm.organizationSchemesByCountry
+                                .let { organizationSchemesByCountries ->
+                                    CreateAwardData.Mdm.OrganizationSchemesByCountries(
+                                        country = organizationSchemesByCountries.country,
+                                        schemes = organizationSchemesByCountries.schemes.mapIfNotEmpty { it }
+                                            .orThrow {
+                                                ErrorException(
+                                                    error = ErrorType.IS_EMPTY,
+                                                    message = "Mdm contains empty list of 'schemes'."
+                                                )
+                                            }
+
+                                    )
+                                }
                         )
                     },
                     award = request.award.let { award ->
