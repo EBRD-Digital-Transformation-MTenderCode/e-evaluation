@@ -373,21 +373,23 @@ class AwardServiceImpl(
      */
     private fun checkSchemeOfIdentifier(data: CreateAwardData) {
         val schemesByCountries = data.mdm.organizationSchemesByCountries
-            .associateBy({ it.country },
-                         {
-                             it.schemes.asSequence()
-                                 .map { scheme -> scheme.toUpperCase() }
-                                 .toSet()
-                         })
+            .associateBy(
+                keySelector = { it.country },
+                valueTransform = {
+                    it.schemes.toSetBy { scheme ->
+                        scheme.toUpperCase()
+                    }
+                }
+            )
 
-        val invalidScheme = data.award.suppliers.any { supplier ->
-            val schemes = schemesByCountries[supplier.address.addressDetails.country.id]
-                ?: throw ErrorException(error = UNKNOWN_SUPPLIER_COUNTRY)
-            supplier.identifier.scheme.toUpperCase() !in schemes
-        }
-
-        if (invalidScheme)
-            throw ErrorException(error = UNKNOWN_SCHEME_IDENTIFIER)
+        data.award.suppliers
+            .forEach { supplier ->
+                val schemes = schemesByCountries[supplier.address.addressDetails.country.id]
+                    ?: throw ErrorException(error = UNKNOWN_SUPPLIER_COUNTRY)
+                if (supplier.identifier.scheme.toUpperCase() !in schemes) {
+                    throw ErrorException(error = UNKNOWN_SCHEME_IDENTIFIER)
+                }
+            }
     }
 
     /**
