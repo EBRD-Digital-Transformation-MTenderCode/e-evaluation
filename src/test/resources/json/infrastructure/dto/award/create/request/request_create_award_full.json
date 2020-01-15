@@ -4,12 +4,14 @@
       "mdm.scales[0]",
       "mdm.scales[1]"
     ],
-    "schemes": {
-      "country": "MD",
-      "schemes": [
-        "mdm.schemas[0]"
-      ]
-    }
+    "schemes": [
+      {
+        "country": "MD",
+        "schemes": [
+          "mdm.schemas[0]"
+        ]
+      }
+    ]
   },
   "award": {
     "description": "award.description",
