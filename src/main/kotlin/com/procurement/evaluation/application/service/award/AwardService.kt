@@ -29,6 +29,7 @@ import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
+import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -54,7 +55,6 @@ import com.procurement.evaluation.model.dto.ocds.asMoney
 import com.procurement.evaluation.model.dto.ocds.asValue
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
-import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
@@ -372,12 +372,17 @@ class AwardServiceImpl(
      *   eEvaluation throws Exception: "Undefined identifier schema";
      */
     private fun checkSchemeOfIdentifier(data: CreateAwardData) {
-        val schemes = data.mdm.organizationSchemesByCountry.schemes
-            .asSequence()
-            .map { it.toUpperCase() }
-            .toSet()
+        val schemesByCountries = data.mdm.organizationSchemesByCountries
+            .associateBy({ it.country },
+                         {
+                             it.schemes.asSequence()
+                                 .map { scheme -> scheme.toUpperCase() }
+                                 .toSet()
+                         })
 
         val invalidScheme = data.award.suppliers.any { supplier ->
+            val schemes = schemesByCountries[supplier.address.addressDetails.country.id]
+                ?: throw ErrorException(error = UNKNOWN_SUPPLIER_COUNTRY)
             supplier.identifier.scheme.toUpperCase() !in schemes
         }
 
