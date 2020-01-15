@@ -14,8 +14,13 @@ data class CreateAwardRequest(
 ) {
     data class Mdm(
         @field:JsonProperty("scales") @param:JsonProperty("scales") val scales: List<String>,
-        @field:JsonProperty("schemes") @param:JsonProperty("schemes") val schemes: List<String>
-    )
+        @field:JsonProperty("schemes") @param:JsonProperty("schemes") val organizationSchemesByCountries: List<OrganizationSchemesByCountries>
+    ){
+        data class OrganizationSchemesByCountries(
+            @field:JsonProperty("country") @param:JsonProperty("country") val country: String,
+            @field:JsonProperty("schemes") @param:JsonProperty("schemes") val schemes: List<String>
+        )
+    }
 
     data class Award(
         @JsonInclude(JsonInclude.Include.NON_NULL)
