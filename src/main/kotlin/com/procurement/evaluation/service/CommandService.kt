@@ -115,8 +115,8 @@ class CommandService(
                     mdm = request.mdm.let { mdm ->
                         CreateAwardData.Mdm(
                             scales = mdm.scales.toList(),
-                            organizationSchemesByCountry = mdm.organizationSchemesByCountry
-                                .let { organizationSchemesByCountries ->
+                            organizationSchemesByCountries = mdm.organizationSchemesByCountries
+                                .map { organizationSchemesByCountries ->
                                     CreateAwardData.Mdm.OrganizationSchemesByCountries(
                                         country = organizationSchemesByCountries.country,
                                         schemes = organizationSchemesByCountries.schemes.mapIfNotEmpty { it }
