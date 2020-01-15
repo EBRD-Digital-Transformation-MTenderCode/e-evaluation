@@ -9,7 +9,7 @@ data class CreateAwardData(
 
     data class Mdm(
         val scales: List<String>,
-        val organizationSchemesByCountry: OrganizationSchemesByCountries
+        val organizationSchemesByCountries: List<OrganizationSchemesByCountries>
     ){
         data class OrganizationSchemesByCountries(
             val country: String,
