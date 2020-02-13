@@ -28,8 +28,8 @@ import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
-import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
+import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -1501,7 +1501,7 @@ class AwardServiceImpl(
             award = StartConsiderationResult.Award(
                 id = AwardId.fromString(updatedAward.id),
                 statusDetails = updatedAward.statusDetails,
-                relatedLots = updatedAward.relatedLots.map { LotId.fromString(it) }
+                relatedBid = BidId.fromString(updatedAward.relatedBid)
             )
         )
 

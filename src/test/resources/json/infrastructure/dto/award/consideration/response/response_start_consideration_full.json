@@ -2,8 +2,6 @@
   "award": {
     "id": "4d7ea60c-6b38-441f-b0f0-eb52814b3c1c",
     "statusDetails": "empty",
-    "relatedLots": [
-      "449f9514-0d1b-4e53-9df0-3b9d7347b063"
-    ]
+    "relatedBid": "449f9514-0d1b-4e53-9df0-3b9d7347b063"
   }
 }

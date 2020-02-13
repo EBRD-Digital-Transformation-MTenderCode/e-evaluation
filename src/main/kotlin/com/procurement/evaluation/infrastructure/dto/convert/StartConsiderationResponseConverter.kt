@@ -8,7 +8,7 @@ fun StartConsiderationResult.convert() = StartConsiderationResponse(
         StartConsiderationResponse.Award(
             id = award.id,
             statusDetails = award.statusDetails,
-            relatedLots = award.relatedLots.toList()
+            relatedBid = award.relatedBid
         )
     }
 )
