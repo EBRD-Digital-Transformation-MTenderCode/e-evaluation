@@ -11,6 +11,8 @@ import com.procurement.evaluation.model.dto.databinding.IntDeserializer
 import com.procurement.evaluation.model.dto.databinding.JsonDateDeserializer
 import com.procurement.evaluation.model.dto.databinding.JsonDateSerializer
 import com.procurement.evaluation.model.dto.databinding.StringsDeserializer
+import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.infrastructure.fail.Fail
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
@@ -95,12 +97,31 @@ fun <T> toObject(clazz: Class<T>, json: String): T {
     }
 }
 
+
 fun <T> toObject(clazz: Class<T>, json: JsonNode): T {
     try {
         return JsonMapper.mapper.treeToValue(json, clazz)
     } catch (e: IOException) {
         throw IllegalArgumentException(e)
     }
+}
+
+fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
+    Result.success(JsonMapper.mapper.treeToValue(this, target))
+} catch (expected: Exception) {
+    Result.failure(Fail.Incident.Parsing(target.canonicalName, expected))
+}
+
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, String> = try {
+    Result.success(JsonMapper.mapper.readValue(this, target))
+} catch (expected: Exception) {
+    Result.failure("Error binding string to an object of type '${target.canonicalName}'.")
+}
+
+fun String.tryToNode(): Result<JsonNode, Fail.Incident.Parsing> = try {
+    Result.success(JsonMapper.mapper.readTree(this))
+} catch (exception: JsonProcessingException) {
+    Result.failure(Fail.Incident.Parsing(JsonNode::class.java.canonicalName, exception))
 }
 
 /*Collection*/
