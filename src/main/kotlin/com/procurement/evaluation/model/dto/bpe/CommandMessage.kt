@@ -71,7 +71,7 @@ val CommandMessage.startDate: LocalDateTime
 
 val CommandMessage.operationType: OperationType
     get() = this.context.operationType?.let {
-        OperationType.fromString(it)
+        OperationType.creator(it)
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'operationType' attribute in context.")
 
 val CommandMessage.lotId: LotId
