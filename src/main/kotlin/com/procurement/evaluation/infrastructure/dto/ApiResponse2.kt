@@ -1,9 +1,11 @@
 package com.procurement.evaluation.infrastructure.dto
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.fasterxml.jackson.annotation.JsonValue
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import java.time.LocalDateTime
 import java.util.*
 
@@ -60,18 +62,16 @@ class ApiDataErrorResponse2(
     }
 }
 
-enum class Response2Status(private val value: String) {
-
+enum class Response2Status(@JsonValue override val key: String) : EnumElementProvider.Key {
     SUCCESS("success"),
     ERROR("error"),
     INCIDENT("incident");
 
-    @JsonValue
-    fun value(): String {
-        return this.value
-    }
+    override fun toString(): String = key
 
-    override fun toString(): String {
-        return this.value
+    companion object : EnumElementProvider<Response2Status>(info = info()) {
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = Response2Status.orThrow(name)
     }
 }
