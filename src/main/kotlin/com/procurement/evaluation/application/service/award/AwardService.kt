@@ -2337,7 +2337,7 @@ class AwardServiceImpl(
                                             }
                                     )
                                 },
-                            scale = details.scale.value
+                            scale = details.scale.key
                         )
                     }
             )

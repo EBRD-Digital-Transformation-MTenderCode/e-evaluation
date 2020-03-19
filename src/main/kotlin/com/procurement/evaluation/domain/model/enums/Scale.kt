@@ -2,26 +2,18 @@ package com.procurement.evaluation.domain.model.enums
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import com.procurement.evaluation.exception.EnumException
 
-enum class Scale(@JsonValue val value: String) {
+enum class Scale(@JsonValue override val key: String) : EnumElementProvider.Key {
     MICRO("micro"),
     SME("sme"),
     LARGE("large"),
     EMPTY("");
 
-    override fun toString(): String = value
+    override fun toString(): String = key
 
-    companion object {
-        private val elements: Map<String, Scale> = values().associateBy { it.value.toUpperCase() }
-
-        @JsonCreator
+    companion object : EnumElementProvider<Scale>(info = info()) {
         @JvmStatic
-        fun fromString(value: String): Scale = elements[value.toUpperCase()]
-            ?: throw EnumException(
-                enumType = Scale::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.value }
-            )
+        @JsonCreator
+        fun creator(name: String) = Scale.orThrow(name)
     }
 }
