@@ -693,7 +693,7 @@ class AwardServiceImpl(
             AwardStatusDetails.NO_OFFERS_RECEIVED,
             AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
-                message = "Invalid status details of award from request (${data.award.statusDetails.value})."
+                message = "Invalid status details of award from request (${data.award.statusDetails.key})."
             )
         }
     }
@@ -712,7 +712,7 @@ class AwardServiceImpl(
                     AwardStatusDetails.NO_OFFERS_RECEIVED,
                     AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                         error = INVALID_STATUS_DETAILS,
-                        message = "Invalid status details of award from database (${statusDetails.value}) by stage 'EV'."
+                        message = "Invalid status details of award from database (${statusDetails.key}) by stage 'EV'."
                     )
                 }
             }
@@ -728,7 +728,7 @@ class AwardServiceImpl(
                     AwardStatusDetails.NO_OFFERS_RECEIVED,
                     AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                         error = INVALID_STATUS_DETAILS,
-                        message = "Invalid status details of award from database (${statusDetails.value}) by stage 'NP'."
+                        message = "Invalid status details of award from database (${statusDetails.key}) by stage 'NP'."
                     )
                 }
             }
@@ -1073,8 +1073,8 @@ class AwardServiceImpl(
             status == AwardStatus.PENDING && details == AwardStatusDetails.UNSUCCESSFUL
 
         fun isValidStatuses(entity: AwardEntity): Boolean {
-            val status = AwardStatus.fromString(entity.status)
-            val details = AwardStatusDetails.fromString(entity.statusDetails)
+            val status = AwardStatus.creator(entity.status)
+            val details = AwardStatusDetails.creator(entity.statusDetails)
             return isActive(status, details) || isUnsuccessful(status, details)
         }
 
@@ -1110,8 +1110,8 @@ class AwardServiceImpl(
                 val updatedAward = award.updatingStatuses()
 
                 val updatedEntity = entity.copy(
-                    status = updatedAward.status.value,
-                    statusDetails = updatedAward.statusDetails.value,
+                    status = updatedAward.status.key,
+                    statusDetails = updatedAward.statusDetails.key,
                     jsonData = toJson(updatedAward)
                 )
 
@@ -1200,8 +1200,8 @@ class AwardServiceImpl(
                 cpId = context.cpid,
                 stage = context.stage,
                 token = UUID.fromString(award.token),
-                statusDetails = award.statusDetails.value,
-                status = award.status.value,
+                statusDetails = award.statusDetails.key,
+                status = award.status.key,
                 owner = context.owner,
                 jsonData = toJson(award)
             )
@@ -1263,8 +1263,8 @@ class AwardServiceImpl(
                 cpId = context.cpid,
                 stage = context.stage,
                 token = UUID.fromString(award.token),
-                statusDetails = award.statusDetails.value,
-                status = award.status.value,
+                statusDetails = award.statusDetails.key,
+                status = award.status.key,
                 owner = context.owner,
                 jsonData = toJson(award)
             )
@@ -1323,8 +1323,8 @@ class AwardServiceImpl(
                 val awardId = AwardId.fromString(award.id)
                 val entity = awardEntityByAwardId.getValue(awardId)
                 entity.copy(
-                    status = award.status.value,
-                    statusDetails = award.statusDetails.value,
+                    status = award.status.key,
+                    statusDetails = award.statusDetails.key,
                     jsonData = toJson(award)
                 )
             }
@@ -1418,8 +1418,8 @@ class AwardServiceImpl(
                 stage = context.stage,
                 owner = context.owner,
                 token = Token.fromString(award.token!!),
-                status = award.status.value,
-                statusDetails = award.statusDetails.value,
+                status = award.status.key,
+                statusDetails = award.statusDetails.key,
                 jsonData = toJson(award)
             )
         }
@@ -1493,7 +1493,7 @@ class AwardServiceImpl(
         )
 
         val updatedAwardEntity = awardEntity.copy(
-            statusDetails = updatedAward.statusDetails.value,
+            statusDetails = updatedAward.statusDetails.key,
             jsonData = toJson(updatedAward)
         )
 
@@ -1542,7 +1542,7 @@ class AwardServiceImpl(
             AwardStatusDetails.NO_OFFERS_RECEIVED,
             AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
-                message = "Invalid status details of award from request (${award.statusDetails.value})."
+                message = "Invalid status details of award from request (${award.statusDetails.key})."
             )
         }
 
@@ -1559,8 +1559,8 @@ class AwardServiceImpl(
             val updatedAwardEntity = awardEntitiesByAwardId.getValue(AwardId.fromString(updatedAward.id))
                 .let {
                     it.copy(
-                        status = updatedAward.status.value,
-                        statusDetails = updatedAward.statusDetails.value,
+                        status = updatedAward.status.key,
+                        statusDetails = updatedAward.statusDetails.key,
                         jsonData = toJson(updatedAward)
                     )
                 }
@@ -1594,8 +1594,8 @@ class AwardServiceImpl(
                 )
 
                 val updatedEntity: AwardEntity = entity.copy(
-                    status = updatedAward.status.value,
-                    statusDetails = updatedAward.statusDetails.value,
+                    status = updatedAward.status.key,
+                    statusDetails = updatedAward.statusDetails.key,
                     jsonData = toJson(updatedAward)
                 )
 
@@ -1641,8 +1641,8 @@ class AwardServiceImpl(
                         token = Token.fromString(award.token!!),
                         owner = context.owner,
                         stage = context.stage,
-                        status = award.status.value,
-                        statusDetails = award.statusDetails.value,
+                        status = award.status.key,
+                        statusDetails = award.statusDetails.key,
                         jsonData = toJson(award)
                     )
                 }

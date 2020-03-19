@@ -53,7 +53,7 @@ val CommandMessage.stage: String
 
 val CommandMessage.phase: Phase
     get() = this.context.phase
-        ?.let { Phase.fromValue(it) }
+        ?.let { Phase.creator(it) }
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'phase' attribute in context.")
 
 val CommandMessage.country: String
