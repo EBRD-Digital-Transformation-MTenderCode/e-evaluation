@@ -1,7 +1,11 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.domain.functional.Result.Companion.failure
+import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
@@ -11,8 +15,10 @@ import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.enums.OperationType
+import com.procurement.evaluation.domain.model.getStage
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.util.extension.mapResultPair
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
@@ -30,6 +36,8 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
+import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
+import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -57,6 +65,7 @@ import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
+import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Service
 import java.math.RoundingMode
 import java.time.LocalDateTime
@@ -111,6 +120,8 @@ interface AwardService {
     ): SetInitialAwardsStatusResult
 
     fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
+
+    fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail.Incident>
 }
 
 @Service
@@ -1672,6 +1683,30 @@ class AwardServiceImpl(
         }
     }
 
+    override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail.Incident> {
+        val awardEntities = awardRepository.tryFindBy(
+            cpid = params.cpid.value,
+            stage = params.ocid.getStage()
+        ).doReturn { incident ->
+            return failure(incident)
+        }
+
+        val awardsIds = params.awardIds.map { it.toString() }
+
+        return awardEntities
+            .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
+            .doReturn { failPair ->
+                return failure(Fail.Incident.ParseFromDatabaseIncident(failPair.element.jsonData))
+            }
+            .filter { award -> awardsIds.contains(award.id) }
+            .map { award ->
+                GetAwardStateByIdsResult(
+                    id = UUID.fromString(award.id),
+                    status = award.status,
+                    statusDetails = award.statusDetails
+                )
+            }.asSuccess()
+    }
 
     private fun generateUnsuccessfulAwards(
         lots: List<AwardCancellationData.Lot>,
