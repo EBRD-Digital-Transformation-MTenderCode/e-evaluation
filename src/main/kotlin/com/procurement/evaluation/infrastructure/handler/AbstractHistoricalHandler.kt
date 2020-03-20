@@ -36,26 +36,24 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
             .get
         if (history != null) {
             val data = history.jsonData
-            val result = data.tryToObject(target)
-                .doOnError {
+            return data.tryToObject(ApiSuccessResponse2::class.java)
+                .doReturn {
                     return generateResponseOnFailure(
                         fail = Fail.Incident.ParseFromDatabaseIncident(data),
                         id = id,
                         version = version,
                         logger = logger
                     )
-                }.get
-            return ApiSuccessResponse2(version = version, id = id, result = result)
+                }
         }
 
         return when (val result = execute(node)) {
             is Result.Success -> {
-                val resultData = result.get
-                historyRepository.saveHistory(id.toString(), action.key, resultData)
-                if (logger.isDebugEnabled)
-                    logger.debug("${action.key} has been executed. Result: ${toJson(resultData)}")
-
-                ApiSuccessResponse2(version = version, id = id, result = resultData)
+                ApiSuccessResponse2(version = version, id = id, result = result.get).also {
+                    historyRepository.saveHistory(id.toString(), action.key, it)
+                    if (logger.isDebugEnabled)
+                        logger.debug("${action.key} has been executed. Response: ${toJson(it)}")
+                }
             }
             is Result.Failure -> generateResponseOnFailure(
                 fail = result.error,
