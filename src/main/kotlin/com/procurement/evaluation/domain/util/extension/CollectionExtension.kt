@@ -27,3 +27,16 @@ fun <T, R, E> List<T>.mapResult(block: (T) -> Result<R, E>): Result<List<R>, E> 
     }
     return Result.success(r)
 }
+
+fun <T, R, E> List<T>.mapResultPair(block: (T) -> Result<R, E>): Result<List<R>, FailPair<E, T>> {
+    val r = mutableListOf<R>()
+    for (element in this) {
+        when (val result = block(element)) {
+            is Result.Success -> r.add(result.get)
+            is Result.Failure -> return Result.failure(FailPair(result.error, element))
+        }
+    }
+    return Result.success(r)
+}
+data class FailPair<out E, out T> constructor(val fail: E, val element: T)
+
