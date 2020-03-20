@@ -9,6 +9,11 @@ import com.datastax.driver.core.Statement
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.domain.functional.Result.Companion.failure
+import com.procurement.evaluation.domain.functional.asSuccess
+import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
+import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.model.entity.AwardEntity
 import org.springframework.stereotype.Repository
 import java.util.*
@@ -207,6 +212,18 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         val result = executeUpdating(statements)
         if (!result.wasApplied())
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
+    }
+
+    override fun tryFindBy(cpid: String, stage: String): Result<List<AwardEntity>, Fail.Incident> {
+        val query = preparedFindByCpidAndStageCQL.bind()
+            .apply {
+                setString(columnCpid, cpid)
+                setString(columnStage, stage)
+            }
+
+        val resultSet = query.tryExecute(session)
+            .doReturn { error -> return failure(error) }
+        return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
