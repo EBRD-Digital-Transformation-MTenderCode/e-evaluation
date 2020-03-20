@@ -16,18 +16,18 @@ import org.springframework.stereotype.Repository
 class HistoryRepositoryCassandra(private val session: Session) : HistoryRepository {
 
     companion object {
-        private const val KEYSPACE = "revision"
-        private const val HISTORY_TABLE = "history"
-        private const val COMMAND_ID = "command_id"
+        private const val KEYSPACE = "ocds"
+        private const val HISTORY_TABLE = "evaluation_history"
+        private const val OPERATION_ID = "operation_id"
         private const val COMMAND = "command"
-        private const val COMMAND_DATE = "command_date"
+        private const val OPERATION_DATE = "operation_date"
         private const val JSON_DATA = "json_data"
 
         private const val SAVE_HISTORY_CQL = """
                INSERT INTO $KEYSPACE.$HISTORY_TABLE(
-                      $COMMAND_ID,
+                      $OPERATION_ID,
                       $COMMAND,
-                      $COMMAND_DATE,
+                      $OPERATION_DATE,
                       $JSON_DATA
                )
                VALUES(?, ?, ?, ?)
@@ -35,12 +35,12 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
             """
 
         private const val FIND_HISTORY_ENTRY_CQL = """
-               SELECT $COMMAND_ID,
+               SELECT $OPERATION_ID,
                       $COMMAND,
-                      $COMMAND_DATE,
+                      $OPERATION_DATE,
                       $JSON_DATA
                  FROM $KEYSPACE.$HISTORY_TABLE
-                WHERE $COMMAND_ID=?
+                WHERE $OPERATION_ID=?
                   AND $COMMAND=?
                LIMIT 1
             """
@@ -52,7 +52,7 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
     override fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail.Incident> {
         val query = preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
-                setString(COMMAND_ID, operationId)
+                setString(OPERATION_ID, operationId)
                 setString(COMMAND, command)
             }
 
@@ -62,28 +62,28 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
             .one()
             ?.let { row ->
                 HistoryEntity(
-                    row.getString(COMMAND_ID),
+                    row.getString(OPERATION_ID),
                     row.getString(COMMAND),
-                    row.getTimestamp(COMMAND_DATE),
+                    row.getTimestamp(OPERATION_DATE),
                     row.getString(JSON_DATA)
                 )
             }
             .asSuccess()
     }
 
-    override fun saveHistory(operationId: String, command: String, result: Any): Result<HistoryEntity, Fail.Incident> {
+    override fun saveHistory(operationId: String, command: String, response: Any): Result<HistoryEntity, Fail.Incident> {
         val entity = HistoryEntity(
             operationId = operationId,
             command = command,
             operationDate = localNowUTC().toDate(),
-            jsonData = toJson(result)
+            jsonData = toJson(response)
         )
 
         val insert = preparedSaveHistoryCQL.bind()
             .apply {
-                setString(COMMAND_ID, entity.operationId)
+                setString(OPERATION_ID, entity.operationId)
                 setString(COMMAND, entity.command)
-                setTimestamp(COMMAND_DATE, entity.operationDate)
+                setTimestamp(OPERATION_DATE, entity.operationDate)
                 setString(JSON_DATA, entity.jsonData)
             }
 
