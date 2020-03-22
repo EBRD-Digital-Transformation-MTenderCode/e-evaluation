@@ -15,7 +15,6 @@ import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.enums.OperationType
-import com.procurement.evaluation.domain.model.getStage
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.domain.util.extension.mapResultPair
@@ -689,10 +688,10 @@ class AwardServiceImpl(
         award: Award
     ) {
         when (data.award.statusDetails) {
-            AwardStatusDetails.UNSUCCESSFUL  -> {
+            AwardStatusDetails.UNSUCCESSFUL -> {
                 checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
             }
-            AwardStatusDetails.ACTIVE        -> {
+            AwardStatusDetails.ACTIVE -> {
                 checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
                 checkRelatedAwards(context = context, award = award)
             }
@@ -731,7 +730,7 @@ class AwardServiceImpl(
                 when (statusDetails) {
                     AwardStatusDetails.UNSUCCESSFUL,
                     AwardStatusDetails.ACTIVE,
-                    AwardStatusDetails.EMPTY         -> Unit
+                    AwardStatusDetails.EMPTY -> Unit
 
                     AwardStatusDetails.CONSIDERATION,
                     AwardStatusDetails.PENDING,
@@ -874,25 +873,25 @@ class AwardServiceImpl(
      */
     private fun statusDetails(data: EvaluateAwardData, award: Award): AwardStatusDetails {
         return when (data.award.statusDetails) {
-            AwardStatusDetails.ACTIVE       -> {
+            AwardStatusDetails.ACTIVE -> {
                 when (award.statusDetails) {
-                    AwardStatusDetails.EMPTY        -> AwardStatusDetails.ACTIVE
-                    AwardStatusDetails.ACTIVE       -> AwardStatusDetails.ACTIVE
+                    AwardStatusDetails.EMPTY -> AwardStatusDetails.ACTIVE
+                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.ACTIVE
                     AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.ACTIVE
-                    else                            -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
+                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
                 }
             }
 
             AwardStatusDetails.UNSUCCESSFUL -> {
                 when (award.statusDetails) {
-                    AwardStatusDetails.EMPTY        -> AwardStatusDetails.UNSUCCESSFUL
+                    AwardStatusDetails.EMPTY -> AwardStatusDetails.UNSUCCESSFUL
                     AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.UNSUCCESSFUL
-                    AwardStatusDetails.ACTIVE       -> AwardStatusDetails.UNSUCCESSFUL
-                    else                            -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
+                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.UNSUCCESSFUL
+                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
                 }
             }
 
-            else                            -> throw ErrorException(error = INVALID_STATUS_DETAILS)
+            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
         }
     }
 
@@ -1090,7 +1089,7 @@ class AwardServiceImpl(
         }
 
         fun Award.updatingStatuses(): Award = when {
-            isActive(this.status, this.statusDetails)       -> this.copy(
+            isActive(this.status, this.statusDetails) -> this.copy(
                 status = AwardStatus.ACTIVE,
                 statusDetails = AwardStatusDetails.EMPTY
             )
@@ -1098,7 +1097,7 @@ class AwardServiceImpl(
                 status = AwardStatus.UNSUCCESSFUL,
                 statusDetails = AwardStatusDetails.EMPTY
             )
-            else                                            -> throw IllegalStateException("No processing for award with status: '${this.status}' and details: '${this.statusDetails}'.")
+            else -> throw IllegalStateException("No processing for award with status: '${this.status}' and details: '${this.statusDetails}'.")
         }
 
         val lotsIds: Set<UUID> = data.lots.asSequence()
@@ -1398,7 +1397,7 @@ class AwardServiceImpl(
                 OperationType.TENDER_UNSUCCESSFUL,
                 OperationType.TENDER_PERIOD_END_EV,
                 OperationType.TENDER_PERIOD_END_AUCTION -> AwardStatusDetails.NO_OFFERS_RECEIVED
-                OperationType.CANCEL_TENDER_EV          -> AwardStatusDetails.LOT_CANCELLED
+                OperationType.CANCEL_TENDER_EV -> AwardStatusDetails.LOT_CANCELLED
             }
         }
 
@@ -1543,8 +1542,8 @@ class AwardServiceImpl(
         }
 
         val updatedAward: Award? = when (award.statusDetails) {
-            AwardStatusDetails.UNSUCCESSFUL  -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
-            AwardStatusDetails.ACTIVE        -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
+            AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
+            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
 
             AwardStatusDetails.PENDING,
             AwardStatusDetails.CONSIDERATION,
@@ -1804,11 +1803,11 @@ class AwardServiceImpl(
                         ratingByWeightedValue(awards = this)
                     }
 
-                    AwardCriteria.PRICE_ONLY     -> ratingByValue(awards = this)
+                    AwardCriteria.PRICE_ONLY -> ratingByValue(awards = this)
                 }
             }
 
-            AwardCriteriaDetails.MANUAL    -> {
+            AwardCriteriaDetails.MANUAL -> {
                 when (awardCriteria) {
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
@@ -2393,9 +2392,9 @@ class AwardServiceImpl(
         bidId: BidId
     ): Boolean =
         when (awardCriteriaDetails) {
-            AwardCriteriaDetails.MANUAL    -> {
+            AwardCriteriaDetails.MANUAL -> {
                 when (awardCriteria) {
-                    AwardCriteria.PRICE_ONLY     -> throw ErrorException(
+                    AwardCriteria.PRICE_ONLY -> throw ErrorException(
                         ErrorType.INVALID_STATUS_DETAILS,
                         "Cannot calculate weighted value for award with award criteria: '${awardCriteria}' " +
                             "and award criteria details: '${awardCriteriaDetails}', based on bid '${bidId}'"
@@ -2407,7 +2406,7 @@ class AwardServiceImpl(
             }
             AwardCriteriaDetails.AUTOMATED -> {
                 when (awardCriteria) {
-                    AwardCriteria.PRICE_ONLY     -> false
+                    AwardCriteria.PRICE_ONLY -> false
 
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
@@ -2482,13 +2481,13 @@ class AwardServiceImpl(
                 else
                     false
             }
-            is RequirementRsValue.AsString  -> {
+            is RequirementRsValue.AsString -> {
                 if (coef is CoefficientValue.AsString)
                     req.value == coef.value
                 else
                     false
             }
-            is RequirementRsValue.AsNumber  -> {
+            is RequirementRsValue.AsNumber -> {
                 if (coef is CoefficientValue.AsNumber)
                     req.value == coef.value
                 else

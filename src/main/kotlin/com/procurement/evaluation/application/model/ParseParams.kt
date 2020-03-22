@@ -7,27 +7,23 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
 fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
-    Cpid.tryCreate(cpid = value)
-        .doReturn { expectedPattern ->
-            return Result.failure(
-                DataErrors.Validation.DataMismatchToPattern(
-                    name = "cpid",
-                    pattern = expectedPattern,
-                    actualValue = value
-                )
+    Cpid.tryCreateOrNull(value = value)
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.DataMismatchToPattern(
+                name = "cpid",
+                pattern = Cpid.pattern,
+                actualValue = value
             )
-        }
-        .asSuccess()
+        )
 
 fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToPattern> =
-    Ocid.tryCreate(ocid = value)
-        .doReturn { expectedPattern ->
-            return Result.failure(
-                DataErrors.Validation.DataMismatchToPattern(
-                    name = "ocid",
-                    pattern = expectedPattern,
-                    actualValue = value
-                )
+    Ocid.tryCreateOrNull(value = value)
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.DataMismatchToPattern(
+                name = "ocid",
+                pattern = Ocid.pattern,
+                actualValue = value
             )
-        }
-        .asSuccess()
+        )
