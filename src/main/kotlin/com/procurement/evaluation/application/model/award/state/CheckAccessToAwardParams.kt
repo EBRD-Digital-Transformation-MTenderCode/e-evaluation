@@ -22,57 +22,59 @@ class CheckAccessToAwardParams private constructor(
     val owner: Owner,
     val awardId: AwardId
 ) {
-    fun tryCreate(
-        cpid: String,
-        ocid: String,
-        token: String,
-        owner: String,
-        awardId: String
-    ): Result<CheckAccessToAwardParams, DataErrors> {
-        val cpidParsed = parseCpid(cpid)
-            .doReturn { error -> return failure(error = error) }
+    companion object {
+        fun tryCreate(
+            cpid: String,
+            ocid: String,
+            token: String,
+            owner: String,
+            awardId: String
+        ): Result<CheckAccessToAwardParams, DataErrors> {
+            val cpidParsed = parseCpid(cpid)
+                .doReturn { error -> return failure(error = error) }
 
-        val ocidParsed = parseOcid(ocid)
-            .doReturn { error -> return failure(error = error) }
+            val ocidParsed = parseOcid(ocid)
+                .doReturn { error -> return failure(error = error) }
 
-        val tokenParsed = token.tryToken()
-            .doReturn {
-                return failure(
-                    DataErrors.Validation.DataFormatMismatch(
-                        name = "token",
-                        expectedFormat = "uuid",
-                        actualValue = token
+            val tokenParsed = token.tryToken()
+                .doReturn {
+                    return failure(
+                        DataErrors.Validation.DataFormatMismatch(
+                            name = "token",
+                            expectedFormat = "uuid",
+                            actualValue = token
+                        )
                     )
-                )
-            }
+                }
 
-        val ownerParsed = owner.tryOwner()
-            .doReturn {
-                return failure(
-                    DataErrors.Validation.DataFormatMismatch(
-                        name = "owner",
-                        expectedFormat = "uuid",
-                        actualValue = owner
+            val ownerParsed = owner.tryOwner()
+                .doReturn {
+                    return failure(
+                        DataErrors.Validation.DataFormatMismatch(
+                            name = "owner",
+                            expectedFormat = "uuid",
+                            actualValue = owner
+                        )
                     )
-                )
-            }
+                }
 
-        val awardIdParsed = awardId.tryAwardId()
-            .doReturn {
-                return failure(
-                    DataErrors.Validation.DataFormatMismatch(
-                        name = "awardId",
-                        expectedFormat = "uuid",
-                        actualValue = awardId
+            val awardIdParsed = awardId.tryAwardId()
+                .doReturn {
+                    return failure(
+                        DataErrors.Validation.DataFormatMismatch(
+                            name = "awardId",
+                            expectedFormat = "uuid",
+                            actualValue = awardId
+                        )
                     )
-                )
-            }
-        return CheckAccessToAwardParams(
-            cpid = cpidParsed,
-            awardId = awardIdParsed,
-            ocid = ocidParsed,
-            owner = ownerParsed,
-            token = tokenParsed
-        ).asSuccess()
+                }
+            return CheckAccessToAwardParams(
+                cpid = cpidParsed,
+                awardId = awardIdParsed,
+                ocid = ocidParsed,
+                owner = ownerParsed,
+                token = tokenParsed
+            ).asSuccess()
+        }
     }
 }
