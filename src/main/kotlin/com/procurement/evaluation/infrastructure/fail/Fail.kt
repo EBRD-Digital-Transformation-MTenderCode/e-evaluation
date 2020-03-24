@@ -36,11 +36,15 @@ sealed class Fail {
             }
         }
 
-        class DatabaseInteractionIncident(exception: Exception) : Incident(
+        class DatabaseInteractionIncident(private val exception: Exception) : Incident(
             level = Level.ERROR,
             number = "1",
-            description = "Database incident. ${exception.message}"
-        )
+            description = "Database incident."
+        ) {
+            override fun logging(logger: Logger) {
+                logger.error(message = message, exception = exception)
+            }
+        }
 
         class DatabaseConsistencyIncident(message: String) : Incident(
             level = Level.ERROR,
@@ -48,17 +52,25 @@ sealed class Fail {
             description = "Database consistency incident. $message"
         )
 
-        class ParseFromDatabaseIncident(val jsonData: String) : Incident(
+        class ParseFromDatabaseIncident(private val jsonData: String) : Incident(
             level = Level.ERROR,
             number = "3",
             description = "Could not parse data stored in database."
-        )
+        ) {
+            override fun logging(logger: Logger) {
+                logger.error(message = message, mdc = mapOf("jsonData" to jsonData))
+            }
+        }
 
-        class Parsing(className: String, val exception: Exception) : Incident(
+        class Parsing(className: String, private val exception: Exception) : Incident(
             level = Level.ERROR,
             number = "4",
             description = "Error parsing to $className."
-        )
+        ) {
+            override fun logging(logger: Logger) {
+                logger.error(message = message, exception = exception)
+            }
+        }
 
         enum class Level(override val key: String) : EnumElementProvider.Key {
             ERROR("error"),
