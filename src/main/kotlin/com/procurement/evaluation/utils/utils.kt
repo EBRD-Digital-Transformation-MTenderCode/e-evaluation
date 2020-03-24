@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.model.dto.databinding.IntDeserializer
 import com.procurement.evaluation.model.dto.databinding.JsonDateDeserializer
 import com.procurement.evaluation.model.dto.databinding.JsonDateSerializer
 import com.procurement.evaluation.model.dto.databinding.StringsDeserializer
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.infrastructure.fail.Fail
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
@@ -112,10 +112,10 @@ fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Pa
     Result.failure(Fail.Incident.Parsing(target.canonicalName, expected))
 }
 
-fun <T : Any> String.tryToObject(target: Class<T>): Result<T, String> = try {
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
     Result.success(JsonMapper.mapper.readValue(this, target))
 } catch (expected: Exception) {
-    Result.failure("Error binding string to an object of type '${target.canonicalName}'.")
+    Result.failure(Fail.Incident.Parsing(target.canonicalName, expected))
 }
 
 fun String.tryToNode(): Result<JsonNode, Fail.Incident.Parsing> = try {
