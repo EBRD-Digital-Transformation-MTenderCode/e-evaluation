@@ -1,10 +1,12 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.application.model.award.state.CheckAccessToAwardParams
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
+import com.procurement.evaluation.domain.functional.ValidationResult
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
@@ -37,6 +39,7 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -121,6 +124,8 @@ interface AwardService {
     fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
 
     fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail.Incident>
+
+    fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail>
 }
 
 @Service
@@ -1705,6 +1710,29 @@ class AwardServiceImpl(
                     statusDetails = award.statusDetails
                 )
             }.asSuccess()
+    }
+
+    override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
+        val awardEntity = awardRepository.tryFindBy(
+            cpid = params.cpid.value,
+            stage = params.ocid.getStage(),
+            token = params.token
+        ).doReturn { incident ->
+            return ValidationResult.error(incident)
+        } ?: return ValidationResult.error(ValidationError.InvalidToken())
+
+        val award = awardEntity.jsonData.tryToObject(Award::class.java)
+            .doReturn { failPair ->
+                return ValidationResult.error(Fail.Incident.ParseFromDatabaseIncident(awardEntity.jsonData))
+            }
+
+        if (award.id != params.awardId.toString())
+            return ValidationResult.error(ValidationError.InvalidToken())
+
+        if (awardEntity.owner != params.owner.toString())
+            return ValidationResult.error(ValidationError.InvalidOwner())
+
+        return ValidationResult.ok()
     }
 
     private fun generateUnsuccessfulAwards(
