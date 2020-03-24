@@ -1700,7 +1700,12 @@ class AwardServiceImpl(
         return awardEntities
             .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
             .doReturn { failPair ->
-                return failure(Fail.Incident.ParseFromDatabaseIncident(failPair.element.jsonData))
+                return failure(
+                    Fail.Incident.ParseFromDatabaseIncident(
+                        jsonData = failPair.element.jsonData,
+                        exception = failPair.fail.exception
+                    )
+                )
             }
             .filter { award -> awardsIds.contains(award.id) }
             .map { award ->
@@ -1713,22 +1718,38 @@ class AwardServiceImpl(
     }
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
-        val awardEntity = awardRepository.tryFindBy(
+
+        val awardEntities = awardRepository.tryFindBy(
             cpid = params.cpid.toString(),
-            stage = params.ocid.getStage(),
-            token = params.token
-        ).doReturn { incident ->
-            return ValidationResult.error(incident)
-        } ?: return ValidationResult.error(ValidationError.InvalidToken())
+            stage = params.ocid.getStage()
+        )
+            .doReturn { incident ->
+                return ValidationResult.error(incident)
+            }
+            .takeIf { it.isNotEmpty() }
+            ?: return ValidationResult.error(ValidationError.AwardNotFound())
 
-        val award = awardEntity.jsonData.tryToObject(Award::class.java)
-            .doReturn { return ValidationResult.error(Fail.Incident.ParseFromDatabaseIncident(awardEntity.jsonData)) }
+        fun findByAwardId(entities: List<AwardEntity>, awardId: String): Result<AwardEntity?, Fail.Incident> {
+            return entities.firstOrNull { entity ->
+                val award = entity.jsonData.tryToObject(Award::class.java)
+                    .doReturn { error ->
+                        return failure(Fail.Incident.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                    }
+                award.id == awardId
+            }.asSuccess()
+        }
 
-        if (award.id != params.awardId.toString())
-            return ValidationResult.error(ValidationError.InvalidToken())
+        val entity = findByAwardId(awardEntities, params.awardId.toString())
+            .doReturn { error -> return ValidationResult.error(error) }
+            ?: return ValidationResult.error(ValidationError.AwardNotFound())
 
-        if (awardEntity.owner != params.owner.toString())
+        if (entity.owner != params.owner.toString()) {
             return ValidationResult.error(ValidationError.InvalidOwner())
+        }
+
+        if (entity.token != params.token) {
+            return ValidationResult.error(ValidationError.InvalidToken())
+        }
 
         return ValidationResult.ok()
     }
