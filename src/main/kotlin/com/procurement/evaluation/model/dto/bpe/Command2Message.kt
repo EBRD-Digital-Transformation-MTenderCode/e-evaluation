@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.bind
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
 import com.procurement.evaluation.domain.util.extension.tryUUID
 import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties2
@@ -28,7 +28,8 @@ import java.util.*
 
 enum class Command2Type(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
 
-    GET_AWARD_STATES_BY_IDS("getAwardStateByIds");
+    GET_AWARD_STATES_BY_IDS("getAwardStateByIds"),
+    CHECK_ACCESS_TO_AWARD("checkAccessToAward");
 
     override fun toString(): String = key
 
