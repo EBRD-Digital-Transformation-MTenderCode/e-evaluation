@@ -9,7 +9,6 @@ import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.service.Command2Service
 import com.procurement.evaluation.model.dto.bpe.NaN
 import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
-import com.procurement.evaluation.model.dto.bpe.tryGetAction
 import com.procurement.evaluation.model.dto.bpe.tryGetId
 import com.procurement.evaluation.model.dto.bpe.tryGetNode
 import com.procurement.evaluation.model.dto.bpe.tryGetVersion
@@ -32,8 +31,7 @@ class Command2Controller(private val commandService: Command2Service, private va
             logger.debug("RECEIVED COMMAND: '$requestBody'.")
 
         val node = requestBody.tryGetNode()
-            .doOnError { error -> return generateResponse(fail = error) }
-            .get
+            .doReturn { error -> return generateResponse(fail = error) }
 
         val version = when (val versionResult = node.tryGetVersion()) {
             is Result.Success -> versionResult.get
@@ -46,11 +44,7 @@ class Command2Controller(private val commandService: Command2Service, private va
         }
 
         val id = node.tryGetId()
-            .doOnError { error -> return generateResponse(fail = error, version = version) }
-            .get
-
-        node.tryGetAction()
-            .doOnError { error -> return generateResponse(fail = error, id = id, version = version) }
+            .doReturn { error -> return generateResponse(fail = error, version = version) }
 
         val response =
             commandService.execute(node)
