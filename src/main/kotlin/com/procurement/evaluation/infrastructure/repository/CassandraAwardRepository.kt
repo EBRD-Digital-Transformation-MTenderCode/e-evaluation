@@ -226,6 +226,19 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
+    override fun tryFindBy(cpid: String, stage: String, token: UUID): Result<AwardEntity?, Fail.Incident>{
+        val query = preparedFindByCpidAndStageAndTokenCQL.bind()
+            .apply {
+                setString(columnCpid, cpid)
+                setString(columnStage, stage)
+                setUUID(columnToken, token)
+            }
+
+        val resultSet = query.tryExecute(session)
+            .doReturn { error -> return failure(error) }
+        return resultSet.one()?.let { convertToAwardEntity(it) }.asSuccess()
+    }
+
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {

@@ -21,4 +21,6 @@ interface AwardRepository {
     fun update(cpid: String, updatedAwards: Collection<AwardEntity>)
 
     fun tryFindBy(cpid: String, stage: String): Result<List<AwardEntity>, Fail.Incident>
+
+    fun tryFindBy(cpid: String, stage: String, token: UUID): Result<AwardEntity?, Fail.Incident>
 }
