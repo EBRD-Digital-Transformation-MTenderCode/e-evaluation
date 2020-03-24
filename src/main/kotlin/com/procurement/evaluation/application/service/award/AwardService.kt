@@ -1722,9 +1722,7 @@ class AwardServiceImpl(
         } ?: return ValidationResult.error(ValidationError.InvalidToken())
 
         val award = awardEntity.jsonData.tryToObject(Award::class.java)
-            .doReturn { failPair ->
-                return ValidationResult.error(Fail.Incident.ParseFromDatabaseIncident(awardEntity.jsonData))
-            }
+            .doReturn { return ValidationResult.error(Fail.Incident.ParseFromDatabaseIncident(awardEntity.jsonData)) }
 
         if (award.id != params.awardId.toString())
             return ValidationResult.error(ValidationError.InvalidToken())
