@@ -1689,7 +1689,7 @@ class AwardServiceImpl(
 
     override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail.Incident> {
         val awardEntities = awardRepository.tryFindBy(
-            cpid = params.cpid.value,
+            cpid = params.cpid.toString(),
             stage = params.ocid.getStage()
         ).doReturn { incident ->
             return failure(incident)
@@ -1714,7 +1714,7 @@ class AwardServiceImpl(
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
         val awardEntity = awardRepository.tryFindBy(
-            cpid = params.cpid.value,
+            cpid = params.cpid.toString(),
             stage = params.ocid.getStage(),
             token = params.token
         ).doReturn { incident ->

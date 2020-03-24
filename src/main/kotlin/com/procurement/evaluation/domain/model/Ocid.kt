@@ -3,23 +3,22 @@ package com.procurement.evaluation.domain.model
 import com.fasterxml.jackson.annotation.JsonValue
 import com.procurement.evaluation.domain.model.enums.Stage
 
-class Ocid private constructor(private val value_: String) {
-    val value: String get() = value_
+class Ocid private constructor(private val value: String) {
 
-    fun getStage() = value_.split("-")[4]
+    fun getStage() = value.split("-")[4]
 
     override fun equals(other: Any?): Boolean {
         return if (this !== other)
             other is Ocid
-                && this.value_ == other.value_
+                && this.value == other.value
         else
             true
     }
 
-    override fun hashCode(): Int = value_.hashCode()
+    override fun hashCode(): Int = value.hashCode()
 
     @JsonValue
-    override fun toString(): String = value_
+    override fun toString(): String = value
 
     companion object {
         private val STAGES: String
@@ -30,6 +29,6 @@ class Ocid private constructor(private val value_: String) {
         val pattern: String
             get() = regex.pattern
 
-        fun tryCreateOrNull(value: String): Ocid? = if (value.matches(regex)) Ocid(value_ = value) else null
+        fun tryCreateOrNull(value: String): Ocid? = if (value.matches(regex)) Ocid(value = value) else null
     }
 }
