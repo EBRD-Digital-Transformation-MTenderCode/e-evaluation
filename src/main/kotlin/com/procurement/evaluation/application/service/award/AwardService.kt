@@ -1,7 +1,8 @@
 package com.procurement.evaluation.application.service.award
 
-import com.procurement.evaluation.application.model.award.state.CheckAccessToAwardParams
+import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
+import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.functional.Result
@@ -126,6 +127,8 @@ interface AwardService {
     fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail.Incident>
 
     fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail>
+
+    fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
 }
 
 @Service
@@ -1750,6 +1753,42 @@ class AwardServiceImpl(
         if (entity.token != params.token) {
             return ValidationResult.error(ValidationError.InvalidToken())
         }
+
+        return ValidationResult.ok()
+    }
+
+    override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
+        val awardEntities = awardRepository.tryFindBy(
+            cpid = params.cpid.toString(),
+            stage = params.ocid.getStage()
+        )
+            .doReturn { incident ->
+                return ValidationResult.error(incident)
+            }
+            .takeIf { it.isNotEmpty() }
+            ?: return ValidationResult.error(ValidationError.AwardNotFound())       //TODO not sure about this
+
+        val award = awardEntities.mapResultPair { entity ->
+            entity.jsonData.tryToObject(Award::class.java)
+        }
+            .doReturn { failPair ->
+                return ValidationResult.error(
+                    Fail.Incident.ParseFromDatabaseIncident(
+                        jsonData = failPair.element.jsonData,
+                        exception = failPair.fail.exception
+                    )
+                )
+            }
+            .firstOrNull { award -> award.id == params.awardId.toString() }
+            ?: return ValidationResult.error(ValidationError.AwardNotFound())
+
+        if (award.suppliers == null || award.suppliers.isEmpty()) {
+            return ValidationResult.error(ValidationError.TendererNotLinkedToAward())
+        }
+
+        award.suppliers
+            .firstOrNull { tenderer -> tenderer.id == params.relatedTendererId }
+            ?: return ValidationResult.error(ValidationError.TendererNotLinkedToAward())
 
         return ValidationResult.ok()
     }
