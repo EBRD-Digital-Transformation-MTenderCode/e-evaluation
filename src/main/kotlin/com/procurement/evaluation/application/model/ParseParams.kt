@@ -4,6 +4,8 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.award.AwardId
+import com.procurement.evaluation.domain.model.award.tryAwardId
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
 fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
@@ -27,3 +29,16 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
                 actualValue = value
             )
         )
+
+fun parseAwardId(value: String): Result<AwardId, DataErrors.Validation.DataFormatMismatch> =
+    value.tryAwardId()
+        .doReturn {
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = "awardId",
+                    expectedFormat = "uuid",
+                    actualValue = value
+                )
+            )
+        }
+        .asSuccess()
