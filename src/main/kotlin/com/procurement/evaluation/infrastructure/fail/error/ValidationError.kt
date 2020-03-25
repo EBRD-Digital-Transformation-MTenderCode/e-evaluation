@@ -10,4 +10,7 @@ sealed class ValidationError(numberError: String, override val description: Stri
     class InvalidOwner() : ValidationError(numberError = "10.2.4.2", description = "Request owner doesn't match owner from the database.")
 
     class AwardNotFound() : ValidationError(numberError = "10.4.2.3", description = "Award not found.")
+
+    class TendererNotLinkedToAward() : ValidationError(numberError = "10.4.5.2", description = "Tenderer is not linked to award.")
+
 }
