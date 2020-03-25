@@ -3,6 +3,8 @@ package com.procurement.evaluation.application.model.award.access
 import com.procurement.evaluation.application.model.parseAwardId
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseOcid
+import com.procurement.evaluation.application.model.parseOwner
+import com.procurement.evaluation.application.model.parseToken
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
@@ -11,8 +13,6 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
-import com.procurement.evaluation.domain.model.tryOwner
-import com.procurement.evaluation.domain.model.tryToken
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
 class CheckAccessToAwardParams private constructor(
@@ -36,27 +36,11 @@ class CheckAccessToAwardParams private constructor(
             val ocidParsed = parseOcid(ocid)
                 .doReturn { error -> return failure(error = error) }
 
-            val tokenParsed = token.tryToken()
-                .doReturn {
-                    return failure(
-                        DataErrors.Validation.DataFormatMismatch(
-                            name = "token",
-                            expectedFormat = "uuid",
-                            actualValue = token
-                        )
-                    )
-                }
+            val tokenParsed = parseToken(token)
+                .doReturn { error -> return failure(error = error) }
 
-            val ownerParsed = owner.tryOwner()
-                .doReturn {
-                    return failure(
-                        DataErrors.Validation.DataFormatMismatch(
-                            name = "owner",
-                            expectedFormat = "uuid",
-                            actualValue = owner
-                        )
-                    )
-                }
+            val ownerParsed = parseOwner(owner)
+                .doReturn { error -> return failure(error = error) }
 
             val awardIdParsed = parseAwardId(awardId)
                 .doReturn { error -> return failure(error = error) }
