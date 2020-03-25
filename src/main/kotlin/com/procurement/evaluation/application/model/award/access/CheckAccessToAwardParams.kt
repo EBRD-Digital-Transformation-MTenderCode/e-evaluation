@@ -1,5 +1,6 @@
-package com.procurement.evaluation.application.model.award.state
+package com.procurement.evaluation.application.model.award.access
 
+import com.procurement.evaluation.application.model.parseAwardId
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseOcid
 import com.procurement.evaluation.domain.functional.Result
@@ -10,7 +11,6 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
-import com.procurement.evaluation.domain.model.award.tryAwardId
 import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.domain.model.tryToken
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
@@ -58,16 +58,9 @@ class CheckAccessToAwardParams private constructor(
                     )
                 }
 
-            val awardIdParsed = awardId.tryAwardId()
-                .doReturn {
-                    return failure(
-                        DataErrors.Validation.DataFormatMismatch(
-                            name = "awardId",
-                            expectedFormat = "uuid",
-                            actualValue = awardId
-                        )
-                    )
-                }
+            val awardIdParsed = parseAwardId(awardId)
+                .doReturn { error -> return failure(error = error) }
+
             return CheckAccessToAwardParams(
                 cpid = cpidParsed,
                 awardId = awardIdParsed,
