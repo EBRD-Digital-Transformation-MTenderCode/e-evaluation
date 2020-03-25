@@ -29,7 +29,8 @@ import java.util.*
 enum class Command2Type(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
 
     GET_AWARD_STATES_BY_IDS("getAwardStateByIds"),
-    CHECK_ACCESS_TO_AWARD("checkAccessToAward");
+    CHECK_ACCESS_TO_AWARD("checkAccessToAward"),
+    CHECK_RELATED_TENDERER("checkRelatedTenderer");
 
     override fun toString(): String = key
 
