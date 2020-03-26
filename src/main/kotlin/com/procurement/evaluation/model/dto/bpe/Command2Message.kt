@@ -139,7 +139,7 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                BadRequest("Error parsing '$name'")
+                BadRequest("Error parsing '$name'", result.error.exception)
             )
         }
     }
@@ -165,6 +165,6 @@ fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
 fun String.tryGetNode(): Result<JsonNode, BadRequest> =
     when (val result = this.tryToNode()) {
         is Result.Success -> result
-        is Result.Failure -> Result.failure(BadRequest())
+        is Result.Failure -> Result.failure(BadRequest(exception = result.error.exception))
     }
 
