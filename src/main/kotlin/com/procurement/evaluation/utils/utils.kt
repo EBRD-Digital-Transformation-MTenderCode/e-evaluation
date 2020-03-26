@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
+import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.model.dto.databinding.IntDeserializer
 import com.procurement.evaluation.model.dto.databinding.JsonDateDeserializer
@@ -34,6 +37,12 @@ private object JsonMapper {
         module.addDeserializer(LocalDateTime::class.java, JsonDateDeserializer())
         module.addDeserializer(String::class.java, StringsDeserializer())
         module.addDeserializer(Int::class.java, IntDeserializer())
+
+        /**
+         * Serializer/Deserializer for RequirementRsValue type
+         */
+        module.addSerializer(RequirementRsValue::class.java, RequirementValueSerializer())
+        module.addDeserializer(RequirementRsValue::class.java, RequirementValueDeserializer())
 
         mapper.registerModule(module)
         mapper.registerKotlinModule()
