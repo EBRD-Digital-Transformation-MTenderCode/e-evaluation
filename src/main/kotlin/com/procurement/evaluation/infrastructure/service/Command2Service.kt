@@ -5,6 +5,7 @@ import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
 import com.procurement.evaluation.infrastructure.handler.CheckAccessToAwardHandler
 import com.procurement.evaluation.infrastructure.handler.CheckRelatedTendererHandler
+import com.procurement.evaluation.infrastructure.handler.CreateRequirementResponseHandler
 import com.procurement.evaluation.infrastructure.handler.GetAwardStateByIdsHandler
 import com.procurement.evaluation.model.dto.bpe.Command2Type
 import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
@@ -18,7 +19,8 @@ class Command2Service(
     private val logger: Logger,
     private val getAwardStateByIdsHandler: GetAwardStateByIdsHandler,
     private val checkAccessToAwardHandler: CheckAccessToAwardHandler,
-    private val checkRelatedTendererHandler: CheckRelatedTendererHandler
+    private val checkRelatedTendererHandler: CheckRelatedTendererHandler,
+    private val createRequirementResponseHandler: CreateRequirementResponseHandler
 ) {
 
     fun execute(node: JsonNode): ApiResponse2 {
@@ -41,6 +43,10 @@ class Command2Service(
 
             Command2Type.CHECK_RELATED_TENDERER ->
                 checkRelatedTendererHandler.handle(node)
+
+            Command2Type.CREATE_REQUIREMENT_RESPONSE ->
+                createRequirementResponseHandler.handle(node)
+
         }
     }
 }
