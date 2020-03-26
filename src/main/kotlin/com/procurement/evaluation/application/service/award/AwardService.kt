@@ -1,6 +1,8 @@
 package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
+import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseParams
+import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
@@ -39,6 +41,7 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
+import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.lib.toSetBy
@@ -129,6 +132,8 @@ interface AwardService {
     fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail>
 
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
+
+    fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
 }
 
 @Service
@@ -1721,36 +1726,19 @@ class AwardServiceImpl(
     }
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
-
-        val awardEntities = awardRepository.tryFindBy(
+        val awardEntity = awardRepository.tryFindBy(
             cpid = params.cpid.toString(),
-            stage = params.ocid.getStage()
+            stage = params.ocid.getStage(),
+            awardId = params.awardId
         )
-            .doReturn { incident ->
-                return ValidationResult.error(incident)
-            }
-            .takeIf { it.isNotEmpty() }
-            ?: return ValidationResult.error(ValidationError.AwardNotFound())
-
-        fun findByAwardId(entities: List<AwardEntity>, awardId: String): Result<AwardEntity?, Fail.Incident> {
-            return entities.firstOrNull { entity ->
-                val award = entity.jsonData.tryToObject(Award::class.java)
-                    .doReturn { error ->
-                        return failure(Fail.Incident.ParseFromDatabaseIncident(entity.jsonData, error.exception))
-                    }
-                award.id == awardId
-            }.asSuccess()
-        }
-
-        val entity = findByAwardId(awardEntities, params.awardId.toString())
             .doReturn { error -> return ValidationResult.error(error) }
             ?: return ValidationResult.error(ValidationError.AwardNotFound())
 
-        if (entity.owner != params.owner.toString()) {
+        if (awardEntity.owner != params.owner.toString()) {
             return ValidationResult.error(ValidationError.InvalidOwner())
         }
 
-        if (entity.token != params.token) {
+        if (awardEntity.token != params.token) {
             return ValidationResult.error(ValidationError.InvalidToken())
         }
 
@@ -1792,6 +1780,66 @@ class AwardServiceImpl(
 
         return ValidationResult.ok()
     }
+
+    override fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
+        val awardEntity = awardRepository.tryFindBy(
+            cpid = params.cpid.toString(),
+            stage = params.ocid.getStage(),
+            awardId = params.award.id
+        )
+            .forwardResult { result -> return result }
+            ?: return failure(ValidationError.AwardNotFound())
+
+        val award = awardEntity.jsonData
+            .tryToObject(Award::class.java)
+            .doReturn { error ->
+                return failure(
+                    Fail.Incident.ParseFromDatabaseIncident(
+                        jsonData = awardEntity.jsonData, exception = error.exception
+                    )
+                )
+            }
+
+        if (award.requirementResponse != null)
+            return failure(ValidationError.DuplicateRequirementResponse())
+
+        val requirementResponse = convertToAwardRequirementResponse(params)
+
+        val updatedAward = award.copy(
+            requirementResponse = requirementResponse
+        )
+
+        val updatedAwardEntity = awardEntity.copy(
+            jsonData = toJson(updatedAward)
+        )
+        awardRepository.update(cpid = updatedAwardEntity.cpId, updatedAward = updatedAwardEntity)
+
+        return params.convert().asSuccess()
+    }
+
+    private fun convertToAwardRequirementResponse(params: CreateRequirementResponseParams): Award.RequirementResponse =
+        params.award.requirementResponse.let { requirementRs ->
+            Award.RequirementResponse(
+                id = requirementRs.id,
+                responderer = requirementRs.responderer.let { responderer ->
+                    Award.RequirementResponse.Responderer(
+                        id = responderer.id,
+                        name = responderer.name
+                    )
+                },
+                requirement = requirementRs.requirement.let { requirement ->
+                    Award.RequirementResponse.Requirement(
+                        id = requirement.id
+                    )
+                },
+                relatedTenderer = requirementRs.relatedTenderer.let { relatedTenderer ->
+                    Award.RequirementResponse.RelatedTenderer(
+                        id = relatedTenderer.id
+                    )
+                },
+                value = requirementRs.value
+            )
+        }
 
     private fun generateUnsuccessfulAwards(
         lots: List<AwardCancellationData.Lot>,
