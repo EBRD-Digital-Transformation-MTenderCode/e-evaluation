@@ -13,4 +13,6 @@ sealed class ValidationError(numberError: String, override val description: Stri
 
     class TendererNotLinkedToAward() : ValidationError(numberError = "10.4.5.2", description = "Tenderer is not linked to award.")
 
+    class DuplicateRequirementResponse() : ValidationError(numberError = "10.4.5.3", description = "Duplicate requirement response.")
+
 }
