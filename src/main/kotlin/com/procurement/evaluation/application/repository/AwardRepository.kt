@@ -1,6 +1,7 @@
 package com.procurement.evaluation.application.repository
 
 import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.model.entity.AwardEntity
 import java.util.*
@@ -22,5 +23,5 @@ interface AwardRepository {
 
     fun tryFindBy(cpid: String, stage: String): Result<List<AwardEntity>, Fail.Incident>
 
-    fun tryFindBy(cpid: String, stage: String, token: UUID): Result<AwardEntity?, Fail.Incident>
+    fun tryFindBy(cpid: String, stage: String, awardId: AwardId): Result<AwardEntity?, Fail>
 }

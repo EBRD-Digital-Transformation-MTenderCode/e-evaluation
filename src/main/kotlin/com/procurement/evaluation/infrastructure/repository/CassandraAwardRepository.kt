@@ -12,9 +12,12 @@ import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
+import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.entity.AwardEntity
+import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Repository
 import java.util.*
 
@@ -226,17 +229,24 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
-    override fun tryFindBy(cpid: String, stage: String, token: UUID): Result<AwardEntity?, Fail.Incident>{
-        val query = preparedFindByCpidAndStageAndTokenCQL.bind()
-            .apply {
-                setString(columnCpid, cpid)
-                setString(columnStage, stage)
-                setUUID(columnToken, token)
-            }
+    override fun tryFindBy(cpid: String, stage: String, awardId: AwardId): Result<AwardEntity?, Fail> {
+        val awardEntities = tryFindBy(
+            cpid = cpid, stage = stage
+        )
+            .forwardResult { incident -> return incident }
+            .takeIf { it.isNotEmpty() }
+            ?: return null.asSuccess()
 
-        val resultSet = query.tryExecute(session)
-            .doReturn { error -> return failure(error) }
-        return resultSet.one()?.let { convertToAwardEntity(it) }.asSuccess()
+        for (entity in awardEntities) {
+            val award = entity.jsonData
+                .tryToObject(Award::class.java)
+                .doReturn { error ->
+                    return failure(Fail.Incident.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                }
+            if (award.id == awardId.toString())
+                return entity.asSuccess()
+        }
+        return null.asSuccess()
     }
 
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
