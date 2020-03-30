@@ -1,6 +1,7 @@
 package com.procurement.evaluation.domain.model
 
 import com.fasterxml.jackson.annotation.JsonValue
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStringsUpper
 import com.procurement.evaluation.domain.model.enums.Stage
 
 class Ocid private constructor(private val value: String) {
@@ -22,7 +23,7 @@ class Ocid private constructor(private val value: String) {
 
     companion object {
         private val STAGES: String
-            get() = Stage.allowedValues.joinToString(separator = "|", prefix = "(", postfix = ")") { it.toUpperCase() }
+            get() = Stage.allowedElements.keysAsStringsUpper().joinToString(separator = "|", prefix = "(", postfix = ")")
 
         private val regex = "^[a-z]{4}-[a-z0-9]{6}-[A-Z]{2}-[0-9]{13}-$STAGES-[0-9]{13}\$".toRegex()
 

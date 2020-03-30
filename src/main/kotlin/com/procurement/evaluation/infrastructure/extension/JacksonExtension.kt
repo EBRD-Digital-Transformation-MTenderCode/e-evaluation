@@ -3,12 +3,13 @@ package com.procurement.evaluation.infrastructure.extension
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
-import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.Result.Companion.success
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.functional.bind
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import java.math.BigDecimal
 
@@ -65,7 +66,7 @@ fun <T> JsonNode.tryGetAttributeAsEnum(name: String, enumProvider: EnumElementPr
             ?: failure(
                 DataErrors.Validation.UnknownValue(
                     name = name,
-                    expectedValues = enumProvider.allowedValues,
+                    expectedValues = enumProvider.allowedElements.keysAsStrings(),
                     actualValue = text
                 )
             )
