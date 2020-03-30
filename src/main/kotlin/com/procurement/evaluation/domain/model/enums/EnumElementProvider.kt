@@ -1,10 +1,19 @@
 package com.procurement.evaluation.domain.model.enums
 
 import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.domain.functional.Result.Companion.failure
+import com.procurement.evaluation.domain.functional.Result.Companion.success
 import com.procurement.evaluation.exception.EnumElementProviderException
 
 abstract class EnumElementProvider<T>(val info: EnumInfo<T>) where T : Enum<T>,
                                                                    T : EnumElementProvider.Key {
+
+    @Target(AnnotationTarget.PROPERTY)
+    annotation class DeprecatedElement
+
+    @Target(AnnotationTarget.PROPERTY)
+    annotation class ExcludedElement
+
     interface Key {
         val key: String
     }
@@ -16,11 +25,25 @@ abstract class EnumElementProvider<T>(val info: EnumInfo<T>) where T : Enum<T>,
 
     companion object {
         inline fun <reified T : Enum<T>> info() = EnumInfo(target = T::class.java, values = enumValues())
+
+        fun <T> Collection<T>.keysAsStrings(): List<String> where T : Enum<T>,
+                                                                  T : Key = this
+            .map { element -> element.key + if (element.isDeprecated()) " (Deprecated)" else "" }
+
+        fun <T> Collection<T>.keysAsStringsUpper(): List<String> where T : Enum<T>,
+                                                                       T : Key = this
+            .map { element -> element.key.toUpperCase() + if (element.isDeprecated()) " (Deprecated)" else "" }
+
+        private fun <E : Enum<E>> Enum<E>.isNotExcluded(): Boolean = this.findAnnotation<ExcludedElement, E>() == null
+        private fun <E : Enum<E>> Enum<E>.isDeprecated(): Boolean = this.findAnnotation<DeprecatedElement, E>() != null
+        private inline fun <reified A : Annotation, E : Enum<E>> Enum<E>.findAnnotation(): A? = this.javaClass
+            .getDeclaredField(this.name)
+            .getAnnotation(A::class.java)
     }
 
-    private val elements: Map<String, T> = info.values.associateBy { it.key.toUpperCase() }
+    val allowedElements: List<T> = info.values.filter { element -> element.isNotExcluded() }
 
-    val allowedValues: List<String> = info.values.map { it.key }
+    private val elements: Map<String, T> = allowedElements.associateBy { it.key.toUpperCase() }
 
     fun orNull(key: String): T? = elements[key.toUpperCase()]
 
@@ -33,11 +56,14 @@ abstract class EnumElementProvider<T>(val info: EnumInfo<T>) where T : Enum<T>,
 
     fun tryOf(key: String): Result<T, String> {
         val element = orNull(key)
-        return if (element == null) {
+        return if (element != null)
+            success(element)
+        else {
             val enumType = info.target.canonicalName
             val allowedValues = info.values.joinToString { it.key }
-            Result.failure("Unknown value '$key' for enum type '$enumType'. Allowed values are '$allowedValues'.")
-        } else
-            Result.success(element)
+            failure("Unknown value '$key' for enum type '$enumType'. Allowed values are '$allowedValues'.")
+        }
     }
+
+    operator fun contains(key: String): Boolean = orNull(key) != null
 }
