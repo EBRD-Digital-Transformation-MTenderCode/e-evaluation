@@ -9,10 +9,14 @@ sealed class ValidationError(numberError: String, override val description: Stri
 
     class InvalidOwner() : ValidationError(numberError = "10.2.4.2", description = "Request owner doesn't match owner from the database.")
 
-    class AwardNotFound() : ValidationError(numberError = "10.4.2.3", description = "Award not found.")
+    class AwardNotFoundOnCheckRelatedTenderer() : ValidationError(numberError = "10.4.5.1", description = "Award not found.")
 
     class TendererNotLinkedToAward() : ValidationError(numberError = "10.4.5.2", description = "Tenderer is not linked to award.")
 
     class DuplicateRequirementResponse() : ValidationError(numberError = "10.4.5.3", description = "Duplicate requirement response.")
+
+    class AwardNotFoundOnCheckAccess() : ValidationError(numberError = "10.4.2.3", description = "Award not found.")
+
+    class AwardNotFoundOnCreateRequirementRs() : ValidationError(numberError = "10.4.4.1", description = "Award not found.")
 
 }
