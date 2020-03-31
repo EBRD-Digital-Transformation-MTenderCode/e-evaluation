@@ -1703,7 +1703,7 @@ class AwardServiceImpl(
             return failure(incident)
         }
 
-        val awardsIds = params.awardIds.map { it.toString() }
+        val awardsIds = params.awardIds.toSetBy { it.toString() }
 
         return awardEntities
             .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
@@ -1715,7 +1715,7 @@ class AwardServiceImpl(
                     )
                 )
             }
-            .filter { award -> awardsIds.contains(award.id) }
+            .filter { award -> testContains(award.id, awardsIds) }
             .map { award ->
                 GetAwardStateByIdsResult(
                     id = UUID.fromString(award.id),
@@ -1816,6 +1816,10 @@ class AwardServiceImpl(
 
         return params.convert().asSuccess()
     }
+
+
+    private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
+        if (patterns.isNotEmpty()) value in patterns else true
 
     private fun convertToAwardRequirementResponse(params: CreateRequirementResponseParams): Award.RequirementResponse =
         params.award.requirementResponse.let { requirementRs ->
