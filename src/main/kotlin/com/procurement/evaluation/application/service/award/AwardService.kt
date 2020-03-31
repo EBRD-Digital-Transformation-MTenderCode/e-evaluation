@@ -1732,7 +1732,9 @@ class AwardServiceImpl(
             awardId = params.awardId
         )
             .doReturn { error -> return ValidationResult.error(error) }
-            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckAccess())
+            ?: return ValidationResult.error(
+                ValidationError.AwardNotFoundOnCheckAccess(params.awardId)
+            )
 
         if (awardEntity.owner != params.owner.toString()) {
             return ValidationResult.error(ValidationError.InvalidOwner())
@@ -1754,7 +1756,9 @@ class AwardServiceImpl(
                 return ValidationResult.error(incident)
             }
             .takeIf { it.isNotEmpty() }
-            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer())
+            ?: return ValidationResult.error(
+                ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId)
+            )
 
         val award = awardEntities.mapResultPair { entity ->
             entity.jsonData.tryToObject(Award::class.java)
@@ -1768,7 +1772,9 @@ class AwardServiceImpl(
                 )
             }
             .firstOrNull { award -> award.id == params.awardId.toString() }
-            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer())
+            ?: return ValidationResult.error(
+                ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId)
+            )
 
         if (award.suppliers == null || award.suppliers.isEmpty()) {
             return ValidationResult.error(ValidationError.TendererNotLinkedToAward())
@@ -1791,7 +1797,9 @@ class AwardServiceImpl(
             awardId = params.award.id
         )
             .forwardResult { result -> return result }
-            ?: return failure(ValidationError.AwardNotFoundOnCreateRequirementRs())
+            ?: return failure(
+                ValidationError.AwardNotFoundOnCreateRequirementRs(params.award.id)
+            )
 
         val award = awardEntity.jsonData
             .tryToObject(Award::class.java)
@@ -1816,7 +1824,6 @@ class AwardServiceImpl(
 
         return params.convert().asSuccess()
     }
-
 
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
         if (patterns.isNotEmpty()) value in patterns else true
