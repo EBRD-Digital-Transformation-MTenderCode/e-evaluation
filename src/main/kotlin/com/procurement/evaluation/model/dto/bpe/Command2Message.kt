@@ -11,8 +11,7 @@ import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
 import com.procurement.evaluation.domain.util.extension.tryUUID
 import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties2
 import com.procurement.evaluation.infrastructure.dto.Action
-import com.procurement.evaluation.infrastructure.dto.ApiDataErrorResponse2
-import com.procurement.evaluation.infrastructure.dto.ApiFailResponse2
+import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse2
 import com.procurement.evaluation.infrastructure.dto.ApiIncidentResponse2
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
 import com.procurement.evaluation.infrastructure.dto.ApiVersion2
@@ -22,6 +21,7 @@ import com.procurement.evaluation.infrastructure.extension.tryGetTextAttribute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.BadRequest
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.utils.tryToNode
 import com.procurement.evaluation.utils.tryToObject
 import java.util.*
@@ -43,57 +43,70 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
 }
 
 fun generateResponseOnFailure(
-    fail: Fail,
-    version: ApiVersion2,
-    id: UUID,
-    logger: Logger
+    fail: Fail, version: ApiVersion2, id: UUID, logger: Logger
 ): ApiResponse2 {
     fail.logging(logger)
     return when (fail) {
         is Fail.Error -> {
             when (fail) {
                 is DataErrors.Validation ->
-                    ApiDataErrorResponse2(
-                        version = version,
-                        id = id,
-                        result = listOf(
-                            ApiDataErrorResponse2.Error(
-                                code = getFullErrorCode(fail.code),
-                                description = fail.description,
-                                details = listOf(
-                                    ApiDataErrorResponse2.Error.Detail(name = fail.name)
-                                )
-                            )
-                        )
-                    )
-                else -> ApiFailResponse2(
-                    version = version,
-                    id = id,
-                    result = listOf(
-                        ApiFailResponse2.Error(
-                            code = getFullErrorCode(fail.code),
-                            description = fail.description
-                        )
-                    )
-                )
+                    generateDataErrorResponse(id = id, version = version, dataError = fail)
+                is ValidationError ->
+                    generateValidationErrorResponse(id = id, version = version, validationError = fail)
+                else -> generateErrorResponse(id = id, version = version, error = fail)
             }
         }
-        is Fail.Incident -> {
-            val errors = listOf(
-                ApiIncidentResponse2.Incident.Details(
-                    code = getFullErrorCode(fail.code),
-                    description = fail.description,
-                    metadata = null
-                )
-            )
-            generateIncident(errors, version, id)
-        }
+        is Fail.Incident -> generateIncidentResponse(id = id, version = version, incident = fail)
     }
 }
 
-private fun generateIncident(
-    details: List<ApiIncidentResponse2.Incident.Details>, version: ApiVersion2, id: UUID
-): ApiIncidentResponse2 =
+private fun generateDataErrorResponse(
+    dataError: DataErrors.Validation, version: ApiVersion2, id: UUID
+) =
+    ApiErrorResponse2(
+        version = version,
+        id = id,
+        result = listOf(
+            ApiErrorResponse2.Error(
+                code = getFullErrorCode(dataError.code),
+                description = dataError.description,
+                details = listOf(
+                    ApiErrorResponse2.Error.Detail(name = dataError.name)
+                )
+            )
+        )
+    )
+
+private fun generateValidationErrorResponse(
+    validationError: ValidationError, version: ApiVersion2, id: UUID
+) =
+    ApiErrorResponse2(
+        version = version,
+        id = id,
+        result = listOf(
+            ApiErrorResponse2.Error(
+                code = getFullErrorCode(validationError.code),
+                description = validationError.description,
+                details = if (validationError.id == null) null else listOf(
+                    ApiErrorResponse2.Error.Detail(id = validationError.id)
+                )
+            )
+        )
+    )
+
+private fun generateErrorResponse(version: ApiVersion2, id: UUID, error: Fail.Error) =
+    ApiErrorResponse2(
+        version = version,
+        id = id,
+        result = listOf(
+            ApiErrorResponse2.Error(
+                code = getFullErrorCode(error.code),
+                description = error.description
+            )
+        )
+    )
+
+private fun generateIncidentResponse(incident: Fail.Incident, version: ApiVersion2, id: UUID) =
     ApiIncidentResponse2(
         version = version,
         id = id,
@@ -105,7 +118,13 @@ private fun generateIncident(
                 version = GlobalProperties2.service.version,
                 name = GlobalProperties2.service.name
             ),
-            details = details
+            details = listOf(
+                ApiIncidentResponse2.Incident.Details(
+                    code = getFullErrorCode(incident.code),
+                    description = incident.description,
+                    metadata = null
+                )
+            )
         )
     )
 
