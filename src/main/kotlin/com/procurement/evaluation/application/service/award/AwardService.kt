@@ -1732,7 +1732,7 @@ class AwardServiceImpl(
             awardId = params.awardId
         )
             .doReturn { error -> return ValidationResult.error(error) }
-            ?: return ValidationResult.error(ValidationError.AwardNotFound())
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckAccess())
 
         if (awardEntity.owner != params.owner.toString()) {
             return ValidationResult.error(ValidationError.InvalidOwner())
@@ -1754,7 +1754,7 @@ class AwardServiceImpl(
                 return ValidationResult.error(incident)
             }
             .takeIf { it.isNotEmpty() }
-            ?: return ValidationResult.error(ValidationError.AwardNotFound())       //TODO not sure about this
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer())
 
         val award = awardEntities.mapResultPair { entity ->
             entity.jsonData.tryToObject(Award::class.java)
@@ -1768,7 +1768,7 @@ class AwardServiceImpl(
                 )
             }
             .firstOrNull { award -> award.id == params.awardId.toString() }
-            ?: return ValidationResult.error(ValidationError.AwardNotFound())
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer())
 
         if (award.suppliers == null || award.suppliers.isEmpty()) {
             return ValidationResult.error(ValidationError.TendererNotLinkedToAward())
@@ -1777,6 +1777,9 @@ class AwardServiceImpl(
         award.suppliers
             .firstOrNull { tenderer -> tenderer.id == params.relatedTendererId }
             ?: return ValidationResult.error(ValidationError.TendererNotLinkedToAward())
+
+        if (award.requirementResponse != null)
+            return ValidationResult.error(ValidationError.DuplicateRequirementResponse())
 
         return ValidationResult.ok()
     }
@@ -1788,7 +1791,7 @@ class AwardServiceImpl(
             awardId = params.award.id
         )
             .forwardResult { result -> return result }
-            ?: return failure(ValidationError.AwardNotFound())
+            ?: return failure(ValidationError.AwardNotFoundOnCreateRequirementRs())
 
         val award = awardEntity.jsonData
             .tryToObject(Award::class.java)
@@ -1799,9 +1802,6 @@ class AwardServiceImpl(
                     )
                 )
             }
-
-        if (award.requirementResponse != null)
-            return failure(ValidationError.DuplicateRequirementResponse())
 
         val requirementResponse = convertToAwardRequirementResponse(params)
 
