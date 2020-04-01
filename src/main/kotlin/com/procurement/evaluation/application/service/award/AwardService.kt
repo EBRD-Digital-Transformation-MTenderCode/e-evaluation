@@ -1697,8 +1697,8 @@ class AwardServiceImpl(
 
     override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail> {
         val awardEntities = awardRepository.tryFindBy(
-            cpid = params.cpid.toString(),
-            stage = params.ocid.getStage()
+            cpid = params.cpid,
+            stage = params.ocid.stage
         ).forwardResult { incident -> return incident }
 
         val awardsIds = params.awardIds.toSetBy { it.toString() }
@@ -1736,8 +1736,8 @@ class AwardServiceImpl(
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
         val awardEntity = awardRepository.tryFindBy(
-            cpid = params.cpid.toString(),
-            stage = params.ocid.getStage(),
+            cpid = params.cpid,
+            stage = params.ocid.stage,
             awardId = params.awardId
         )
             .doReturn { error -> return ValidationResult.error(error) }
@@ -1758,8 +1758,8 @@ class AwardServiceImpl(
 
     override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
         val awardEntities = awardRepository.tryFindBy(
-            cpid = params.cpid.toString(),
-            stage = params.ocid.getStage()
+            cpid = params.cpid,
+            stage = params.ocid.stage
         )
             .doReturn { incident ->
                 return ValidationResult.error(incident)
@@ -1801,8 +1801,8 @@ class AwardServiceImpl(
 
     override fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
         val awardEntity = awardRepository.tryFindBy(
-            cpid = params.cpid.toString(),
-            stage = params.ocid.getStage(),
+            cpid = params.cpid,
+            stage = params.ocid.stage,
             awardId = params.award.id
         )
             .forwardResult { result -> return result }
