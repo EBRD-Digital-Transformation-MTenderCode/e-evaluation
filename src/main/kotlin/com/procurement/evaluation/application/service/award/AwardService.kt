@@ -127,7 +127,7 @@ interface AwardService {
 
     fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
 
-    fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail.Incident>
+    fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail>
 
     fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail>
 
@@ -1695,17 +1695,15 @@ class AwardServiceImpl(
         }
     }
 
-    override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail.Incident> {
+    override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail> {
         val awardEntities = awardRepository.tryFindBy(
             cpid = params.cpid.toString(),
             stage = params.ocid.getStage()
-        ).doReturn { incident ->
-            return failure(incident)
-        }
+        ).forwardResult { incident -> return incident }
 
         val awardsIds = params.awardIds.toSetBy { it.toString() }
 
-        return awardEntities
+        val resultingAwards = awardEntities
             .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
             .doReturn { failPair ->
                 return failure(
@@ -1716,13 +1714,24 @@ class AwardServiceImpl(
                 )
             }
             .filter { award -> testContains(award.id, awardsIds) }
-            .map { award ->
-                GetAwardStateByIdsResult(
-                    id = UUID.fromString(award.id),
-                    status = award.status,
-                    statusDetails = award.statusDetails
+
+        val resultingAwardIds = resultingAwards.toSetBy { it.id }
+        val absentAwardsIds = awardsIds - resultingAwardIds
+
+        if (absentAwardsIds.isNotEmpty())
+            return failure(
+                ValidationError.AwardNotFoundOnGetAwardState(
+                    UUID.fromString(absentAwardsIds.first())
                 )
-            }.asSuccess()
+            )
+
+        return resultingAwards.map { award ->
+            GetAwardStateByIdsResult(
+                id = UUID.fromString(award.id),
+                status = award.status,
+                statusDetails = award.statusDetails
+            )
+        }.asSuccess()
     }
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
