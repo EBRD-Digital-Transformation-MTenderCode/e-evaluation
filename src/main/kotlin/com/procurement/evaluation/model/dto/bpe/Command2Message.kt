@@ -8,6 +8,7 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.bind
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
+import com.procurement.evaluation.domain.util.extension.toListOrEmpty
 import com.procurement.evaluation.domain.util.extension.tryUUID
 import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties2
 import com.procurement.evaluation.infrastructure.dto.Action
@@ -70,9 +71,7 @@ private fun generateDataErrorResponse(
             ApiErrorResponse2.Error(
                 code = getFullErrorCode(dataError.code),
                 description = dataError.description,
-                details = listOf(
-                    ApiErrorResponse2.Error.Detail(name = dataError.name)
-                )
+                details = ApiErrorResponse2.Error.Detail.tryCreateOrNull(name = dataError.name).toListOrEmpty()
             )
         )
     )
@@ -87,9 +86,8 @@ private fun generateValidationErrorResponse(
             ApiErrorResponse2.Error(
                 code = getFullErrorCode(validationError.code),
                 description = validationError.description,
-                details = if (validationError.id == null) null else listOf(
-                    ApiErrorResponse2.Error.Detail(id = validationError.id)
-                )
+                details = ApiErrorResponse2.Error.Detail.tryCreateOrNull(id = validationError.id).toListOrEmpty()
+
             )
         )
     )

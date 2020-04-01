@@ -39,12 +39,20 @@ class ApiErrorResponse2(
     class Error(
         val code: String,
         val description: String,
-        @JsonInclude(JsonInclude.Include.NON_EMPTY) val details: List<Detail>? = null
+        @JsonInclude(JsonInclude.Include.NON_EMPTY) val details: List<Detail> = emptyList()
     ) {
-        class Detail(
+        class Detail private constructor(
             @JsonInclude(JsonInclude.Include.NON_NULL) val name: String? = null,
             @JsonInclude(JsonInclude.Include.NON_NULL) val id: String? = null
-        )
+        ) {
+            companion object {
+                fun tryCreateOrNull(id: String? = null, name: String? = null): Detail? =
+                    if (id == null && name == null)
+                        null
+                    else
+                        Detail(id = id, name = name)
+            }
+        }
     }
 }
 
