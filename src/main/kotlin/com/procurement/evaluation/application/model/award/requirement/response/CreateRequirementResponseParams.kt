@@ -3,15 +3,11 @@ package com.procurement.evaluation.application.model.award.requirement.response
 import com.procurement.evaluation.application.model.parseAwardId
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseOcid
-import com.procurement.evaluation.application.model.parseOwner
-import com.procurement.evaluation.application.model.parseToken
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
-import com.procurement.evaluation.domain.model.Owner
-import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.requirement.RequirementId
@@ -47,30 +43,18 @@ class CreateRequirementResponseParams private constructor(
 
     class Award private constructor(
         val id: AwardId,
-        val owner: Owner,
-        val token: Token,
         val requirementResponse: RequirementResponse
     ) {
         companion object {
             fun tryCreate(
                 id: String,
-                owner: String,
-                token: String,
                 requirementResponse: RequirementResponse
             ): Result<Award, DataErrors> {
-                val tokenParsed = parseToken(token)
-                    .doReturn { error -> return failure(error = error) }
-
-                val ownerParsed = parseOwner(owner)
-                    .doReturn { error -> return failure(error = error) }
-
                 val awardIdParsed = parseAwardId(id)
                     .doReturn { error -> return failure(error = error) }
 
                 return Award(
                     id = awardIdParsed,
-                    token = tokenParsed,
-                    owner = ownerParsed,
                     requirementResponse = requirementResponse
                 ).asSuccess()
             }

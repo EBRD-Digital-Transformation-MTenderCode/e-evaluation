@@ -18,8 +18,6 @@ private fun CreateRequirementResponseRequest.Award.convert()
     : Result<CreateRequirementResponseParams.Award, DataErrors> =
     CreateRequirementResponseParams.Award.tryCreate(
         id = id,
-        owner = owner,
-        token = token,
         requirementResponse = requirementResponse.convert()
             .forwardResult { result -> return result }
     )

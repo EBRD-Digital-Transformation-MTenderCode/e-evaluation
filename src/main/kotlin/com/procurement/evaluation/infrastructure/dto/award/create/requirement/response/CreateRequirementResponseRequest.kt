@@ -10,8 +10,6 @@ data class CreateRequirementResponseRequest(
 ) {
     data class Award(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-        @param:JsonProperty("owner") @field:JsonProperty("owner") val owner: String,
-        @param:JsonProperty("token") @field:JsonProperty("token") val token: String,
         @param:JsonProperty("requirementResponse") @field:JsonProperty("requirementResponse") val requirementResponse: RequirementResponse
     ) {
         data class RequirementResponse(
