@@ -45,4 +45,10 @@ sealed class ValidationError(
         description = "Award not found.",
         id = id.toString()
     )
+
+    class AwardNotFoundOnGetAwardState(id: AwardId) : ValidationError(
+        numberError = "10.4.1.1",
+        description = "Award not found.",
+        id = id.toString()
+    )
 }
