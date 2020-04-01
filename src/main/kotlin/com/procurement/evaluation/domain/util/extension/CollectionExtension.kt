@@ -40,3 +40,5 @@ fun <T, R, E> List<T>.mapResultPair(block: (T) -> Result<R, E>): Result<List<R>,
 }
 data class FailPair<out E, out T> constructor(val fail: E, val element: T)
 
+fun <T> T?.toListOrEmpty(): List<T> = if (this != null) listOf(this) else emptyList()
+
