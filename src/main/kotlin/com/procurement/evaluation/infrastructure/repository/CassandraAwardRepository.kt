@@ -12,7 +12,9 @@ import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
+import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.award.AwardId
+import com.procurement.evaluation.domain.model.enums.Stage
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.model.dto.ocds.Award
@@ -217,11 +219,11 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
     }
 
-    override fun tryFindBy(cpid: String, stage: String): Result<List<AwardEntity>, Fail.Incident> {
+    override fun tryFindBy(cpid: Cpid, stage: Stage): Result<List<AwardEntity>, Fail.Incident> {
         val query = preparedFindByCpidAndStageCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
-                setString(columnStage, stage)
+                setString(columnCpid, cpid.toString())
+                setString(columnStage, stage.toString())
             }
 
         val resultSet = query.tryExecute(session)
@@ -229,7 +231,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
-    override fun tryFindBy(cpid: String, stage: String, awardId: AwardId): Result<AwardEntity?, Fail> {
+    override fun tryFindBy(cpid: Cpid, stage: Stage, awardId: AwardId): Result<AwardEntity?, Fail> {
         val awardEntities = tryFindBy(
             cpid = cpid, stage = stage
         )
