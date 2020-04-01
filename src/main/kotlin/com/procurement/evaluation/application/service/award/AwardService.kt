@@ -1721,13 +1721,13 @@ class AwardServiceImpl(
         if (absentAwardsIds.isNotEmpty())
             return failure(
                 ValidationError.AwardNotFoundOnGetAwardState(
-                    UUID.fromString(absentAwardsIds.first())
+                    AwardId.fromString(absentAwardsIds.first())
                 )
             )
 
         return resultingAwards.map { award ->
             GetAwardStateByIdsResult(
-                id = UUID.fromString(award.id),
+                id = AwardId.fromString(award.id),
                 status = award.status,
                 statusDetails = award.statusDetails
             )
