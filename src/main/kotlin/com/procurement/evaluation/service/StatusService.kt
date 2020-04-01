@@ -191,8 +191,8 @@ class StatusService(private val periodService: PeriodService,
                 cpId = cpId,
                 stage = stage,
                 token = token,
-                status = award.status.value,
-                statusDetails = award.statusDetails.value,
+                status = award.status.key,
+                statusDetails = award.statusDetails.key,
                 owner = owner,
                 jsonData = toJson(award))
     }

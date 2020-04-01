@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
+import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
 import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeDeserializer
 import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeSerializer
 import com.procurement.evaluation.json.exception.JsonBindingException
@@ -94,5 +97,11 @@ object JsonMapper {
             addDeserializer(LocalDateTime::class.java, JsonDateTimeDeserializer())
             addDeserializer(String::class.java, StringsDeserializer())
             addDeserializer(Int::class.java, IntDeserializer())
+
+            /**
+             * Serializer/Deserializer for RequirementRsValue type
+             */
+            addSerializer(RequirementRsValue::class.java, RequirementValueSerializer())
+            addDeserializer(RequirementRsValue::class.java, RequirementValueDeserializer())
         }
 }

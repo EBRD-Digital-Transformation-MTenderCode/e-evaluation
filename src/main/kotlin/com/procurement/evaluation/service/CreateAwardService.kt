@@ -50,7 +50,7 @@ class CreateAwardService(
         addUnsuccessfulLots(lotsFromTenderSet, successfulLotsSet, unsuccessfulLotsSet)
         val successfulBidsList = getSuccessfulBids(dtoBidsList, successfulLotsSet)
         val successfulAwardsList = getSuccessfulAwards(successfulBidsList)
-        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.fromValue(awardCriteria))
+        sortSuccessfulAwards(successfulAwardsList, AwardCriteria.creator(awardCriteria))
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val awards = successfulAwardsList + unsuccessfulAwardsList
         val awardPeriod = if (successfulAwardsList.isEmpty()) {
@@ -60,7 +60,7 @@ class CreateAwardService(
         }
         awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
-        val firstBids = getFirstBidsFromAwards(AwardCriteria.fromValue(awardCriteria), successfulAwardsList)
+        val firstBids = getFirstBidsFromAwards(AwardCriteria.creator(awardCriteria), successfulAwardsList)
         return CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids)
     }
 
@@ -240,8 +240,8 @@ class CreateAwardService(
             cpId = cpId,
             stage = stage,
             token = token,
-            status = award.status.value,
-            statusDetails = award.statusDetails.value,
+            status = award.status.key,
+            statusDetails = award.statusDetails.key,
             owner = owner,
             jsonData = toJson(award)
         )

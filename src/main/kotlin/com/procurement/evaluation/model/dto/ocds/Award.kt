@@ -2,6 +2,11 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.requirement.RequirementId
+import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
+import com.procurement.evaluation.domain.model.requirement.response.RespondererId
+import com.procurement.evaluation.domain.model.tenderer.TendererId
 import java.time.LocalDateTime
 
 data class Award @JsonCreator constructor(
@@ -46,5 +51,29 @@ data class Award @JsonCreator constructor(
     var documents: List<Document>?,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    var items: List<Item>?
-)
+    var items: List<Item>?,
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val requirementResponse: RequirementResponse? = null
+) {
+    data class RequirementResponse(
+        val id: RequirementResponseId,
+        val value: RequirementRsValue,
+        val relatedTenderer: RelatedTenderer,
+        val requirement: Requirement,
+        val responderer: Responderer
+    ) {
+        data class RelatedTenderer(
+            val id: TendererId
+        )
+
+        data class Requirement(
+            val id: RequirementId
+        )
+
+        data class Responderer(
+            val id: RespondererId,
+            val name: String
+        )
+    }
+}
