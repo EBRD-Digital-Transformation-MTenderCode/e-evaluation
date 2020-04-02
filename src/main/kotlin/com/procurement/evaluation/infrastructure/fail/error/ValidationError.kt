@@ -9,12 +9,12 @@ sealed class ValidationError(
     override val code: String = prefix + numberError
 
     class InvalidToken() : ValidationError(
-        numberError = "10.2.4.1",
+        numberError = "10.4.2.1",
         description = "Request token doesn't match token from the database."
     )
 
     class InvalidOwner() : ValidationError(
-        numberError = "10.2.4.2",
+        numberError = "10.4.2.2",
         description = "Request owner doesn't match owner from the database."
     )
 
