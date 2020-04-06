@@ -6,6 +6,4 @@ import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateBy
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
 fun GetAwardStateByIdsRequest.convert(): Result<GetAwardStateByIdsParams, DataErrors> =
-    GetAwardStateByIdsParams.tryCreate(
-        awardIds, cpid, ocid
-    )
+    GetAwardStateByIdsParams.tryCreate(awardIds = awardIds,cpid =  cpid,ocid =  ocid)
