@@ -3,10 +3,10 @@ package com.procurement.evaluation.infrastructure.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
-import com.procurement.evaluation.infrastructure.handler.CheckAccessToAwardHandler
-import com.procurement.evaluation.infrastructure.handler.CheckRelatedTendererHandler
-import com.procurement.evaluation.infrastructure.handler.CreateRequirementResponseHandler
-import com.procurement.evaluation.infrastructure.handler.GetAwardStateByIdsHandler
+import com.procurement.evaluation.infrastructure.handler.check.accesstoaward.CheckAccessToAwardHandler
+import com.procurement.evaluation.infrastructure.handler.check.relatedtenderer.CheckRelatedTendererHandler
+import com.procurement.evaluation.infrastructure.handler.create.requirementresponsehandler.CreateRequirementResponseHandler
+import com.procurement.evaluation.infrastructure.handler.get.awardstatebyids.GetAwardStateByIdsHandler
 import com.procurement.evaluation.model.dto.bpe.Command2Type
 import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
 import com.procurement.evaluation.model.dto.bpe.tryGetAction

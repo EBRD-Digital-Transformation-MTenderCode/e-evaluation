@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.handler
+package com.procurement.evaluation.infrastructure.handler.get.awardstatebyids
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
@@ -9,6 +9,7 @@ import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateBy
 import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.handler.AbstractHandler
 import com.procurement.evaluation.model.dto.bpe.Command2Type
 import com.procurement.evaluation.model.dto.bpe.tryGetParams
 import org.springframework.stereotype.Component
