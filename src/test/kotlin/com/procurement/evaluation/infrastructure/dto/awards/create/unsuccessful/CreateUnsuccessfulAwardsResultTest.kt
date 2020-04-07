@@ -1,0 +1,16 @@
+package com.procurement.evaluation.infrastructure.dto.awards.create.unsuccessful
+
+import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
+import com.procurement.evaluation.infrastructure.dto.award.create.request.CreateAwardsRequest
+import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsRequest
+import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult
+import org.junit.jupiter.api.Test
+
+class CreateUnsuccessfulAwardsResultTest : AbstractDTOTestBase<CreateUnsuccessfulAwardsResult>(
+    CreateUnsuccessfulAwardsResult::class.java) {
+
+    @Test
+    fun fully() {
+        testBindingAndMapping("json/infrastructure/dto/awards/create/unsuccessful/create_unsuccessful_award_response_full.json")
+    }
+}
