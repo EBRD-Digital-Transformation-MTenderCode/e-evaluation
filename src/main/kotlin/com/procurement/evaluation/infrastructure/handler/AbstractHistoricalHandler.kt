@@ -15,7 +15,7 @@ import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.tryToObject
 
 abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
-    private val target: Class<R>,
+    private val target: Class<ApiSuccessResponse2>,
     private val historyRepository: HistoryRepository,
     private val logger: Logger
 ) : Handler<ACTION, ApiResponse2> {

@@ -6,6 +6,7 @@ import com.procurement.evaluation.application.repository.HistoryRepository
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.infrastructure.dto.ApiSuccessResponse2
 import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.CreateRequirementResponseRequest
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
@@ -22,7 +23,7 @@ class CreateRequirementResponseHandler(
 ) : AbstractHistoricalHandler<Command2Type, CreateRequirementResponseResult>(
     logger = logger,
     historyRepository = historyRepository,
-    target = CreateRequirementResponseResult::class.java
+    target = ApiSuccessResponse2::class.java
 ) {
 
     override val action: Command2Type = Command2Type.CREATE_REQUIREMENT_RESPONSE
