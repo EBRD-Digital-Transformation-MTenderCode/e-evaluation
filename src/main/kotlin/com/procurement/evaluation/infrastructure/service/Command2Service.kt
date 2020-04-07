@@ -5,6 +5,7 @@ import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
 import com.procurement.evaluation.infrastructure.handler.check.accesstoaward.CheckAccessToAwardHandler
 import com.procurement.evaluation.infrastructure.handler.check.relatedtenderer.CheckRelatedTendererHandler
+import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.create.requirementresponsehandler.CreateRequirementResponseHandler
 import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsHandler
 import com.procurement.evaluation.infrastructure.handler.get.awardstatebyids.GetAwardStateByIdsHandler
@@ -22,7 +23,8 @@ class Command2Service(
     private val checkAccessToAwardHandler: CheckAccessToAwardHandler,
     private val checkRelatedTendererHandler: CheckRelatedTendererHandler,
     private val createRequirementResponseHandler: CreateRequirementResponseHandler,
-    private val createUnsuccessfulAwardHandler: CreateUnsuccessfulAwardsHandler
+    private val createUnsuccessfulAwardHandler: CreateUnsuccessfulAwardsHandler,
+    private val closeAwardPeriodHandler: CloseAwardPeriodHandler
 ) {
 
     fun execute(node: JsonNode): ApiResponse2 {
@@ -46,6 +48,8 @@ class Command2Service(
             Command2Type.CREATE_REQUIREMENT_RESPONSE -> createRequirementResponseHandler.handle(node)
 
             Command2Type.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(node)
+
+            Command2Type.CLOSE_AWARD_PERIOD -> closeAwardPeriodHandler.handle(node)
         }
     }
 }
