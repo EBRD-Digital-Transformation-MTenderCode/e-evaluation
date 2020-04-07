@@ -5,8 +5,10 @@ import com.procurement.evaluation.application.model.award.requirement.response.C
 import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
+import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.ValidationResult
@@ -134,6 +136,9 @@ interface AwardService {
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
 
     fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
+
+    fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
+        : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
 }
 
 @Service
@@ -142,6 +147,11 @@ class AwardServiceImpl(
     private val awardRepository: AwardRepository,
     private val awardPeriodRepository: AwardPeriodRepository
 ) : AwardService {
+
+    val createUnsuccessfulAwardsStrategy = CreateUnsuccessfulAwardsStrategy(
+        awardRepository = awardRepository,
+        generationService = generationService
+    )
 
     /**
      * BR-7.10.1 General Rule
@@ -1798,6 +1808,9 @@ class AwardServiceImpl(
 
         return ValidationResult.ok()
     }
+
+    override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
+        createUnsuccessfulAwardsStrategy.execute(params = params)
 
     override fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
         val awardEntity = awardRepository.tryFindBy(
