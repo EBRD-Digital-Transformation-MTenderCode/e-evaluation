@@ -32,7 +32,8 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
     GET_AWARD_STATES_BY_IDS("getAwardStateByIds"),
     CHECK_ACCESS_TO_AWARD("checkAccessToAward"),
     CHECK_RELATED_TENDERER("checkRelatedTenderer"),
-    CREATE_REQUIREMENT_RESPONSE("createRequirementResponse");
+    CREATE_REQUIREMENT_RESPONSE("createRequirementResponse"),
+    CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards");
 
     override fun toString(): String = key
 
