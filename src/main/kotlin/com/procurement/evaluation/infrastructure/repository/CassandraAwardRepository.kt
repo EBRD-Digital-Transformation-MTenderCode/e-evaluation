@@ -11,6 +11,7 @@ import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
+import com.procurement.evaluation.domain.functional.asFailure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.award.AwardId
@@ -249,6 +250,19 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 return entity.asSuccess()
         }
         return null.asSuccess()
+    }
+
+    override fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Boolean, Fail.Incident> {
+        val statements = BatchStatement()
+            .apply {
+                for (award in awards) {
+                    add(statementForAwardSave(cpid = cpid.toString(), award = award))
+                }
+            }
+        statements.tryExecute(session = session)
+            .doReturn { error -> return error.asFailure() }
+
+        return true.asSuccess()
     }
 
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
