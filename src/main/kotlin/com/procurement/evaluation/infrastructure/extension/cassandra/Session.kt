@@ -1,5 +1,6 @@
 package com.procurement.evaluation.infrastructure.extension.cassandra
 
+import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
@@ -13,3 +14,11 @@ fun BoundStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident
 } catch (expected: Exception) {
     failure(Fail.Incident.DatabaseInteractionIncident(exception = expected))
 }
+
+fun BatchStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.DatabaseInteractionIncident> =
+    try {
+        success(session.execute(this))
+    } catch (expected: Exception) {
+        failure(Fail.Incident.DatabaseInteractionIncident(exception = expected))
+    }
+
