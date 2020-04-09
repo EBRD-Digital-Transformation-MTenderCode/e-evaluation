@@ -32,7 +32,7 @@ class CreateUnsuccessfulAwardsStrategy(
                     /*FR-10.4.5.2*/
                     id = generationService.awardId().toString(),
                     /*FR-10.4.5.3*/
-                    date = params.requestDate,
+                    date = params.date,
                     /*FR-10.4.5.4*/
                     title = "Lot is not awarded",
                     /*FR-10.4.5.5*/

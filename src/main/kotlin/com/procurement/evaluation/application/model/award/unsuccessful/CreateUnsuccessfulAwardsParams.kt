@@ -21,7 +21,7 @@ data class CreateUnsuccessfulAwardsParams private constructor(
     val cpid: Cpid,
     val ocid: Ocid,
     val lotIds: List<LotId>,
-    val requestDate: LocalDateTime
+    val date: LocalDateTime
 ) {
     companion object {
         fun tryCreate(
@@ -29,7 +29,7 @@ data class CreateUnsuccessfulAwardsParams private constructor(
             cpid: String,
             ocid: String,
             lotIds: List<String>,
-            requestDate: String
+            date: String
         ): Result<CreateUnsuccessfulAwardsParams, DataErrors> {
 
             if (lotIds.isEmpty())
@@ -68,14 +68,14 @@ data class CreateUnsuccessfulAwardsParams private constructor(
             val parsedOcid = parseOcid(value = ocid)
                 .doReturn { error -> return error.asFailure() }
 
-            val parsedRequestDate = parseDate(value = requestDate, attributeName = "requestDate")
+            val parsedDate = parseDate(value = date, attributeName = "date")
                 .doReturn { error -> return error.asFailure() }
 
             return CreateUnsuccessfulAwardsParams(
                 cpid = parsedCpid,
                 ocid = parsedOcid,
                 lotIds = lotIdsParsed,
-                requestDate = parsedRequestDate,
+                date = parsedDate,
                 owner = parsedOwner
             ).asSuccess()
         }

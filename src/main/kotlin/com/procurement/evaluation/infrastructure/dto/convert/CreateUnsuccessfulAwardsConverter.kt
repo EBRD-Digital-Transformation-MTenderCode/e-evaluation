@@ -9,7 +9,7 @@ fun CreateUnsuccessfulAwardsRequest.convert(): Result<CreateUnsuccessfulAwardsPa
     CreateUnsuccessfulAwardsParams.tryCreate(
         cpid = this.cpid,
         ocid = this.ocid,
-        requestDate = this.requestDate,
+        date = this.date,
         lotIds = this.lotIds,
         owner = this.owner
     )
