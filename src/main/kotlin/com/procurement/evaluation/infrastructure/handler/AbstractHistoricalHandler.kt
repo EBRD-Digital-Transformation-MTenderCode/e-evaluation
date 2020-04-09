@@ -36,7 +36,7 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
             .get
         if (history != null) {
             val data = history.jsonData
-            return data.tryToObject(ApiSuccessResponse2::class.java)
+            return data.tryToObject(target)
                 .doReturn { error ->
                     return generateResponseOnFailure(
                         fail = Fail.Incident.ParseFromDatabaseIncident(data, error.exception),
