@@ -139,16 +139,21 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             .asSuccess()
     }
 
-    override fun trySaveEnd(cpid: Cpid, stage: Stage, endDate: LocalDateTime): Result<Boolean, Fail.Incident> {
+    override fun trySaveEnd(cpid: Cpid, stage: Stage, endDate: LocalDateTime): Result<Unit, Fail.Incident> {
         val statement = preparedSaveEndDateCQL.bind()
             .apply {
                 setString(columnCpid, cpid.toString())
                 setString(columnStage, stage.toString())
                 setTimestamp(columnEndDate, endDate.toCassandraTimestamp())
             }
-        statement.tryExecute(session = session)
-            .doOnError { error -> return Result.failure(error) }
+        val result = statement.tryExecute(session = session)
+            .forwardResult { error -> return error }
 
-        return true.asSuccess()
+        if (!result.wasApplied())
+            return Result.failure(
+                Fail.Incident.RecordIsNotExist(description = "An error occurred when writing a record(s) of the end award period '$endDate' by cpid '$cpid' and stage '$stage' to the database. Record is not exists.")
+            )
+
+        return Unit.asSuccess()
     }
 }

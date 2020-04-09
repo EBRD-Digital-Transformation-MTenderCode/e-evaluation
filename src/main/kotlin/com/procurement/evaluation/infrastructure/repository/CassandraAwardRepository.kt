@@ -11,7 +11,6 @@ import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.asFailure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.award.AwardId
@@ -252,17 +251,22 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return null.asSuccess()
     }
 
-    override fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Boolean, Fail.Incident> {
+    override fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident> {
         val statements = BatchStatement()
             .apply {
                 for (award in awards) {
                     add(statementForAwardSave(cpid = cpid.toString(), award = award))
                 }
             }
-        statements.tryExecute(session = session)
-            .doReturn { error -> return error.asFailure() }
+        val result = statements.tryExecute(session = session)
+            .forwardResult { error -> return error }
 
-        return true.asSuccess()
+        if (!result.wasApplied())
+            return failure(
+                Fail.Incident.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
+            )
+
+        return Unit.asSuccess()
     }
 
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =

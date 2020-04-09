@@ -74,6 +74,12 @@ sealed class Fail {
             }
         }
 
+        class RecordIsNotExist(override val description: String):Incident(
+            level = Level.ERROR,
+            number = "5",
+            description = description
+        )
+
         enum class Level(override val key: String) : EnumElementProvider.Key {
             ERROR("error"),
             WARNING("warning"),
