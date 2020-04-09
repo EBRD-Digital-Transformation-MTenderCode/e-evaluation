@@ -19,17 +19,17 @@ class GetAwardStateByIdsParams private constructor(
 ) {
     companion object {
         fun tryCreate(
-            awardIds: List<String>?,
+            awardIds: List<String>,
             cpid: String,
             ocid: String
         ): Result<GetAwardStateByIdsParams, DataErrors> {
             val awardIdsAttribute = "awardIds"
-            if (awardIds != null && awardIds.isEmpty())
+            if (awardIds.isEmpty())
                 return failure(DataErrors.Validation.EmptyArray(awardIdsAttribute))
 
             val awardIdsParsed = awardIds
-                ?.mapResultPair { awardId -> awardId.tryAwardId() }
-                ?.doReturn { failPair ->
+                .mapResultPair { awardId -> awardId.tryAwardId() }
+                .doReturn { failPair ->
                     return failure(
                         DataErrors.Validation.DataFormatMismatch(
                             name = awardIdsAttribute,
@@ -37,7 +37,7 @@ class GetAwardStateByIdsParams private constructor(
                             actualValue = failPair.element
                         )
                     )
-                }.orEmpty()
+                }
 
             val cpidParsed = parseCpid(cpid)
                 .doReturn { error -> return failure(error = error) }
