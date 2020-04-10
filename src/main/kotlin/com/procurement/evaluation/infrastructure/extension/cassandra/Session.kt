@@ -9,16 +9,16 @@ import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.Result.Companion.success
 import com.procurement.evaluation.infrastructure.fail.Fail
 
-fun BoundStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.DatabaseInteractionIncident> = try {
+fun BoundStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> = try {
     success(session.execute(this))
 } catch (expected: Exception) {
-    failure(Fail.Incident.DatabaseInteractionIncident(exception = expected))
+    failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = expected))
 }
 
-fun BatchStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.DatabaseInteractionIncident> =
+fun BatchStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> =
     try {
         success(session.execute(this))
     } catch (expected: Exception) {
-        failure(Fail.Incident.DatabaseInteractionIncident(exception = expected))
+        failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = expected))
     }
 

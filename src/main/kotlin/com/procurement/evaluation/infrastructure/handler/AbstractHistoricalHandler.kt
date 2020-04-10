@@ -39,7 +39,7 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
             return data.tryToObject(target)
                 .doReturn { error ->
                     return generateResponseOnFailure(
-                        fail = Fail.Incident.ParseFromDatabaseIncident(data, error.exception),
+                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(data, error.exception),
                         id = id,
                         version = version,
                         logger = logger

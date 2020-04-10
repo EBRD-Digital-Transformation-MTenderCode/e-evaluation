@@ -6,4 +6,4 @@ import com.procurement.evaluation.infrastructure.fail.Fail
 
 typealias RespondererId = String
 
-fun String.tryRespondererId(): Result<RespondererId, Fail.Incident.Parsing> = this.asSuccess()
+fun String.tryRespondererId(): Result<RespondererId, Fail.Incident.Transform.Parsing> = this.asSuccess()

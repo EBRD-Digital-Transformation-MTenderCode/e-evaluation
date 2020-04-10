@@ -1724,7 +1724,7 @@ class AwardServiceImpl(
             .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
             .doReturn { failPair ->
                 return failure(
-                    Fail.Incident.ParseFromDatabaseIncident(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
                         jsonData = failPair.element.jsonData,
                         exception = failPair.fail.exception
                     )
@@ -1791,7 +1791,7 @@ class AwardServiceImpl(
         }
             .doReturn { failPair ->
                 return ValidationResult.error(
-                    Fail.Incident.ParseFromDatabaseIncident(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
                         jsonData = failPair.element.jsonData,
                         exception = failPair.fail.exception
                     )
@@ -1837,7 +1837,7 @@ class AwardServiceImpl(
             .tryToObject(Award::class.java)
             .doReturn { error ->
                 return failure(
-                    Fail.Incident.ParseFromDatabaseIncident(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
                         jsonData = awardEntity.jsonData, exception = error.exception
                     )
                 )

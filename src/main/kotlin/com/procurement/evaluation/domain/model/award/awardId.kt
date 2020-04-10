@@ -7,5 +7,5 @@ import java.util.*
 
 typealias AwardId = UUID
 
-fun String.tryAwardId(): Result<AwardId, Fail.Incident.Parsing> =
+fun String.tryAwardId(): Result<AwardId, Fail.Incident.Transform.Parsing> =
     this.tryUUID()

@@ -36,49 +36,44 @@ sealed class Fail {
             }
         }
 
-        class DatabaseInteractionIncident(private val exception: Exception) : Incident(
-            level = Level.ERROR,
-            number = "1",
-            description = "Database incident."
-        ) {
+        sealed class Database(val number: String, override val description: String) :
+            Incident(level = Level.ERROR, number = number, description = description) {
+
+            class DatabaseInteractionIncident(private val exception: Exception) : Database(
+                number = "1.1",
+                description = "Database incident."
+            ) {
+                override fun logging(logger: Logger) {
+                    logger.error(message = message, exception = exception)
+                }
+            }
+
+            class RecordIsNotExist(override val description: String) : Database(
+                number = "1.2",
+                description = description
+            )
+        }
+
+        sealed class Transform(val number: String, override val description: String, val exception: Exception) :
+            Incident(level = Level.ERROR, number = number, description = description) {
+
             override fun logging(logger: Logger) {
                 logger.error(message = message, exception = exception)
             }
-        }
 
-        class DatabaseConsistencyIncident(message: String) : Incident(
-            level = Level.ERROR,
-            number = "2",
-            description = "Database consistency incident. $message"
-        )
-
-        class ParseFromDatabaseIncident(private val jsonData: String, private val exception: Exception) : Incident(
-            level = Level.ERROR,
-            number = "3",
-            description = "Could not parse data stored in database."
-        ) {
-            override fun logging(logger: Logger) {
-                logger.error(message = message, mdc = mapOf("jsonData" to jsonData), exception = exception)
+            class ParseFromDatabaseIncident(val jsonData: String, exception: Exception) : Transform(
+                number = "2.1",
+                description = "Could not parse data stored in database.",
+                exception = exception
+            ) {
+                override fun logging(logger: Logger) {
+                    logger.error(message = message, mdc = mapOf("jsonData" to jsonData), exception = exception)
+                }
             }
+
+            class Parsing(className: String, exception: Exception) :
+                Transform(number = "2.2", description = "Error parsing to $className.", exception = exception)
         }
-
-        class Parsing(className: String, private val exception_: Exception) : Incident(
-            level = Level.ERROR,
-            number = "4",
-            description = "Error parsing to $className."
-        ) {
-            val exception get() = exception_
-
-            override fun logging(logger: Logger) {
-                logger.error(message = message, exception = exception_)
-            }
-        }
-
-        class RecordIsNotExist(override val description: String):Incident(
-            level = Level.ERROR,
-            number = "5",
-            description = description
-        )
 
         enum class Level(override val key: String) : EnumElementProvider.Key {
             ERROR("error"),

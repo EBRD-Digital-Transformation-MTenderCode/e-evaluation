@@ -115,22 +115,22 @@ fun <T> toObject(clazz: Class<T>, json: JsonNode): T {
     }
 }
 
-fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
+fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.treeToValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Parsing(target.canonicalName, expected))
+    Result.failure(Fail.Incident.Transform.Parsing(target.canonicalName, expected))
 }
 
-fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.readValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Parsing(target.canonicalName, expected))
+    Result.failure(Fail.Incident.Transform.Parsing(target.canonicalName, expected))
 }
 
-fun String.tryToNode(): Result<JsonNode, Fail.Incident.Parsing> = try {
+fun String.tryToNode(): Result<JsonNode, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(Fail.Incident.Parsing(JsonNode::class.java.canonicalName, exception))
+    Result.failure(Fail.Incident.Transform.Parsing(JsonNode::class.java.canonicalName, exception))
 }
 
 /*Collection*/

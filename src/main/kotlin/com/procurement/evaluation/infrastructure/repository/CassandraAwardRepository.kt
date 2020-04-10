@@ -243,7 +243,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             val award = entity.jsonData
                 .tryToObject(Award::class.java)
                 .doReturn { error ->
-                    return failure(Fail.Incident.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                    return failure(Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, error.exception))
                 }
             if (award.id == awardId.toString())
                 return entity.asSuccess()
@@ -263,7 +263,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
 
         if (!result.wasApplied())
             return failure(
-                Fail.Incident.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
+                Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
             )
 
         return Unit.asSuccess()

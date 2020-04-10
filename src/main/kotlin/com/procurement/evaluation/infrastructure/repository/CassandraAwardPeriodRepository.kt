@@ -151,7 +151,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
 
         if (!result.wasApplied())
             return Result.failure(
-                Fail.Incident.RecordIsNotExist(description = "An error occurred when writing a record(s) of the end award period '$endDate' by cpid '$cpid' and stage '$stage' to the database. Record is not exists.")
+                Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the end award period '$endDate' by cpid '$cpid' and stage '$stage' to the database. Record is not exists.")
             )
 
         return Unit.asSuccess()
