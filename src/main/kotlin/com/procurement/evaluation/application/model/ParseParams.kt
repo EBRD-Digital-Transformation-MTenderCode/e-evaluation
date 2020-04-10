@@ -10,7 +10,9 @@ import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.award.tryAwardId
 import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.domain.model.tryToken
+import com.procurement.evaluation.domain.util.extension.tryParseLocalDateTime
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import java.time.LocalDateTime
 
 fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
     Cpid.tryCreateOrNull(value = value)
@@ -67,6 +69,18 @@ fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMis
                     name = "owner",
                     expectedFormat = "uuid",
                     actualValue = value
+                )
+            )
+        }.asSuccess()
+
+fun parseDate(value: String, attributeName: String): Result<LocalDateTime, DataErrors.Validation.DataFormatMismatch> =
+    value.tryParseLocalDateTime()
+        .doReturn { pattern ->
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = attributeName,
+                    actualValue = value,
+                    expectedFormat = pattern
                 )
             )
         }.asSuccess()

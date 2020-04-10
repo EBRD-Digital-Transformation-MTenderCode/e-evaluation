@@ -6,4 +6,4 @@ import com.procurement.evaluation.infrastructure.fail.Fail
 
 typealias TendererId = String
 
-fun String.tryTendererId(): Result<TendererId, Fail.Incident.Parsing> = this.asSuccess()
+fun String.tryTendererId(): Result<TendererId, Fail.Incident.Transform.Parsing> = this.asSuccess()

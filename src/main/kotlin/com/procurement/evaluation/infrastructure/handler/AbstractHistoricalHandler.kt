@@ -15,7 +15,7 @@ import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.tryToObject
 
 abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
-    private val target: Class<R>,
+    private val target: Class<ApiSuccessResponse2>,
     private val historyRepository: HistoryRepository,
     private val logger: Logger
 ) : Handler<ACTION, ApiResponse2> {
@@ -36,10 +36,10 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
             .get
         if (history != null) {
             val data = history.jsonData
-            return data.tryToObject(ApiSuccessResponse2::class.java)
+            return data.tryToObject(target)
                 .doReturn { error ->
                     return generateResponseOnFailure(
-                        fail = Fail.Incident.ParseFromDatabaseIncident(data, error.exception),
+                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(data, error.exception),
                         id = id,
                         version = version,
                         logger = logger

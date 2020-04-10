@@ -243,12 +243,30 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             val award = entity.jsonData
                 .tryToObject(Award::class.java)
                 .doReturn { error ->
-                    return failure(Fail.Incident.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                    return failure(Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, error.exception))
                 }
             if (award.id == awardId.toString())
                 return entity.asSuccess()
         }
         return null.asSuccess()
+    }
+
+    override fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident> {
+        val statements = BatchStatement()
+            .apply {
+                for (award in awards) {
+                    add(statementForAwardSave(cpid = cpid.toString(), award = award))
+                }
+            }
+        val result = statements.tryExecute(session = session)
+            .forwardResult { error -> return error }
+
+        if (!result.wasApplied())
+            return failure(
+                Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
+            )
+
+        return Unit.asSuccess()
     }
 
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =

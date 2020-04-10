@@ -1,38 +1,38 @@
-package com.procurement.evaluation.infrastructure.handler
+package com.procurement.evaluation.infrastructure.handler.close.awardperiod
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
 import com.procurement.evaluation.application.repository.HistoryRepository
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.CreateRequirementResponseRequest
+import com.procurement.evaluation.infrastructure.dto.ApiSuccessResponse2
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.handler.AbstractHistoricalHandler
 import com.procurement.evaluation.model.dto.bpe.Command2Type
 import com.procurement.evaluation.model.dto.bpe.tryGetParams
 import org.springframework.stereotype.Component
 
 @Component
-class CreateRequirementResponseHandler(
+class CloseAwardPeriodHandler(
     private val awardService: AwardService,
     historyRepository: HistoryRepository,
     logger: Logger
-) : AbstractHistoricalHandler<Command2Type, CreateRequirementResponseResult>(
+) : AbstractHistoricalHandler<Command2Type, CloseAwardPeriodResult>(
     logger = logger,
     historyRepository = historyRepository,
-    target = CreateRequirementResponseResult::class.java
+    target = ApiSuccessResponse2::class.java
 ) {
 
-    override val action: Command2Type = Command2Type.CREATE_REQUIREMENT_RESPONSE
+    override val action: Command2Type = Command2Type.CLOSE_AWARD_PERIOD
 
-    override fun execute(node: JsonNode): Result<CreateRequirementResponseResult, Fail> {
+    override fun execute(node: JsonNode): Result<CloseAwardPeriodResult, Fail> {
         val params = node
-            .tryGetParams(CreateRequirementResponseRequest::class.java)
+            .tryGetParams(CloseAwardPeriodRequest::class.java)
             .forwardResult { result -> return result }
             .convert()
             .forwardResult { result -> return result }
 
-        return awardService.createRequirementResponse(params = params)
+        return awardService.closeAwardPeriod(params = params)
     }
 }

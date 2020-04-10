@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.handler
+package com.procurement.evaluation.infrastructure.handler.check.accesstoaward
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
@@ -7,6 +7,7 @@ import com.procurement.evaluation.domain.functional.ValidationResult
 import com.procurement.evaluation.infrastructure.dto.award.access.CheckAccessToAwardRequest
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.handler.AbstractValidationHandler
 import com.procurement.evaluation.model.dto.bpe.Command2Type
 import com.procurement.evaluation.model.dto.bpe.tryGetParams
 import org.springframework.stereotype.Component

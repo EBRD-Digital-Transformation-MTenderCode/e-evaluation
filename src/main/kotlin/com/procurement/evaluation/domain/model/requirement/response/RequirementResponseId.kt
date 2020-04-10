@@ -7,7 +7,7 @@ import java.util.*
 
 typealias RequirementResponseId = UUID
 
-fun String.tryRequirementResponseId(): Result<RequirementResponseId, Fail.Incident.Parsing> =
+fun String.tryRequirementResponseId(): Result<RequirementResponseId, Fail.Incident.Transform.Parsing> =
     this.tryUUID()
 
 

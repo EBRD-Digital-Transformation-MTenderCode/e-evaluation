@@ -1,12 +1,16 @@
 package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
+import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseParams
 import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
+import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
+import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.ValidationResult
@@ -44,6 +48,7 @@ import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateBy
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
+import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -134,6 +139,11 @@ interface AwardService {
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
 
     fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
+
+    fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
+        : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
+
+    fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail>
 }
 
 @Service
@@ -142,6 +152,13 @@ class AwardServiceImpl(
     private val awardRepository: AwardRepository,
     private val awardPeriodRepository: AwardPeriodRepository
 ) : AwardService {
+
+    val createUnsuccessfulAwardsStrategy = CreateUnsuccessfulAwardsStrategy(
+        awardRepository = awardRepository,
+        generationService = generationService
+    )
+
+    val closeAwardPeriodStrategy = CloseAwardPeriodStrategy(awardPeriodRepository = awardPeriodRepository)
 
     /**
      * BR-7.10.1 General Rule
@@ -1707,7 +1724,7 @@ class AwardServiceImpl(
             .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
             .doReturn { failPair ->
                 return failure(
-                    Fail.Incident.ParseFromDatabaseIncident(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
                         jsonData = failPair.element.jsonData,
                         exception = failPair.fail.exception
                     )
@@ -1774,7 +1791,7 @@ class AwardServiceImpl(
         }
             .doReturn { failPair ->
                 return ValidationResult.error(
-                    Fail.Incident.ParseFromDatabaseIncident(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
                         jsonData = failPair.element.jsonData,
                         exception = failPair.fail.exception
                     )
@@ -1799,6 +1816,12 @@ class AwardServiceImpl(
         return ValidationResult.ok()
     }
 
+    override fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail> =
+        closeAwardPeriodStrategy.execute(params = params)
+
+    override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
+        createUnsuccessfulAwardsStrategy.execute(params = params)
+
     override fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
         val awardEntity = awardRepository.tryFindBy(
             cpid = params.cpid,
@@ -1814,7 +1837,7 @@ class AwardServiceImpl(
             .tryToObject(Award::class.java)
             .doReturn { error ->
                 return failure(
-                    Fail.Incident.ParseFromDatabaseIncident(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
                         jsonData = awardEntity.jsonData, exception = error.exception
                     )
                 )

@@ -51,4 +51,9 @@ sealed class ValidationError(
         description = "Award not found.",
         id = id.toString()
     )
+
+    class PeriodNotFoundOnCloseAwardPeriod() : ValidationError(
+        numberError = "10.4.6.1",
+        description = "Period not found."
+    )
 }
