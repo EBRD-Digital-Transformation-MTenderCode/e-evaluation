@@ -28,7 +28,7 @@ class CloseAwardPeriodParams(
             val parseOcid = parseOcid(value = ocid)
                 .forwardResult { error -> return error }
 
-            val parseEndDate = parseDate(value = endDate, attributeName = "requestDate")
+            val parseEndDate = parseDate(value = endDate, attributeName = "endDate")
                 .forwardResult { error -> return error }
 
             return CloseAwardPeriodParams(cpid = parseCpid, ocid = parseOcid, endDate = parseEndDate)
