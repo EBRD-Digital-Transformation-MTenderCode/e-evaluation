@@ -50,7 +50,6 @@ class CreateUnsuccessfulAwardsStrategy(
                     documents = null,
                     items = null,
                     relatedBid = null,
-                    requirementResponse = null,
                     suppliers = null,
                     weightedValue = null
                 )
