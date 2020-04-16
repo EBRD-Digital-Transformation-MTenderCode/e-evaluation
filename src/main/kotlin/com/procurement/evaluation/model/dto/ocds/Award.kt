@@ -53,8 +53,8 @@ data class Award @JsonCreator constructor(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     var items: List<Item>?,
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    val requirementResponse: RequirementResponse? = null
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    val requirementResponses: List<RequirementResponse> = emptyList()
 ) {
     data class RequirementResponse(
         val id: RequirementResponseId,
