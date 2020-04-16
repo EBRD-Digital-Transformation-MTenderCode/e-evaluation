@@ -1800,12 +1800,14 @@ class AwardServiceImpl(
             .firstOrNull { supplier -> supplier.id == params.relatedTendererId }
             ?: return ValidationResult.error(ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer())
 
-        award.requirementResponses
+        val requirementResponse = award.requirementResponses
             .firstOrNull { requirementResponse ->
                 requirementResponse.relatedTenderer.id == params.relatedTendererId &&
                     requirementResponse.requirement.id == params.requirementId
             }
-            ?: return ValidationResult.error(ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer())
+
+        if (requirementResponse != null)
+            return ValidationResult.error(ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer())
 
         return ValidationResult.ok()
     }
