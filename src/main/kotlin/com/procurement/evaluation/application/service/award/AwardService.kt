@@ -1774,21 +1774,13 @@ class AwardServiceImpl(
     }
 
     override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
-        val awardEntities = awardRepository.tryFindBy(
-            cpid = params.cpid,
-            stage = params.ocid.stage
-        )
-            .doReturn { incident ->
-                return ValidationResult.error(incident)
-            }
+        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, stage = params.ocid.stage)
+            .doReturn { incident -> return ValidationResult.error(incident) }
             .takeIf { it.isNotEmpty() }
-            ?: return ValidationResult.error(
-                ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId)
-            )
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
 
-        val award = awardEntities.mapResultPair { entity ->
-            entity.jsonData.tryToObject(Award::class.java)
-        }
+        val award = awardEntities
+            .mapResultPair { entity -> entity.jsonData.tryToObject(Award::class.java) }
             .doReturn { failPair ->
                 return ValidationResult.error(
                     Fail.Incident.Transform.ParseFromDatabaseIncident(
@@ -1798,20 +1790,24 @@ class AwardServiceImpl(
                 )
             }
             .firstOrNull { award -> award.id == params.awardId.toString() }
-            ?: return ValidationResult.error(
-                ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId)
-            )
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
 
         if (award.suppliers == null || award.suppliers.isEmpty()) {
-            return ValidationResult.error(ValidationError.TendererNotLinkedToAward())
+            return ValidationResult.error(ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer())
         }
 
         award.suppliers
-            .firstOrNull { tenderer -> tenderer.id == params.relatedTendererId }
-            ?: return ValidationResult.error(ValidationError.TendererNotLinkedToAward())
+            .firstOrNull { supplier -> supplier.id == params.relatedTendererId }
+            ?: return ValidationResult.error(ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer())
 
-        if (award.requirementResponse != null)
-            return ValidationResult.error(ValidationError.DuplicateRequirementResponse())
+        val requirementResponse = award.requirementResponses
+            .firstOrNull { requirementResponse ->
+                requirementResponse.relatedTenderer.id == params.relatedTendererId &&
+                    requirementResponse.requirement.id == params.requirementId
+            }
+
+        if (requirementResponse != null)
+            return ValidationResult.error(ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer())
 
         return ValidationResult.ok()
     }
@@ -1846,7 +1842,7 @@ class AwardServiceImpl(
         val requirementResponse = convertToAwardRequirementResponse(params)
 
         val updatedAward = award.copy(
-            requirementResponse = requirementResponse
+            requirementResponses = listOf(requirementResponse)
         )
 
         val updatedAwardEntity = awardEntity.copy(

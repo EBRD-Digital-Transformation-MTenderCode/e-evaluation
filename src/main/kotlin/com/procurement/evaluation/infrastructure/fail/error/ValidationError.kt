@@ -19,18 +19,18 @@ sealed class ValidationError(
     )
 
     class AwardNotFoundOnCheckRelatedTenderer(id: AwardId) : ValidationError(
-        numberError = "10.4.5.1",
+        numberError = "10.4.4.1",
         description = "Award not found.",
         id = id.toString()
     )
 
-    class TendererNotLinkedToAward() : ValidationError(
-        numberError = "10.4.5.2",
+    class TendererNotLinkedToAwardOnCheckRelatedTenderer : ValidationError(
+        numberError = "10.4.4.2",
         description = "Tenderer is not linked to award."
     )
 
-    class DuplicateRequirementResponse() : ValidationError(
-        numberError = "10.4.5.3",
+    class DuplicateRequirementResponseOnCheckRelatedTenderer : ValidationError(
+        numberError = "10.4.4.3",
         description = "Duplicate requirement response."
     )
 
