@@ -45,7 +45,6 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
-import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
@@ -1716,7 +1715,7 @@ class AwardServiceImpl(
         val awardEntities = awardRepository.tryFindBy(
             cpid = params.cpid,
             stage = params.ocid.stage
-        ).forwardResult { incident -> return incident }
+        ).orForwardFail { incident -> return incident }
 
         val awardsIds = params.awardIds.toSetBy { it.toString() }
 
