@@ -138,7 +138,7 @@ interface AwardService {
 
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
 
-    fun createRequirementResponse(params: AddRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
+    fun addRequirementResponse(params: AddRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
 
     fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
         : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
@@ -1818,7 +1818,7 @@ class AwardServiceImpl(
     override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
         createUnsuccessfulAwardsStrategy.execute(params = params)
 
-    override fun createRequirementResponse(params: AddRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
+    override fun addRequirementResponse(params: AddRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
         val awardEntity = awardRepository.tryFindBy(
             cpid = params.cpid,
             stage = params.ocid.stage,

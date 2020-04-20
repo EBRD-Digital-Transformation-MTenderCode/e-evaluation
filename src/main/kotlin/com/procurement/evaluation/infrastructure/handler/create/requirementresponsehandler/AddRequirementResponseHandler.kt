@@ -35,6 +35,6 @@ class AddRequirementResponseHandler(
             .convert()
             .forwardResult { result -> return result }
 
-        return awardService.createRequirementResponse(params = params)
+        return awardService.addRequirementResponse(params = params)
     }
 }
