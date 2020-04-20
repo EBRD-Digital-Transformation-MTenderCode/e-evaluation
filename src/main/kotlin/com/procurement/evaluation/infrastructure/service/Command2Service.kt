@@ -6,7 +6,7 @@ import com.procurement.evaluation.infrastructure.dto.ApiResponse2
 import com.procurement.evaluation.infrastructure.handler.check.accesstoaward.CheckAccessToAwardHandler
 import com.procurement.evaluation.infrastructure.handler.check.relatedtenderer.CheckRelatedTendererHandler
 import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodHandler
-import com.procurement.evaluation.infrastructure.handler.create.requirementresponsehandler.CreateRequirementResponseHandler
+import com.procurement.evaluation.infrastructure.handler.create.requirementresponsehandler.AddRequirementResponseHandler
 import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsHandler
 import com.procurement.evaluation.infrastructure.handler.get.awardstatebyids.GetAwardStateByIdsHandler
 import com.procurement.evaluation.model.dto.bpe.Command2Type
@@ -22,7 +22,7 @@ class Command2Service(
     private val getAwardStateByIdsHandler: GetAwardStateByIdsHandler,
     private val checkAccessToAwardHandler: CheckAccessToAwardHandler,
     private val checkRelatedTendererHandler: CheckRelatedTendererHandler,
-    private val createRequirementResponseHandler: CreateRequirementResponseHandler,
+    private val addRequirementResponseHandler: AddRequirementResponseHandler,
     private val createUnsuccessfulAwardHandler: CreateUnsuccessfulAwardsHandler,
     private val closeAwardPeriodHandler: CloseAwardPeriodHandler
 ) {
@@ -45,7 +45,7 @@ class Command2Service(
 
             Command2Type.CHECK_RELATED_TENDERER -> checkRelatedTendererHandler.handle(node)
 
-            Command2Type.ADD_REQUIREMENT_RESPONSE -> createRequirementResponseHandler.handle(node)
+            Command2Type.ADD_REQUIREMENT_RESPONSE -> addRequirementResponseHandler.handle(node)
 
             Command2Type.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(node)
 

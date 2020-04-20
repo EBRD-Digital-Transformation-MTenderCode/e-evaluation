@@ -16,7 +16,7 @@ import com.procurement.evaluation.model.dto.bpe.tryGetParams
 import org.springframework.stereotype.Component
 
 @Component
-class CreateRequirementResponseHandler(
+class AddRequirementResponseHandler(
     private val awardService: AwardService,
     historyRepository: HistoryRepository,
     logger: Logger
