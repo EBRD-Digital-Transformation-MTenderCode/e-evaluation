@@ -269,6 +269,24 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return Unit.asSuccess()
     }
 
+    override fun tryUpdate(cpid: String, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
+        val statement = boundStatementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
+        val result = statement.tryExecute(session = session)
+            .forwardResult { error -> return error }
+        return result.wasApplied().asSuccess()
+    }
+
+    private fun boundStatementForUpdateAward(cpid: String, updatedAward: AwardEntity): BoundStatement =
+        preparedUpdatedAwardStatusesCQL.bind()
+            .apply {
+                setString(columnCpid, cpid)
+                setString(columnStage, updatedAward.stage)
+                setUUID(columnToken, updatedAward.token)
+                setString(columnStatus, updatedAward.status)
+                setString(columnStatusDetails, updatedAward.statusDetails)
+                setString(columnJsonData, updatedAward.jsonData)
+            }
+
     private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {
