@@ -1,7 +1,6 @@
 package com.procurement.evaluation.infrastructure.dto.convert
 
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
-import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.AddRequirementResponseRequest
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
@@ -52,31 +51,3 @@ private fun AddRequirementResponseRequest.Award.RequirementResponse.Responderer.
     AddRequirementResponseParams.Award.RequirementResponse.Responderer.tryCreate(
         id, name
     )
-
-fun AddRequirementResponseParams.convert() = CreateRequirementResponseResult(
-    award = CreateRequirementResponseResult.Award(
-        id = award.id,
-        requirementResponse = award.requirementResponse.let { requirementResponse ->
-            CreateRequirementResponseResult.Award.RequirementResponse(
-                id = requirementResponse.id,
-                value = requirementResponse.value,
-                relatedTenderer = requirementResponse.relatedTenderer.let { relatedTenderer ->
-                    CreateRequirementResponseResult.Award.RequirementResponse.RelatedTenderer(
-                        id = relatedTenderer.id
-                    )
-                },
-                requirement = requirementResponse.requirement.let { requirement ->
-                    CreateRequirementResponseResult.Award.RequirementResponse.Requirement(
-                        id = requirement.id
-                    )
-                },
-                responderer = requirementResponse.responderer.let { responderer ->
-                    CreateRequirementResponseResult.Award.RequirementResponse.Responderer(
-                        id = responderer.id,
-                        name = responderer.name
-                    )
-                }
-            )
-        }
-    )
-)
