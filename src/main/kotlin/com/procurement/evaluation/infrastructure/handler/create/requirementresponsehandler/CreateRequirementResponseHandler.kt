@@ -7,7 +7,7 @@ import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.infrastructure.dto.ApiSuccessResponse2
-import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.CreateRequirementResponseRequest
+import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.AddRequirementResponseRequest
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.handler.AbstractHistoricalHandler
@@ -30,7 +30,7 @@ class CreateRequirementResponseHandler(
 
     override fun execute(node: JsonNode): Result<CreateRequirementResponseResult, Fail> {
         val params = node
-            .tryGetParams(CreateRequirementResponseRequest::class.java)
+            .tryGetParams(AddRequirementResponseRequest::class.java)
             .forwardResult { result -> return result }
             .convert()
             .forwardResult { result -> return result }

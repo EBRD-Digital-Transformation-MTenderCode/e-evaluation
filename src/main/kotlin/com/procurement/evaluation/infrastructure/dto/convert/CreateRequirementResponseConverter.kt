@@ -3,10 +3,10 @@ package com.procurement.evaluation.infrastructure.dto.convert
 import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseParams
 import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.CreateRequirementResponseRequest
+import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.AddRequirementResponseRequest
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
-fun CreateRequirementResponseRequest.convert(): Result<CreateRequirementResponseParams, DataErrors> =
+fun AddRequirementResponseRequest.convert(): Result<CreateRequirementResponseParams, DataErrors> =
     CreateRequirementResponseParams.tryCreate(
         cpid = cpid,
         ocid = ocid,
@@ -14,7 +14,7 @@ fun CreateRequirementResponseRequest.convert(): Result<CreateRequirementResponse
             .forwardResult { result -> return result }
     )
 
-private fun CreateRequirementResponseRequest.Award.convert()
+private fun AddRequirementResponseRequest.Award.convert()
     : Result<CreateRequirementResponseParams.Award, DataErrors> =
     CreateRequirementResponseParams.Award.tryCreate(
         id = id,
@@ -22,7 +22,7 @@ private fun CreateRequirementResponseRequest.Award.convert()
             .forwardResult { result -> return result }
     )
 
-private fun CreateRequirementResponseRequest.Award.RequirementResponse.convert()
+private fun AddRequirementResponseRequest.Award.RequirementResponse.convert()
     : Result<CreateRequirementResponseParams.Award.RequirementResponse, DataErrors> =
     CreateRequirementResponseParams.Award.RequirementResponse.tryCreate(
         id = id,
@@ -35,19 +35,19 @@ private fun CreateRequirementResponseRequest.Award.RequirementResponse.convert()
             .forwardResult { result -> return result }
     )
 
-private fun CreateRequirementResponseRequest.Award.RequirementResponse.RelatedTenderer.convert()
+private fun AddRequirementResponseRequest.Award.RequirementResponse.RelatedTenderer.convert()
     : Result<CreateRequirementResponseParams.Award.RequirementResponse.RelatedTenderer, DataErrors> =
     CreateRequirementResponseParams.Award.RequirementResponse.RelatedTenderer.tryCreate(
         id
     )
 
-private fun CreateRequirementResponseRequest.Award.RequirementResponse.Requirement.convert()
+private fun AddRequirementResponseRequest.Award.RequirementResponse.Requirement.convert()
     : Result<CreateRequirementResponseParams.Award.RequirementResponse.Requirement, DataErrors> =
     CreateRequirementResponseParams.Award.RequirementResponse.Requirement.tryCreate(
         id
     )
 
-private fun CreateRequirementResponseRequest.Award.RequirementResponse.Responderer.convert()
+private fun AddRequirementResponseRequest.Award.RequirementResponse.Responderer.convert()
     : Result<CreateRequirementResponseParams.Award.RequirementResponse.Responderer, DataErrors> =
     CreateRequirementResponseParams.Award.RequirementResponse.Responderer.tryCreate(
         id, name

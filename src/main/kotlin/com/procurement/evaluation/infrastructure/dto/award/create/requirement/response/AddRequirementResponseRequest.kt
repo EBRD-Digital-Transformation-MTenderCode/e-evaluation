@@ -3,7 +3,7 @@ package com.procurement.evaluation.infrastructure.dto.award.create.requirement.r
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 
-data class CreateRequirementResponseRequest(
+data class AddRequirementResponseRequest(
     @param:JsonProperty("cpid") @field:JsonProperty("cpid") val cpid: String,
     @param:JsonProperty("ocid") @field:JsonProperty("ocid") val ocid: String,
     @param:JsonProperty("award") @field:JsonProperty("award") val award: Award
