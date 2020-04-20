@@ -52,6 +52,12 @@ sealed class Fail {
                 number = "1.2",
                 description = description
             )
+
+            class DatabaseConsistencyIncident(message: String) : Incident(
+                level = Level.ERROR,
+                number = "1.3",
+                description = "Database consistency incident. $message"
+            )
         }
 
         sealed class Transform(val number: String, override val description: String, val exception: Exception) :
