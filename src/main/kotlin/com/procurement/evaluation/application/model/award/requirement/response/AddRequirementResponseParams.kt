@@ -20,20 +20,20 @@ import com.procurement.evaluation.domain.model.tenderer.TendererId
 import com.procurement.evaluation.domain.model.tenderer.tryTendererId
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
-class CreateRequirementResponseParams private constructor(
+class AddRequirementResponseParams private constructor(
     val cpid: Cpid, val ocid: Ocid, val award: Award
 ) {
     companion object {
         fun tryCreate(
             cpid: String, ocid: String, award: Award
-        ): Result<CreateRequirementResponseParams, DataErrors> {
+        ): Result<AddRequirementResponseParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .doReturn { error -> return failure(error = error) }
 
             val ocidParsed = parseOcid(ocid)
                 .doReturn { error -> return failure(error = error) }
 
-            return CreateRequirementResponseParams(
+            return AddRequirementResponseParams(
                 cpid = cpidParsed,
                 ocid = ocidParsed,
                 award = award

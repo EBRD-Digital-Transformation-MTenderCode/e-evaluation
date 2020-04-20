@@ -2,7 +2,7 @@ package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
-import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseParams
+import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
 import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
@@ -138,7 +138,7 @@ interface AwardService {
 
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
 
-    fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
+    fun createRequirementResponse(params: AddRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
 
     fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
         : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
@@ -1818,7 +1818,7 @@ class AwardServiceImpl(
     override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
         createUnsuccessfulAwardsStrategy.execute(params = params)
 
-    override fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
+    override fun createRequirementResponse(params: AddRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
         val awardEntity = awardRepository.tryFindBy(
             cpid = params.cpid,
             stage = params.ocid.stage,
@@ -1856,7 +1856,7 @@ class AwardServiceImpl(
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
         if (patterns.isNotEmpty()) value in patterns else true
 
-    private fun convertToAwardRequirementResponse(params: CreateRequirementResponseParams): Award.RequirementResponse =
+    private fun convertToAwardRequirementResponse(params: AddRequirementResponseParams): Award.RequirementResponse =
         params.award.requirementResponse.let { requirementRs ->
             Award.RequirementResponse(
                 id = requirementRs.id,
