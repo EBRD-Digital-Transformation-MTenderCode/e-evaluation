@@ -45,7 +45,7 @@ class Command2Service(
 
             Command2Type.CHECK_RELATED_TENDERER -> checkRelatedTendererHandler.handle(node)
 
-            Command2Type.CREATE_REQUIREMENT_RESPONSE -> createRequirementResponseHandler.handle(node)
+            Command2Type.ADD_REQUIREMENT_RESPONSE -> createRequirementResponseHandler.handle(node)
 
             Command2Type.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(node)
 

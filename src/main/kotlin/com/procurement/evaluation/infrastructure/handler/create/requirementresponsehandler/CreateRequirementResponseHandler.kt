@@ -26,7 +26,7 @@ class CreateRequirementResponseHandler(
     target = ApiSuccessResponse2::class.java
 ) {
 
-    override val action: Command2Type = Command2Type.CREATE_REQUIREMENT_RESPONSE
+    override val action: Command2Type = Command2Type.ADD_REQUIREMENT_RESPONSE
 
     override fun execute(node: JsonNode): Result<CreateRequirementResponseResult, Fail> {
         val params = node
