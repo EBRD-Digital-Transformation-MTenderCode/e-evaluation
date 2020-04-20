@@ -1825,7 +1825,7 @@ class AwardServiceImpl(
         )
             .doReturn { error -> return ValidationResult.error(error) }
             ?: return ValidationResult.error(
-                ValidationError.AwardNotFoundOnCreateRequirementRs(params.award.id)
+                ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id)
             )
 
         val award = awardEntity.jsonData
