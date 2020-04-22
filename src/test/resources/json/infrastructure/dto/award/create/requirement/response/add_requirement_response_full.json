@@ -1,0 +1,24 @@
+{
+  "cpid": "ocds-b3wdp1-MD-1580458690892",
+  "ocid": "ocds-b3wdp1-MD-1580458690892-EV-1580458791896",
+  "award": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "requirementResponse": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": "true",
+      "relatedTenderer": {
+        "id": "MD-IDNO-4214231235"
+      },
+      "requirement": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      },
+      "responder": {
+        "name": "IMSP SCM nr.1",
+        "identifier": {
+          "scheme": "string",
+          "id": "string"
+        }
+      }
+    }
+  }
+}
