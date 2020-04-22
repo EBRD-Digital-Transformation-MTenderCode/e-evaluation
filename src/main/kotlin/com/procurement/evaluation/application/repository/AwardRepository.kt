@@ -29,5 +29,5 @@ interface AwardRepository {
 
     fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident>
 
-    fun tryUpdate(cpid: String, updatedAward: AwardEntity): Result<Boolean, Fail.Incident>
+    fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident>
 }

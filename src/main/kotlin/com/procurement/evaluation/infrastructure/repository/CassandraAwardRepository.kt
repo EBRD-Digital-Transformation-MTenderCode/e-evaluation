@@ -269,8 +269,8 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return Unit.asSuccess()
     }
 
-    override fun tryUpdate(cpid: String, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
-        val statement = boundStatementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
+    override fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
+        val statement = boundStatementForUpdateAward(cpid = cpid.toString(), updatedAward = updatedAward)
         val result = statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
         return result.wasApplied().asSuccess()

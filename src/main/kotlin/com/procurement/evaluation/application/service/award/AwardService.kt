@@ -1848,7 +1848,7 @@ class AwardServiceImpl(
             jsonData = toJson(updatedAward)
         )
 
-        awardRepository.tryUpdate(cpid = updatedAwardEntity.cpId, updatedAward = updatedAwardEntity)
+        awardRepository.tryUpdate(cpid = params.cpid, updatedAward = updatedAwardEntity)
             .doReturn { error -> return ValidationResult.error(error) }
             .isFalse {
                 return ValidationResult.error(
