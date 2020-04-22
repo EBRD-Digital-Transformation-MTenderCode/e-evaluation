@@ -25,7 +25,7 @@ import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
-import com.procurement.evaluation.domain.util.extension.isFalse
+import com.procurement.evaluation.domain.util.extension.doOnFalse
 import com.procurement.evaluation.domain.util.extension.mapResultPair
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -1850,7 +1850,7 @@ class AwardServiceImpl(
 
         awardRepository.tryUpdate(cpid = params.cpid, updatedAward = updatedAwardEntity)
             .doReturn { error -> return ValidationResult.error(error) }
-            .isFalse {
+            .doOnFalse {
                 return ValidationResult.error(
                     Fail.Incident.Database.DatabaseConsistencyIncident(
                         "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpId}'. Record(s) does not exist."
