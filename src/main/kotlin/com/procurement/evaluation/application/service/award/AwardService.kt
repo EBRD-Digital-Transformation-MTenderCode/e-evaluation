@@ -2,8 +2,7 @@ package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
-import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseParams
-import com.procurement.evaluation.application.model.award.requirement.response.CreateRequirementResponseResult
+import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
@@ -26,6 +25,7 @@ import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.util.extension.doOnFalse
 import com.procurement.evaluation.domain.util.extension.mapResultPair
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -45,7 +45,6 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
-import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
@@ -138,7 +137,7 @@ interface AwardService {
 
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
 
-    fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail>
+    fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail>
 
     fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
         : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
@@ -1716,7 +1715,7 @@ class AwardServiceImpl(
         val awardEntities = awardRepository.tryFindBy(
             cpid = params.cpid,
             stage = params.ocid.stage
-        ).forwardResult { incident -> return incident }
+        ).orForwardFail { incident -> return incident }
 
         val awardsIds = params.awardIds.toSetBy { it.toString() }
 
@@ -1818,21 +1817,21 @@ class AwardServiceImpl(
     override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
         createUnsuccessfulAwardsStrategy.execute(params = params)
 
-    override fun createRequirementResponse(params: CreateRequirementResponseParams): Result<CreateRequirementResponseResult, Fail> {
+    override fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail> {
         val awardEntity = awardRepository.tryFindBy(
             cpid = params.cpid,
             stage = params.ocid.stage,
             awardId = params.award.id
         )
-            .forwardResult { result -> return result }
-            ?: return failure(
-                ValidationError.AwardNotFoundOnCreateRequirementRs(params.award.id)
+            .doReturn { error -> return ValidationResult.error(error) }
+            ?: return ValidationResult.error(
+                ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id)
             )
 
         val award = awardEntity.jsonData
             .tryToObject(Award::class.java)
             .doReturn { error ->
-                return failure(
+                return ValidationResult.error(
                     Fail.Incident.Transform.ParseFromDatabaseIncident(
                         jsonData = awardEntity.jsonData, exception = error.exception
                     )
@@ -1848,22 +1847,36 @@ class AwardServiceImpl(
         val updatedAwardEntity = awardEntity.copy(
             jsonData = toJson(updatedAward)
         )
-        awardRepository.update(cpid = updatedAwardEntity.cpId, updatedAward = updatedAwardEntity)
 
-        return params.convert().asSuccess()
+        awardRepository.tryUpdate(cpid = params.cpid, updatedAward = updatedAwardEntity)
+            .doReturn { error -> return ValidationResult.error(error) }
+            .doOnFalse {
+                return ValidationResult.error(
+                    Fail.Incident.Database.DatabaseConsistencyIncident(
+                        "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpId}'. Record(s) does not exist."
+                    )
+                )
+            }
+
+        return ValidationResult.ok()
     }
 
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
         if (patterns.isNotEmpty()) value in patterns else true
 
-    private fun convertToAwardRequirementResponse(params: CreateRequirementResponseParams): Award.RequirementResponse =
+    private fun convertToAwardRequirementResponse(params: AddRequirementResponseParams): Award.RequirementResponse =
         params.award.requirementResponse.let { requirementRs ->
             Award.RequirementResponse(
                 id = requirementRs.id,
-                responderer = requirementRs.responderer.let { responderer ->
-                    Award.RequirementResponse.Responderer(
-                        id = responderer.id,
-                        name = responderer.name
+                responder = requirementRs.responder.let { responder ->
+                    Award.RequirementResponse.Responder(
+                        identifier = responder.identifier.let { identifier ->
+                            Award.RequirementResponse.Responder.Identifier(
+                                id = identifier.id,
+                                scheme = identifier.scheme
+                            )
+                        },
+                        name = responder.name
                     )
                 },
                 requirement = requirementRs.requirement.let { requirement ->

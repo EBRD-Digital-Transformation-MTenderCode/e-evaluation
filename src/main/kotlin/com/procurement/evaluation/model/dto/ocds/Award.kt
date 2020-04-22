@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
-import com.procurement.evaluation.domain.model.requirement.response.RespondererId
+import com.procurement.evaluation.domain.model.requirement.response.ResponderId
 import com.procurement.evaluation.domain.model.tenderer.TendererId
 import java.time.LocalDateTime
 
@@ -61,7 +61,7 @@ data class Award @JsonCreator constructor(
         val value: RequirementRsValue,
         val relatedTenderer: RelatedTenderer,
         val requirement: Requirement,
-        val responderer: Responderer
+        val responder: Responder
     ) {
         data class RelatedTenderer(
             val id: TendererId
@@ -71,9 +71,14 @@ data class Award @JsonCreator constructor(
             val id: RequirementId
         )
 
-        data class Responderer(
-            val id: RespondererId,
+        data class Responder(
+            val identifier: Identifier,
             val name: String
-        )
+        ) {
+            data class Identifier(
+                val id: ResponderId,
+                val scheme: String
+            )
+        }
     }
 }

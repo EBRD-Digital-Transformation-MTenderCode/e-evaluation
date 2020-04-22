@@ -40,8 +40,8 @@ sealed class ValidationError(
         id = id.toString()
     )
 
-    class AwardNotFoundOnCreateRequirementRs(id: AwardId) : ValidationError(
-        numberError = "10.4.4.1",
+    class AwardNotFoundOnAddRequirementRs(id: AwardId) : ValidationError(
+        numberError = "10.4.3.1",
         description = "Award not found.",
         id = id.toString()
     )

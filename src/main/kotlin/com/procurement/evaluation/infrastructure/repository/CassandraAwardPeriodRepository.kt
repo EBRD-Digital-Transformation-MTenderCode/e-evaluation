@@ -132,7 +132,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setString(columnStage, stage.toString())
             }
         return statement.tryExecute(session = session)
-            .forwardResult { error -> return error }
+            .orForwardFail { error -> return error }
             .one()
             ?.getTimestamp(columnEndDate)
             ?.toLocalDateTime()
@@ -147,7 +147,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setTimestamp(columnEndDate, endDate.toCassandraTimestamp())
             }
         val result = statement.tryExecute(session = session)
-            .forwardResult { error -> return error }
+            .orForwardFail { error -> return error }
 
         if (!result.wasApplied())
             return Result.failure(

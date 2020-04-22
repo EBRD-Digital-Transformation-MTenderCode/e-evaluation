@@ -28,4 +28,6 @@ interface AwardRepository {
     fun tryFindBy(cpid: Cpid, stage: Stage, awardId: AwardId): Result<AwardEntity?, Fail>
 
     fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident>
+
+    fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident>
 }

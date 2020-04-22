@@ -235,7 +235,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         val awardEntities = tryFindBy(
             cpid = cpid, stage = stage
         )
-            .forwardResult { incident -> return incident }
+            .orForwardFail { incident -> return incident }
             .takeIf { it.isNotEmpty() }
             ?: return null.asSuccess()
 
@@ -259,7 +259,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 }
             }
         val result = statements.tryExecute(session = session)
-            .forwardResult { error -> return error }
+            .orForwardFail { error -> return error }
 
         if (!result.wasApplied())
             return failure(
@@ -269,7 +269,14 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return Unit.asSuccess()
     }
 
-    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
+    override fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
+        val statement = statementForUpdateAward(cpid = cpid.toString(), updatedAward = updatedAward)
+        val result = statement.tryExecute(session = session)
+            .orForwardFail { error -> return error }
+        return result.wasApplied().asSuccess()
+    }
+
+    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): BoundStatement =
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {
                 setString(columnCpid, cpid)

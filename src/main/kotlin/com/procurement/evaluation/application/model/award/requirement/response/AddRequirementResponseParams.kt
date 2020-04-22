@@ -12,28 +12,28 @@ import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
-import com.procurement.evaluation.domain.model.requirement.response.RespondererId
+import com.procurement.evaluation.domain.model.requirement.response.ResponderId
 import com.procurement.evaluation.domain.model.requirement.response.tryRequirementResponseId
-import com.procurement.evaluation.domain.model.requirement.response.tryRespondererId
+import com.procurement.evaluation.domain.model.requirement.response.tryResponderId
 import com.procurement.evaluation.domain.model.requirement.tryRequirementId
 import com.procurement.evaluation.domain.model.tenderer.TendererId
 import com.procurement.evaluation.domain.model.tenderer.tryTendererId
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
-class CreateRequirementResponseParams private constructor(
+class AddRequirementResponseParams private constructor(
     val cpid: Cpid, val ocid: Ocid, val award: Award
 ) {
     companion object {
         fun tryCreate(
             cpid: String, ocid: String, award: Award
-        ): Result<CreateRequirementResponseParams, DataErrors> {
+        ): Result<AddRequirementResponseParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .doReturn { error -> return failure(error = error) }
 
             val ocidParsed = parseOcid(ocid)
                 .doReturn { error -> return failure(error = error) }
 
-            return CreateRequirementResponseParams(
+            return AddRequirementResponseParams(
                 cpid = cpidParsed,
                 ocid = ocidParsed,
                 award = award
@@ -65,7 +65,7 @@ class CreateRequirementResponseParams private constructor(
             val value: RequirementRsValue,
             val relatedTenderer: RelatedTenderer,
             val requirement: Requirement,
-            val responderer: Responderer
+            val responder: Responder
         ) {
             companion object {
                 fun tryCreate(
@@ -73,7 +73,7 @@ class CreateRequirementResponseParams private constructor(
                     value: RequirementRsValue,
                     relatedTenderer: RelatedTenderer,
                     requirement: Requirement,
-                    responderer: Responderer
+                    responder: Responder
                 ): Result<RequirementResponse, DataErrors> {
                     val parsedRRequirementResponseId = id.tryRequirementResponseId()
                         .doReturn { error ->
@@ -90,7 +90,7 @@ class CreateRequirementResponseParams private constructor(
                         value = value,
                         relatedTenderer = relatedTenderer,
                         requirement = requirement,
-                        responderer = responderer
+                        responder = responder
                     ).asSuccess()
                 }
             }
@@ -135,25 +135,32 @@ class CreateRequirementResponseParams private constructor(
                 }
             }
 
-            class Responderer private constructor(
-                val id: RespondererId, val name: String
+            class Responder private constructor(
+                val identifier: Identifier, val name: String
             ) {
                 companion object {
-                    fun tryCreate(id: String, name: String): Result<Responderer, DataErrors> {
-                        val parsedRespondererId = id.tryRespondererId()
-                            .doReturn { error ->
-                                return failure(
-                                    DataErrors.Validation.DataFormatMismatch(
-                                        name = "respondererId",
-                                        expectedFormat = "string",
-                                        actualValue = id
-                                    )
-                                )
-                            }
-                        return Responderer(
-                            id = parsedRespondererId,
+                    fun tryCreate(identifier: Identifier, name: String) =
+                        Responder(
+                            identifier = identifier,
                             name = name
-                        ).asSuccess()
+                        ).asSuccess<Responder, DataErrors>()
+                }
+
+                class Identifier private constructor(val scheme: String, val id: ResponderId) {
+                    companion object {
+                        fun tryCreate(scheme: String, id: String): Result<Identifier, DataErrors> {
+                            val parsedResponderId = id.tryResponderId()
+                                .doReturn { error ->
+                                    return failure(
+                                        DataErrors.Validation.DataFormatMismatch(
+                                            name = "identifier.id",
+                                            expectedFormat = "string",
+                                            actualValue = id
+                                        )
+                                    )
+                                }
+                            return Identifier(id = parsedResponderId, scheme = scheme).asSuccess()
+                        }
                     }
                 }
             }
