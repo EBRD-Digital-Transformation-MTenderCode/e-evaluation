@@ -270,24 +270,13 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     override fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
-        val statement = boundStatementForUpdateAward(cpid = cpid.toString(), updatedAward = updatedAward)
+        val statement = statementForUpdateAward(cpid = cpid.toString(), updatedAward = updatedAward)
         val result = statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
         return result.wasApplied().asSuccess()
     }
 
-    private fun boundStatementForUpdateAward(cpid: String, updatedAward: AwardEntity): BoundStatement =
-        preparedUpdatedAwardStatusesCQL.bind()
-            .apply {
-                setString(columnCpid, cpid)
-                setString(columnStage, updatedAward.stage)
-                setUUID(columnToken, updatedAward.token)
-                setString(columnStatus, updatedAward.status)
-                setString(columnStatusDetails, updatedAward.statusDetails)
-                setString(columnJsonData, updatedAward.jsonData)
-            }
-
-    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
+    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): BoundStatement =
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
