@@ -1868,10 +1868,15 @@ class AwardServiceImpl(
         params.award.requirementResponse.let { requirementRs ->
             Award.RequirementResponse(
                 id = requirementRs.id,
-                responderer = requirementRs.responderer.let { responderer ->
-                    Award.RequirementResponse.Responderer(
-                        id = responderer.id,
-                        name = responderer.name
+                responder = requirementRs.responder.let { responder ->
+                    Award.RequirementResponse.Responder(
+                        identifier = responder.identifier.let { identifier ->
+                            Award.RequirementResponse.Responder.Identifier(
+                                id = identifier.id,
+                                scheme = identifier.scheme
+                            )
+                        },
+                        name = responder.name
                     )
                 },
                 requirement = requirementRs.requirement.let { requirement ->

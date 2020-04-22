@@ -30,7 +30,7 @@ private fun AddRequirementResponseRequest.Award.RequirementResponse.convert()
             .orForwardFail { result -> return result },
         requirement = requirement.convert()
             .orForwardFail { result -> return result },
-        responderer = responderer.convert()
+        responder = responder.convert()
             .orForwardFail { result -> return result }
     )
 
@@ -42,6 +42,13 @@ private fun AddRequirementResponseRequest.Award.RequirementResponse.Requirement.
     : Result<AddRequirementResponseParams.Award.RequirementResponse.Requirement, DataErrors> =
     AddRequirementResponseParams.Award.RequirementResponse.Requirement.tryCreate(id)
 
-private fun AddRequirementResponseRequest.Award.RequirementResponse.Responderer.convert()
-    : Result<AddRequirementResponseParams.Award.RequirementResponse.Responderer, DataErrors> =
-    AddRequirementResponseParams.Award.RequirementResponse.Responderer.tryCreate(id, name)
+private fun AddRequirementResponseRequest.Award.RequirementResponse.Responder.convert()
+    : Result<AddRequirementResponseParams.Award.RequirementResponse.Responder, DataErrors> =
+    AddRequirementResponseParams.Award.RequirementResponse.Responder.tryCreate(
+        name = name,
+        identifier = identifier.convert()
+            .orForwardFail { result -> return result })
+
+private fun AddRequirementResponseRequest.Award.RequirementResponse.Responder.Identifier.convert()
+    : Result<AddRequirementResponseParams.Award.RequirementResponse.Responder.Identifier, DataErrors> =
+    AddRequirementResponseParams.Award.RequirementResponse.Responder.Identifier.tryCreate(id = id, scheme = scheme)

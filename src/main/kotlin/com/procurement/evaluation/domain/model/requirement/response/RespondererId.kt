@@ -4,6 +4,6 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.infrastructure.fail.Fail
 
-typealias RespondererId = String
+typealias ResponderId = String
 
-fun String.tryRespondererId(): Result<RespondererId, Fail.Incident.Transform.Parsing> = this.asSuccess()
+fun String.tryResponderId(): Result<ResponderId, Fail.Incident.Transform.Parsing> = this.asSuccess()

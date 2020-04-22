@@ -12,9 +12,9 @@ import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
-import com.procurement.evaluation.domain.model.requirement.response.RespondererId
+import com.procurement.evaluation.domain.model.requirement.response.ResponderId
 import com.procurement.evaluation.domain.model.requirement.response.tryRequirementResponseId
-import com.procurement.evaluation.domain.model.requirement.response.tryRespondererId
+import com.procurement.evaluation.domain.model.requirement.response.tryResponderId
 import com.procurement.evaluation.domain.model.requirement.tryRequirementId
 import com.procurement.evaluation.domain.model.tenderer.TendererId
 import com.procurement.evaluation.domain.model.tenderer.tryTendererId
@@ -65,7 +65,7 @@ class AddRequirementResponseParams private constructor(
             val value: RequirementRsValue,
             val relatedTenderer: RelatedTenderer,
             val requirement: Requirement,
-            val responderer: Responderer
+            val responder: Responder
         ) {
             companion object {
                 fun tryCreate(
@@ -73,7 +73,7 @@ class AddRequirementResponseParams private constructor(
                     value: RequirementRsValue,
                     relatedTenderer: RelatedTenderer,
                     requirement: Requirement,
-                    responderer: Responderer
+                    responder: Responder
                 ): Result<RequirementResponse, DataErrors> {
                     val parsedRRequirementResponseId = id.tryRequirementResponseId()
                         .doReturn { error ->
@@ -90,7 +90,7 @@ class AddRequirementResponseParams private constructor(
                         value = value,
                         relatedTenderer = relatedTenderer,
                         requirement = requirement,
-                        responderer = responderer
+                        responder = responder
                     ).asSuccess()
                 }
             }
@@ -135,25 +135,32 @@ class AddRequirementResponseParams private constructor(
                 }
             }
 
-            class Responderer private constructor(
-                val id: RespondererId, val name: String
+            class Responder private constructor(
+                val identifier: Identifier, val name: String
             ) {
                 companion object {
-                    fun tryCreate(id: String, name: String): Result<Responderer, DataErrors> {
-                        val parsedRespondererId = id.tryRespondererId()
-                            .doReturn { error ->
-                                return failure(
-                                    DataErrors.Validation.DataFormatMismatch(
-                                        name = "respondererId",
-                                        expectedFormat = "string",
-                                        actualValue = id
-                                    )
-                                )
-                            }
-                        return Responderer(
-                            id = parsedRespondererId,
+                    fun tryCreate(identifier: Identifier, name: String) =
+                        Responder(
+                            identifier = identifier,
                             name = name
-                        ).asSuccess()
+                        ).asSuccess<Responder, DataErrors>()
+                }
+
+                class Identifier private constructor(val scheme: String, val id: ResponderId) {
+                    companion object {
+                        fun tryCreate(scheme: String, id: String): Result<Identifier, DataErrors> {
+                            val parsedResponderId = id.tryResponderId()
+                                .doReturn { error ->
+                                    return failure(
+                                        DataErrors.Validation.DataFormatMismatch(
+                                            name = "respondererId",
+                                            expectedFormat = "string",
+                                            actualValue = id
+                                        )
+                                    )
+                                }
+                            return Identifier(id = parsedResponderId, scheme = scheme).asSuccess()
+                        }
                     }
                 }
             }
