@@ -153,7 +153,7 @@ class AddRequirementResponseParams private constructor(
                                 .doReturn { error ->
                                     return failure(
                                         DataErrors.Validation.DataFormatMismatch(
-                                            name = "respondererId",
+                                            name = "identifier.id",
                                             expectedFormat = "string",
                                             actualValue = id
                                         )
