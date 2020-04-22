@@ -36,18 +36,12 @@ private fun AddRequirementResponseRequest.Award.RequirementResponse.convert()
 
 private fun AddRequirementResponseRequest.Award.RequirementResponse.RelatedTenderer.convert()
     : Result<AddRequirementResponseParams.Award.RequirementResponse.RelatedTenderer, DataErrors> =
-    AddRequirementResponseParams.Award.RequirementResponse.RelatedTenderer.tryCreate(
-        id
-    )
+    AddRequirementResponseParams.Award.RequirementResponse.RelatedTenderer.tryCreate(id)
 
 private fun AddRequirementResponseRequest.Award.RequirementResponse.Requirement.convert()
     : Result<AddRequirementResponseParams.Award.RequirementResponse.Requirement, DataErrors> =
-    AddRequirementResponseParams.Award.RequirementResponse.Requirement.tryCreate(
-        id
-    )
+    AddRequirementResponseParams.Award.RequirementResponse.Requirement.tryCreate(id)
 
 private fun AddRequirementResponseRequest.Award.RequirementResponse.Responderer.convert()
     : Result<AddRequirementResponseParams.Award.RequirementResponse.Responderer, DataErrors> =
-    AddRequirementResponseParams.Award.RequirementResponse.Responderer.tryCreate(
-        id, name
-    )
+    AddRequirementResponseParams.Award.RequirementResponse.Responderer.tryCreate(id, name)
