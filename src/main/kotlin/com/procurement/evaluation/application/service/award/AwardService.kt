@@ -68,6 +68,7 @@ import com.procurement.evaluation.model.dto.ocds.LocalityDetails
 import com.procurement.evaluation.model.dto.ocds.OrganizationReference
 import com.procurement.evaluation.model.dto.ocds.Phase
 import com.procurement.evaluation.model.dto.ocds.RegionDetails
+import com.procurement.evaluation.model.dto.ocds.RequirementResponse
 import com.procurement.evaluation.model.dto.ocds.Value
 import com.procurement.evaluation.model.dto.ocds.asMoney
 import com.procurement.evaluation.model.dto.ocds.asValue
@@ -1864,14 +1865,14 @@ class AwardServiceImpl(
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
         if (patterns.isNotEmpty()) value in patterns else true
 
-    private fun convertToAwardRequirementResponse(params: AddRequirementResponseParams): Award.RequirementResponse =
+    private fun convertToAwardRequirementResponse(params: AddRequirementResponseParams): RequirementResponse =
         params.award.requirementResponse.let { requirementRs ->
-            Award.RequirementResponse(
+            RequirementResponse(
                 id = requirementRs.id,
                 responder = requirementRs.responder.let { responder ->
-                    Award.RequirementResponse.Responder(
+                    RequirementResponse.Responder(
                         identifier = responder.identifier.let { identifier ->
-                            Award.RequirementResponse.Responder.Identifier(
+                            RequirementResponse.Responder.Identifier(
                                 id = identifier.id,
                                 scheme = identifier.scheme
                             )
@@ -1880,12 +1881,12 @@ class AwardServiceImpl(
                     )
                 },
                 requirement = requirementRs.requirement.let { requirement ->
-                    Award.RequirementResponse.Requirement(
+                    RequirementResponse.Requirement(
                         id = requirement.id
                     )
                 },
                 relatedTenderer = requirementRs.relatedTenderer.let { relatedTenderer ->
-                    Award.RequirementResponse.RelatedTenderer(
+                    RequirementResponse.RelatedTenderer(
                         id = relatedTenderer.id
                     )
                 },
