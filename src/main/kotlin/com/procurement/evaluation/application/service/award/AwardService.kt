@@ -1842,7 +1842,7 @@ class AwardServiceImpl(
         val requirementResponse = convertToAwardRequirementResponse(params)
 
         val updatedAward = award.copy(
-            requirementResponses = listOf(requirementResponse)
+            requirementResponses = award.requirementResponses + requirementResponse
         )
 
         val updatedAwardEntity = awardEntity.copy(
