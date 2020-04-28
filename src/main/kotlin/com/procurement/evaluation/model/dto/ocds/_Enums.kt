@@ -108,6 +108,7 @@ enum class Phase(@JsonValue override val key: String) : EnumElementProvider.Key 
 }
 
 enum class BusinessFunctionType(@JsonValue override val key: String) : EnumElementProvider.Key {
+    CHAIRMAN("chairman"),
     AUTHORITY("authority"),
     PROCUREMENT_OFFICER("procurementOfficer"),
     CONTRACT_POINT("contactPoint"),
