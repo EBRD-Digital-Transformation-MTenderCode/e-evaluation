@@ -80,7 +80,7 @@ class AddRequirementResponseParams private constructor(
                             return failure(
                                 DataErrors.Validation.DataFormatMismatch(
                                     name = "requirementResponseId",
-                                    expectedFormat = "string",
+                                    expectedFormat = "uuid",
                                     actualValue = id
                                 )
                             )
