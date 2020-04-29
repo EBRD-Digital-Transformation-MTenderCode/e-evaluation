@@ -36,8 +36,8 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                   LIMIT 1
             """
 
-        private const val FIND_END_DATE_BY_CPID_AND_STAGE_CQL = """
-            SELECT $columnEndDate
+        private const val FIND_START_DATE_BY_CPID_AND_STAGE_CQL = """
+            SELECT $columnStartDate
                  FROM $keySpace.$tableName
                 WHERE $columnCpid=?
                   AND $columnStage=?
@@ -65,7 +65,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     private val preparedFindByCpidAndStageCQL = session.prepare(FIND_BY_CPID_AND_STAGE_CQL)
     private val preparedSaveNewStartDateCQL = session.prepare(SAVE_NEW_START_DATE_CQL)
     private val preparedSaveEndDateCQL = session.prepare(SAVE_END_DATE_CQL)
-    private val preparedFindEndDateByCpidAndStageCQL = session.prepare(FIND_END_DATE_BY_CPID_AND_STAGE_CQL)
+    private val preparedFindStartDateByCpidAndStageCQL = session.prepare(FIND_START_DATE_BY_CPID_AND_STAGE_CQL)
 
     override fun findStartDateBy(cpid: String, stage: String): LocalDateTime? {
         val query = preparedFindByCpidAndStageCQL.bind()
@@ -126,7 +126,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     }
 
     override fun tryFindStartDateByCpidAndStage(cpid: Cpid, stage: Stage): Result<LocalDateTime?, Fail.Incident> {
-        val statement = preparedFindEndDateByCpidAndStageCQL.bind()
+        val statement = preparedFindStartDateByCpidAndStageCQL.bind()
             .apply {
                 setString(columnCpid, cpid.toString())
                 setString(columnStage, stage.toString())
