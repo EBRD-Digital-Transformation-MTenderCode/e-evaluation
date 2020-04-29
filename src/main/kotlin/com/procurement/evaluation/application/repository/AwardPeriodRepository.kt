@@ -13,7 +13,7 @@ interface AwardPeriodRepository {
 
     fun saveEnd(cpid: String, stage: String, end: LocalDateTime)
 
-    fun tryFindEndDateByCpidAndStage(cpid: Cpid, stage: Stage): Result<LocalDateTime?, Fail.Incident>
+    fun tryFindStartDateByCpidAndStage(cpid: Cpid, stage: Stage): Result<LocalDateTime?, Fail.Incident>
 
     fun trySaveEnd(cpid: Cpid, stage: Stage, endDate: LocalDateTime): Result<Unit, Fail.Incident>
 }

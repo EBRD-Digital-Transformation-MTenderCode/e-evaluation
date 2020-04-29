@@ -125,7 +125,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         throw SaveEntityException(message = "Error writing updated end period to database.", cause = exception)
     }
 
-    override fun tryFindEndDateByCpidAndStage(cpid: Cpid, stage: Stage): Result<LocalDateTime?, Fail.Incident> {
+    override fun tryFindStartDateByCpidAndStage(cpid: Cpid, stage: Stage): Result<LocalDateTime?, Fail.Incident> {
         val statement = preparedFindEndDateByCpidAndStageCQL.bind()
             .apply {
                 setString(columnCpid, cpid.toString())
@@ -134,7 +134,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         return statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
             .one()
-            ?.getTimestamp(columnEndDate)
+            ?.getTimestamp(columnStartDate)
             ?.toLocalDateTime()
             .asSuccess()
     }
