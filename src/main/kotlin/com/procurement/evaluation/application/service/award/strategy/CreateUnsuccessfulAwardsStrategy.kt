@@ -63,7 +63,7 @@ class CreateUnsuccessfulAwardsStrategy(
                     token = token,
                     status = award.status.toString(),
                     statusDetails = award.statusDetails.toString(),
-                    owner = params.owner.toString(),
+                    owner = null,
                     jsonData = toJson(award)
                 )
             }
