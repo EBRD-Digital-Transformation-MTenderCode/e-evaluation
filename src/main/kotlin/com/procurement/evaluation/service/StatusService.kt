@@ -185,7 +185,7 @@ class StatusService(private val periodService: PeriodService,
     private fun getEntity(award: Award,
                           cpId: String,
                           stage: String,
-                          owner: String,
+                          owner: String?,
                           token: UUID): AwardEntity {
         return AwardEntity(
                 cpId = cpId,

@@ -3,13 +3,11 @@ package com.procurement.evaluation.application.model.award.unsuccessful
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseDate
 import com.procurement.evaluation.application.model.parseOcid
-import com.procurement.evaluation.application.model.parseOwner
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.asFailure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
-import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.lot.tryLotId
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
@@ -17,7 +15,6 @@ import com.procurement.evaluation.lib.toSetBy
 import java.time.LocalDateTime
 
 data class CreateUnsuccessfulAwardsParams private constructor(
-    val owner:Owner,
     val cpid: Cpid,
     val ocid: Ocid,
     val lotIds: List<LotId>,
@@ -25,7 +22,6 @@ data class CreateUnsuccessfulAwardsParams private constructor(
 ) {
     companion object {
         fun tryCreate(
-            owner: String,
             cpid: String,
             ocid: String,
             lotIds: List<String>,
@@ -59,9 +55,6 @@ data class CreateUnsuccessfulAwardsParams private constructor(
                     }
             }
 
-            val parsedOwner = parseOwner(value = owner)
-                .doReturn { error -> return error.asFailure() }
-
             val parsedCpid = parseCpid(value = cpid)
                 .doReturn { error -> return error.asFailure() }
 
@@ -75,8 +68,7 @@ data class CreateUnsuccessfulAwardsParams private constructor(
                 cpid = parsedCpid,
                 ocid = parsedOcid,
                 lotIds = lotIdsParsed,
-                date = parsedDate,
-                owner = parsedOwner
+                date = parsedDate
             ).asSuccess()
         }
     }
