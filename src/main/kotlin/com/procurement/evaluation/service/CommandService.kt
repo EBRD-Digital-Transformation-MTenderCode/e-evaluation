@@ -588,8 +588,7 @@ class CommandService(
                             startDate = cm.startDate,
                             cpid = cm.cpid,
                             stage = cm.stage,
-                            owner = cm.owner,
-                            token = cm.token
+                            owner = cm.owner
                         )
                         val request = toObject(CreateUnsuccessfulAwardsRequest::class.java, cm.data)
                         awardService.createUnsuccessfulAwards(context = context, data = request.convert())
