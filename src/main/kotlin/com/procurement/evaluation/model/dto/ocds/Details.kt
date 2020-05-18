@@ -9,7 +9,7 @@ data class Details @JsonCreator constructor(
     val typeOfSupplier: TypeOfSupplier?,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    val mainEconomicActivities: List<String>?,
+    val mainEconomicActivities: List<MainEconomicActivity>?,
 
     val scale: String,
 

@@ -247,13 +247,20 @@ fun CreateAwardsAuctionEndRequest.convert() = CreateAwardsAuctionEndData(
                                                 )
                                             },
                                         mainEconomicActivities = details.mainEconomicActivities
-                                            .mapIfNotEmpty { it }
-                                            .orThrow {
+                                            .errorIfEmpty {
                                                 ErrorException(
                                                     error = ErrorType.IS_EMPTY,
                                                     message = "The bid '${bid.id}' contains empty list of the main economic activities."
                                                 )
-                                            },
+                                            }
+                                            ?.map { mainEconomicActivity ->
+                                                CreateAwardsAuctionEndData.Bid.Tenderer.Details.MainEconomicActivity(
+                                                    id = mainEconomicActivity.id,
+                                                    description = mainEconomicActivity.description,
+                                                    uri = mainEconomicActivity.uri,
+                                                    scheme = mainEconomicActivity.scheme
+                                                )
+                                            }.orEmpty(),
                                         permits = details.permits
                                             .errorIfEmpty {
                                                 ErrorException(

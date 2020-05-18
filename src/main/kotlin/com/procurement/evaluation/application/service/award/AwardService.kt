@@ -65,6 +65,7 @@ import com.procurement.evaluation.model.dto.ocds.Document
 import com.procurement.evaluation.model.dto.ocds.DocumentType
 import com.procurement.evaluation.model.dto.ocds.Identifier
 import com.procurement.evaluation.model.dto.ocds.LocalityDetails
+import com.procurement.evaluation.model.dto.ocds.MainEconomicActivity
 import com.procurement.evaluation.model.dto.ocds.OrganizationReference
 import com.procurement.evaluation.model.dto.ocds.Phase
 import com.procurement.evaluation.model.dto.ocds.RegionDetails
@@ -2254,7 +2255,15 @@ class AwardServiceImpl(
                                             description = legalForm.description
                                         )
                                     },
-                                mainEconomicActivities = details.mainEconomicActivities,
+                                mainEconomicActivities = details.mainEconomicActivities
+                                    .map { mainEconomicActivity ->
+                                        MainEconomicActivity(
+                                            id = mainEconomicActivity.id,
+                                            description = mainEconomicActivity.description,
+                                            uri = mainEconomicActivity.uri,
+                                            scheme = mainEconomicActivity.scheme
+                                        )
+                                    },
                                 permits = details.permits
                                     .map { permit ->
                                         Details.Permit(
@@ -2523,7 +2532,15 @@ class AwardServiceImpl(
                                         description = legalForm.description
                                     )
                                 },
-                            mainEconomicActivities = details.mainEconomicActivities,
+                            mainEconomicActivities = details.mainEconomicActivities
+                                .map { mainEconomicActivity ->
+                                    MainEconomicActivity(
+                                        id = mainEconomicActivity.id,
+                                        description = mainEconomicActivity.description,
+                                        uri = mainEconomicActivity.uri,
+                                        scheme = mainEconomicActivity.scheme
+                                    )
+                                },
                             permits = details.permits
                                 .map { permit ->
                                     Details.Permit(

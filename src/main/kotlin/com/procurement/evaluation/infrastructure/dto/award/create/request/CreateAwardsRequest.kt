@@ -211,7 +211,9 @@ data class CreateAwardsRequest(
 
             data class Details(
                 @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: TypeOfSupplier,
-                @param:JsonProperty("mainEconomicActivities") @field:JsonProperty("mainEconomicActivities") val mainEconomicActivities: List<String>,
+
+                @JsonInclude(JsonInclude.Include.NON_EMPTY)
+                @param:JsonProperty("mainEconomicActivities") @field:JsonProperty("mainEconomicActivities") val mainEconomicActivities: List<MainEconomicActivity>?,
                 @param:JsonProperty("scale") @field:JsonProperty("scale") val scale: String,
 
                 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -223,6 +225,15 @@ data class CreateAwardsRequest(
                 @JsonInclude(JsonInclude.Include.NON_NULL)
                 @param:JsonProperty("legalForm") @field:JsonProperty("legalForm") val legalForm: LegalForm?
             ) {
+                data class MainEconomicActivity(
+                    @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String,
+                    @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+                    @param:JsonProperty("description") @field:JsonProperty("description") val description: String,
+
+                    @JsonInclude(JsonInclude.Include.NON_NULL)
+                    @param:JsonProperty("uri") @field:JsonProperty("uri") val uri: String?
+                )
+
                 data class Permit(
                     @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String,
                     @param:JsonProperty("id") @field:JsonProperty("id") val id: String,

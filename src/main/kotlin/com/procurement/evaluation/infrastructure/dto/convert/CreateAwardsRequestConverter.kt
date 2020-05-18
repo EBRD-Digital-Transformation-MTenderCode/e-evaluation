@@ -210,7 +210,21 @@ fun CreateAwardsRequest.convert(): CreateAwardsData = CreateAwardsData(
                                             description = legalForm.description
                                         )
                                     },
-                                    mainEconomicActivities = details.mainEconomicActivities,
+                                    mainEconomicActivities = details.mainEconomicActivities
+                                        .errorIfEmpty {
+                                            ErrorException(
+                                                error = ErrorType.IS_EMPTY,
+                                                message = "The bid '${bid.id}' contains empty list of the main economic activities."
+                                            )
+                                        }
+                                        ?.map { mainEconomicActivity ->
+                                            CreateAwardsData.Bid.Tenderer.Details.MainEconomicActivity(
+                                                id = mainEconomicActivity.id,
+                                                description = mainEconomicActivity.description,
+                                                uri = mainEconomicActivity.uri,
+                                                scheme = mainEconomicActivity.scheme
+                                            )
+                                        }.orEmpty(),
                                     permits = details.permits
                                         .errorIfEmpty {
                                             ErrorException(
