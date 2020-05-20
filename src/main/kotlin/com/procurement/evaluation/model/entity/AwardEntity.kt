@@ -17,7 +17,7 @@ data class AwardEntity(
 
     var statusDetails: String,
 
-    val owner: String,
+    val owner: String?,
 
     var jsonData: String
 ) {

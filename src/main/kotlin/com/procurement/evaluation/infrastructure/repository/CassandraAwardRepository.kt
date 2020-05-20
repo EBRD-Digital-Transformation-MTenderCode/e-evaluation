@@ -9,7 +9,17 @@ import com.datastax.driver.core.Statement
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.domain.functional.Result.Companion.failure
+import com.procurement.evaluation.domain.functional.asSuccess
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.award.AwardId
+import com.procurement.evaluation.domain.model.enums.Stage
+import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
+import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.entity.AwardEntity
+import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Repository
 import java.util.*
 
@@ -209,7 +219,64 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
     }
 
-    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): Statement =
+    override fun tryFindBy(cpid: Cpid, stage: Stage): Result<List<AwardEntity>, Fail.Incident> {
+        val query = preparedFindByCpidAndStageCQL.bind()
+            .apply {
+                setString(columnCpid, cpid.toString())
+                setString(columnStage, stage.toString())
+            }
+
+        val resultSet = query.tryExecute(session)
+            .doReturn { error -> return failure(error) }
+        return resultSet.map { convertToAwardEntity(it) }.asSuccess()
+    }
+
+    override fun tryFindBy(cpid: Cpid, stage: Stage, awardId: AwardId): Result<AwardEntity?, Fail> {
+        val awardEntities = tryFindBy(
+            cpid = cpid, stage = stage
+        )
+            .orForwardFail { incident -> return incident }
+            .takeIf { it.isNotEmpty() }
+            ?: return null.asSuccess()
+
+        for (entity in awardEntities) {
+            val award = entity.jsonData
+                .tryToObject(Award::class.java)
+                .doReturn { error ->
+                    return failure(Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                }
+            if (award.id == awardId.toString())
+                return entity.asSuccess()
+        }
+        return null.asSuccess()
+    }
+
+    override fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident> {
+        val statements = BatchStatement()
+            .apply {
+                for (award in awards) {
+                    add(statementForAwardSave(cpid = cpid.toString(), award = award))
+                }
+            }
+        val result = statements.tryExecute(session = session)
+            .orForwardFail { error -> return error }
+
+        if (!result.wasApplied())
+            return failure(
+                Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
+            )
+
+        return Unit.asSuccess()
+    }
+
+    override fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
+        val statement = statementForUpdateAward(cpid = cpid.toString(), updatedAward = updatedAward)
+        val result = statement.tryExecute(session = session)
+            .orForwardFail { error -> return error }
+        return result.wasApplied().asSuccess()
+    }
+
+    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): BoundStatement =
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {
                 setString(columnCpid, cpid)

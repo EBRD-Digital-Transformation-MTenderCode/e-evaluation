@@ -174,8 +174,8 @@ class CassandraAwardRepositoryIT {
             cpId = CPID,
             stage = STAGE,
             token = TOKEN,
-            status = AWARD_STATUS.value,
-            statusDetails = AWARD_STATUS_DETAILS.value,
+            status = AWARD_STATUS.key,
+            statusDetails = AWARD_STATUS_DETAILS.key,
             owner = OWNER,
             jsonData = JSON_DATA
         )
@@ -193,8 +193,8 @@ class CassandraAwardRepositoryIT {
             cpId = CPID,
             stage = STAGE,
             token = TOKEN,
-            status = AWARD_STATUS.value,
-            statusDetails = AWARD_STATUS_DETAILS.value,
+            status = AWARD_STATUS.key,
+            statusDetails = AWARD_STATUS_DETAILS.key,
             owner = OWNER,
             jsonData = JSON_DATA
         )
@@ -220,8 +220,8 @@ class CassandraAwardRepositoryIT {
             cpId = CPID,
             stage = STAGE,
             token = TOKEN,
-            status = AWARD_STATUS.value,
-            statusDetails = AWARD_STATUS_DETAILS.value,
+            status = AWARD_STATUS.key,
+            statusDetails = AWARD_STATUS_DETAILS.key,
             owner = OWNER,
             jsonData = JSON_DATA
         )
@@ -241,8 +241,8 @@ class CassandraAwardRepositoryIT {
             stage = STAGE,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.value,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            status = UPDATED_AWARD_STATUS.key,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
             jsonData = UPDATED_JSON_DATA
         )
         awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
@@ -260,8 +260,8 @@ class CassandraAwardRepositoryIT {
             stage = STAGE,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.value,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            status = UPDATED_AWARD_STATUS.key,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
             jsonData = UPDATED_JSON_DATA
         )
         val exception = assertThrows<SaveEntityException> {
@@ -285,8 +285,8 @@ class CassandraAwardRepositoryIT {
             stage = STAGE,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.value,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            status = UPDATED_AWARD_STATUS.key,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
             jsonData = UPDATED_JSON_DATA
         )
 
@@ -305,8 +305,8 @@ class CassandraAwardRepositoryIT {
             stage = STAGE,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.value,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            status = UPDATED_AWARD_STATUS.key,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
             jsonData = UPDATED_JSON_DATA
         )
         awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
@@ -324,8 +324,8 @@ class CassandraAwardRepositoryIT {
             stage = STAGE,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.value,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            status = UPDATED_AWARD_STATUS.key,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
             jsonData = UPDATED_JSON_DATA
         )
         val exception = assertThrows<SaveEntityException> {
@@ -349,8 +349,8 @@ class CassandraAwardRepositoryIT {
             stage = STAGE,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.value,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.value,
+            status = UPDATED_AWARD_STATUS.key,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
             jsonData = UPDATED_JSON_DATA
         )
 

@@ -1,0 +1,11 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "date": "2020-04-06T10:24:03Z",
+  "title": "string",
+  "description": "string",
+  "status": "unsuccessful",
+  "statusDetails": "lotCancelled",
+  "relatedLots": [
+    "3fa85f64-5717-4562-b3fc-2c963f66afb3"
+  ]
+}

@@ -1,16 +1,11 @@
 package com.procurement.evaluation.exception
 
 
-class ErrorException(error: ErrorType, message: String? = null) : RuntimeException(message) {
-
-    var code: String = error.code
-    var msg: String
-
-    init {
-        when (message) {
-            null -> this.msg = error.message
-            else -> this.msg = error.message + message
-        }
+class ErrorException(error: ErrorType, message: String? = null) : RuntimeException(
+    when (message) {
+        null -> error.message
+        else -> error.message + message
     }
-
+) {
+    val code: String = error.code
 }

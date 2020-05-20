@@ -5,7 +5,12 @@
       "mdm.scales[1]"
     ],
     "schemes": [
-      "mdm.schemas[0]"
+      {
+        "country": "MD",
+        "schemes": [
+          "mdm.schemas[0]"
+        ]
+      }
     ]
   },
   "award": {

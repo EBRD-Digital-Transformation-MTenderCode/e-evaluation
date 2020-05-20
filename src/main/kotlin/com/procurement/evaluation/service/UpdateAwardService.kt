@@ -14,7 +14,6 @@ import com.procurement.evaluation.model.dto.AwardByBid
 import com.procurement.evaluation.model.dto.AwardByBidRq
 import com.procurement.evaluation.model.dto.AwardByBidRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
-import com.procurement.evaluation.model.dto.bpe.ResponseDto
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
@@ -30,13 +29,13 @@ import java.util.*
 @Service
 class UpdateAwardService(private val awardDao: AwardDao) {
 
-    fun awardByBid(cm: CommandMessage): ResponseDto {
+    fun awardByBid(cm: CommandMessage): AwardByBidRs {
         val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val token = cm.context.token ?: throw ErrorException(CONTEXT)
         val awardId = cm.context.id ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
-        val awardCriteria = AwardCriteria.fromValue(cm.context.awardCriteria ?: throw ErrorException(CONTEXT))
+        val awardCriteria = AwardCriteria.creator(cm.context.awardCriteria ?: throw ErrorException(CONTEXT))
         val dateTime = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val dto = toObject(AwardByBidRq::class.java, cm.data)
 
@@ -84,7 +83,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value
+                    statusDetails = awardByBid.statusDetails.key
                     lotAwarded = true
                     lotId = awardByBid.relatedLots[0]
                 }
@@ -93,7 +92,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value
+                    statusDetails = awardByBid.statusDetails.key
                     /*find next in status CONSIDERATION*/
                     nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatusDetails.CONSIDERATION }
                     if (nextAwardForUpdate != null) {
@@ -120,7 +119,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value
+                    statusDetails = awardByBid.statusDetails.key
                     /*find next in status EMPTY*/
                     nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatusDetails.EMPTY }
                     if (nextAwardForUpdate != null) {
@@ -140,7 +139,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                     updateAward(awardByBid, dto.award, dateTime)
                     saveAward(awardByBid, awardIdToEntityMap[awardByBid.id])
                     bidId = awardByBid.relatedBid
-                    statusDetails = awardByBid.statusDetails.value
+                    statusDetails = awardByBid.statusDetails.key
                     /*find next in status EMPTY*/
                     nextAwardForUpdate = rangedAwards.asSequence().firstOrNull { it.statusDetails == AwardStatusDetails.EMPTY }
                     if (nextAwardForUpdate != null) {
@@ -158,7 +157,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
             }
         }
 
-        return ResponseDto(data = AwardByBidRs(
+        return  AwardByBidRs(
                 award = awardByBid,
                 nextAwardForUpdate = nextAwardForUpdate,
                 awardStatusDetails = statusDetails,
@@ -166,15 +165,15 @@ class UpdateAwardService(private val awardDao: AwardDao) {
                 consideredBidId = consideredBidId,
                 lotId = lotId,
                 lotAwarded = lotAwarded,
-                bidAwarded = bidAwarded)
+                bidAwarded = bidAwarded
         )
     }
 
     private fun saveAward(award: Award, awardEntity: AwardEntity?) {
         if (awardEntity != null) {
             val newEntity = awardEntity.copy(
-                    status = award.status.value,
-                    statusDetails = award.statusDetails.value,
+                    status = award.status.key,
+                    statusDetails = award.statusDetails.key,
                     jsonData = toJson(award))
             awardDao.save(newEntity)
         }

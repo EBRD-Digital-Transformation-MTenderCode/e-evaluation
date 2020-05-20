@@ -1,7 +1,19 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
+import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
+import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
+import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
+import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
+import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
 import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
+import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
+import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.domain.functional.Result.Companion.failure
+import com.procurement.evaluation.domain.functional.ValidationResult
+import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
@@ -13,6 +25,8 @@ import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.util.extension.doOnFalse
+import com.procurement.evaluation.domain.util.extension.mapResultPair
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
@@ -28,7 +42,12 @@ import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
+import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
+import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
+import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.error.ValidationError
+import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -46,17 +65,19 @@ import com.procurement.evaluation.model.dto.ocds.Document
 import com.procurement.evaluation.model.dto.ocds.DocumentType
 import com.procurement.evaluation.model.dto.ocds.Identifier
 import com.procurement.evaluation.model.dto.ocds.LocalityDetails
+import com.procurement.evaluation.model.dto.ocds.MainEconomicActivity
 import com.procurement.evaluation.model.dto.ocds.OrganizationReference
 import com.procurement.evaluation.model.dto.ocds.Phase
 import com.procurement.evaluation.model.dto.ocds.RegionDetails
+import com.procurement.evaluation.model.dto.ocds.RequirementResponse
 import com.procurement.evaluation.model.dto.ocds.Value
 import com.procurement.evaluation.model.dto.ocds.asMoney
 import com.procurement.evaluation.model.dto.ocds.asValue
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
-import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
+import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Service
 import java.math.RoundingMode
 import java.time.LocalDateTime
@@ -111,6 +132,19 @@ interface AwardService {
     ): SetInitialAwardsStatusResult
 
     fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
+
+    fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail>
+
+    fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail>
+
+    fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
+
+    fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail>
+
+    fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
+        : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
+
+    fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail>
 }
 
 @Service
@@ -119,6 +153,13 @@ class AwardServiceImpl(
     private val awardRepository: AwardRepository,
     private val awardPeriodRepository: AwardPeriodRepository
 ) : AwardService {
+
+    val createUnsuccessfulAwardsStrategy = CreateUnsuccessfulAwardsStrategy(
+        awardRepository = awardRepository,
+        generationService = generationService
+    )
+
+    val closeAwardPeriodStrategy = CloseAwardPeriodStrategy(awardPeriodRepository = awardPeriodRepository)
 
     /**
      * BR-7.10.1 General Rule
@@ -372,17 +413,24 @@ class AwardServiceImpl(
      *   eEvaluation throws Exception: "Undefined identifier schema";
      */
     private fun checkSchemeOfIdentifier(data: CreateAwardData) {
-        val schemes = data.mdm.schemes
-            .asSequence()
-            .map { it.toUpperCase() }
-            .toSet()
+        val schemesByCountries = data.mdm.organizationSchemesByCountries
+            .associateBy(
+                keySelector = { it.country },
+                valueTransform = {
+                    it.schemes.toSetBy { scheme ->
+                        scheme.toUpperCase()
+                    }
+                }
+            )
 
-        val invalidScheme = data.award.suppliers.any { supplier ->
-            supplier.identifier.scheme.toUpperCase() !in schemes
-        }
-
-        if (invalidScheme)
-            throw ErrorException(error = UNKNOWN_SCHEME_IDENTIFIER)
+        data.award.suppliers
+            .forEach { supplier ->
+                val schemes = schemesByCountries[supplier.address.addressDetails.country.id]
+                    ?: throw ErrorException(error = UNKNOWN_SUPPLIER_COUNTRY)
+                if (supplier.identifier.scheme.toUpperCase() !in schemes) {
+                    throw ErrorException(error = UNKNOWN_SCHEME_IDENTIFIER)
+                }
+            }
     }
 
     /**
@@ -671,10 +719,10 @@ class AwardServiceImpl(
         award: Award
     ) {
         when (data.award.statusDetails) {
-            AwardStatusDetails.UNSUCCESSFUL  -> {
+            AwardStatusDetails.UNSUCCESSFUL -> {
                 checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
             }
-            AwardStatusDetails.ACTIVE        -> {
+            AwardStatusDetails.ACTIVE -> {
                 checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
                 checkRelatedAwards(context = context, award = award)
             }
@@ -686,7 +734,7 @@ class AwardServiceImpl(
             AwardStatusDetails.NO_OFFERS_RECEIVED,
             AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
-                message = "Invalid status details of award from request (${data.award.statusDetails.value})."
+                message = "Invalid status details of award from request (${data.award.statusDetails.key})."
             )
         }
     }
@@ -705,7 +753,7 @@ class AwardServiceImpl(
                     AwardStatusDetails.NO_OFFERS_RECEIVED,
                     AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                         error = INVALID_STATUS_DETAILS,
-                        message = "Invalid status details of award from database (${statusDetails.value}) by stage 'EV'."
+                        message = "Invalid status details of award from database (${statusDetails.key}) by stage 'EV'."
                     )
                 }
             }
@@ -713,7 +761,7 @@ class AwardServiceImpl(
                 when (statusDetails) {
                     AwardStatusDetails.UNSUCCESSFUL,
                     AwardStatusDetails.ACTIVE,
-                    AwardStatusDetails.EMPTY         -> Unit
+                    AwardStatusDetails.EMPTY -> Unit
 
                     AwardStatusDetails.CONSIDERATION,
                     AwardStatusDetails.PENDING,
@@ -721,7 +769,7 @@ class AwardServiceImpl(
                     AwardStatusDetails.NO_OFFERS_RECEIVED,
                     AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                         error = INVALID_STATUS_DETAILS,
-                        message = "Invalid status details of award from database (${statusDetails.value}) by stage 'NP'."
+                        message = "Invalid status details of award from database (${statusDetails.key}) by stage 'NP'."
                     )
                 }
             }
@@ -856,25 +904,25 @@ class AwardServiceImpl(
      */
     private fun statusDetails(data: EvaluateAwardData, award: Award): AwardStatusDetails {
         return when (data.award.statusDetails) {
-            AwardStatusDetails.ACTIVE       -> {
+            AwardStatusDetails.ACTIVE -> {
                 when (award.statusDetails) {
-                    AwardStatusDetails.EMPTY        -> AwardStatusDetails.ACTIVE
-                    AwardStatusDetails.ACTIVE       -> AwardStatusDetails.ACTIVE
+                    AwardStatusDetails.EMPTY -> AwardStatusDetails.ACTIVE
+                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.ACTIVE
                     AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.ACTIVE
-                    else                            -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
+                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
                 }
             }
 
             AwardStatusDetails.UNSUCCESSFUL -> {
                 when (award.statusDetails) {
-                    AwardStatusDetails.EMPTY        -> AwardStatusDetails.UNSUCCESSFUL
+                    AwardStatusDetails.EMPTY -> AwardStatusDetails.UNSUCCESSFUL
                     AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.UNSUCCESSFUL
-                    AwardStatusDetails.ACTIVE       -> AwardStatusDetails.UNSUCCESSFUL
-                    else                            -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
+                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.UNSUCCESSFUL
+                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
                 }
             }
 
-            else                            -> throw ErrorException(error = INVALID_STATUS_DETAILS)
+            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
         }
     }
 
@@ -1066,13 +1114,13 @@ class AwardServiceImpl(
             status == AwardStatus.PENDING && details == AwardStatusDetails.UNSUCCESSFUL
 
         fun isValidStatuses(entity: AwardEntity): Boolean {
-            val status = AwardStatus.fromString(entity.status)
-            val details = AwardStatusDetails.fromString(entity.statusDetails)
+            val status = AwardStatus.creator(entity.status)
+            val details = AwardStatusDetails.creator(entity.statusDetails)
             return isActive(status, details) || isUnsuccessful(status, details)
         }
 
         fun Award.updatingStatuses(): Award = when {
-            isActive(this.status, this.statusDetails)       -> this.copy(
+            isActive(this.status, this.statusDetails) -> this.copy(
                 status = AwardStatus.ACTIVE,
                 statusDetails = AwardStatusDetails.EMPTY
             )
@@ -1080,7 +1128,7 @@ class AwardServiceImpl(
                 status = AwardStatus.UNSUCCESSFUL,
                 statusDetails = AwardStatusDetails.EMPTY
             )
-            else                                            -> throw IllegalStateException("No processing for award with status: '${this.status}' and details: '${this.statusDetails}'.")
+            else -> throw IllegalStateException("No processing for award with status: '${this.status}' and details: '${this.statusDetails}'.")
         }
 
         val lotsIds: Set<UUID> = data.lots.asSequence()
@@ -1103,8 +1151,8 @@ class AwardServiceImpl(
                 val updatedAward = award.updatingStatuses()
 
                 val updatedEntity = entity.copy(
-                    status = updatedAward.status.value,
-                    statusDetails = updatedAward.statusDetails.value,
+                    status = updatedAward.status.key,
+                    statusDetails = updatedAward.statusDetails.key,
                     jsonData = toJson(updatedAward)
                 )
 
@@ -1193,8 +1241,8 @@ class AwardServiceImpl(
                 cpId = context.cpid,
                 stage = context.stage,
                 token = UUID.fromString(award.token),
-                statusDetails = award.statusDetails.value,
-                status = award.status.value,
+                statusDetails = award.statusDetails.key,
+                status = award.status.key,
                 owner = context.owner,
                 jsonData = toJson(award)
             )
@@ -1256,8 +1304,8 @@ class AwardServiceImpl(
                 cpId = context.cpid,
                 stage = context.stage,
                 token = UUID.fromString(award.token),
-                statusDetails = award.statusDetails.value,
-                status = award.status.value,
+                statusDetails = award.statusDetails.key,
+                status = award.status.key,
                 owner = context.owner,
                 jsonData = toJson(award)
             )
@@ -1316,8 +1364,8 @@ class AwardServiceImpl(
                 val awardId = AwardId.fromString(award.id)
                 val entity = awardEntityByAwardId.getValue(awardId)
                 entity.copy(
-                    status = award.status.value,
-                    statusDetails = award.statusDetails.value,
+                    status = award.status.key,
+                    statusDetails = award.statusDetails.key,
                     jsonData = toJson(award)
                 )
             }
@@ -1380,7 +1428,7 @@ class AwardServiceImpl(
                 OperationType.TENDER_UNSUCCESSFUL,
                 OperationType.TENDER_PERIOD_END_EV,
                 OperationType.TENDER_PERIOD_END_AUCTION -> AwardStatusDetails.NO_OFFERS_RECEIVED
-                OperationType.CANCEL_TENDER_EV          -> AwardStatusDetails.LOT_CANCELLED
+                OperationType.CANCEL_TENDER_EV -> AwardStatusDetails.LOT_CANCELLED
             }
         }
 
@@ -1411,8 +1459,8 @@ class AwardServiceImpl(
                 stage = context.stage,
                 owner = context.owner,
                 token = Token.fromString(award.token!!),
-                status = award.status.value,
-                statusDetails = award.statusDetails.value,
+                status = award.status.key,
+                statusDetails = award.statusDetails.key,
                 jsonData = toJson(award)
             )
         }
@@ -1486,7 +1534,7 @@ class AwardServiceImpl(
         )
 
         val updatedAwardEntity = awardEntity.copy(
-            statusDetails = updatedAward.statusDetails.value,
+            statusDetails = updatedAward.statusDetails.key,
             jsonData = toJson(updatedAward)
         )
 
@@ -1494,7 +1542,7 @@ class AwardServiceImpl(
             award = StartConsiderationResult.Award(
                 id = AwardId.fromString(updatedAward.id),
                 statusDetails = updatedAward.statusDetails,
-                relatedLots = updatedAward.relatedLots.map { LotId.fromString(it) }
+                relatedBid = BidId.fromString(updatedAward.relatedBid)
             )
         )
 
@@ -1525,8 +1573,8 @@ class AwardServiceImpl(
         }
 
         val updatedAward: Award? = when (award.statusDetails) {
-            AwardStatusDetails.UNSUCCESSFUL  -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
-            AwardStatusDetails.ACTIVE        -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
+            AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
+            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
 
             AwardStatusDetails.PENDING,
             AwardStatusDetails.CONSIDERATION,
@@ -1535,7 +1583,7 @@ class AwardServiceImpl(
             AwardStatusDetails.NO_OFFERS_RECEIVED,
             AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
-                message = "Invalid status details of award from request (${award.statusDetails.value})."
+                message = "Invalid status details of award from request (${award.statusDetails.key})."
             )
         }
 
@@ -1552,8 +1600,8 @@ class AwardServiceImpl(
             val updatedAwardEntity = awardEntitiesByAwardId.getValue(AwardId.fromString(updatedAward.id))
                 .let {
                     it.copy(
-                        status = updatedAward.status.value,
-                        statusDetails = updatedAward.statusDetails.value,
+                        status = updatedAward.status.key,
+                        statusDetails = updatedAward.statusDetails.key,
                         jsonData = toJson(updatedAward)
                     )
                 }
@@ -1587,8 +1635,8 @@ class AwardServiceImpl(
                 )
 
                 val updatedEntity: AwardEntity = entity.copy(
-                    status = updatedAward.status.value,
-                    statusDetails = updatedAward.statusDetails.value,
+                    status = updatedAward.status.key,
+                    statusDetails = updatedAward.statusDetails.key,
                     jsonData = toJson(updatedAward)
                 )
 
@@ -1613,22 +1661,29 @@ class AwardServiceImpl(
         return result
     }
 
-    override fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult =
+    /**
+     * BR-7.5.8
+     * When StandStill.endDate has come, eEvaluation analyzes the value of phase parameter from context of Request:
+     * 1. IF { phase == "TENDERING" || "CLARIFICATION" || "NEGOTIATION" || "EMPTY" eEvaluation creates Awards by
+     * cancelled Lots by rule BR-7.5.9 and adds them to Response;
+     * 2. IF { phase != "TENDERING" || "CLARIFICATION" || "NEGOTIATION" || "EMPTY", eEvaluation throws Exception
+     */
+    override fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult {
         when (context.phase) {
-            Phase.AWARDING,
             Phase.TENDERING,
             Phase.CLARIFICATION,
             Phase.NEGOTIATION,
             Phase.EMPTY -> {
-                val unsuccessfulAwards: List<Award> = generateUnsuccessfulAwards(data.lots)
+                // BR-7.5.9
+                val unsuccessfulAwards: List<Award> = generateUnsuccessfulAwards(lots = data.lots, context = context)
                 val entities = unsuccessfulAwards.map { award ->
                     AwardEntity(
                         cpId = context.cpid,
                         token = Token.fromString(award.token!!),
                         owner = context.owner,
                         stage = context.stage,
-                        status = award.status.value,
-                        statusDetails = award.statusDetails.value,
+                        status = award.status.key,
+                        statusDetails = award.statusDetails.key,
                         jsonData = toJson(award)
                     )
                 }
@@ -1647,21 +1702,219 @@ class AwardServiceImpl(
                     }
                 )
                 awardRepository.saveNew(cpid = context.cpid, awards = entities)
-                result
+                return result
+            }
+            Phase.AWARDING -> {
+                throw ErrorException(
+                    error = ErrorType.INVALID_PHASE,
+                    message = "Command 'awardsCancellation' can not be executed with phase ${context.phase} "
+                )
             }
         }
+    }
 
-    private fun generateUnsuccessfulAwards(lots: List<AwardCancellationData.Lot>): List<Award> = lots.map { lot ->
+    override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail> {
+        val awardEntities = awardRepository.tryFindBy(
+            cpid = params.cpid,
+            stage = params.ocid.stage
+        ).orForwardFail { incident -> return incident }
+
+        val awardsIds = params.awardIds.toSetBy { it.toString() }
+
+        val resultingAwards = awardEntities
+            .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
+            .doReturn { failPair ->
+                return failure(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
+                        jsonData = failPair.element.jsonData,
+                        exception = failPair.fail.exception
+                    )
+                )
+            }
+            .filter { award -> testContains(award.id, awardsIds) }
+
+        val resultingAwardIds = resultingAwards.toSetBy { it.id }
+        val absentAwardsIds = awardsIds - resultingAwardIds
+
+        if (absentAwardsIds.isNotEmpty())
+            return failure(
+                ValidationError.AwardNotFoundOnGetAwardState(
+                    AwardId.fromString(absentAwardsIds.first())
+                )
+            )
+
+        return resultingAwards.map { award ->
+            GetAwardStateByIdsResult(
+                id = AwardId.fromString(award.id),
+                status = award.status,
+                statusDetails = award.statusDetails
+            )
+        }.asSuccess()
+    }
+
+    override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
+        val awardEntity = awardRepository.tryFindBy(
+            cpid = params.cpid,
+            stage = params.ocid.stage,
+            awardId = params.awardId
+        )
+            .doReturn { error -> return ValidationResult.error(error) }
+            ?: return ValidationResult.error(
+                ValidationError.AwardNotFoundOnCheckAccess(params.awardId)
+            )
+
+        if (awardEntity.owner != params.owner.toString()) {
+            return ValidationResult.error(ValidationError.InvalidOwner())
+        }
+
+        if (awardEntity.token != params.token) {
+            return ValidationResult.error(ValidationError.InvalidToken())
+        }
+
+        return ValidationResult.ok()
+    }
+
+    override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
+        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, stage = params.ocid.stage)
+            .doReturn { incident -> return ValidationResult.error(incident) }
+            .takeIf { it.isNotEmpty() }
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
+
+        val award = awardEntities
+            .mapResultPair { entity -> entity.jsonData.tryToObject(Award::class.java) }
+            .doReturn { failPair ->
+                return ValidationResult.error(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
+                        jsonData = failPair.element.jsonData,
+                        exception = failPair.fail.exception
+                    )
+                )
+            }
+            .firstOrNull { award -> award.id == params.awardId.toString() }
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
+
+        if (award.suppliers == null || award.suppliers.isEmpty()) {
+            return ValidationResult.error(ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer())
+        }
+
+        award.suppliers
+            .firstOrNull { supplier -> supplier.id == params.relatedTendererId }
+            ?: return ValidationResult.error(ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer())
+
+        val requirementResponse = award.requirementResponses
+            .firstOrNull { requirementResponse ->
+                requirementResponse.relatedTenderer.id == params.relatedTendererId &&
+                    requirementResponse.requirement.id == params.requirementId
+            }
+
+        if (requirementResponse != null)
+            return ValidationResult.error(ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer())
+
+        return ValidationResult.ok()
+    }
+
+    override fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail> =
+        closeAwardPeriodStrategy.execute(params = params)
+
+    override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
+        createUnsuccessfulAwardsStrategy.execute(params = params)
+
+    override fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail> {
+        val awardEntity = awardRepository.tryFindBy(
+            cpid = params.cpid,
+            stage = params.ocid.stage,
+            awardId = params.award.id
+        )
+            .doReturn { error -> return ValidationResult.error(error) }
+            ?: return ValidationResult.error(
+                ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id)
+            )
+
+        val award = awardEntity.jsonData
+            .tryToObject(Award::class.java)
+            .doReturn { error ->
+                return ValidationResult.error(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
+                        jsonData = awardEntity.jsonData, exception = error.exception
+                    )
+                )
+            }
+
+        val requirementResponse = convertToAwardRequirementResponse(params)
+
+        val updatedAward = award.copy(
+            requirementResponses = award.requirementResponses + requirementResponse
+        )
+
+        val updatedAwardEntity = awardEntity.copy(
+            jsonData = toJson(updatedAward)
+        )
+
+        awardRepository.tryUpdate(cpid = params.cpid, updatedAward = updatedAwardEntity)
+            .doReturn { error -> return ValidationResult.error(error) }
+            .doOnFalse {
+                return ValidationResult.error(
+                    Fail.Incident.Database.DatabaseConsistencyIncident(
+                        "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpId}'. Record(s) does not exist."
+                    )
+                )
+            }
+
+        return ValidationResult.ok()
+    }
+
+    private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
+        if (patterns.isNotEmpty()) value in patterns else true
+
+    private fun convertToAwardRequirementResponse(params: AddRequirementResponseParams): RequirementResponse =
+        params.award.requirementResponse.let { requirementRs ->
+            RequirementResponse(
+                id = requirementRs.id,
+                responder = requirementRs.responder.let { responder ->
+                    RequirementResponse.Responder(
+                        identifier = responder.identifier.let { identifier ->
+                            RequirementResponse.Responder.Identifier(
+                                id = identifier.id,
+                                scheme = identifier.scheme
+                            )
+                        },
+                        name = responder.name
+                    )
+                },
+                requirement = requirementRs.requirement.let { requirement ->
+                    RequirementResponse.Requirement(
+                        id = requirement.id
+                    )
+                },
+                relatedTenderer = requirementRs.relatedTenderer.let { relatedTenderer ->
+                    RequirementResponse.RelatedTenderer(
+                        id = relatedTenderer.id
+                    )
+                },
+                value = requirementRs.value
+            )
+        }
+
+    private fun generateUnsuccessfulAwards(
+        lots: List<AwardCancellationData.Lot>,
+        context: AwardCancellationContext
+    ): List<Award> = lots.map { lot ->
         Award(
-            token = generationService.token().toString(),
+            // BR-7.5.1
             id = generationService.awardId().toString(),
-            date = localNowUTC(),
-            description = "Other reasons (discontinuation of procedure)",
-            title = "The contract/lot is not awarded",
+            // BR-7.5.2
+            relatedLots = listOf(lot.id),
+            // BR-7.5.3
             status = AwardStatus.UNSUCCESSFUL,
             statusDetails = AwardStatusDetails.EMPTY,
+            // BR-7.5.4
+            date = context.startDate,
+            // BR-7.5.5
+            title = "The contract/lot is not awarded",
+            // BR-7.5.6
+            description = "Other reasons (discontinuation of procedure)",
+            token = generationService.token().toString(),
             value = null,
-            relatedLots = listOf(lot.id),
             relatedBid = null,
             bidDate = null,
             suppliers = null,
@@ -1738,11 +1991,11 @@ class AwardServiceImpl(
                         ratingByWeightedValue(awards = this)
                     }
 
-                    AwardCriteria.PRICE_ONLY     -> ratingByValue(awards = this)
+                    AwardCriteria.PRICE_ONLY -> ratingByValue(awards = this)
                 }
             }
 
-            AwardCriteriaDetails.MANUAL    -> {
+            AwardCriteriaDetails.MANUAL -> {
                 when (awardCriteria) {
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
@@ -2002,7 +2255,15 @@ class AwardServiceImpl(
                                             description = legalForm.description
                                         )
                                     },
-                                mainEconomicActivities = details.mainEconomicActivities,
+                                mainEconomicActivities = details.mainEconomicActivities
+                                    .map { mainEconomicActivity ->
+                                        MainEconomicActivity(
+                                            id = mainEconomicActivity.id,
+                                            description = mainEconomicActivity.description,
+                                            uri = mainEconomicActivity.uri,
+                                            scheme = mainEconomicActivity.scheme
+                                        )
+                                    },
                                 permits = details.permits
                                     .map { permit ->
                                         Details.Permit(
@@ -2182,7 +2443,7 @@ class AwardServiceImpl(
                                                     id = document.id,
                                                     title = document.title,
                                                     description = document.description,
-                                                    documentType = document.documentType.value
+                                                    documentType = document.documentType.key
                                                 )
                                             },
                                         jobTitle = businessFunction.jobTitle,
@@ -2271,7 +2532,15 @@ class AwardServiceImpl(
                                         description = legalForm.description
                                     )
                                 },
-                            mainEconomicActivities = details.mainEconomicActivities,
+                            mainEconomicActivities = details.mainEconomicActivities
+                                .map { mainEconomicActivity ->
+                                    MainEconomicActivity(
+                                        id = mainEconomicActivity.id,
+                                        description = mainEconomicActivity.description,
+                                        uri = mainEconomicActivity.uri,
+                                        scheme = mainEconomicActivity.scheme
+                                    )
+                                },
                             permits = details.permits
                                 .map { permit ->
                                     Details.Permit(
@@ -2306,7 +2575,7 @@ class AwardServiceImpl(
                                             }
                                     )
                                 },
-                            scale = details.scale.value
+                            scale = details.scale.key
                         )
                     }
             )
@@ -2327,9 +2596,9 @@ class AwardServiceImpl(
         bidId: BidId
     ): Boolean =
         when (awardCriteriaDetails) {
-            AwardCriteriaDetails.MANUAL    -> {
+            AwardCriteriaDetails.MANUAL -> {
                 when (awardCriteria) {
-                    AwardCriteria.PRICE_ONLY     -> throw ErrorException(
+                    AwardCriteria.PRICE_ONLY -> throw ErrorException(
                         ErrorType.INVALID_STATUS_DETAILS,
                         "Cannot calculate weighted value for award with award criteria: '${awardCriteria}' " +
                             "and award criteria details: '${awardCriteriaDetails}', based on bid '${bidId}'"
@@ -2341,7 +2610,7 @@ class AwardServiceImpl(
             }
             AwardCriteriaDetails.AUTOMATED -> {
                 when (awardCriteria) {
-                    AwardCriteria.PRICE_ONLY     -> false
+                    AwardCriteria.PRICE_ONLY -> false
 
                     AwardCriteria.COST_ONLY,
                     AwardCriteria.QUALITY_ONLY,
@@ -2416,13 +2685,13 @@ class AwardServiceImpl(
                 else
                     false
             }
-            is RequirementRsValue.AsString  -> {
+            is RequirementRsValue.AsString -> {
                 if (coef is CoefficientValue.AsString)
                     req.value == coef.value
                 else
                     false
             }
-            is RequirementRsValue.AsNumber  -> {
+            is RequirementRsValue.AsNumber -> {
                 if (coef is CoefficientValue.AsNumber)
                     req.value == coef.value
                 else
