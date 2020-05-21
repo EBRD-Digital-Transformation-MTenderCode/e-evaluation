@@ -10,6 +10,7 @@ import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.person.PersonId
 import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
 import com.procurement.evaluation.domain.model.requirement.response.ResponderId
@@ -136,12 +137,14 @@ class AddRequirementResponseParams private constructor(
             }
 
             class Responder private constructor(
-                val identifier: Identifier, val name: String
+                val id: PersonId,
+                val name: String
             ) {
                 companion object {
-                    fun tryCreate(identifier: Identifier, name: String) =
+                    fun tryCreate(id: String, name: String) =
                         Responder(
-                            identifier = identifier,
+                            id = PersonId.tryCreate(id)
+                                .orForwardFail { return it },
                             name = name
                         ).asSuccess<Responder, DataErrors>()
                 }

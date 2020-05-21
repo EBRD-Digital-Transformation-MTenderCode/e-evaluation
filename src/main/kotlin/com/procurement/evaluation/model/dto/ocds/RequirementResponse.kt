@@ -2,9 +2,9 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.person.PersonId
 import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
-import com.procurement.evaluation.domain.model.requirement.response.ResponderId
 import com.procurement.evaluation.domain.model.tenderer.TendererId
 
 data class RequirementResponse(
@@ -23,12 +23,7 @@ data class RequirementResponse(
     )
 
     data class Responder(
-        @param:JsonProperty("identifier") @field:JsonProperty("identifier") val identifier: Identifier,
+        @param:JsonProperty("id") @field:JsonProperty("id") val id: PersonId,
         @param:JsonProperty("name") @field:JsonProperty("name") val name: String
-    ) {
-        data class Identifier(
-            @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String,
-            @param:JsonProperty("id") @field:JsonProperty("id") val id: ResponderId
-        )
-    }
+    )
 }

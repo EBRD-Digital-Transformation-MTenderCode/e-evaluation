@@ -13,11 +13,8 @@
         "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       },
       "responder": {
-        "name": "IMSP SCM nr.1",
-        "identifier": {
-          "scheme": "string",
-          "id": "string"
-        }
+        "id": "scheme-id",
+        "name": "IMSP SCM nr.1"
       }
     }
   }
