@@ -1872,12 +1872,7 @@ class AwardServiceImpl(
                 id = requirementRs.id,
                 responder = requirementRs.responder.let { responder ->
                     RequirementResponse.Responder(
-                        identifier = responder.identifier.let { identifier ->
-                            RequirementResponse.Responder.Identifier(
-                                id = identifier.id,
-                                scheme = identifier.scheme
-                            )
-                        },
+                        id = responder.id,
                         name = responder.name
                     )
                 },

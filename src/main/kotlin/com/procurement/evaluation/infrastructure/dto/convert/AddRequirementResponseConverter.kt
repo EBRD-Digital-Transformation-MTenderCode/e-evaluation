@@ -45,10 +45,6 @@ private fun AddRequirementResponseRequest.Award.RequirementResponse.Requirement.
 private fun AddRequirementResponseRequest.Award.RequirementResponse.Responder.convert()
     : Result<AddRequirementResponseParams.Award.RequirementResponse.Responder, DataErrors> =
     AddRequirementResponseParams.Award.RequirementResponse.Responder.tryCreate(
-        name = name,
-        identifier = identifier.convert()
-            .orForwardFail { result -> return result })
-
-private fun AddRequirementResponseRequest.Award.RequirementResponse.Responder.Identifier.convert()
-    : Result<AddRequirementResponseParams.Award.RequirementResponse.Responder.Identifier, DataErrors> =
-    AddRequirementResponseParams.Award.RequirementResponse.Responder.Identifier.tryCreate(id = id, scheme = scheme)
+        id = id,
+        name = name
+    )
