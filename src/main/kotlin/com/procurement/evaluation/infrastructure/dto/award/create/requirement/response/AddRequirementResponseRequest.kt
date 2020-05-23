@@ -2,7 +2,6 @@ package com.procurement.evaluation.infrastructure.dto.award.create.requirement.r
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
-import com.procurement.evaluation.domain.model.requirement.response.ResponderId
 
 data class AddRequirementResponseRequest(
     @param:JsonProperty("cpid") @field:JsonProperty("cpid") val cpid: String,
@@ -29,14 +28,9 @@ data class AddRequirementResponseRequest(
             )
 
             data class Responder(
-                @param:JsonProperty("identifier") @field:JsonProperty("identifier") val identifier: Identifier,
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
                 @param:JsonProperty("name") @field:JsonProperty("name") val name: String
-            ){
-                data class Identifier(
-                    @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String,
-                    @param:JsonProperty("id") @field:JsonProperty("id") val id: ResponderId
-                )
-            }
+            )
         }
     }
 }
