@@ -8,6 +8,8 @@ import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.award.tryAwardId
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.domain.model.tryToken
 import com.procurement.evaluation.domain.util.extension.tryParseLocalDateTime
@@ -84,3 +86,17 @@ fun parseDate(value: String, attributeName: String): Result<LocalDateTime, DataE
                 )
             )
         }.asSuccess()
+
+fun <T> parseEnum(value: String, allowedEnums: Set<T>, attributeName: String, target: EnumElementProvider<T>)
+    : Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,
+                                                          T : EnumElementProvider.Key =
+    target.orNull(value)
+        ?.takeIf { it in allowedEnums }
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.UnknownValue(
+                name = attributeName,
+                expectedValues = allowedEnums.keysAsStrings(),
+                actualValue = value
+            )
+        )
