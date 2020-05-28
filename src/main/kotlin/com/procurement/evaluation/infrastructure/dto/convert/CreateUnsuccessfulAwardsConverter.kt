@@ -10,5 +10,6 @@ fun CreateUnsuccessfulAwardsRequest.convert(): Result<CreateUnsuccessfulAwardsPa
         cpid = this.cpid,
         ocid = this.ocid,
         date = this.date,
-        lotIds = this.lotIds
+        lotIds = this.lotIds,
+        operationType = this.operationType
     )
