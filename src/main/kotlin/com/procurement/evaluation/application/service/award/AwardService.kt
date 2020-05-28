@@ -1581,6 +1581,7 @@ class AwardServiceImpl(
             AwardStatusDetails.EMPTY,
             AwardStatusDetails.AWAITING,
             AwardStatusDetails.NO_OFFERS_RECEIVED,
+            AwardStatusDetails.LACK_OF_SUBMISSIONS,
             AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
                 message = "Invalid status details of award from request (${award.statusDetails.key})."
