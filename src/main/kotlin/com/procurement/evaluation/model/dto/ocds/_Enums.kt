@@ -51,7 +51,8 @@ enum class AwardStatusDetails(@JsonValue override val key: String) : EnumElement
     EMPTY("empty"),
     AWAITING("awaiting"),
     NO_OFFERS_RECEIVED("noOffersReceived"),
-    LOT_CANCELLED("lotCancelled");
+    LOT_CANCELLED("lotCancelled"),
+    LACK_OF_SUBMISSIONS("lackOfSubmissions");
 
     override fun toString(): String = key
 
