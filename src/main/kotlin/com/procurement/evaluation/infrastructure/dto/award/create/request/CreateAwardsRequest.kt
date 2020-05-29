@@ -210,7 +210,8 @@ data class CreateAwardsRequest(
             }
 
             data class Details(
-                @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: TypeOfSupplier,
+                @JsonInclude(JsonInclude.Include.NON_NULL)
+                @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: TypeOfSupplier?,
 
                 @JsonInclude(JsonInclude.Include.NON_EMPTY)
                 @param:JsonProperty("mainEconomicActivities") @field:JsonProperty("mainEconomicActivities") val mainEconomicActivities: List<MainEconomicActivity>?,
