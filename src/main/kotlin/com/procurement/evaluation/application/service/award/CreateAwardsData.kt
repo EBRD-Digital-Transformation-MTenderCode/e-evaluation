@@ -146,7 +146,7 @@ data class CreateAwardsData(
             }
 
             data class Details(
-                val typeOfSupplier: TypeOfSupplier,
+                val typeOfSupplier: TypeOfSupplier?,
                 val mainEconomicActivities: List<MainEconomicActivity>,
                 val scale: String,
                 val permits: List<Permit>,
