@@ -7,5 +7,10 @@ import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 
 fun CheckRelatedTendererRequest.convert(): Result<CheckRelatedTendererParams, DataErrors> =
     CheckRelatedTendererParams.tryCreate(
-        cpid, ocid, awardId, requirementId, relatedTendererId
+        cpid = cpid,
+        ocid = ocid,
+        awardId = awardId,
+        requirementId = requirementId,
+        relatedTendererId = relatedTendererId,
+        responderId = responderId
     )
