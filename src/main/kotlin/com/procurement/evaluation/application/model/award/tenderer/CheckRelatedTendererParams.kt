@@ -9,6 +9,7 @@ import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.award.AwardId
+import com.procurement.evaluation.domain.model.person.PersonId
 import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.domain.model.requirement.tryRequirementId
 import com.procurement.evaluation.domain.model.tenderer.TendererId
@@ -20,7 +21,8 @@ class CheckRelatedTendererParams private constructor(
     val ocid: Ocid,
     val awardId: AwardId,
     val requirementId: RequirementId,
-    val relatedTendererId: TendererId
+    val relatedTendererId: TendererId,
+    val responderId: PersonId
 ) {
     companion object {
         fun tryCreate(
@@ -28,7 +30,8 @@ class CheckRelatedTendererParams private constructor(
             ocid: String,
             awardId: String,
             requirementId: String,
-            relatedTendererId: String
+            relatedTendererId: String,
+            responderId: String
         ): Result<CheckRelatedTendererParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .doReturn { error -> return failure(error = error) }
@@ -61,12 +64,16 @@ class CheckRelatedTendererParams private constructor(
                     )
                 }
 
+            val responderIdParsed = PersonId.tryCreate(responderId)
+                .orForwardFail { fail -> return fail }
+
             return CheckRelatedTendererParams(
                 cpid = cpidParsed,
                 ocid = ocidParsed,
                 awardId = awardIdParsed,
                 relatedTendererId = relatedTendererIdParsed,
-                requirementId = requirementIdParsed
+                requirementId = requirementIdParsed,
+                responderId = responderIdParsed
             ).asSuccess()
         }
     }
