@@ -1282,8 +1282,9 @@ class AwardServiceImpl(
                 conversion.relatedItem
             }
 
-        val electronicAuctionsByLots: Map<LotId, CreateAwardsAuctionEndData.ElectronicAuctions.Detail> = data.electronicAuctions.details
-            .associateBy { it.relatedLot }
+        val electronicAuctionsByLots: Map<LotId, CreateAwardsAuctionEndData.ElectronicAuctions.Detail> =
+            data.electronicAuctions.details
+                .associateBy { it.relatedLot }
 
         val createdAwards = matchedBids.map { bid ->
             val canCalculateWeightedValue = canCalculateWeightedValue(
@@ -1425,10 +1426,13 @@ class AwardServiceImpl(
 
         fun defineStatusDetails(operationType: OperationType): AwardStatusDetails {
             return when (operationType) {
-                OperationType.TENDER_UNSUCCESSFUL,
+                OperationType.TENDER_PERIOD_END_AUCTION,
                 OperationType.TENDER_PERIOD_END_EV,
-                OperationType.TENDER_PERIOD_END_AUCTION -> AwardStatusDetails.NO_OFFERS_RECEIVED
+                OperationType.TENDER_UNSUCCESSFUL -> AwardStatusDetails.NO_OFFERS_RECEIVED
+
                 OperationType.CANCEL_TENDER_EV -> AwardStatusDetails.LOT_CANCELLED
+
+                OperationType.APPLY_QUALIFICATION_PROTOCOL -> AwardStatusDetails.LACK_OF_SUBMISSIONS
             }
         }
 
@@ -1576,13 +1580,14 @@ class AwardServiceImpl(
             AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
             AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
 
-            AwardStatusDetails.PENDING,
+            AwardStatusDetails.AWAITING,
             AwardStatusDetails.CONSIDERATION,
             AwardStatusDetails.EMPTY,
-            AwardStatusDetails.AWAITING,
-            AwardStatusDetails.NO_OFFERS_RECEIVED,
+            AwardStatusDetails.LACK_OF_QUALIFICATIONS,
             AwardStatusDetails.LACK_OF_SUBMISSIONS,
-            AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
+            AwardStatusDetails.LOT_CANCELLED,
+            AwardStatusDetails.NO_OFFERS_RECEIVED,
+            AwardStatusDetails.PENDING -> throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
                 message = "Invalid status details of award from request (${award.statusDetails.key})."
             )
@@ -2646,12 +2651,13 @@ class AwardServiceImpl(
             bid.value
     }
 
-    private fun Money.calculateWeightedValue(coefficientRates: List<CoefficientRate>): Money = if (coefficientRates.isNotEmpty()) {
-        val amount = coefficientRates.fold(this.amount, { acc, rate -> acc.multiply(rate.rate) })
-            .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
-        Money(amount = amount, currency = this.currency)
-    } else
-        this
+    private fun Money.calculateWeightedValue(coefficientRates: List<CoefficientRate>): Money =
+        if (coefficientRates.isNotEmpty()) {
+            val amount = coefficientRates.fold(this.amount, { acc, rate -> acc.multiply(rate.rate) })
+                .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
+            Money(amount = amount, currency = this.currency)
+        } else
+            this
 
     private fun getCoefficients(
         bid: CreateAwardsAuctionEndData.Bid,
