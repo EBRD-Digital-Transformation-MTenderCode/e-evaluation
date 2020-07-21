@@ -93,9 +93,10 @@ class CreateUnsuccessfulAwardsStrategy(
     )
 
     private fun defineAwardStatusDetails(operationType: OperationType2): Result<AwardStatusDetails, DataErrors.Validation.UnknownValue> =
-        when(operationType) {
+        when (operationType) {
+            OperationType2.APPLY_QUALIFICATION_PROTOCOL -> AwardStatusDetails.LACK_OF_QUALIFICATIONS.asSuccess()
+            OperationType2.SUBMISSION_PERIOD_END -> AwardStatusDetails.LACK_OF_SUBMISSIONS.asSuccess()
             OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION -> AwardStatusDetails.LOT_CANCELLED.asSuccess()
-            OperationType2.SUBMISSION_PERIOD_END                -> AwardStatusDetails.LACK_OF_SUBMISSIONS.asSuccess()
 
             OperationType2.CREATE_SUBMISSION,
             OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
