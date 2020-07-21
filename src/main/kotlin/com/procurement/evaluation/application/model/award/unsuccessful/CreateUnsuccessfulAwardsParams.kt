@@ -27,8 +27,10 @@ class CreateUnsuccessfulAwardsParams private constructor(
         val allowedOperationTypes = OperationType2.allowedElements
             .filter {
                 when (it) {
-                    OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION,
-                    OperationType2.SUBMISSION_PERIOD_END                -> true
+                    OperationType2.APPLY_QUALIFICATION_PROTOCOL,
+                    OperationType2.SUBMISSION_PERIOD_END,
+                    OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION -> true
+
                     OperationType2.CREATE_SUBMISSION,
                     OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
                     OperationType2.LOT_CANCELLATION,

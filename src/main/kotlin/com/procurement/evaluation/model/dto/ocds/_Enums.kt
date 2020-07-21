@@ -44,15 +44,16 @@ enum class AwardStatus(@JsonValue override val key: String) : EnumElementProvide
 }
 
 enum class AwardStatusDetails(@JsonValue override val key: String) : EnumElementProvider.Key {
-    PENDING("pending"),
     ACTIVE("active"),
-    UNSUCCESSFUL("unsuccessful"),
+    AWAITING("awaiting"),
     CONSIDERATION("consideration"),
     EMPTY("empty"),
-    AWAITING("awaiting"),
-    NO_OFFERS_RECEIVED("noOffersReceived"),
+    LACK_OF_QUALIFICATIONS("lackOfQualifications"),
+    LACK_OF_SUBMISSIONS("lackOfSubmissions"),
     LOT_CANCELLED("lotCancelled"),
-    LACK_OF_SUBMISSIONS("lackOfSubmissions");
+    NO_OFFERS_RECEIVED("noOffersReceived"),
+    PENDING("pending"),
+    UNSUCCESSFUL("unsuccessful");
 
     override fun toString(): String = key
 
