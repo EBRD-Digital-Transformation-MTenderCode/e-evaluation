@@ -3,9 +3,57 @@ server:
 
 spring:
   application:
-    name: e-revision
+    name: e-evaluation
 
 cassandra:
-  contact-points: 127.0.0.1
+  contact-points: localhost
   keyspace-name: ocds
   port: 9042
+
+health:
+  config:
+    enabled: false
+
+management:
+  health:
+    #    diskspace:
+    #      enabled: true
+    db:
+      enabled: true
+    #    refresh:
+    #      enabled: false
+    defaults:
+      enabled: false
+
+  endpoint:
+    health:
+      show-details: always
+
+  #    loggers:
+  #      enabled: true
+
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+
+#    jmx:
+#      domain: com.procurement
+#      exposure:
+#        exclude: "*"
+
+#  metrics:
+#    distribution:
+#      percentiles-histogram:
+#        http:
+#          server:
+#            requests: true
+#      sla:
+#        http:
+#          server:
+#            requests: 1ms,5ms
+#  server:
+#    port: 9999
+#  info:
+#    git:
+#      mode: full
