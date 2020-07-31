@@ -551,7 +551,8 @@ class CommandService(
                 when (cm.pmd) {
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
-                    ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         val context = StartAwardPeriodContext(
                             cpid = cm.cpid,
                             stage = cm.stage,
@@ -582,7 +583,8 @@ class CommandService(
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
-                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> {
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP,
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         val context = CreateUnsuccessfulAwardsContext(
                             operationType = cm.operationType,
                             startDate = cm.startDate,
