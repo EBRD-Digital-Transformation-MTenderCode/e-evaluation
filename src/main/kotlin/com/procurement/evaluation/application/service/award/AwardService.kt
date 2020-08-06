@@ -773,6 +773,24 @@ class AwardServiceImpl(
                     )
                 }
             }
+            "TP" -> {
+                when (statusDetails) {
+                    AwardStatusDetails.UNSUCCESSFUL,
+                    AwardStatusDetails.ACTIVE,
+                    AwardStatusDetails.CONSIDERATION -> Unit
+
+                    AwardStatusDetails.PENDING,
+                    AwardStatusDetails.EMPTY,
+                    AwardStatusDetails.AWAITING,
+                    AwardStatusDetails.NO_OFFERS_RECEIVED,
+                    AwardStatusDetails.LOT_CANCELLED,
+                    AwardStatusDetails.LACK_OF_QUALIFICATIONS,
+                    AwardStatusDetails.LACK_OF_SUBMISSIONS -> throw ErrorException(
+                        error = INVALID_STATUS_DETAILS,
+                        message = "Invalid status details of award from database (${statusDetails.key}) by stage '${stage}'."
+                    )
+                }
+            }
             else -> throw ErrorException(error = ErrorType.INVALID_STAGE)
         }
     }
@@ -1182,9 +1200,10 @@ class AwardServiceImpl(
         ProcurementMethod.NP, ProcurementMethod.TEST_NP,
         ProcurementMethod.OP, ProcurementMethod.TEST_OP -> "NP"
 
+        ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> "TP"
+
         ProcurementMethod.RT, ProcurementMethod.TEST_RT,
-        ProcurementMethod.FA, ProcurementMethod.TEST_FA,
-        ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> throw ErrorException(ErrorType.INVALID_PMD)
+        ProcurementMethod.FA, ProcurementMethod.TEST_FA -> throw ErrorException(ErrorType.INVALID_PMD)
     }
 
     private fun loadAwards(cpid: String, stage: String): Sequence<AwardEntity> =
