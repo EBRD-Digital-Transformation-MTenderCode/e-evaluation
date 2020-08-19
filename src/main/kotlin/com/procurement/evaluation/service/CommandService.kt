@@ -549,10 +549,11 @@ class CommandService(
             }
             CommandType.START_AWARD_PERIOD -> {
                 when (cm.pmd) {
-                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
-                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
-                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV -> {
                         val context = StartAwardPeriodContext(
                             cpid = cm.cpid,
                             stage = cm.stage,
@@ -566,25 +567,28 @@ class CommandService(
                             .convert()
                     }
 
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
-                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
-                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> {
-                        throw ErrorException(ErrorType.INVALID_PMD)
-                    }
-
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
             CommandType.CREATE_UNSUCCESSFUL_AWARDS -> {
                 when (cm.pmd) {
-                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
-                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
-                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
-                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV -> {
                         val context = CreateUnsuccessfulAwardsContext(
                             operationType = cm.operationType,
                             startDate = cm.startDate,
@@ -601,7 +605,6 @@ class CommandService(
                             .convert()
                     }
 
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA -> {
                         throw ErrorException(ErrorType.INVALID_PMD)
                     }
