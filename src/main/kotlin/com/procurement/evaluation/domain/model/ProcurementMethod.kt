@@ -4,24 +4,24 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.procurement.evaluation.exception.EnumException
 
 enum class ProcurementMethod(@JsonValue val value: String) {
+    DA("limited"),
+    FA("limited"),
+    GPA("selective"),
     MV("open"),
+    NP("limited"),
+    OP("selective"),
     OT("open"),
     RT("selective"),
     SV("open"),
-    DA("limited"),
-    NP("limited"),
-    FA("limited"),
-    OP("selective"),
-    GPA("selective"),
-    TEST_OT("open"),
-    TEST_SV("open"),
-    TEST_RT("selective"),
-    TEST_MV("open"),
     TEST_DA("limited"),
-    TEST_NP("limited"),
     TEST_FA("limited"),
+    TEST_GPA("selective"),
+    TEST_MV("open"),
+    TEST_NP("limited"),
     TEST_OP("selective"),
-    TEST_GPA("selective");
+    TEST_OT("open"),
+    TEST_RT("selective"),
+    TEST_SV("open");
 
     override fun toString(): String {
         return this.value
