@@ -270,7 +270,7 @@ data class CreateAwardsAuctionEndData(
 
         data class RequirementResponse(
             val id: RequirementResponseId,
-            val title: String,
+            val title: String?,
             val description: String?,
             val value: RequirementRsValue,
             val requirement: Requirement,
