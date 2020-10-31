@@ -549,8 +549,10 @@ class CommandService(
             }
             CommandType.START_AWARD_PERIOD -> {
                 when (cm.pmd) {
+                    ProcurementMethod.CF, ProcurementMethod.TEST_CF,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.OF, ProcurementMethod.TEST_OF,
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV -> {
@@ -579,12 +581,14 @@ class CommandService(
             CommandType.CREATE_UNSUCCESSFUL_AWARDS -> {
                 when (cm.pmd) {
                     ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.CF, ProcurementMethod.TEST_CF,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.DC, ProcurementMethod.TEST_DC,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
                     ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.OF, ProcurementMethod.TEST_OF,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
