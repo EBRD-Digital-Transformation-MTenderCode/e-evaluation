@@ -1206,7 +1206,9 @@ class AwardServiceImpl(
         ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
         ProcurementMethod.RT, ProcurementMethod.TEST_RT -> "TP"
 
-        ProcurementMethod.FA, ProcurementMethod.TEST_FA -> throw ErrorException(ErrorType.INVALID_PMD)
+        ProcurementMethod.CF, ProcurementMethod.TEST_CF,
+        ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+        ProcurementMethod.OF, ProcurementMethod.TEST_OF -> throw ErrorException(ErrorType.INVALID_PMD)
     }
 
     private fun loadAwards(cpid: String, stage: String): Sequence<AwardEntity> =
