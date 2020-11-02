@@ -24,7 +24,7 @@ data class EvaluateAwardRequest(
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("documents") @param:JsonProperty("documents") val documents: List<Document>?,
 
-        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         @field:JsonProperty("value") @param:JsonProperty("value") val value: Value?
     ) {
         data class Document(
