@@ -23,6 +23,7 @@ import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.enums.OperationType
+import com.procurement.evaluation.domain.model.enums.Stage
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.domain.util.extension.doOnFalse
@@ -693,6 +694,8 @@ class AwardServiceImpl(
 
         //FR-7.1.2.1.1
         val updatedDocuments = updateDocuments(data = data, award = award)
+        
+        val updatedValue = getUpdatedValue(context, data, award)
 
         val updatedAward = award.copy(
             description = data.award.description,
@@ -700,7 +703,8 @@ class AwardServiceImpl(
             documents = updatedDocuments,
 
             statusDetails = data.award.statusDetails,
-            date = context.startDate
+            date = context.startDate,
+            value = updatedValue
         )
 
         val updatedAwardEntity = awardEntity.copy(
@@ -711,6 +715,27 @@ class AwardServiceImpl(
         awardRepository.update(cpid = cpid, updatedAward = updatedAwardEntity)
 
         return getEvaluateAwardResult(updatedAward = updatedAward)
+    }
+
+    private fun getUpdatedValue(context: EvaluateAwardContext, data: EvaluateAwardData, award: Award): Value {
+        val stage = Stage.creator(context.stage)
+        val storedValue = award.value!!
+        return when (stage) {
+            Stage.NP -> {
+                val receivedValue = data.award.value
+                if (receivedValue != null)
+                    storedValue.copy(amount = receivedValue.amount)
+                else storedValue
+            }
+            Stage.AC,
+            Stage.EI,
+            Stage.EV,
+            Stage.FE,
+            Stage.FS,
+            Stage.PC,
+            Stage.PN,
+            Stage.TP -> storedValue
+        }
     }
 
     private fun checkStatusDetails(
@@ -954,7 +979,7 @@ class AwardServiceImpl(
             relatedLots = updatedAward.relatedLots
                 .map { LotId.fromString(it) },
             relatedBid = updatedAward.relatedBid?.let { BidId.fromString(it) },
-            value = updatedAward.value!!.asMoney,
+            value = updatedAward.value!!,
             suppliers = updatedAward.suppliers!!
                 .map { supplier ->
                     EvaluateAwardResult.Award.Supplier(

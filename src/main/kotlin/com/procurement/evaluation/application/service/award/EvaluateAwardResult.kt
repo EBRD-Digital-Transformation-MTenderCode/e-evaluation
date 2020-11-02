@@ -8,6 +8,7 @@ import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.DocumentType
+import com.procurement.evaluation.model.dto.ocds.Value
 import java.time.LocalDateTime
 
 class EvaluateAwardResult(val award: Award) {
@@ -19,7 +20,7 @@ class EvaluateAwardResult(val award: Award) {
         val statusDetails: AwardStatusDetails,
         val relatedLots: List<LotId>,
         val relatedBid: BidId?,
-        val value: Money,
+        val value: Value,
         val suppliers: List<Supplier>,
         val documents: List<Document>,
         val weightedValue: Money?

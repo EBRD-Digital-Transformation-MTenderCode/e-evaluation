@@ -5,6 +5,7 @@ import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.EvaluateAwardRequest
 import com.procurement.evaluation.lib.errorIfEmpty
+import com.procurement.evaluation.model.dto.ocds.Value
 
 fun EvaluateAwardRequest.convert() = EvaluateAwardData(
     award = this.award
@@ -36,7 +37,8 @@ fun EvaluateAwardRequest.convert() = EvaluateAwardData(
                             documentType = document.documentType
                         )
                     }
-                    .orEmpty()
+                    .orEmpty(),
+                value = award.value?.let { Value(amount = it.amount, currency = null) }
             )
         }
 )
