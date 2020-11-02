@@ -7,7 +7,7 @@ import java.math.BigDecimal
 
 data class Value(
     @field:JsonDeserialize(using = MoneyDeserializer::class)
-    val amount: BigDecimal,
+    val amount: BigDecimal?,
 
     val currency: String?
 )
@@ -23,7 +23,7 @@ val Money.asValue: Value
 val Value.asMoney: Money
     get() = this.let { money ->
         Money(
-            amount = money.amount,
+            amount = money.amount!!,
             currency = money.currency!!
         )
     }
