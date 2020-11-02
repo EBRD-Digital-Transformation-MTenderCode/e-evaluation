@@ -15,7 +15,12 @@ fun EvaluateAwardResult.convert() = EvaluateAwardResponse(
                 relatedLots = award.relatedLots
                     .toList(),
                 relatedBid = award.relatedBid,
-                value = award.value,
+                value = award.value.let { value ->
+                    EvaluateAwardResponse.Award.Value(
+                        amount = value.amount,
+                        currency = value.currency!!
+                    )
+                },
                 suppliers = award.suppliers
                     .map { supplier ->
                         EvaluateAwardResponse.Award.Supplier(
