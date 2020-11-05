@@ -34,6 +34,7 @@ import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_STAGE
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.INVALID_TOKEN
@@ -1656,7 +1657,7 @@ class AwardServiceImpl(
 
         val updatedAward: Award? = when (award.statusDetails) {
             AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
-            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(awards = awardsToEntities.keys)
+            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(context.stage, awards = awardsToEntities.keys)
 
             AwardStatusDetails.AWAITING,
             AwardStatusDetails.CONSIDERATION,
@@ -2021,17 +2022,42 @@ class AwardServiceImpl(
         return null
     }
 
-    private fun getAwardForActiveStatusDetails(awards: Collection<Award>): Award? {
-        val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
-        val existsConsideration = awardsByStatusDetails.existsConsideration
-        val existsAwaiting = awardsByStatusDetails.existsAwaiting
+    private fun getAwardForActiveStatusDetails(stage: String, awards: Collection<Award>): Award? {
+        when(Stage.creator(stage)){
+            Stage.EV,
+            Stage.TP -> {
+                val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
+                val existsConsideration = awardsByStatusDetails.existsConsideration
+                val existsAwaiting = awardsByStatusDetails.existsAwaiting
 
-        return if (existsConsideration || existsAwaiting) {
-            ratingByValueOrWeightedValue(awards)
-                .first { it.statusDetails == AwardStatusDetails.CONSIDERATION || it.statusDetails == AwardStatusDetails.AWAITING }
-                .copy(statusDetails = AwardStatusDetails.EMPTY)
-        } else
-            null
+                return if (existsConsideration || existsAwaiting) {
+                    ratingByValueOrWeightedValue(awards)
+                        .first { it.statusDetails == AwardStatusDetails.CONSIDERATION || it.statusDetails == AwardStatusDetails.AWAITING }
+                        .copy(statusDetails = AwardStatusDetails.EMPTY)
+                } else
+                    null
+            }
+            Stage.PC -> {
+                val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
+
+                val existsConsideration = awardsByStatusDetails.existsConsideration
+                val existsAwaiting = awardsByStatusDetails.existsAwaiting
+                val existsEmpty = awardsByStatusDetails.existsEmpty
+
+                if (existsConsideration || existsAwaiting || existsEmpty.not()) return null
+
+                return ratingByValueOrWeightedValue(awards)
+                    .first { it.statusDetails == AwardStatusDetails.EMPTY }
+                    .copy(statusDetails = AwardStatusDetails.AWAITING)
+
+            }
+            Stage.PN,
+            Stage.FS,
+            Stage.FE,
+            Stage.EI,
+            Stage.AC,
+            Stage.NP -> throw ErrorException(INVALID_STAGE)
+        }
     }
 
     private val Map<AwardStatusDetails, List<Award>>.existsActive: Boolean
