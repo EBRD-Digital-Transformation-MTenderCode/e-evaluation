@@ -1024,6 +1024,9 @@ class AwardServiceImpl(
             throw ErrorException(DATA_NOT_FOUND)
 
         return getAwardsByLotId(lotId = context.lotId, entities = awardEntities)
+            .apply {
+                forEach { award -> checkValueAmount(award.value!!, Stage.creator(context.stage)) }
+            }
             .findActiveAward()
             ?.let { award ->
                 WinningAward(id = UUID.fromString(award.id))
@@ -1089,6 +1092,31 @@ class AwardServiceImpl(
             throw ErrorException(error = INVALID_STATUS_DETAILS)
 
         return null
+    }
+
+    /**
+     * VR-7.6.4
+     *
+     * eEvaluation analyzes the availability of lot.value in lot object:
+     * IF [award.value.amount are available] then: validation successful;
+     * else [award.value.amount, aren’t available] then:  eEvaluation thrown Exception: "Award should have amount";
+     */
+
+    private fun checkValueAmount(value: Value, stage: Stage) {
+        when (stage) {
+            Stage.NP -> {
+                if (value.amount == null)
+                    throw ErrorException(error = ErrorType.AMOUNT, message = "Award should have amount. ")
+            }
+            Stage.AC,
+            Stage.EI,
+            Stage.EV,
+            Stage.FE,
+            Stage.FS,
+            Stage.PC,
+            Stage.PN,
+            Stage.TP -> Unit
+        }
     }
 
     /**
