@@ -743,13 +743,14 @@ class AwardServiceImpl(
         data: EvaluateAwardData,
         award: Award
     ) {
+        val stage = Stage.creator(context.stage)
         when (data.award.statusDetails) {
             AwardStatusDetails.UNSUCCESSFUL -> {
-                checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
+                checkStatusDetailsForStage(stage = stage, statusDetails = award.statusDetails)
             }
             AwardStatusDetails.ACTIVE -> {
-                checkStatusDetailsForStage(stage = context.stage, statusDetails = award.statusDetails)
-                checkRelatedAwards(context = context, award = award)
+                checkStatusDetailsForStage(stage = stage, statusDetails = award.statusDetails)
+                checkRelatedAwards(stage = stage, context = context, award = award)
             }
 
             AwardStatusDetails.PENDING,
@@ -757,48 +758,20 @@ class AwardServiceImpl(
             AwardStatusDetails.EMPTY,
             AwardStatusDetails.AWAITING,
             AwardStatusDetails.NO_OFFERS_RECEIVED,
-            AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
+            AwardStatusDetails.LOT_CANCELLED,
+            AwardStatusDetails.LACK_OF_QUALIFICATIONS,
+            AwardStatusDetails.LACK_OF_SUBMISSIONS -> throw ErrorException(
                 error = INVALID_STATUS_DETAILS,
                 message = "Invalid status details of award from request (${data.award.statusDetails.key})."
             )
         }
     }
 
-    private fun checkStatusDetailsForStage(stage: String, statusDetails: AwardStatusDetails) {
+    private fun checkStatusDetailsForStage(stage: Stage, statusDetails: AwardStatusDetails) {
         when (stage) {
-            "EV" -> {
-                when (statusDetails) {
-                    AwardStatusDetails.UNSUCCESSFUL,
-                    AwardStatusDetails.ACTIVE,
-                    AwardStatusDetails.CONSIDERATION -> Unit
-
-                    AwardStatusDetails.PENDING,
-                    AwardStatusDetails.EMPTY,
-                    AwardStatusDetails.AWAITING,
-                    AwardStatusDetails.NO_OFFERS_RECEIVED,
-                    AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
-                        error = INVALID_STATUS_DETAILS,
-                        message = "Invalid status details of award from database (${statusDetails.key}) by stage 'EV'."
-                    )
-                }
-            }
-            "NP" -> {
-                when (statusDetails) {
-                    AwardStatusDetails.UNSUCCESSFUL,
-                    AwardStatusDetails.ACTIVE,
-                    AwardStatusDetails.EMPTY -> Unit
-
-                    AwardStatusDetails.CONSIDERATION,
-                    AwardStatusDetails.PENDING,
-                    AwardStatusDetails.AWAITING,
-                    AwardStatusDetails.NO_OFFERS_RECEIVED,
-                    AwardStatusDetails.LOT_CANCELLED -> throw ErrorException(
-                        error = INVALID_STATUS_DETAILS,
-                        message = "Invalid status details of award from database (${statusDetails.key}) by stage 'NP'."
-                    )
-                }
-            }
-            "TP" -> {
+            Stage.EV,
+            Stage.TP,
+            Stage.PC -> {
                 when (statusDetails) {
                     AwardStatusDetails.UNSUCCESSFUL,
                     AwardStatusDetails.ACTIVE,
@@ -816,27 +789,61 @@ class AwardServiceImpl(
                     )
                 }
             }
-            else -> throw ErrorException(error = ErrorType.INVALID_STAGE)
+            Stage.NP -> {
+                when (statusDetails) {
+                    AwardStatusDetails.UNSUCCESSFUL,
+                    AwardStatusDetails.ACTIVE,
+                    AwardStatusDetails.EMPTY -> Unit
+
+                    AwardStatusDetails.CONSIDERATION,
+                    AwardStatusDetails.PENDING,
+                    AwardStatusDetails.AWAITING,
+                    AwardStatusDetails.NO_OFFERS_RECEIVED,
+                    AwardStatusDetails.LOT_CANCELLED,
+                    AwardStatusDetails.LACK_OF_SUBMISSIONS,
+                    AwardStatusDetails.LACK_OF_QUALIFICATIONS -> throw ErrorException(
+                        error = INVALID_STATUS_DETAILS,
+                        message = "Invalid status details of award from database (${statusDetails.key}) by stage 'NP'."
+                    )
+                }
+            }
+            Stage.PN,
+            Stage.FS,
+            Stage.FE,
+            Stage.EI,
+            Stage.AC -> throw ErrorException(error = ErrorType.INVALID_STAGE)
         }
     }
 
-    private fun checkRelatedAwards(context: EvaluateAwardContext, award: Award) {
-        val lots = award.relatedLots.toSet()
-        val relatedAwards = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
-            .asSequence()
-            .map { entity ->
-                toObject(Award::class.java, entity.jsonData)
-            }
-            .filter {
-                if (AwardId.fromString(it.id) == context.awardId)
-                    false
-                else
-                    lots.containsAll(it.relatedLots)
-            }
-            .toList()
+    private fun checkRelatedAwards(stage: Stage, context: EvaluateAwardContext, award: Award) {
+        when (stage) {
+            Stage.EV,
+            Stage.TP,
+            Stage.NP -> {
+                val lots = award.relatedLots.toSet()
+                val relatedAwards = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+                    .asSequence()
+                    .map { entity ->
+                        toObject(Award::class.java, entity.jsonData)
+                    }
+                    .filter {
+                        if (AwardId.fromString(it.id) == context.awardId)
+                            false
+                        else
+                            lots.containsAll(it.relatedLots)
+                    }
+                    .toList()
 
-        if (isNotAcceptableStatusDetails(relatedAwards))
-            throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
+                if (isNotAcceptableStatusDetails(relatedAwards))
+                    throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
+            }
+            Stage.AC,
+            Stage.EI,
+            Stage.FE,
+            Stage.FS,
+            Stage.PN,
+            Stage.PC -> Unit
+        }
     }
 
     private fun isNotAcceptableStatusDetails(awards: List<Award>) =
