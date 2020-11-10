@@ -11,5 +11,12 @@ object Database {
         const val JSON_DATA = "json_data"
     }
 
+    object Rules {
+        const val TABLE = "rules"
+        const val COUNTRY = "country"
+        const val PMD = "pmd"
+        const val PARAMETER = "parameter"
+        const val VALUE = "value"
+    }
 
 }

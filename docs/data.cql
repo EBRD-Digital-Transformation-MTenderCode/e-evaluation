@@ -52,3 +52,12 @@ CREATE TABLE IF NOT EXISTS evaluation.history
     json_data    TEXT,
     PRIMARY KEY (command_id, command_name)
 );
+
+CREATE TABLE IF NOT EXISTS evaluation.rules
+(
+    country   TEXT,
+    pmd       TEXT,
+    parameter TEXT,
+    value     TEXT,
+    PRIMARY KEY (country, pmd, parameter)
+);
