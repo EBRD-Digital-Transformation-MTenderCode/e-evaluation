@@ -5,8 +5,6 @@ import com.procurement.evaluation.application.service.award.AwardCancellationRes
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.application.service.award.CheckAwardStatusContext
 import com.procurement.evaluation.application.service.award.CheckAwardStatusResult
-import com.procurement.evaluation.application.service.award.CompleteAwardingContext
-import com.procurement.evaluation.application.service.award.CompletedAwarding
 import com.procurement.evaluation.application.service.award.CreateAwardContext
 import com.procurement.evaluation.application.service.award.CreateAwardData
 import com.procurement.evaluation.application.service.award.CreateAwardsAuctionEndContext
@@ -27,8 +25,6 @@ import com.procurement.evaluation.application.service.award.GetNextAwardResult
 import com.procurement.evaluation.application.service.award.GetWinningAwardContext
 import com.procurement.evaluation.application.service.award.SetAwardForEvaluationContext
 import com.procurement.evaluation.application.service.award.SetAwardForEvaluationResult
-import com.procurement.evaluation.application.service.award.SetInitialAwardsStatusContext
-import com.procurement.evaluation.application.service.award.SetInitialAwardsStatusResult
 import com.procurement.evaluation.application.service.award.StartAwardPeriodContext
 import com.procurement.evaluation.application.service.award.StartAwardPeriodResult
 import com.procurement.evaluation.application.service.award.StartConsiderationContext
@@ -54,7 +50,6 @@ import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.Eval
 import com.procurement.evaluation.infrastructure.dto.award.evaluate.request.SetAwardForEvaluationRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.request.FinalAwardsStatusByLotsRequest
 import com.procurement.evaluation.infrastructure.dto.award.finalize.response.FinalAwardsStatusByLotsResponse
-import com.procurement.evaluation.infrastructure.dto.award.initial.request.SetInitialAwardsStatusRequest
 import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.request.CreateUnsuccessfulAwardsRequest
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.dto.convert.converter
@@ -365,9 +360,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.CREATE_AWARDS_BY_LOT_AUCTION -> createAwardService.createAwardsByLotsAuction(cm)
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
-            CommandType.SET_FINAL_STATUSES -> statusService.setFinalStatuses(cm)
             CommandType.AWARDS_CANCELLATION -> {
                 val context = AwardCancellationContext(
                     cpid = cm.cpid,
@@ -384,7 +377,6 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.CHECK_AWARD_VALUE -> statusService.checkAwardValue(cm)
             CommandType.CHECK_AWARD_STATUS -> {
                 val context = CheckAwardStatusContext(
                     cpid = cm.cpid,
@@ -403,21 +395,6 @@ class CommandService(
                     }
             }
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
-            CommandType.SET_INITIAL_AWARDS_STATUS -> {
-                val context = SetInitialAwardsStatusContext(
-                    cpid = cm.cpid,
-                    stage = cm.stage,
-                    startDate = cm.startDate
-                )
-                val request = toObject(SetInitialAwardsStatusRequest::class.java, cm.data)
-                awardService.setInitialAwardsStatuses(context = context, data = request.convert())
-                    .also { result: SetInitialAwardsStatusResult ->
-
-                        if (log.isDebugEnabled)
-                            log.debug("Set initial awards status. Result: ${toJson(result)}")
-                    }
-                    .convert()
-            }
             CommandType.GET_WINNING_AWARD -> {
                 val context = GetWinningAwardContext(
                     cpid = cm.cpid,
@@ -498,25 +475,6 @@ class CommandService(
                                     statusDetails = award.statusDetails
                                 )
                             }
-                        )
-                    }
-            }
-            CommandType.COMPLETE_AWARDING -> {
-                val context = CompleteAwardingContext(
-                    cpid = cm.cpid,
-                    startDate = cm.startDate
-                )
-
-                awardService.completeAwarding(context)
-                    .also { result: CompletedAwarding ->
-                        if (log.isDebugEnabled)
-                            log.debug("Award was completed. Result: ${toJson(result)}")
-                    }
-                    .let { result: CompletedAwarding ->
-                        CompletedAwarding(
-                            awardPeriod = CompletedAwarding.AwardPeriod(
-                                endDate = result.awardPeriod.endDate
-                            )
                         )
                     }
             }

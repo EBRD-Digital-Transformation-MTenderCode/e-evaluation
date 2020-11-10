@@ -115,32 +115,27 @@ data class Context @JsonCreator constructor(
 
 enum class CommandType(private val value: String) {
 
-    CREATE_AWARD("createAward"),
-    EVALUATE_AWARD("evaluateAward"),
-    CREATE_AWARDS("createAwards"),
-    AWARD_BY_BID("awardByBid"),
-    SET_FINAL_STATUSES("setFinalStatuses"),
     AWARDS_CANCELLATION("awardsCancellation"),
-    CREATE_AWARDS_BY_LOT_AUCTION("createAwardsByLotAuction"),
+    AWARD_BY_BID("awardByBid"),
+    CHECK_AWARD_STATUS("checkAwardStatus"),
+    CREATE_AWARD("createAward"),
+    CREATE_AWARDS("createAwards"),
     CREATE_AWARDS_AUCTION("createAwardsAuction"),
     CREATE_AWARDS_AUCTION_END("createAwardsAuctionEnd"),
-    CHECK_AWARD_VALUE("checkAwardValue"),
-    CHECK_AWARD_STATUS("checkAwardStatus"),
+    CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards"),
     END_AWARD_PERIOD("endAwardPeriod"),
-    SET_INITIAL_AWARDS_STATUS("setInitialAwardsStatus"),
-    GET_WINNING_AWARD("getWinAward"),
-    GET_EVALUATED_AWARDS("getEvaluatedAwards"),
-    GET_AWARDS_FOR_AC("getAwardsForAc"),
-    GET_LOT_FOR_CHECK("getLotForCheck"),
-    GET_AWARD_ID_FOR_CHECK("getAwardIdForCheck"),
+    EVALUATE_AWARD("evaluateAward"),
     FINAL_AWARDS_STATUS_BY_LOTS("finalAwardsStatusByLots"),
-    COMPLETE_AWARDING("completeAwarding"),
+    GET_AWARDS_FOR_AC("getAwardsForAc"),
+    GET_AWARD_ID_FOR_CHECK("getAwardIdForCheck"),
+    GET_EVALUATED_AWARDS("getEvaluatedAwards"),
+    GET_LOT_FOR_CHECK("getLotForCheck"),
+    GET_NEXT_AWARD("getNextAward"),
     GET_UNSUCCESSFUL_LOTS("getUnsuccessfulLots"),
+    GET_WINNING_AWARD("getWinAward"),
     SET_AWARD_FOR_EVALUATION("setAwardForEvaluation"),
     START_AWARD_PERIOD("startAwardPeriod"),
-    CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards"),
-    START_CONSIDERATION("startConsideration"),
-    GET_NEXT_AWARD("getNextAward");
+    START_CONSIDERATION("startConsideration");
 
     @JsonValue
     fun value(): String {

@@ -55,7 +55,7 @@ class UpdateAwardService(private val awardDao: AwardDao) {
             }
         }
 
-        val rangedAwards = sortAwardsByCriteria(awardFromEntitiesSet, awardCriteria)
+        val rangedAwards = sortAwardsByCriteria(awardFromEntitiesSet)
 
         var bidId: String? = null
         var consideredBidId: String? = null
@@ -217,18 +217,8 @@ class UpdateAwardService(private val awardDao: AwardDao) {
         this.relatedLots = documentDto.relatedLots
     }
 
-    private fun sortAwardsByCriteria(awards: Set<Award>, awardCriteria: AwardCriteria): List<Award> {
+    private fun sortAwardsByCriteria(awards: Set<Award>): List<Award> {
         return awards.sortedWith(compareBy<Award> { it.value?.amount }.thenBy { it.bidDate })
-//        when (awardCriteria) {
-//            AwardCriteria.PRICE_ONLY -> {
-//            }
-//            AwardCriteria.COST_ONLY -> {
-//            }
-//            AwardCriteria.QUALITY_ONLY -> {
-//            }
-//            AwardCriteria.RATED_CRITERIA -> {
-//            }
-//        }
     }
 
     private fun validation(award: Award, awardId: String, dto: AwardByBidRq) {

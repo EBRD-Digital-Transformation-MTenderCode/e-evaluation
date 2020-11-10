@@ -106,8 +106,6 @@ interface AwardService {
         data: FinalAwardsStatusByLotsData
     ): FinalizedAwardsStatusByLots
 
-    fun completeAwarding(context: CompleteAwardingContext): CompletedAwarding
-
     fun setAwardForEvaluation(
         context: SetAwardForEvaluationContext,
         data: SetAwardForEvaluationData
@@ -127,11 +125,6 @@ interface AwardService {
     fun startConsideration(context: StartConsiderationContext): StartConsiderationResult
 
     fun getNext(context: GetNextAwardContext): GetNextAwardResult
-
-    fun setInitialAwardsStatuses(
-        context: SetInitialAwardsStatusContext,
-        data: SetInitialAwardsStatusData
-    ): SetInitialAwardsStatusResult
 
     fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
 
@@ -1280,18 +1273,6 @@ class AwardServiceImpl(
             ?.asSequence()
             ?: throw ErrorException(error = AWARD_NOT_FOUND)
 
-    /**
-     * BR-7.4.7 awardPeriod (awardPeriod.endDate)
-     * 1. Sets value of Stage parameter == EV and saves it to memory;
-     * 2. Finds awardPeriod object in DB by values of CPID from the context of Request and Stage set before;
-     * 3. Sets awardPeriod.endDate == startDate value from the context of Request and adds it for Response;
-     */
-    override fun completeAwarding(context: CompleteAwardingContext): CompletedAwarding {
-        val endDate = context.startDate
-        awardPeriodRepository.saveEnd(cpid = context.cpid, stage = "EV", end = endDate)
-        return CompletedAwarding(awardPeriod = CompletedAwarding.AwardPeriod(endDate = endDate))
-    }
-
     override fun create(context: CreateAwardsContext, data: CreateAwardsData): CreatedAwardsResult {
         val lotsIds: Set<String> = data.lots.toSetBy { it.id }
         val matchedBids = data.bids
@@ -1702,55 +1683,6 @@ class AwardServiceImpl(
             result
         } else
             GetNextAwardResult(award = null)
-    }
-
-    override fun setInitialAwardsStatuses(
-        context: SetInitialAwardsStatusContext,
-        data: SetInitialAwardsStatusData
-    ): SetInitialAwardsStatusResult {
-        val awardEntities = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
-
-        val lotId = data.lotId.toString()
-        val updatedEntitiesByAward = awardEntities.asSequence()
-            .map { entity ->
-                val award = toObject(Award::class.java, entity.jsonData)
-                award to entity
-            }
-            .filter { (award, _) ->
-                lotId in award.relatedLots
-            }
-            .map { (award, entity) ->
-                val updatedAward = award.copy(
-                    date = context.startDate,
-                    status = AwardStatus.PENDING,
-                    statusDetails = AwardStatusDetails.EMPTY
-                )
-
-                val updatedEntity: AwardEntity = entity.copy(
-                    status = updatedAward.status.key,
-                    statusDetails = updatedAward.statusDetails.key,
-                    jsonData = toJson(updatedAward)
-                )
-
-                updatedAward to updatedEntity
-            }
-            .toMap()
-
-        val result = SetInitialAwardsStatusResult(
-            awards = updatedEntitiesByAward.keys
-                .map { award ->
-                    SetInitialAwardsStatusResult.Award(
-                        id = AwardId.fromString(award.id),
-                        date = award.date!!,
-                        status = award.status,
-                        statusDetails = award.statusDetails,
-                        relatedBid = BidId.fromString(award.relatedBid!!)
-                    )
-                }
-        )
-
-        awardRepository.update(cpid = context.cpid, updatedAwards = updatedEntitiesByAward.values)
-        return result
     }
 
     /**
