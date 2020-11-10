@@ -39,7 +39,7 @@ class HistoryDao(private val session: Session) {
             jsonData = toJson(response)
         )
 
-        val insert = insertInto(Database.History.TABLE)
+        val insert = insertInto(Database.KEYSPACE, Database.History.TABLE)
             .value(Database.History.COMMAND_ID, entity.operationId)
             .value(Database.History.COMMAND_NAME, entity.command)
             .value(Database.History.COMMAND_DATE, entity.operationDate)
