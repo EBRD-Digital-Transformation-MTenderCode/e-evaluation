@@ -61,3 +61,13 @@ CREATE TABLE IF NOT EXISTS evaluation.rules
     value     TEXT,
     PRIMARY KEY (country, pmd, parameter)
 );
+
+CREATE TABLE IF NOT EXISTS evaluation.periods
+(
+    cpid           TEXT,
+    ocid           TEXT,
+    award_criteria TEXT,
+    start_date     TIMESTAMP,
+    end_date       TIMESTAMP,
+    PRIMARY KEY (cpid, ocid)
+);

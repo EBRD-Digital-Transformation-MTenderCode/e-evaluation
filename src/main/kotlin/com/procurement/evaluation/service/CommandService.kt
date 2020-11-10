@@ -99,6 +99,7 @@ class CommandService(
             CommandType.CREATE_AWARD -> {
                 val context = CreateAwardContext(
                     cpid = cm.cpid,
+                    ocid = cm.ocid,
                     stage = cm.stage,
                     owner = cm.owner,
                     startDate = cm.startDate,
@@ -312,7 +313,7 @@ class CommandService(
             }
             CommandType.EVALUATE_AWARD -> {
                 val context = EvaluateAwardContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     token = cm.token,
                     owner = cm.owner,
@@ -330,11 +331,11 @@ class CommandService(
             }
             CommandType.CREATE_AWARDS -> {
                 val context = CreateAwardsContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     owner = cm.owner,
                     startDate = cm.startDate,
-                    ocid = cm.ocid
+                    ocid = cm.ocid.toString()
                 )
                 val request = toObject(CreateAwardsRequest::class.java, cm.data)
                 awardService.create(context = context, data = request.convert())
@@ -347,7 +348,7 @@ class CommandService(
             CommandType.CREATE_AWARDS_AUCTION -> createAwardService.createAwardsAuction(cm)
             CommandType.CREATE_AWARDS_AUCTION_END -> {
                 val context = CreateAwardsAuctionEndContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     owner = cm.owner,
                     startDate = cm.startDate
@@ -363,7 +364,7 @@ class CommandService(
             CommandType.AWARD_BY_BID -> updateAwardService.awardByBid(cm)
             CommandType.AWARDS_CANCELLATION -> {
                 val context = AwardCancellationContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     owner = cm.owner,
                     startDate = cm.startDate,
                     stage = cm.stage,
@@ -379,7 +380,7 @@ class CommandService(
             }
             CommandType.CHECK_AWARD_STATUS -> {
                 val context = CheckAwardStatusContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     token = cm.token,
                     owner = UUID.fromString(cm.owner),
@@ -397,7 +398,7 @@ class CommandService(
             CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
             CommandType.GET_WINNING_AWARD -> {
                 val context = GetWinningAwardContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     lotId = cm.lotId
                 )
@@ -420,7 +421,7 @@ class CommandService(
             }
             CommandType.GET_EVALUATED_AWARDS -> {
                 val context = GetEvaluatedAwardsContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     lotId = cm.lotId
                 )
@@ -449,7 +450,7 @@ class CommandService(
             CommandType.GET_AWARD_ID_FOR_CHECK -> statusService.getAwardIdForCheck(cm)
             CommandType.FINAL_AWARDS_STATUS_BY_LOTS -> {
                 val context = FinalAwardsStatusByLotsContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     pmd = cm.pmd
                 )
                 val request = toObject(FinalAwardsStatusByLotsRequest::class.java, cm.data)
@@ -493,8 +494,8 @@ class CommandService(
             }
             CommandType.SET_AWARD_FOR_EVALUATION -> {
                 val context = SetAwardForEvaluationContext(
-                    cpid = cm.cpid,
-                    ocid = cm.ocid,
+                    cpid = cm.cpid.toString(),
+                    ocid = cm.ocid.toString(),
                     stage = cm.stage
                 )
                 val request = toObject(SetAwardForEvaluationRequest::class.java, cm.data)
@@ -516,7 +517,7 @@ class CommandService(
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV -> {
                         val context = StartAwardPeriodContext(
                             cpid = cm.cpid,
-                            stage = cm.stage,
+                            ocid = cm.ocid,
                             startDate = cm.startDate
                         )
                         awardService.startAwardPeriod(context = context)
@@ -554,7 +555,7 @@ class CommandService(
                         val context = CreateUnsuccessfulAwardsContext(
                             operationType = cm.operationType,
                             startDate = cm.startDate,
-                            cpid = cm.cpid,
+                            cpid = cm.cpid.toString(),
                             stage = cm.stage,
                             owner = cm.owner
                         )
@@ -575,7 +576,7 @@ class CommandService(
             }
             CommandType.START_CONSIDERATION -> {
                 val context = StartConsiderationContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     token = cm.token,
                     owner = UUID.fromString(cm.owner),
@@ -590,7 +591,7 @@ class CommandService(
             }
             CommandType.GET_NEXT_AWARD -> {
                 val context = GetNextAwardContext(
-                    cpid = cm.cpid,
+                    cpid = cm.cpid.toString(),
                     stage = cm.stage,
                     awardId = cm.awardId
                 )

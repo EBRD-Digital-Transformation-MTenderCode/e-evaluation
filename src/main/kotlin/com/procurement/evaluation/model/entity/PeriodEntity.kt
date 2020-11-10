@@ -1,17 +1,13 @@
 package com.procurement.evaluation.model.entity
 
-import java.util.*
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
+import java.time.LocalDateTime
 
 data class PeriodEntity(
-
-        val cpId: String,
-
-        val stage: String,
-
-        val awardCriteria: String?,
-
-        var startDate: Date?,
-
-        var endDate: Date?
-
+    val cpid: Cpid,
+    val ocid: Ocid,
+    val awardCriteria: String?,
+    val startDate: LocalDateTime?,
+    val endDate: LocalDateTime?
 )

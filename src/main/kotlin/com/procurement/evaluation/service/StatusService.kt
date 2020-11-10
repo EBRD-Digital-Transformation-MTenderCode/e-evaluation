@@ -12,7 +12,8 @@ import com.procurement.evaluation.model.dto.AwardsForAcRs
 import com.procurement.evaluation.model.dto.EndAwardPeriodRs
 import com.procurement.evaluation.model.dto.GetLotForCheckRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
-import com.procurement.evaluation.model.dto.bpe.pmd
+import com.procurement.evaluation.model.dto.bpe.cpid
+import com.procurement.evaluation.model.dto.bpe.ocid
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.toLocal
@@ -58,10 +59,11 @@ class StatusService(private val periodService: PeriodService,
     }
 
     fun endAwardPeriod(cm: CommandMessage): EndAwardPeriodRs {
-        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
-        val stage = getStage(cm.pmd)
+        val cpid = cm.cpid
+        val ocid = cm.ocid
+
         val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
-        val awardPeriod = periodService.saveEndOfPeriod(cpId, stage, endDate)
+        val awardPeriod = periodService.saveEndOfPeriod(cpid, ocid, endDate)
         return EndAwardPeriodRs(awardPeriod)
     }
 

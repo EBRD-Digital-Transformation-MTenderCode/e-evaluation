@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.config.properties.GlobalProperties
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
@@ -26,12 +28,26 @@ data class CommandMessage @JsonCreator constructor(
     val version: ApiVersion
 )
 
-val CommandMessage.cpid: String
+val CommandMessage.cpid: Cpid
     get() = this.context.cpid
+        ?.let {
+            Cpid.tryCreateOrNull(it)
+                ?: throw ErrorException(
+                    error = ErrorType.INVALID_ATTRIBUTE,
+                    message = "Cannot parse 'cpid' attribute '${it}'."
+                )
+        }
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'cpid' attribute in context.")
 
-val CommandMessage.ocid: String
+val CommandMessage.ocid: Ocid
     get() = this.context.ocid
+        ?.let {
+            Ocid.tryCreateOrNull(it)
+                ?: throw ErrorException(
+                    error = ErrorType.INVALID_ATTRIBUTE,
+                    message = "Cannot parse 'ocid' attribute '${it}'."
+                )
+        }
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'ocid' attribute in context.")
 
 val CommandMessage.token: Token

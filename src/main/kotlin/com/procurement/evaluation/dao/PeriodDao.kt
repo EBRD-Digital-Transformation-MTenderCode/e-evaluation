@@ -1,9 +1,15 @@
 package com.procurement.evaluation.dao
 
 import com.datastax.driver.core.Session
-import com.datastax.driver.core.querybuilder.QueryBuilder.*
+import com.datastax.driver.core.querybuilder.QueryBuilder.eq
+import com.datastax.driver.core.querybuilder.QueryBuilder.insertInto
+import com.datastax.driver.core.querybuilder.QueryBuilder.select
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.repository.Database
+import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.entity.PeriodEntity
 import org.springframework.stereotype.Service
 
@@ -12,38 +18,30 @@ class PeriodDao(private val session: Session) {
 
     fun save(entity: PeriodEntity) {
         val insert =
-                insertInto(PERIOD_TABLE)
-                        .value(CP_ID, entity.cpId)
-                        .value(STAGE, entity.stage)
-                        .value(AWARD_CRITERIA, entity.awardCriteria)
-                        .value(START_DATE, entity.startDate)
-                        .value(END_DATE, entity.endDate)
+            insertInto(Database.KEYSPACE, Database.Period.TABLE)
+                .value(Database.Period.CPID, entity.cpid)
+                .value(Database.Period.OCID, entity.ocid)
+                .value(Database.Period.AWARD_CRITERIA, entity.awardCriteria)
+                .value(Database.Period.START_DATE, entity.startDate)
+                .value(Database.Period.END_DATE, entity.endDate)
         session.execute(insert)
     }
 
-    fun getByCpIdAndStage(cpId: String, stage: String): PeriodEntity {
+    fun getByCpIdAndStage(cpid: Cpid, ocid: Ocid): PeriodEntity {
         val query = select()
-                .all()
-                .from(PERIOD_TABLE)
-                .where(eq(CP_ID, cpId))
-                .and(eq(STAGE, stage)).limit(1)
+            .all()
+            .from(Database.KEYSPACE, Database.Period.TABLE)
+            .where(eq(Database.Period.CPID, cpid))
+            .and(eq(Database.Period.OCID, ocid)).limit(1)
         val row = session.execute(query).one()
         return if (row != null)
             PeriodEntity(
-                    cpId = row.getString(CP_ID),
-                    stage = row.getString(STAGE),
-                    awardCriteria = row.getString(AWARD_CRITERIA),
-                    startDate = row.getTimestamp(START_DATE),
-                    endDate = row.getTimestamp(END_DATE))
+                cpid = cpid,
+                ocid = ocid,
+                awardCriteria = row.getString(Database.Period.AWARD_CRITERIA),
+                startDate = row.getTimestamp(Database.Period.START_DATE).toLocalDateTime(),
+                endDate = row.getTimestamp(Database.Period.END_DATE).toLocalDateTime()
+            )
         else throw ErrorException(ErrorType.PERIOD_NOT_FOUND)
-    }
-
-    companion object {
-        private const val PERIOD_TABLE = "evaluation_period"
-        private const val CP_ID = "cp_id"
-        private const val AWARD_CRITERIA = "award_criteria"
-        private const val STAGE = "stage"
-        private const val START_DATE = "start_date"
-        private const val END_DATE = "end_date"
     }
 }

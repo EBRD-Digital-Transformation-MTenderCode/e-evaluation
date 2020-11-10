@@ -1,6 +1,7 @@
 package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.AwardDao
+import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
 import com.procurement.evaluation.model.dto.BidsData
@@ -8,6 +9,8 @@ import com.procurement.evaluation.model.dto.CreateAwardsAuctionRq
 import com.procurement.evaluation.model.dto.CreateAwardsRs
 import com.procurement.evaluation.model.dto.FirstBid
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
+import com.procurement.evaluation.model.dto.bpe.cpid
+import com.procurement.evaluation.model.dto.bpe.ocid
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
@@ -31,7 +34,9 @@ class CreateAwardService(
     private val generationService: GenerationService
 ) {
     fun createAwardsAuction(cm: CommandMessage): CreateAwardsRs {
-        val cpId = cm.context.cpid ?: throw ErrorException(CONTEXT)
+        val cpid = cm.cpid
+        val ocid = cm.ocid
+
         val stage = cm.context.stage ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
         val country = cm.context.country ?: throw ErrorException(CONTEXT)
@@ -54,11 +59,11 @@ class CreateAwardService(
         val unsuccessfulAwardsList = getUnsuccessfulAwards(unsuccessfulLotsSet)
         val awards = successfulAwardsList + unsuccessfulAwardsList
         val awardPeriod = if (successfulAwardsList.isEmpty()) {
-            periodService.savePeriod(cpId, stage, startDate, startDate, awardCriteria)
+            periodService.savePeriod(cpid, ocid, startDate, startDate, awardCriteria)
         } else {
-            periodService.saveStartOfPeriod(cpId, stage, startDate, awardCriteria)
+            periodService.saveStartOfPeriod(cpid, ocid, startDate, awardCriteria)
         }
-        awardDao.saveAll(getAwardEntities(awards, cpId, owner, stage))
+        awardDao.saveAll(getAwardEntities(awards, cpid, owner, stage))
         val unsuccessfulLots = getLotsDto(unsuccessfulLotsSet)
         val firstBids = getFirstBidsFromAwards(AwardCriteria.creator(awardCriteria), successfulAwardsList)
         return CreateAwardsRs(awardPeriod, awards, unsuccessfulLots, firstBids)
@@ -72,14 +77,14 @@ class CreateAwardService(
         } else null
     }
 
-    private fun getAwardEntities(awards: List<Award>, cpId: String, owner: String, stage: String): List<AwardEntity> {
+    private fun getAwardEntities(awards: List<Award>, cpid: Cpid, owner: String, stage: String): List<AwardEntity> {
         val entities = ArrayList<AwardEntity>()
         awards.asSequence()
             .forEach { award ->
                 entities.add(
                     getEntity(
                         award = award,
-                        cpId = cpId,
+                        cpid = cpid,
                         stage = stage,
                         owner = owner,
                         token = UUID.fromString(award.token)
@@ -193,13 +198,13 @@ class CreateAwardService(
 
     private fun getEntity(
         award: Award,
-        cpId: String,
+        cpid: Cpid,
         stage: String,
         owner: String,
         token: UUID
     ): AwardEntity {
         return AwardEntity(
-            cpId = cpId,
+            cpId = cpid.toString(),
             stage = stage,
             token = token,
             status = award.status.key,

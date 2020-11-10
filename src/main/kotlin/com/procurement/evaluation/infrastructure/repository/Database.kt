@@ -19,4 +19,12 @@ object Database {
         const val VALUE = "value"
     }
 
+    object Period {
+        const val TABLE = "periods"
+        const val CPID = "cpid"
+        const val OCID = "ocid"
+        const val AWARD_CRITERIA = "award_criteria"
+        const val START_DATE = "start_date"
+        const val END_DATE = "end_date"
+    }
 }

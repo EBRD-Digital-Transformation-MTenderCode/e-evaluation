@@ -39,7 +39,6 @@ import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.INVALID_TOKEN
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
-import com.procurement.evaluation.exception.ErrorType.STATUS_DETAILS_SAVED_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
@@ -194,6 +193,7 @@ class AwardServiceImpl(
      */
     override fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData {
         val cpid = context.cpid
+        val ocid = context.ocid
         val stage = context.stage
 
         //VR-7.10.9
@@ -208,7 +208,7 @@ class AwardServiceImpl(
         //VR-7.10.8(1)
         checkSuppliersIdentifiers(suppliers = data.award.suppliers)
 
-        val awardsEntities = awardRepository.findBy(cpid = cpid)
+        val awardsEntities = awardRepository.findBy(cpid = cpid.toString())
         val awards = awardsEntities.map {
             toObject(Award::class.java, it.jsonData)
         }
@@ -323,10 +323,10 @@ class AwardServiceImpl(
             weightedValue = null
         )
 
-        val prevAwardPeriodStart = awardPeriodRepository.findStartDateBy(cpid = cpid, stage = stage)
+        val prevAwardPeriodStart = awardPeriodRepository.findStartDateBy(cpid = cpid, ocid = ocid)
 
         val newAwardEntity = AwardEntity(
-            cpId = cpid,
+            cpId = cpid.toString(),
             stage = stage,
             status = award.status.toString(),
             statusDetails = award.statusDetails.toString(),
@@ -340,11 +340,11 @@ class AwardServiceImpl(
             prevAwardPeriodStart
         } else {
             val newAwardPeriodStart = context.startDate
-            awardPeriodRepository.saveNewStart(cpid = cpid, stage = stage, start = newAwardPeriodStart)
+            awardPeriodRepository.saveNewStart(cpid = cpid, ocid = ocid, start = newAwardPeriodStart)
             newAwardPeriodStart
         }
 
-        awardRepository.saveNew(cpid = cpid, award = newAwardEntity)
+        awardRepository.saveNew(cpid = cpid.toString(), award = newAwardEntity)
 
         return getCreatedAwardData(award, awardPeriodStart, lotAwarded)
     }
@@ -805,7 +805,7 @@ class AwardServiceImpl(
             Stage.FS,
             Stage.FE,
             Stage.EI,
-            Stage.AC -> throw ErrorException(error = ErrorType.INVALID_STAGE)
+            Stage.AC -> throw ErrorException(error = INVALID_STAGE)
         }
     }
 
@@ -922,53 +922,6 @@ class AwardServiceImpl(
         description = document.description,
         relatedLots = document.relatedLots.asSequence().map { it.toString() }.toHashSet()
     )
-
-    /**
-     * BR-7.10.6 "statusDetails" (awards)
-     *
-     * eEvaluation checks the value of award.statusDetails from Request:
-     * 1. IF award gets statusDetails == "active" in request, eEvaluation checks the value of statusDetails field in saved version of award:
-     *   a. IF statusDetails of award's saved version == "empty", eEvaluation performs next steps:
-     *        Saves new award.statusDetails == "active";
-     *   b. ELSE IF statusDetails of award's saved version == "active"
-     *        eEvaluation does not perform any operation with award.statusDetails;
-     *   c. ELSE IF statusDetails of award's saved version == "unsuccessful" eEvaluation performs next steps:
-     *        Saves new award.statusDetails ==  "active";
-     *   d. ELSE IF statusDetails of award's saved version != "unsuccessful" || "empty" || "active"
-     *        eEvaluation returns exception.
-     * 2. ELSE (award gets statusDetails == "unsuccessful" in Request), eEvaluation checks the value of statusDetails field in saved version of award:
-     *   a. IF statusDetails of award's saved version == "empty", eEvaluation performs next steps:
-     *        Saves new award.statusDetails ==  "unsuccessful";
-     *   b. ELSE IF statusDetails of award's saved version == "unsuccessful"
-     *        eEvaluation does not perform any operation with award.statusDetails;
-     *   c. ELSE IF statusDetails of award's saved version == "active", eEvaluation performs next steps:
-     *        Saves new award.statusDetails ==  "unsuccessful";
-     *   d. ELSE IF statusDetails of award's saved version != "active" || "empty" || "unsuccessful"
-     *        eEvaluation returns exception.
-     */
-    private fun statusDetails(data: EvaluateAwardData, award: Award): AwardStatusDetails {
-        return when (data.award.statusDetails) {
-            AwardStatusDetails.ACTIVE -> {
-                when (award.statusDetails) {
-                    AwardStatusDetails.EMPTY -> AwardStatusDetails.ACTIVE
-                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.ACTIVE
-                    AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.ACTIVE
-                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
-                }
-            }
-
-            AwardStatusDetails.UNSUCCESSFUL -> {
-                when (award.statusDetails) {
-                    AwardStatusDetails.EMPTY -> AwardStatusDetails.UNSUCCESSFUL
-                    AwardStatusDetails.UNSUCCESSFUL -> AwardStatusDetails.UNSUCCESSFUL
-                    AwardStatusDetails.ACTIVE -> AwardStatusDetails.UNSUCCESSFUL
-                    else -> throw ErrorException(error = STATUS_DETAILS_SAVED_AWARD)
-                }
-            }
-
-            else -> throw ErrorException(error = INVALID_STATUS_DETAILS)
-        }
-    }
 
     private fun getEvaluateAwardResult(updatedAward: Award) = EvaluateAwardResult(
         award = EvaluateAwardResult.Award(
@@ -1478,7 +1431,7 @@ class AwardServiceImpl(
     }
 
     override fun startAwardPeriod(context: StartAwardPeriodContext): StartAwardPeriodResult {
-        awardPeriodRepository.saveNewStart(cpid = context.cpid, stage = context.stage, start = context.startDate)
+        awardPeriodRepository.saveNewStart(cpid = context.cpid, ocid = context.ocid, start = context.startDate)
         return StartAwardPeriodResult(
             StartAwardPeriodResult.AwardPeriod(
                 startDate = context.startDate
@@ -1671,13 +1624,11 @@ class AwardServiceImpl(
             val awardEntitiesByAwardId: Map<AwardId, AwardEntity> = awardsToEntities.asSequence()
                 .associateBy(keySelector = { AwardId.fromString(it.key.id) }, valueTransform = { it.value })
             val updatedAwardEntity = awardEntitiesByAwardId.getValue(AwardId.fromString(updatedAward.id))
-                .let {
-                    it.copy(
-                        status = updatedAward.status.key,
-                        statusDetails = updatedAward.statusDetails.key,
-                        jsonData = toJson(updatedAward)
-                    )
-                }
+                .copy(
+                    status = updatedAward.status.key,
+                    statusDetails = updatedAward.statusDetails.key,
+                    jsonData = toJson(updatedAward)
+                )
             awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
 
             result
@@ -2644,7 +2595,7 @@ class AwardServiceImpl(
             AwardCriteriaDetails.MANUAL -> {
                 when (awardCriteria) {
                     AwardCriteria.PRICE_ONLY -> throw ErrorException(
-                        ErrorType.INVALID_STATUS_DETAILS,
+                        INVALID_STATUS_DETAILS,
                         "Cannot calculate weighted value for award with award criteria: '${awardCriteria}' " +
                             "and award criteria details: '${awardCriteriaDetails}', based on bid '${bidId}'"
                     )

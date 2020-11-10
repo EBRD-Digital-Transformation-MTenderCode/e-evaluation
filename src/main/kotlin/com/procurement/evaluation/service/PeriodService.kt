@@ -1,77 +1,68 @@
 package com.procurement.evaluation.service
 
 import com.procurement.evaluation.dao.PeriodDao
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.model.dto.ocds.Period
 import com.procurement.evaluation.model.entity.PeriodEntity
-import com.procurement.evaluation.utils.toDate
-import com.procurement.evaluation.utils.toLocal
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
 
 @Service
 class PeriodService(private val periodRepository: PeriodDao) {
 
-    fun saveStartOfPeriod(cpId: String, stage: String, startDate: LocalDateTime, awardCriteria: String): Period {
-        val period = getEntity(
-                cpId = cpId,
-                stage = stage,
-                awardCriteria = awardCriteria,
-                startDate = startDate.toDate(),
-                endDate = null
+    fun saveStartOfPeriod(cpid: Cpid, ocid: Ocid, startDate: LocalDateTime, awardCriteria: String): Period {
+        val period = PeriodEntity(
+            cpid = cpid,
+            ocid = ocid,
+            awardCriteria = awardCriteria,
+            startDate = startDate,
+            endDate = null
         )
+
         periodRepository.save(period)
-        return Period(period.startDate!!.toLocal(), null)
+        return Period(period.startDate!!, null)
     }
 
-    fun saveEndOfPeriod(cpId: String, stage: String, endDate: LocalDateTime): Period {
-        val period = periodRepository.getByCpIdAndStage(cpId, stage)
-        val newPeriod = getEntity(
-                cpId = period.cpId,
-                stage = period.stage,
-                awardCriteria = period.awardCriteria,
-                startDate = period.startDate!!,
-                endDate = endDate.toDate()
+    fun saveEndOfPeriod(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Period {
+        val period = periodRepository.getByCpIdAndStage(cpid, ocid)
+        val newPeriod = PeriodEntity(
+            cpid = period.cpid,
+            ocid = period.ocid,
+            awardCriteria = period.awardCriteria,
+            startDate = period.startDate!!,
+            endDate = endDate
         )
         periodRepository.save(newPeriod)
-        return Period(period.startDate!!.toLocal(), endDate)
+        return Period(period.startDate, endDate)
     }
 
-    fun savePeriod(cpId: String, stage: String, startDate: LocalDateTime, endDate: LocalDateTime, awardCriteria: String): Period {
-        val period = getEntity(
-                cpId = cpId,
-                stage = stage,
-                awardCriteria = awardCriteria,
-                startDate = startDate.toDate(),
-                endDate = endDate.toDate()
+    fun savePeriod(
+        cpid: Cpid,
+        ocid: Ocid,
+        startDate: LocalDateTime,
+        endDate: LocalDateTime,
+        awardCriteria: String
+    ): Period {
+        val period = PeriodEntity(
+            cpid = cpid,
+            ocid = ocid,
+            awardCriteria = awardCriteria,
+            startDate = startDate,
+            endDate = endDate
         )
         periodRepository.save(period)
         return Period(startDate, endDate)
     }
 
-    fun saveAwardCriteria(cpId: String, stage: String, awardCriteria: String) {
-        val period = getEntity(
-                cpId = cpId,
-                stage = stage,
-                awardCriteria = awardCriteria,
-                startDate = null,
-                endDate = null
+    fun saveAwardCriteria(cpid: Cpid, ocid: Ocid, awardCriteria: String) {
+        val period = PeriodEntity(
+            cpid = cpid,
+            ocid = ocid,
+            awardCriteria = awardCriteria,
+            startDate = null,
+            endDate = null
         )
         periodRepository.save(period)
-    }
-
-    private fun getEntity(cpId: String,
-                          stage: String,
-                          startDate: Date?,
-                          endDate: Date?,
-                          awardCriteria: String?
-    ): PeriodEntity {
-        return PeriodEntity(
-                cpId = cpId,
-                stage = stage,
-                awardCriteria = awardCriteria,
-                startDate = startDate,
-                endDate = endDate
-        )
     }
 }
