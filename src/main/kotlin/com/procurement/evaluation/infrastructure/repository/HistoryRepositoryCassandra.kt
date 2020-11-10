@@ -16,32 +16,26 @@ import org.springframework.stereotype.Repository
 class HistoryRepositoryCassandra(private val session: Session) : HistoryRepository {
 
     companion object {
-        private const val KEYSPACE = "ocds"
-        private const val HISTORY_TABLE = "evaluation_history"
-        private const val OPERATION_ID = "operation_id"
-        private const val COMMAND = "command"
-        private const val OPERATION_DATE = "operation_date"
-        private const val JSON_DATA = "json_data"
 
         private const val SAVE_HISTORY_CQL = """
-               INSERT INTO $KEYSPACE.$HISTORY_TABLE(
-                      $OPERATION_ID,
-                      $COMMAND,
-                      $OPERATION_DATE,
-                      $JSON_DATA
+               INSERT INTO ${Database.KEYSPACE}.${Database.History.TABLE}(
+                      ${Database.History.COMMAND_ID},
+                      ${Database.History.COMMAND_NAME},
+                      ${Database.History.COMMAND_DATE},
+                      ${Database.History.JSON_DATA}
                )
                VALUES(?, ?, ?, ?)
                IF NOT EXISTS
             """
 
         private const val FIND_HISTORY_ENTRY_CQL = """
-               SELECT $OPERATION_ID,
-                      $COMMAND,
-                      $OPERATION_DATE,
-                      $JSON_DATA
-                 FROM $KEYSPACE.$HISTORY_TABLE
-                WHERE $OPERATION_ID=?
-                  AND $COMMAND=?
+               SELECT ${Database.History.COMMAND_ID},
+                      ${Database.History.COMMAND_NAME},
+                      ${Database.History.COMMAND_DATE},
+                      ${Database.History.JSON_DATA}
+                 FROM ${Database.KEYSPACE}.${Database.History.TABLE}
+                WHERE ${Database.History.COMMAND_ID}=?
+                  AND ${Database.History.COMMAND_NAME}=?
                LIMIT 1
             """
     }
@@ -52,8 +46,8 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
     override fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail.Incident> {
         val query = preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
-                setString(OPERATION_ID, operationId)
-                setString(COMMAND, command)
+                setString(Database.History.COMMAND_ID, operationId)
+                setString(Database.History.COMMAND_NAME, command)
             }
 
         return query.tryExecute(session)
@@ -62,16 +56,20 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
             .one()
             ?.let { row ->
                 HistoryEntity(
-                    row.getString(OPERATION_ID),
-                    row.getString(COMMAND),
-                    row.getTimestamp(OPERATION_DATE),
-                    row.getString(JSON_DATA)
+                    row.getString(Database.History.COMMAND_ID),
+                    row.getString(Database.History.COMMAND_NAME),
+                    row.getTimestamp(Database.History.COMMAND_DATE),
+                    row.getString(Database.History.JSON_DATA)
                 )
             }
             .asSuccess()
     }
 
-    override fun saveHistory(operationId: String, command: String, response: Any): Result<HistoryEntity, Fail.Incident> {
+    override fun saveHistory(
+        operationId: String,
+        command: String,
+        response: Any
+    ): Result<HistoryEntity, Fail.Incident> {
         val entity = HistoryEntity(
             operationId = operationId,
             command = command,
@@ -81,10 +79,10 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
 
         val insert = preparedSaveHistoryCQL.bind()
             .apply {
-                setString(OPERATION_ID, entity.operationId)
-                setString(COMMAND, entity.command)
-                setTimestamp(OPERATION_DATE, entity.operationDate)
-                setString(JSON_DATA, entity.jsonData)
+                setString(Database.History.COMMAND_ID, entity.operationId)
+                setString(Database.History.COMMAND_NAME, entity.command)
+                setTimestamp(Database.History.COMMAND_DATE, entity.operationDate)
+                setString(Database.History.JSON_DATA, entity.jsonData)
             }
 
         insert.tryExecute(session)

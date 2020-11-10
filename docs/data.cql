@@ -40,3 +40,15 @@ INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD'
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'SV', 'minBids', '1');
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_OT', 'minBids', '1');
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_SV', 'minBids', '1');
+
+
+CREATE KEYSPACE IF NOT EXISTS evaluation WITH replication = {'class':'SimpleStrategy', 'replication_factor':1};
+
+CREATE TABLE IF NOT EXISTS evaluation.history
+(
+    command_id   TEXT,
+    command_name TEXT,
+    command_date TIMESTAMP,
+    json_data    TEXT,
+    PRIMARY KEY (command_id, command_name)
+);

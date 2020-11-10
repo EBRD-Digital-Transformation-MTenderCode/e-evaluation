@@ -18,15 +18,15 @@ class HistoryDao(private val session: Session) {
         val query = select()
                 .all()
                 .from(HISTORY_TABLE)
-                .where(eq(OPERATION_ID, operationId))
-                .and(eq(COMMAND, command))
+                .where(eq(COMMAND_ID, operationId))
+                .and(eq(COMMAND_NAME, command))
                 .limit(1)
         val row = session.execute(query).one()
         return if (row != null) HistoryEntity(
-                row.getString(OPERATION_ID),
-                row.getString(COMMAND),
-                row.getTimestamp(OPERATION_DATE),
-                row.getString(JSON_DATA)) else null
+            row.getString(COMMAND_ID),
+            row.getString(COMMAND_NAME),
+            row.getTimestamp(COMMAND_DATE),
+            row.getString(JSON_DATA)) else null
     }
 
     fun saveHistory(operationId: String, command: String, response: ApiSuccessResponse): HistoryEntity {
@@ -37,9 +37,9 @@ class HistoryDao(private val session: Session) {
                 jsonData = toJson(response))
 
         val insert = insertInto(HISTORY_TABLE)
-                .value(OPERATION_ID, entity.operationId)
-                .value(COMMAND, entity.command)
-                .value(OPERATION_DATE, entity.operationDate)
+                .value(COMMAND_ID, entity.operationId)
+                .value(COMMAND_NAME, entity.command)
+                .value(COMMAND_DATE, entity.operationDate)
                 .value(JSON_DATA, entity.jsonData)
         session.execute(insert)
         return entity
@@ -47,9 +47,9 @@ class HistoryDao(private val session: Session) {
 
     companion object {
         private const val HISTORY_TABLE = "evaluation_history"
-        private const val OPERATION_ID = "operation_id"
-        private const val COMMAND = "command"
-        private const val OPERATION_DATE = "operation_date"
+        private const val COMMAND_ID = "command_id"
+        private const val COMMAND_NAME = "command_name"
+        private const val COMMAND_DATE = "command_date"
         private const val JSON_DATA = "json_data"
     }
 
