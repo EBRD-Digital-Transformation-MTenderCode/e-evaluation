@@ -18,7 +18,7 @@ class HistoryDao(private val session: Session) {
     fun getHistory(operationId: String, command: String): HistoryEntity? {
         val query = select()
             .all()
-            .from(Database.History.TABLE)
+            .from(Database.KEYSPACE, Database.History.TABLE)
             .where(eq(Database.History.COMMAND_ID, operationId))
             .and(eq(Database.History.COMMAND_NAME, command))
             .limit(1)
