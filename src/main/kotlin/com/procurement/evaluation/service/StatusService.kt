@@ -1,6 +1,6 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.dao.AwardDao
+import com.procurement.evaluation.application.repository.AwardRepository
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
@@ -21,15 +21,17 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class StatusService(private val periodService: PeriodService,
-                    private val awardDao: AwardDao) {
+class StatusService(
+    private val periodService: PeriodService,
+    private val awardRepository: AwardRepository
+) {
 
     fun getAwardIdForCheck(cm: CommandMessage): AwardForCansRs {
         val cpid = cm.cpid
         val ocid = cm.ocid
         val bidId = cm.context.id ?: throw ErrorException(CONTEXT)
 
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpid, ocid)
+        val awardEntities = awardRepository.findBy(cpid, ocid)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
@@ -48,7 +50,7 @@ class StatusService(private val periodService: PeriodService,
         val dto = toObject(AwardsForAcRq::class.java, cm.data)
         val awardsIdsSet = dto.cans.asSequence().map { it.awardId }.toSet()
 
-        val awardEntities = awardDao.findAllByCpIdAndStage(cpid, ocid)
+        val awardEntities = awardRepository.findBy(cpid, ocid)
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
@@ -73,7 +75,10 @@ class StatusService(private val periodService: PeriodService,
 
         val token = cm.context.token ?: throw ErrorException(CONTEXT)
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
-        val awardEntity = awardDao.getByCpIdAndStageAndToken(cpid, ocid, UUID.fromString(token))
+
+        val awardEntity = awardRepository.findBy(cpid, ocid, UUID.fromString(token))
+            ?: throw ErrorException(DATA_NOT_FOUND)
+
         if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         return GetLotForCheckRs(awardByBid.relatedLots[0])
