@@ -29,11 +29,6 @@ class AwardDao(private val session: Session) {
         session.execute(insert)
     }
 
-
-    fun saveAll(entities: List<AwardEntity>) {
-        entities.forEach { save(it) }
-    }
-
     fun findAllByCpIdAndStage(cpid: Cpid, ocid: Ocid): List<AwardEntity> {
         val query = select()
                 .all()
@@ -77,28 +72,6 @@ class AwardDao(private val session: Session) {
                 statusDetails = row.getString(Database.Awards.STATUS_DETAILS),
                 jsonData = row.getString(Database.Awards.JSON_DATA))
         else throw ErrorException(ErrorType.DATA_NOT_FOUND)
-    }
-
-    fun findAllByCpId(cpid: Cpid): List<AwardEntity> {
-        val query = select()
-                .all()
-                .from(Database.KEYSPACE, Database.Awards.TABLE_NAME)
-                .where(eq(Database.Awards.CPID, cpid))
-
-        val resultSet = session.execute(query)
-        val entities = ArrayList<AwardEntity>()
-        resultSet.forEach { row ->
-            entities.add(
-                    AwardEntity(
-                        cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
-                        token = row.getUUID(Database.Awards.TOKEN_ENTITY),
-                        ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
-                        owner = row.getString(Database.Awards.OWNER),
-                        status = row.getString(Database.Awards.STATUS),
-                        statusDetails = row.getString(Database.Awards.STATUS_DETAILS),
-                        jsonData = row.getString(Database.Awards.JSON_DATA)))
-        }
-        return entities
     }
 
 }
