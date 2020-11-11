@@ -19,9 +19,9 @@ class AwardDao(private val session: Session) {
     fun save(entity: AwardEntity) {
         val insert =
                 QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE_NAME)
-                        .value(Database.Awards.CPID, entity.cpid)
-                        .value(Database.Awards.TOKEN_ENTITY, entity.token)
-                        .value(Database.Awards.OCID, entity.ocid)
+                        .value(Database.Awards.CPID, entity.cpid.toString())
+                        .value(Database.Awards.TOKEN_ENTITY, entity.token.toString())
+                        .value(Database.Awards.OCID, entity.ocid.toString())
                         .value(Database.Awards.OWNER, entity.owner)
                         .value(Database.Awards.STATUS, entity.status)
                         .value(Database.Awards.STATUS_DETAILS, entity.statusDetails)
