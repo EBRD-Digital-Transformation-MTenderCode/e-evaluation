@@ -39,7 +39,7 @@ sealed class Fail {
         sealed class Database(val number: String, override val description: String) :
             Incident(level = Level.ERROR, number = number, description = description) {
 
-            class DatabaseInteractionIncident(private val exception: Exception) : Database(
+            class DatabaseInteractionIncident(val exception: Exception) : Database(
                 number = "1.1",
                 description = "Database incident."
             ) {

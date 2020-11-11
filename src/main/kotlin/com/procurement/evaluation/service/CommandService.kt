@@ -1,5 +1,6 @@
 package com.procurement.evaluation.service
 
+import com.procurement.evaluation.application.repository.HistoryRepository
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
 import com.procurement.evaluation.application.service.award.AwardCancellationResult
 import com.procurement.evaluation.application.service.award.AwardService
@@ -33,7 +34,6 @@ import com.procurement.evaluation.application.service.award.WinningAward
 import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsContext
 import com.procurement.evaluation.application.service.lot.GetUnsuccessfulLotsResult
 import com.procurement.evaluation.application.service.lot.LotService
-import com.procurement.evaluation.dao.HistoryDao
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -78,7 +78,7 @@ import java.util.*
 
 @Service
 class CommandService(
-    private val historyDao: HistoryDao,
+    private val historyRepository: HistoryRepository,
     private val statusService: StatusService,
     private val awardService: AwardService,
     private val lotService: LotService
@@ -89,7 +89,10 @@ class CommandService(
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
-        val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
+        val historyEntity = historyRepository.getHistory(cm.id, cm.command.value())
+            .orThrow {
+                throw RuntimeException("Error of loading history. ${it.description}", it.exception)
+            }
         if (historyEntity != null) {
             return toObject(ApiSuccessResponse::class.java, historyEntity.jsonData)
         }
@@ -609,7 +612,10 @@ class CommandService(
                 if (log.isDebugEnabled)
                     log.debug("Response: ${toJson(it)}")
             }
-        historyDao.saveHistory(cm.id, cm.command.value(), response)
+        historyRepository.saveHistory(cm.id, cm.command.value(), response)
+            .doOnError {
+                log.error("Error of save history. ${it.description}", it.exception)
+            }
         return response
     }
 }
