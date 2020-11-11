@@ -83,3 +83,8 @@ CREATE TABLE IF NOT EXISTS evaluation.awards
     json_data      TEXT,
     PRIMARY KEY (cpid, ocid, token_entity)
 );
+
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'OT', 'minBids', '1');
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'SV', 'minBids', '1');
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_OT', 'minBids', '1');
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_SV', 'minBids', '1');
