@@ -1,31 +1,23 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.dao.PeriodDao
+import com.procurement.evaluation.application.repository.AwardPeriodRepository
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.exception.ErrorException
+import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.ocds.Period
 import com.procurement.evaluation.model.entity.PeriodEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class PeriodService(private val periodRepository: PeriodDao) {
-
-    fun saveStartOfPeriod(cpid: Cpid, ocid: Ocid, startDate: LocalDateTime, awardCriteria: String): Period {
-        val period = PeriodEntity(
-            cpid = cpid,
-            ocid = ocid,
-            awardCriteria = awardCriteria,
-            startDate = startDate,
-            endDate = null
-        )
-
-        periodRepository.save(period)
-        return Period(period.startDate!!, null)
-    }
+class PeriodService(private val periodRepository: AwardPeriodRepository) {
 
     fun saveEndOfPeriod(cpid: Cpid, endDate: LocalDateTime): Period {
-        val period = periodRepository.getByCpid(cpid)
+        val period = periodRepository.findByCpid(cpid)
+            .orThrow { it.exception }
+            ?: throw ErrorException(ErrorType.PERIOD_NOT_FOUND)
+
         val newPeriod = PeriodEntity(
             cpid = period.cpid,
             ocid = period.ocid,
@@ -34,6 +26,8 @@ class PeriodService(private val periodRepository: PeriodDao) {
             endDate = endDate
         )
         periodRepository.save(newPeriod)
+            .doOnFail { throw it.exception }
+
         return Period(period.startDate, endDate)
     }
 
@@ -52,6 +46,8 @@ class PeriodService(private val periodRepository: PeriodDao) {
             endDate = endDate
         )
         periodRepository.save(period)
+            .doOnFail { throw it.exception }
+
         return Period(startDate, endDate)
     }
 
@@ -64,5 +60,6 @@ class PeriodService(private val periodRepository: PeriodDao) {
             endDate = null
         )
         periodRepository.save(period)
+            .doOnFail { throw it.exception }
     }
 }
