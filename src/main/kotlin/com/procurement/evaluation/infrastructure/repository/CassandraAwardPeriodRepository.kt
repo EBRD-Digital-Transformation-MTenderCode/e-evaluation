@@ -54,7 +54,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                   LIMIT 1
             """
 
-        private const val FIND_START_DATE_BY_CPID_AND_STAGE_CQL = """
+        private const val FIND_START_DATE_BY_CPID_AND_OCID_CQL = """
             SELECT ${Database.Period.START_DATE}
                  FROM ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
                 WHERE ${Database.Period.CPID}=?
@@ -81,11 +81,11 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     }
 
     private val preparedSavePeriodCQL = session.prepare(SAVE_PERIOD_CQL)
-    private val preparedFindByCpidAndStageCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
+    private val preparedFindByCpidAndOcidCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
     private val preparedFindPeriodByCpidCQL = session.prepare(FIND_PERIOD_BY_CPID_CQL)
     private val preparedSaveNewStartDateCQL = session.prepare(SAVE_NEW_START_DATE_CQL)
     private val preparedSaveEndDateCQL = session.prepare(SAVE_END_DATE_CQL)
-    private val preparedFindStartDateByCpidAndStageCQL = session.prepare(FIND_START_DATE_BY_CPID_AND_STAGE_CQL)
+    private val preparedFindStartDateByCpidAndOcidCQL = session.prepare(FIND_START_DATE_BY_CPID_AND_OCID_CQL)
 
     override fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database.DatabaseInteractionIncident> {
         preparedSavePeriodCQL.bind()
@@ -124,7 +124,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     }
 
     override fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime? {
-        val query = preparedFindByCpidAndStageCQL.bind()
+        val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.toString())
                 setString(Database.Period.OCID, ocid.toString())
@@ -179,7 +179,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     }
 
     override fun tryFindStartDateByCpidAndStage(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident> {
-        val statement = preparedFindStartDateByCpidAndStageCQL.bind()
+        val statement = preparedFindStartDateByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.toString())
                 setString(Database.Period.OCID, ocid.toString())

@@ -39,7 +39,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 WHERE ${Database.Awards.CPID}=?
             """
 
-        private const val FIND_BY_CPID_AND_STAGE_CQL = """
+        private const val FIND_BY_CPID_AND_OCID_CQL = """
                SELECT ${Database.Awards.CPID},
                       ${Database.Awards.OCID},
                       ${Database.Awards.TOKEN_ENTITY},
@@ -52,7 +52,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                   AND ${Database.Awards.OCID}=?
             """
 
-        private const val FIND_BY_CPID_AND_STAGE_AND_TOKEN_CQL = """
+        private const val FIND_BY_CPID_AND_OCID_AND_TOKEN_CQL = """
                SELECT ${Database.Awards.CPID},
                       ${Database.Awards.OCID},
                       ${Database.Awards.TOKEN_ENTITY},
@@ -93,8 +93,8 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     private val preparedFindByCpidCQL = session.prepare(FIND_BY_CPID_CQL)
-    private val preparedFindByCpidAndStageCQL = session.prepare(FIND_BY_CPID_AND_STAGE_CQL)
-    private val preparedFindByCpidAndStageAndTokenCQL = session.prepare(FIND_BY_CPID_AND_STAGE_AND_TOKEN_CQL)
+    private val preparedFindByCpidAndOcidCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
+    private val preparedFindByCpidAndOcidAndTokenCQL = session.prepare(FIND_BY_CPID_AND_OCID_AND_TOKEN_CQL)
     private val preparedSaveNewAwardCQL = session.prepare(SAVE_NEW_AWARD_CQL)
     private val preparedUpdatedAwardStatusesCQL = session.prepare(UPDATE_AWARD_STATUSES_CQL)
 
@@ -125,7 +125,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     )
 
     override fun findBy(cpid: Cpid, ocid: Ocid): List<AwardEntity> {
-        val query = preparedFindByCpidAndStageCQL.bind()
+        val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())
                 setString(Database.Awards.OCID, ocid.toString())
@@ -136,7 +136,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): AwardEntity? {
-        val query = preparedFindByCpidAndStageAndTokenCQL.bind()
+        val query = preparedFindByCpidAndOcidAndTokenCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())
                 setString(Database.Awards.OCID, ocid.toString())
@@ -211,7 +211,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     override fun tryFindBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident> {
-        val query = preparedFindByCpidAndStageCQL.bind()
+        val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())
                 setString(Database.Awards.OCID, ocid.toString())
