@@ -15,7 +15,7 @@ class RulesService(private val rulesRepository: CassandraRuleRepository) {
                 value?.toIntOrNull()
                     ?: throw ErrorException(
                         error = ErrorType.INVALID_ATTRIBUTE,
-                        message = "Cannot convert ${value} as integer value."
+                        message = "Cannot convert $value as integer value."
                     )
             }
             .orThrow {

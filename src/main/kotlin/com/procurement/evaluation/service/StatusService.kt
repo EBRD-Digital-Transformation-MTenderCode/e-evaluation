@@ -35,10 +35,9 @@ class StatusService(
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
-        val award = awards.asSequence().firstOrNull {
-            it.relatedBid == bidId
-        }
-                ?: throw ErrorException(DATA_NOT_FOUND)
+        val award = awards
+            .firstOrNull { it.relatedBid == bidId }
+            ?: throw ErrorException(DATA_NOT_FOUND)
 
         return AwardForCansRs(award.id)
     }

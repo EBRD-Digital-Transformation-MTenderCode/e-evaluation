@@ -8,12 +8,12 @@ sealed class ValidationError(
 ) : Fail.Error("VR-") {
     override val code: String = prefix + numberError
 
-    class InvalidToken() : ValidationError(
+    class InvalidToken : ValidationError(
         numberError = "10.4.2.1",
         description = "Request token doesn't match token from the database."
     )
 
-    class InvalidOwner() : ValidationError(
+    class InvalidOwner : ValidationError(
         numberError = "10.4.2.2",
         description = "Request owner doesn't match owner from the database."
     )
@@ -52,7 +52,7 @@ sealed class ValidationError(
         id = id.toString()
     )
 
-    class PeriodNotFoundOnCloseAwardPeriod() : ValidationError(
+    class PeriodNotFoundOnCloseAwardPeriod : ValidationError(
         numberError = "10.4.6.1",
         description = "Period not found."
     )
