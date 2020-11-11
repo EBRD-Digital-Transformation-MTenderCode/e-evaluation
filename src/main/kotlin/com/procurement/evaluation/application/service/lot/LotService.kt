@@ -21,7 +21,7 @@ class LotServiceImpl(
         context: GetUnsuccessfulLotsContext,
         data: GetUnsuccessfulLotsData
     ): GetUnsuccessfulLotsResult {
-        val minNumberOfBids = rulesService.getRulesMinBids(country = context.country, method = context.pmd.name)
+        val minNumberOfBids = rulesService.getRulesMinBids(country = context.country, method = context.pmd)
 
         val bidsIdsByLotId: Map<LotId, Set<BidId>> = mutableMapOf<LotId, MutableSet<BidId>>()
             .apply {

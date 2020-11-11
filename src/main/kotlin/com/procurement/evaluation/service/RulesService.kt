@@ -1,16 +1,26 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.dao.RulesDao
+import com.procurement.evaluation.dao.CassandraRuleRepository
+import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import org.springframework.stereotype.Service
 
 @Service
-class RulesService(private val rulesDao: RulesDao) {
+class RulesService(private val rulesRepository: CassandraRuleRepository) {
 
-    fun getRulesMinBids(country: String, method: String): Int {
-        return rulesDao.getValue(country, method, PARAMETER_MIN_BIDS)?.toIntOrNull()
-                ?: throw ErrorException(ErrorType.BIDS_RULES)
+    fun getRulesMinBids(country: String, method: ProcurementMethod): Int {
+        return rulesRepository.find(country, method, PARAMETER_MIN_BIDS)
+            .map { value ->
+                value?.toIntOrNull()
+                    ?: throw ErrorException(
+                        error = ErrorType.INVALID_ATTRIBUTE,
+                        message = "Cannot convert ${value} as integer value."
+                    )
+            }
+            .orThrow {
+                throw ErrorException(ErrorType.BIDS_RULES)
+            }
     }
 
     companion object {
