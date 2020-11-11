@@ -18,7 +18,7 @@ class PeriodDao(private val session: Session) {
 
     fun save(entity: PeriodEntity) {
         val insert =
-            insertInto(Database.KEYSPACE, Database.Period.TABLE)
+            insertInto(Database.KEYSPACE, Database.Period.TABLE_NAME)
                 .value(Database.Period.CPID, entity.cpid)
                 .value(Database.Period.OCID, entity.ocid)
                 .value(Database.Period.AWARD_CRITERIA, entity.awardCriteria)
@@ -30,7 +30,7 @@ class PeriodDao(private val session: Session) {
     fun getByCpIdAndStage(cpid: Cpid, ocid: Ocid): PeriodEntity {
         val query = select()
             .all()
-            .from(Database.KEYSPACE, Database.Period.TABLE)
+            .from(Database.KEYSPACE, Database.Period.TABLE_NAME)
             .where(eq(Database.Period.CPID, cpid))
             .and(eq(Database.Period.OCID, ocid)).limit(1)
         val row = session.execute(query).one()
@@ -48,7 +48,7 @@ class PeriodDao(private val session: Session) {
     fun getByCpid(cpid: Cpid): PeriodEntity {
         val query = select()
             .all()
-            .from(Database.KEYSPACE, Database.Period.TABLE)
+            .from(Database.KEYSPACE, Database.Period.TABLE_NAME)
             .where(eq(Database.Period.CPID, cpid))
             .limit(1)
 

@@ -35,7 +35,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                       ${Database.Awards.STATUS},
                       ${Database.Awards.STATUS_DETAILS},
                       ${Database.Awards.JSON_DATA}
-                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE}
+                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME}
                 WHERE ${Database.Awards.CPID}=?
             """
 
@@ -47,7 +47,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                       ${Database.Awards.STATUS},
                       ${Database.Awards.STATUS_DETAILS},
                       ${Database.Awards.JSON_DATA}
-                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE}
+                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME}
                 WHERE ${Database.Awards.CPID}=?
                   AND ${Database.Awards.OCID}=?
             """
@@ -60,14 +60,14 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                       ${Database.Awards.STATUS},
                       ${Database.Awards.STATUS_DETAILS},
                       ${Database.Awards.JSON_DATA}
-                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE}
+                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME}
                 WHERE ${Database.Awards.CPID}=?
                   AND ${Database.Awards.OCID}=?
                   AND ${Database.Awards.TOKEN_ENTITY}=?
             """
 
         private const val SAVE_NEW_AWARD_CQL = """
-               INSERT INTO ${Database.KEYSPACE}.${Database.Awards.TABLE}(
+               INSERT INTO ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME}(
                       ${Database.Awards.CPID},
                       ${Database.Awards.OCID},
                       ${Database.Awards.TOKEN_ENTITY},
@@ -81,7 +81,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             """
 
         private const val UPDATE_AWARD_STATUSES_CQL = """
-               UPDATE ${Database.KEYSPACE}.${Database.Awards.TABLE}
+               UPDATE ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME}
                   SET ${Database.Awards.STATUS}=?,
                       ${Database.Awards.STATUS_DETAILS}=?,
                       ${Database.Awards.JSON_DATA}=?

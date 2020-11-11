@@ -18,7 +18,7 @@ class AwardDao(private val session: Session) {
 
     fun save(entity: AwardEntity) {
         val insert =
-                QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE)
+                QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE_NAME)
                         .value(Database.Awards.CPID, entity.cpid)
                         .value(Database.Awards.TOKEN_ENTITY, entity.token)
                         .value(Database.Awards.OCID, entity.ocid)
@@ -37,7 +37,7 @@ class AwardDao(private val session: Session) {
     fun findAllByCpIdAndStage(cpid: Cpid, ocid: Ocid): List<AwardEntity> {
         val query = select()
                 .all()
-                .from(Database.KEYSPACE, Database.Awards.TABLE)
+                .from(Database.KEYSPACE, Database.Awards.TABLE_NAME)
                 .where(eq(Database.Awards.CPID, cpid))
                 .and(eq(Database.Awards.OCID, ocid))
 
@@ -60,7 +60,7 @@ class AwardDao(private val session: Session) {
     fun getByCpIdAndStageAndToken(cpid: Cpid, ocid: Ocid, token: UUID): AwardEntity {
         val query = select()
                 .all()
-                .from(Database.KEYSPACE, Database.Awards.TABLE)
+                .from(Database.KEYSPACE, Database.Awards.TABLE_NAME)
                 .where(eq(Database.Awards.CPID, cpid))
                 .and(eq(Database.Awards.OCID, ocid))
                 .and(eq(Database.Awards.TOKEN_ENTITY, token))
@@ -82,7 +82,7 @@ class AwardDao(private val session: Session) {
     fun findAllByCpId(cpid: Cpid): List<AwardEntity> {
         val query = select()
                 .all()
-                .from(Database.KEYSPACE, Database.Awards.TABLE)
+                .from(Database.KEYSPACE, Database.Awards.TABLE_NAME)
                 .where(eq(Database.Awards.CPID, cpid))
 
         val resultSet = session.execute(query)

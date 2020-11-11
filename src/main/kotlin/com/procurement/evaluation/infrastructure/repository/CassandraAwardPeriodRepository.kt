@@ -24,7 +24,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
 
         private const val FIND_BY_CPID_AND_STAGE_CQL = """
                SELECT ${Database.Period.START_DATE}
-                 FROM ${Database.KEYSPACE}.${Database.Period.TABLE}
+                 FROM ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
                 WHERE ${Database.Period.CPID}=?
                   AND ${Database.Period.OCID}=?
                   LIMIT 1
@@ -32,13 +32,13 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
 
         private const val FIND_START_DATE_BY_CPID_AND_STAGE_CQL = """
             SELECT ${Database.Period.START_DATE}
-                 FROM ${Database.KEYSPACE}.${Database.Period.TABLE}
+                 FROM ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
                 WHERE ${Database.Period.CPID}=?
                   AND ${Database.Period.OCID}=?
         """
 
         private const val SAVE_NEW_START_DATE_CQL = """
-               INSERT INTO ${Database.KEYSPACE}.${Database.Period.TABLE}(
+               INSERT INTO ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}(
                            ${Database.Period.CPID}, 
                            ${Database.Period.OCID}, 
                            ${Database.Period.START_DATE}
@@ -48,7 +48,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             """
 
         private const val SAVE_END_DATE_CQL = """
-               UPDATE ${Database.KEYSPACE}.${Database.Period.TABLE}
+               UPDATE ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
                   SET ${Database.Period.END_DATE}=?
                 WHERE ${Database.Period.CPID}=?
                   AND ${Database.Period.OCID}=?

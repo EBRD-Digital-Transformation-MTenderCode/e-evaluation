@@ -374,7 +374,7 @@ class CassandraAwardRepositoryIT {
     private fun createTable() {
         session.execute(
             """
-                CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Awards.TABLE} (
+                CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME} (
                     cpid           TEXT,
                     ocid           TEXT,
                     token_entity   UUID,
@@ -403,7 +403,7 @@ class CassandraAwardRepositoryIT {
         statusDetails: AwardStatusDetails = AWARD_STATUS_DETAILS,
         jsonData: String = JSON_DATA
     ) {
-        val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE)
+        val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE_NAME)
             .value(Database.Awards.CPID, CPID.toString())
             .value(Database.Awards.OCID, OCID.toString())
             .value(Database.Awards.TOKEN_ENTITY, TOKEN)

@@ -184,7 +184,7 @@ class CassandraAwardPeriodRepositoryIT {
     private fun createTable() {
         session.execute(
             """
-                   CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Period.TABLE}
+                   CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
                     (
                         cpid           TEXT,
                         ocid           TEXT,
@@ -198,7 +198,7 @@ class CassandraAwardPeriodRepositoryIT {
     }
 
     private fun insertAwardPeriod(endDate: LocalDateTime? = null) {
-        val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Period.TABLE)
+        val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Period.TABLE_NAME)
             .value(Database.Period.CPID, CPID.toString())
             .value(Database.Period.OCID, OCID.toString())
             .value(Database.Period.AWARD_CRITERIA, AWARD_CRITERIA)
@@ -209,7 +209,7 @@ class CassandraAwardPeriodRepositoryIT {
 
     private fun findAwardPeriodEnd(): LocalDateTime? {
         val query = QueryBuilder.select(Database.Period.END_DATE)
-            .from(Database.KEYSPACE, Database.Period.TABLE)
+            .from(Database.KEYSPACE, Database.Period.TABLE_NAME)
             .where(QueryBuilder.eq(Database.Period.CPID, CPID.toString()))
             .and(QueryBuilder.eq(Database.Period.OCID, OCID.toString()))
 

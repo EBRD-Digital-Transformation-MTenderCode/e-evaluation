@@ -18,7 +18,7 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
     companion object {
 
         private const val SAVE_HISTORY_CQL = """
-               INSERT INTO ${Database.KEYSPACE}.${Database.History.TABLE}(
+               INSERT INTO ${Database.KEYSPACE}.${Database.History.TABLE_NAME}(
                       ${Database.History.COMMAND_ID},
                       ${Database.History.COMMAND_NAME},
                       ${Database.History.COMMAND_DATE},
@@ -33,7 +33,7 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
                       ${Database.History.COMMAND_NAME},
                       ${Database.History.COMMAND_DATE},
                       ${Database.History.JSON_DATA}
-                 FROM ${Database.KEYSPACE}.${Database.History.TABLE}
+                 FROM ${Database.KEYSPACE}.${Database.History.TABLE_NAME}
                 WHERE ${Database.History.COMMAND_ID}=?
                   AND ${Database.History.COMMAND_NAME}=?
                LIMIT 1

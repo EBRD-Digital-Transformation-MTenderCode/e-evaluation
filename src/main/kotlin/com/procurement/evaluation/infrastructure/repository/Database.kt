@@ -4,7 +4,7 @@ object Database {
     const val KEYSPACE = "evaluation"
 
     object History {
-        const val TABLE = "history"
+        const val TABLE_NAME = "history"
         const val COMMAND_ID = "command_id"
         const val COMMAND_NAME = "command_name"
         const val COMMAND_DATE = "command_date"
@@ -12,7 +12,7 @@ object Database {
     }
 
     object Rules {
-        const val TABLE = "rules"
+        const val TABLE_NAME = "rules"
         const val COUNTRY = "country"
         const val PMD = "pmd"
         const val PARAMETER = "parameter"
@@ -20,7 +20,7 @@ object Database {
     }
 
     object Period {
-        const val TABLE = "periods"
+        const val TABLE_NAME = "periods"
         const val CPID = "cpid"
         const val OCID = "ocid"
         const val AWARD_CRITERIA = "award_criteria"
@@ -29,7 +29,7 @@ object Database {
     }
 
     object Awards {
-        const val TABLE = "awards"
+        const val TABLE_NAME = "awards"
         const val CPID = "cpid"
         const val OCID = "ocid"
         const val TOKEN_ENTITY = "token_entity"

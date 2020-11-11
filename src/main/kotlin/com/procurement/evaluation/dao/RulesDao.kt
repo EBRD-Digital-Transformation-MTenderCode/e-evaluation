@@ -12,7 +12,7 @@ class RulesDao(private val session: Session) {
     fun getValue(country: String, pmd: String, parameter: String): String? {
         val query = select()
                 .column(Database.Rules.VALUE)
-                .from(Database.KEYSPACE, Database.Rules.TABLE)
+                .from(Database.KEYSPACE, Database.Rules.TABLE_NAME)
                 .where(eq(Database.Rules.COUNTRY, country))
                 .and(eq(Database.Rules.PMD, pmd))
                 .and(eq(Database.Rules.PARAMETER, parameter))
