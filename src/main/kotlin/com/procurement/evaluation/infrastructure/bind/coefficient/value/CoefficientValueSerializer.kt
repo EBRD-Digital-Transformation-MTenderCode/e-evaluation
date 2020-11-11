@@ -22,25 +22,9 @@ class CoefficientValueSerializer : JsonSerializer<CoefficientValue>() {
         provider: SerializerProvider
     ) =
         when (coefficientValue) {
-            is CoefficientValue.AsString  -> jsonGenerator.writeString(
-                serialize(
-                    coefficientValue
-                )
-            )
-            is CoefficientValue.AsNumber  -> jsonGenerator.writeNumber(
-                serialize(
-                    coefficientValue
-                )
-            )
-            is CoefficientValue.AsBoolean -> jsonGenerator.writeBoolean(
-                serialize(
-                    coefficientValue
-                )
-            )
-            is CoefficientValue.AsInteger -> jsonGenerator.writeNumber(
-                serialize(
-                    coefficientValue
-                )
-            )
+            is CoefficientValue.AsString -> jsonGenerator.writeString(serialize(coefficientValue))
+            is CoefficientValue.AsNumber -> jsonGenerator.writeNumber(serialize(coefficientValue))
+            is CoefficientValue.AsBoolean -> jsonGenerator.writeBoolean(serialize(coefficientValue))
+            is CoefficientValue.AsInteger -> jsonGenerator.writeNumber(serialize(coefficientValue))
         }
 }

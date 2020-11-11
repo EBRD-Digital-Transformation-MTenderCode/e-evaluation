@@ -10,16 +10,16 @@ import java.math.BigDecimal
 
 class CoefficientRateSerializer : JsonSerializer<CoefficientRate>() {
     companion object {
-        fun serialize(CoefficientRate: CoefficientRate): BigDecimal = CoefficientRate.rate
+        fun serialize(coefficientRate: CoefficientRate): BigDecimal = coefficientRate.rate
     }
 
     @Throws(IOException::class, JsonProcessingException::class)
     override fun serialize(
-        CoefficientRate: CoefficientRate,
+        coefficientRate: CoefficientRate,
         jsonGenerator: JsonGenerator,
         provider: SerializerProvider
     ) {
-        val coefficient = serialize(CoefficientRate)
+        val coefficient = serialize(coefficientRate)
         if (coefficient.stripTrailingZeros().scale() == 0) {
             jsonGenerator.writeNumber(coefficient.longValueExact())
         } else {
