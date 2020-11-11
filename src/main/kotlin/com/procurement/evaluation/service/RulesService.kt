@@ -1,9 +1,9 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.dao.CassandraRuleRepository
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.repository.rule.CassandraRuleRepository
 import org.springframework.stereotype.Service
 
 @Service

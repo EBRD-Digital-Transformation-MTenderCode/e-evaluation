@@ -1,6 +1,7 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.repository.award.AwardRepository
+import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
@@ -14,7 +15,6 @@ import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.cpid
 import com.procurement.evaluation.model.dto.bpe.ocid
 import com.procurement.evaluation.model.dto.ocds.Award
-import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.toLocal
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service

@@ -14,12 +14,13 @@ import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
-import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.repository.award.AwardRepository
+import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.infrastructure.repository.award.CassandraAwardRepository
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
-import com.procurement.evaluation.model.entity.AwardEntity
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

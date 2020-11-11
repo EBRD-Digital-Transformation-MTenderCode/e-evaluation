@@ -1,4 +1,4 @@
-package com.procurement.evaluation.dao
+package com.procurement.evaluation.application.repository.rule
 
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.model.ProcurementMethod

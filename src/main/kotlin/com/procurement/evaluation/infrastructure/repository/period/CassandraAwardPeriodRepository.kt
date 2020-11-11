@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.repository
+package com.procurement.evaluation.infrastructure.repository.period
 
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
@@ -6,17 +6,18 @@ import com.datastax.driver.core.Session
 import com.datastax.driver.core.Statement
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
-import com.procurement.evaluation.application.repository.AwardPeriodRepository
+import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
+import com.procurement.evaluation.application.repository.period.model.PeriodEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.infrastructure.tools.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.lib.functional.MaybeFail
-import com.procurement.evaluation.model.entity.PeriodEntity
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 

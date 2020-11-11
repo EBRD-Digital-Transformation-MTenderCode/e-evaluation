@@ -13,9 +13,10 @@ import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
-import com.procurement.evaluation.application.repository.AwardPeriodRepository
+import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepository
 import com.procurement.evaluation.infrastructure.tools.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import org.junit.jupiter.api.AfterEach

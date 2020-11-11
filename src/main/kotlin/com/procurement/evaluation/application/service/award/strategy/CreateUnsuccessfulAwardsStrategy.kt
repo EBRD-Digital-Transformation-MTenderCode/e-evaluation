@@ -1,7 +1,8 @@
 package com.procurement.evaluation.application.service.award.strategy
 
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
-import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.repository.award.AwardRepository
+import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asFailure
@@ -16,7 +17,6 @@ import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulawar
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
-import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
 import com.procurement.evaluation.utils.toJson
 

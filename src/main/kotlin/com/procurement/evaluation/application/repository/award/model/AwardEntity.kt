@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.entity
+package com.procurement.evaluation.application.repository.award.model
 
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid

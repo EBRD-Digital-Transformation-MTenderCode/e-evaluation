@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.model.entity
+package com.procurement.evaluation.application.repository.history.model
 
 import java.util.*
 

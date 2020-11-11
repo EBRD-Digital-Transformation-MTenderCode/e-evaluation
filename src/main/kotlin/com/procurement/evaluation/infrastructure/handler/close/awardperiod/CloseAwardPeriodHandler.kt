@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.handler.close.awardperiod
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.evaluation.application.repository.HistoryRepository
+import com.procurement.evaluation.application.repository.history.HistoryRepository
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.domain.functional.Result

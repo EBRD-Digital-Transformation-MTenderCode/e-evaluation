@@ -6,8 +6,9 @@ import com.procurement.evaluation.application.model.award.requirement.response.A
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
-import com.procurement.evaluation.application.repository.AwardPeriodRepository
-import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.repository.award.AwardRepository
+import com.procurement.evaluation.application.repository.award.model.AwardEntity
+import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.functional.Result
@@ -74,7 +75,6 @@ import com.procurement.evaluation.model.dto.ocds.RequirementResponse
 import com.procurement.evaluation.model.dto.ocds.Value
 import com.procurement.evaluation.model.dto.ocds.asMoney
 import com.procurement.evaluation.model.dto.ocds.asValue
-import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.service.GenerationService
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject

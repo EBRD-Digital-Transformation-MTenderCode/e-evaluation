@@ -1,6 +1,6 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.application.repository.HistoryRepository
+import com.procurement.evaluation.application.repository.history.HistoryRepository
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
 import com.procurement.evaluation.application.service.award.AwardCancellationResult
 import com.procurement.evaluation.application.service.award.AwardService

@@ -1,11 +1,11 @@
-package com.procurement.evaluation.application.repository
+package com.procurement.evaluation.application.repository.period
 
+import com.procurement.evaluation.application.repository.period.model.PeriodEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.lib.functional.MaybeFail
-import com.procurement.evaluation.model.entity.PeriodEntity
 import java.time.LocalDateTime
 
 interface AwardPeriodRepository {

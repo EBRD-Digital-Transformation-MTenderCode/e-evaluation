@@ -1,12 +1,12 @@
-package com.procurement.evaluation.application.repository
+package com.procurement.evaluation.application.repository.award
 
+import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.infrastructure.fail.Fail
-import com.procurement.evaluation.model.entity.AwardEntity
 
 interface AwardRepository {
     fun findBy(cpid: Cpid): List<AwardEntity>

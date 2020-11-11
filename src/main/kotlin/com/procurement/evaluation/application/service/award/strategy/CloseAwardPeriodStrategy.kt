@@ -1,7 +1,7 @@
 package com.procurement.evaluation.application.service.award.strategy
 
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
-import com.procurement.evaluation.application.repository.AwardPeriodRepository
+import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.infrastructure.fail.Fail

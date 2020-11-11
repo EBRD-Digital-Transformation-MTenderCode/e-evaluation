@@ -1,12 +1,12 @@
 package com.procurement.evaluation.service
 
-import com.procurement.evaluation.application.repository.AwardPeriodRepository
+import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
+import com.procurement.evaluation.application.repository.period.model.PeriodEntity
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.model.dto.ocds.Period
-import com.procurement.evaluation.model.entity.PeriodEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 

@@ -1,19 +1,20 @@
-package com.procurement.evaluation.infrastructure.repository
+package com.procurement.evaluation.infrastructure.repository.history
 
 import com.datastax.driver.core.Session
-import com.procurement.evaluation.application.repository.HistoryRepository
+import com.procurement.evaluation.application.repository.history.HistoryRepository
+import com.procurement.evaluation.application.repository.history.model.HistoryEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
-import com.procurement.evaluation.infrastructure.model.entity.HistoryEntity
+import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.utils.localNowUTC
 import com.procurement.evaluation.utils.toDate
 import com.procurement.evaluation.utils.toJson
 import org.springframework.stereotype.Repository
 
 @Repository
-class HistoryRepositoryCassandra(private val session: Session) : HistoryRepository {
+class CassandraHistoryRepository(private val session: Session) : HistoryRepository {
 
     companion object {
 

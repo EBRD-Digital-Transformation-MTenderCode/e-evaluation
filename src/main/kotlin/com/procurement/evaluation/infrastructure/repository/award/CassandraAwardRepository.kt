@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.repository
+package com.procurement.evaluation.infrastructure.repository.award
 
 import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.BoundStatement
@@ -8,7 +8,8 @@ import com.datastax.driver.core.Session
 import com.datastax.driver.core.Statement
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
-import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.application.repository.award.AwardRepository
+import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
@@ -18,8 +19,8 @@ import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.model.dto.ocds.Award
-import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Repository
 
