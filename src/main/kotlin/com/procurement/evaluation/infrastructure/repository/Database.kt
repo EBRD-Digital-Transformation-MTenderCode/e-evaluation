@@ -27,4 +27,15 @@ object Database {
         const val START_DATE = "start_date"
         const val END_DATE = "end_date"
     }
+
+    object Awards {
+        const val TABLE = "awards"
+        const val CPID = "cpid"
+        const val OCID = "ocid"
+        const val TOKEN_ENTITY = "token_entity"
+        const val STATUS = "status"
+        const val STATUS_DETAILS = "status_details"
+        const val OWNER = "owner"
+        const val JSON_DATA = "json_data"
+    }
 }

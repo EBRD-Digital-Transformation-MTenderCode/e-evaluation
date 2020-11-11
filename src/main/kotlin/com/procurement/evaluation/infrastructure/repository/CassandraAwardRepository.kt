@@ -13,90 +13,81 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
-import com.procurement.evaluation.domain.model.enums.Stage
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.entity.AwardEntity
 import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Repository
-import java.util.*
 
 @Repository
 class CassandraAwardRepository(private val session: Session) : AwardRepository {
     companion object {
-        private const val keySpace = "ocds"
-        private const val tableName = "evaluation_award"
-        private const val columnCpid = "cp_id"
-        private const val columnStage = "stage"
-        private const val columnToken = "token_entity"
-        private const val columnOwner = "owner"
-        private const val columnStatus = "status"
-        private const val columnStatusDetails = "status_details"
-        private const val columnJsonData = "json_data"
 
         private const val FIND_BY_CPID_CQL = """
-               SELECT $columnCpid,
-                      $columnStage,
-                      $columnToken,
-                      $columnOwner,
-                      $columnStatus,
-                      $columnStatusDetails,
-                      $columnJsonData
-                 FROM $keySpace.$tableName
-                WHERE $columnCpid=?
+               SELECT ${Database.Awards.CPID},
+                      ${Database.Awards.OCID},
+                      ${Database.Awards.TOKEN_ENTITY},
+                      ${Database.Awards.OWNER},
+                      ${Database.Awards.STATUS},
+                      ${Database.Awards.STATUS_DETAILS},
+                      ${Database.Awards.JSON_DATA}
+                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE}
+                WHERE ${Database.Awards.CPID}=?
             """
 
         private const val FIND_BY_CPID_AND_STAGE_CQL = """
-               SELECT $columnCpid,
-                      $columnStage,
-                      $columnToken,
-                      $columnOwner,
-                      $columnStatus,
-                      $columnStatusDetails,
-                      $columnJsonData
-                 FROM $keySpace.$tableName
-                WHERE $columnCpid=?
-                  AND $columnStage=?
+               SELECT ${Database.Awards.CPID},
+                      ${Database.Awards.OCID},
+                      ${Database.Awards.TOKEN_ENTITY},
+                      ${Database.Awards.OWNER},
+                      ${Database.Awards.STATUS},
+                      ${Database.Awards.STATUS_DETAILS},
+                      ${Database.Awards.JSON_DATA}
+                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE}
+                WHERE ${Database.Awards.CPID}=?
+                  AND ${Database.Awards.OCID}=?
             """
 
         private const val FIND_BY_CPID_AND_STAGE_AND_TOKEN_CQL = """
-               SELECT $columnCpid,
-                      $columnStage,
-                      $columnToken,
-                      $columnOwner,
-                      $columnStatus,
-                      $columnStatusDetails,
-                      $columnJsonData
-                 FROM $keySpace.$tableName
-                WHERE $columnCpid=?
-                  AND $columnStage=?
-                  AND $columnToken=?
+               SELECT ${Database.Awards.CPID},
+                      ${Database.Awards.OCID},
+                      ${Database.Awards.TOKEN_ENTITY},
+                      ${Database.Awards.OWNER},
+                      ${Database.Awards.STATUS},
+                      ${Database.Awards.STATUS_DETAILS},
+                      ${Database.Awards.JSON_DATA}
+                 FROM ${Database.KEYSPACE}.${Database.Awards.TABLE}
+                WHERE ${Database.Awards.CPID}=?
+                  AND ${Database.Awards.OCID}=?
+                  AND ${Database.Awards.TOKEN_ENTITY}=?
             """
 
         private const val SAVE_NEW_AWARD_CQL = """
-               INSERT INTO $keySpace.$tableName(
-                      $columnCpid,
-                      $columnStage,
-                      $columnToken,
-                      $columnOwner,
-                      $columnStatus,
-                      $columnStatusDetails,
-                      $columnJsonData
+               INSERT INTO ${Database.KEYSPACE}.${Database.Awards.TABLE}(
+                      ${Database.Awards.CPID},
+                      ${Database.Awards.OCID},
+                      ${Database.Awards.TOKEN_ENTITY},
+                      ${Database.Awards.OWNER},
+                      ${Database.Awards.STATUS},
+                      ${Database.Awards.STATUS_DETAILS},
+                      ${Database.Awards.JSON_DATA}
                )
                VALUES(?,?,?,?,?,?,?)
                IF NOT EXISTS
             """
 
         private const val UPDATE_AWARD_STATUSES_CQL = """
-               UPDATE $keySpace.$tableName
-                  SET $columnStatus=?,
-                      $columnStatusDetails=?,
-                      $columnJsonData=?
-                WHERE $columnCpid=?
-                  AND $columnStage=?
-                  AND $columnToken=?
+               UPDATE ${Database.KEYSPACE}.${Database.Awards.TABLE}
+                  SET ${Database.Awards.STATUS}=?,
+                      ${Database.Awards.STATUS_DETAILS}=?,
+                      ${Database.Awards.JSON_DATA}=?
+                WHERE ${Database.Awards.CPID}=?
+                  AND ${Database.Awards.OCID}=?
+                  AND ${Database.Awards.TOKEN_ENTITY}=?
                IF EXISTS
             """
     }
@@ -107,10 +98,10 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     private val preparedSaveNewAwardCQL = session.prepare(SAVE_NEW_AWARD_CQL)
     private val preparedUpdatedAwardStatusesCQL = session.prepare(UPDATE_AWARD_STATUSES_CQL)
 
-    override fun findBy(cpid: String): List<AwardEntity> {
+    override fun findBy(cpid: Cpid): List<AwardEntity> {
         val query = preparedFindByCpidCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
+                setString(Database.Awards.CPID, cpid.toString())
             }
 
         val resultSet = load(query)
@@ -124,58 +115,58 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     private fun convertToAwardEntity(row: Row): AwardEntity = AwardEntity(
-        cpId = row.getString(columnCpid),
-        token = row.getUUID(columnToken),
-        stage = row.getString(columnStage),
-        owner = row.getString(columnOwner),
-        status = row.getString(columnStatus),
-        statusDetails = row.getString(columnStatusDetails),
-        jsonData = row.getString(columnJsonData)
+        cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
+        token = row.getUUID(Database.Awards.TOKEN_ENTITY),
+        ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
+        owner = row.getString(Database.Awards.OWNER),
+        status = row.getString(Database.Awards.STATUS),
+        statusDetails = row.getString(Database.Awards.STATUS_DETAILS),
+        jsonData = row.getString(Database.Awards.JSON_DATA)
     )
 
-    override fun findBy(cpid: String, stage: String): List<AwardEntity> {
+    override fun findBy(cpid: Cpid, ocid: Ocid): List<AwardEntity> {
         val query = preparedFindByCpidAndStageCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
-                setString(columnStage, stage)
+                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.OCID, ocid.toString())
             }
 
         val resultSet = load(query)
         return resultSet.map { convertToAwardEntity(it) }
     }
 
-    override fun findBy(cpid: String, stage: String, token: UUID): AwardEntity? {
+    override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): AwardEntity? {
         val query = preparedFindByCpidAndStageAndTokenCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
-                setString(columnStage, stage)
-                setUUID(columnToken, token)
+                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.OCID, ocid.toString())
+                setUUID(Database.Awards.TOKEN_ENTITY, token)
             }
 
         val resultSet = load(query)
         return resultSet.one()?.let { convertToAwardEntity(it) }
     }
 
-    override fun saveNew(cpid: String, award: AwardEntity) {
+    override fun saveNew(cpid: Cpid, award: AwardEntity) {
         val statement = statementForAwardSave(cpid, award)
 
         val result = saveNew(statement)
         if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${award.stage}' to the database. Record is already.")
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${award.ocid}' to the database. Record is already.")
     }
 
     private fun statementForAwardSave(
-        cpid: String,
+        cpid: Cpid,
         award: AwardEntity
     ): BoundStatement = preparedSaveNewAwardCQL.bind()
         .apply {
-            setString(columnCpid, cpid)
-            setString(columnStage, award.stage)
-            setUUID(columnToken, award.token)
-            setString(columnOwner, award.owner)
-            setString(columnStatus, award.status)
-            setString(columnStatusDetails, award.statusDetails)
-            setString(columnJsonData, award.jsonData)
+            setString(Database.Awards.CPID, cpid.toString())
+            setString(Database.Awards.OCID, award.ocid.toString())
+            setUUID(Database.Awards.TOKEN_ENTITY, award.token)
+            setString(Database.Awards.OWNER, award.owner)
+            setString(Database.Awards.STATUS, award.status)
+            setString(Database.Awards.STATUS_DETAILS, award.statusDetails)
+            setString(Database.Awards.JSON_DATA, award.jsonData)
         }
 
     private fun saveNew(statement: BoundStatement): ResultSet = try {
@@ -184,7 +175,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         throw SaveEntityException(message = "Error writing new award to database.", cause = exception)
     }
 
-    override fun saveNew(cpid: String, awards: List<AwardEntity>) {
+    override fun saveNew(cpid: Cpid, awards: List<AwardEntity>) {
         val statements = BatchStatement().apply {
             for (award in awards) {
                 add(statementForAwardSave(cpid = cpid, award = award))
@@ -201,14 +192,14 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         throw SaveEntityException(message = "Error writing new award(s) to database.", cause = exception)
     }
 
-    override fun update(cpid: String, updatedAward: AwardEntity) {
+    override fun update(cpid: Cpid, updatedAward: AwardEntity) {
         val statement = statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
         val result = executeUpdating(statement)
         if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and stage '${updatedAward.stage}' and token to the database. Record is already.")
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${updatedAward.ocid}' and token to the database. Record is already.")
     }
 
-    override fun update(cpid: String, updatedAwards: Collection<AwardEntity>) {
+    override fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>) {
         val statements = BatchStatement().apply {
             for (updatedAward in updatedAwards) {
                 add(statementForUpdateAward(cpid = cpid, updatedAward = updatedAward))
@@ -219,11 +210,11 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
     }
 
-    override fun tryFindBy(cpid: Cpid, stage: Stage): Result<List<AwardEntity>, Fail.Incident> {
+    override fun tryFindBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident> {
         val query = preparedFindByCpidAndStageCQL.bind()
             .apply {
-                setString(columnCpid, cpid.toString())
-                setString(columnStage, stage.toString())
+                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.OCID, ocid.toString())
             }
 
         val resultSet = query.tryExecute(session)
@@ -231,10 +222,8 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
-    override fun tryFindBy(cpid: Cpid, stage: Stage, awardId: AwardId): Result<AwardEntity?, Fail> {
-        val awardEntities = tryFindBy(
-            cpid = cpid, stage = stage
-        )
+    override fun tryFindBy(cpid: Cpid, ocid: Ocid, awardId: AwardId): Result<AwardEntity?, Fail> {
+        val awardEntities = tryFindBy(cpid = cpid, ocid = ocid)
             .orForwardFail { incident -> return incident }
             .takeIf { it.isNotEmpty() }
             ?: return null.asSuccess()
@@ -255,7 +244,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         val statements = BatchStatement()
             .apply {
                 for (award in awards) {
-                    add(statementForAwardSave(cpid = cpid.toString(), award = award))
+                    add(statementForAwardSave(cpid = cpid, award = award))
                 }
             }
         val result = statements.tryExecute(session = session)
@@ -270,21 +259,21 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     }
 
     override fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
-        val statement = statementForUpdateAward(cpid = cpid.toString(), updatedAward = updatedAward)
+        val statement = statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
         val result = statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
         return result.wasApplied().asSuccess()
     }
 
-    private fun statementForUpdateAward(cpid: String, updatedAward: AwardEntity): BoundStatement =
+    private fun statementForUpdateAward(cpid: Cpid, updatedAward: AwardEntity): BoundStatement =
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
-                setString(columnStage, updatedAward.stage)
-                setUUID(columnToken, updatedAward.token)
-                setString(columnStatus, updatedAward.status)
-                setString(columnStatusDetails, updatedAward.statusDetails)
-                setString(columnJsonData, updatedAward.jsonData)
+                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.OCID, updatedAward.ocid.toString())
+                setUUID(Database.Awards.TOKEN_ENTITY, updatedAward.token)
+                setString(Database.Awards.STATUS, updatedAward.status)
+                setString(Database.Awards.STATUS_DETAILS, updatedAward.statusDetails)
+                setString(Database.Awards.JSON_DATA, updatedAward.jsonData)
             }
 
     private fun executeUpdating(statement: Statement): ResultSet = try {

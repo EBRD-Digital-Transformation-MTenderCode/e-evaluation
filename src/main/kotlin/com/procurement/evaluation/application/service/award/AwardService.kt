@@ -14,7 +14,7 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.ValidationResult
 import com.procurement.evaluation.domain.functional.asSuccess
-import com.procurement.evaluation.domain.model.ProcurementMethod
+import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.bid.BidId
@@ -194,7 +194,6 @@ class AwardServiceImpl(
     override fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData {
         val cpid = context.cpid
         val ocid = context.ocid
-        val stage = context.stage
 
         //VR-7.10.9
         checkNumberSuppliers(suppliers = data.award.suppliers)
@@ -208,7 +207,7 @@ class AwardServiceImpl(
         //VR-7.10.8(1)
         checkSuppliersIdentifiers(suppliers = data.award.suppliers)
 
-        val awardsEntities = awardRepository.findBy(cpid = cpid.toString())
+        val awardsEntities = awardRepository.findBy(cpid = cpid)
         val awards = awardsEntities.map {
             toObject(Award::class.java, it.jsonData)
         }
@@ -326,8 +325,8 @@ class AwardServiceImpl(
         val prevAwardPeriodStart = awardPeriodRepository.findStartDateBy(cpid = cpid, ocid = ocid)
 
         val newAwardEntity = AwardEntity(
-            cpId = cpid.toString(),
-            stage = stage,
+            cpid = cpid,
+            ocid = ocid,
             status = award.status.toString(),
             statusDetails = award.statusDetails.toString(),
             token = UUID.fromString(award.token),
@@ -344,7 +343,7 @@ class AwardServiceImpl(
             newAwardPeriodStart
         }
 
-        awardRepository.saveNew(cpid = cpid.toString(), award = newAwardEntity)
+        awardRepository.saveNew(cpid = cpid, award = newAwardEntity)
 
         return getCreatedAwardData(award, awardPeriodStart, lotAwarded)
     }
@@ -663,7 +662,7 @@ class AwardServiceImpl(
     override fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluateAwardResult {
         val cpid = context.cpid
 
-        val awardEntity = awardRepository.findBy(cpid = cpid, stage = context.stage, token = context.token)
+        val awardEntity = awardRepository.findBy(cpid = cpid, ocid = context.ocid, token = context.token)
             ?: throw ErrorException(error = AWARD_NOT_FOUND)
 
         //VR-7.10.1
@@ -815,7 +814,7 @@ class AwardServiceImpl(
             Stage.TP,
             Stage.NP -> {
                 val lots = award.relatedLots.toSet()
-                val relatedAwards = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+                val relatedAwards = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
                     .asSequence()
                     .map { entity ->
                         toObject(Award::class.java, entity.jsonData)
@@ -973,7 +972,7 @@ class AwardServiceImpl(
      *   eEvaluation sets parameter awardingSucces == FALSE and returns it for Response;
      */
     override fun getWinning(context: GetWinningAwardContext): WinningAward? {
-        val awardEntities: List<AwardEntity> = awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+        val awardEntities: List<AwardEntity> = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
         if (awardEntities.isEmpty())
             throw ErrorException(DATA_NOT_FOUND)
 
@@ -1085,7 +1084,7 @@ class AwardServiceImpl(
      *   - award.relatedBid;
      */
     override fun getEvaluated(context: GetEvaluatedAwardsContext): List<EvaluatedAward> =
-        awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+        awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
             .toSequenceOfAwards()
             .filterByLotId(lotId = context.lotId)
             .filter { award ->
@@ -1160,8 +1159,7 @@ class AwardServiceImpl(
             .map { it.id }
             .toSet()
 
-        val stage = getStage(context)
-        val updatedAwards = loadAwards(cpid = context.cpid, stage = stage)
+        val updatedAwards = loadAwards(cpid = context.cpid)
             .filter { entity ->
                 isValidStatuses(entity)
             }
@@ -1198,31 +1196,9 @@ class AwardServiceImpl(
         )
     }
 
-    private fun getStage(context: FinalAwardsStatusByLotsContext): String = when (context.pmd) {
-        ProcurementMethod.OT, ProcurementMethod.TEST_OT,
-        ProcurementMethod.SV, ProcurementMethod.TEST_SV,
-        ProcurementMethod.MV, ProcurementMethod.TEST_MV -> "EV"
-
-        ProcurementMethod.CD, ProcurementMethod.TEST_CD,
-        ProcurementMethod.DA, ProcurementMethod.TEST_DA,
-        ProcurementMethod.DC, ProcurementMethod.TEST_DC,
-        ProcurementMethod.IP, ProcurementMethod.TEST_IP,
-        ProcurementMethod.NP, ProcurementMethod.TEST_NP,
-        ProcurementMethod.OP, ProcurementMethod.TEST_OP -> "NP"
-
-        ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
-        ProcurementMethod.RT, ProcurementMethod.TEST_RT -> "TP"
-
-        ProcurementMethod.CF, ProcurementMethod.TEST_CF,
-        ProcurementMethod.FA, ProcurementMethod.TEST_FA,
-        ProcurementMethod.OF, ProcurementMethod.TEST_OF -> throw ErrorException(ErrorType.INVALID_PMD)
-    }
-
-    private fun loadAwards(cpid: String, stage: String): Sequence<AwardEntity> =
-        awardRepository.findBy(cpid = cpid, stage = stage)
-            .takeIf {
-                it.isNotEmpty()
-            }
+    private fun loadAwards(cpid: Cpid): Sequence<AwardEntity> =
+        awardRepository.findBy(cpid = cpid)
+            .takeIf { it.isNotEmpty() }
             ?.asSequence()
             ?: throw ErrorException(error = AWARD_NOT_FOUND)
 
@@ -1258,8 +1234,8 @@ class AwardServiceImpl(
         }
         val entities = createdAwards.map { award ->
             AwardEntity(
-                cpId = context.cpid,
-                stage = context.stage,
+                cpid = context.cpid,
+                ocid = context.ocid,
                 token = UUID.fromString(award.token),
                 statusDetails = award.statusDetails.key,
                 status = award.status.key,
@@ -1322,8 +1298,8 @@ class AwardServiceImpl(
         }
         val entities = createdAwards.map { award ->
             AwardEntity(
-                cpId = context.cpid,
-                stage = context.stage,
+                cpid = context.cpid,
+                ocid = context.ocid,
                 token = UUID.fromString(award.token),
                 statusDetails = award.statusDetails.key,
                 status = award.status.key,
@@ -1352,14 +1328,14 @@ class AwardServiceImpl(
 
         val awardEntityByAwardId: MutableMap<AwardId, AwardEntity> = mutableMapOf()
         val awards: MutableList<Award> = mutableListOf()
-        awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+        awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
             .forEach { entity ->
                 val award: Award = toObject(Award::class.java, entity.jsonData)
                 val prev = awardEntityByAwardId.put(LotId.fromString(award.id), entity)
                 if (prev != null)
                     throw ErrorException(
                         error = ErrorType.INVALID_AWARD_ID,
-                        message = "The duplicate of the award identifier '${award.id}' by cpid: '${context.cpid}' and stage: '${context.stage}'."
+                        message = "The duplicate of the award identifier '${award.id}' by cpid: '${context.cpid}' and ocid: '${context.ocid}'."
                     )
 
                 awards.add(award)
@@ -1479,8 +1455,8 @@ class AwardServiceImpl(
 
         val awardsEntities = awardsByUnsuccessfulLots.map { award ->
             AwardEntity(
-                cpId = context.cpid,
-                stage = context.stage,
+                cpid = context.cpid,
+                ocid = context.ocid,
                 owner = context.owner,
                 token = Token.fromString(award.token!!),
                 status = award.status.key,
@@ -1509,10 +1485,10 @@ class AwardServiceImpl(
     }
 
     override fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult {
-        val awardEntity = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
+        val awardEntity = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid, token = context.token)
             ?: throw ErrorException(
                 error = AWARD_NOT_FOUND,
-                message = "Record of the award by cpid '${context.cpid}', stage '${context.stage}' and token '${context.token}' not found."
+                message = "Record of the award by cpid '${context.cpid}', ocid '${context.ocid}' and token '${context.token}' not found."
             )
 
         awardEntity.checkOwner(context.owner)
@@ -1540,7 +1516,7 @@ class AwardServiceImpl(
     }
 
     override fun startConsideration(context: StartConsiderationContext): StartConsiderationResult {
-        val awardEntity = awardRepository.findBy(cpid = context.cpid, stage = context.stage, token = context.token)
+        val awardEntity = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid, token = context.token)
             ?.also { entity ->
                 entity.checkOwner(context.owner)
             }
@@ -1577,7 +1553,7 @@ class AwardServiceImpl(
 
     override fun getNext(context: GetNextAwardContext): GetNextAwardResult {
         val allAwardsToEntities: Map<Award, AwardEntity> =
-            awardRepository.findBy(cpid = context.cpid, stage = context.stage)
+            awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
                 .takeIf { it.isNotEmpty() }
                 ?.asSequence()
                 ?.map { entity ->
@@ -1653,10 +1629,10 @@ class AwardServiceImpl(
                 val unsuccessfulAwards: List<Award> = generateUnsuccessfulAwards(lots = data.lots, context = context)
                 val entities = unsuccessfulAwards.map { award ->
                     AwardEntity(
-                        cpId = context.cpid,
+                        cpid = context.cpid,
                         token = Token.fromString(award.token!!),
                         owner = context.owner,
-                        stage = context.stage,
+                        ocid = context.ocid,
                         status = award.status.key,
                         statusDetails = award.statusDetails.key,
                         jsonData = toJson(award)
@@ -1691,7 +1667,7 @@ class AwardServiceImpl(
     override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail> {
         val awardEntities = awardRepository.tryFindBy(
             cpid = params.cpid,
-            stage = params.ocid.stage
+            ocid = params.ocid
         ).orForwardFail { incident -> return incident }
 
         val awardsIds = params.awardIds.toSetBy { it.toString() }
@@ -1730,7 +1706,7 @@ class AwardServiceImpl(
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
         val awardEntity = awardRepository.tryFindBy(
             cpid = params.cpid,
-            stage = params.ocid.stage,
+            ocid = params.ocid,
             awardId = params.awardId
         )
             .doReturn { error -> return ValidationResult.error(error) }
@@ -1750,7 +1726,7 @@ class AwardServiceImpl(
     }
 
     override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
-        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, stage = params.ocid.stage)
+        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
             .doReturn { incident -> return ValidationResult.error(incident) }
             .takeIf { it.isNotEmpty() }
             ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
@@ -1798,7 +1774,7 @@ class AwardServiceImpl(
     override fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail> {
         val awardEntity = awardRepository.tryFindBy(
             cpid = params.cpid,
-            stage = params.ocid.stage,
+            ocid = params.ocid,
             awardId = params.award.id
         )
             .doReturn { error -> return ValidationResult.error(error) }
@@ -1831,7 +1807,7 @@ class AwardServiceImpl(
             .doOnFalse {
                 return ValidationResult.error(
                     Fail.Incident.Database.DatabaseConsistencyIncident(
-                        "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpId}'. Record(s) does not exist."
+                        "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpid}'. Record(s) does not exist."
                     )
                 )
             }

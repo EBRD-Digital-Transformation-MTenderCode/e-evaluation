@@ -2,30 +2,30 @@ package com.procurement.evaluation.application.repository
 
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
-import com.procurement.evaluation.domain.model.enums.Stage
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.model.entity.AwardEntity
-import java.util.*
 
 interface AwardRepository {
-    fun findBy(cpid: String): List<AwardEntity>
+    fun findBy(cpid: Cpid): List<AwardEntity>
 
-    fun findBy(cpid: String, stage: String): List<AwardEntity>
+    fun findBy(cpid: Cpid, ocid: Ocid): List<AwardEntity>
 
-    fun findBy(cpid: String, stage: String, token: UUID): AwardEntity?
+    fun findBy(cpid: Cpid, ocid: Ocid, token: Token): AwardEntity?
 
-    fun saveNew(cpid: String, award: AwardEntity)
+    fun saveNew(cpid: Cpid, award: AwardEntity)
 
-    fun saveNew(cpid: String, awards: List<AwardEntity>)
+    fun saveNew(cpid: Cpid, awards: List<AwardEntity>)
 
-    fun update(cpid: String, updatedAward: AwardEntity)
+    fun update(cpid: Cpid, updatedAward: AwardEntity)
 
-    fun update(cpid: String, updatedAwards: Collection<AwardEntity>)
+    fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>)
 
-    fun tryFindBy(cpid: Cpid, stage: Stage): Result<List<AwardEntity>, Fail.Incident>
+    fun tryFindBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident>
 
-    fun tryFindBy(cpid: Cpid, stage: Stage, awardId: AwardId): Result<AwardEntity?, Fail>
+    fun tryFindBy(cpid: Cpid, ocid: Ocid, awardId: AwardId): Result<AwardEntity?, Fail>
 
     fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident>
 

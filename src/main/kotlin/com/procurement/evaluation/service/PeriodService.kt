@@ -24,8 +24,8 @@ class PeriodService(private val periodRepository: PeriodDao) {
         return Period(period.startDate!!, null)
     }
 
-    fun saveEndOfPeriod(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Period {
-        val period = periodRepository.getByCpIdAndStage(cpid, ocid)
+    fun saveEndOfPeriod(cpid: Cpid, endDate: LocalDateTime): Period {
+        val period = periodRepository.getByCpid(cpid)
         val newPeriod = PeriodEntity(
             cpid = period.cpid,
             ocid = period.ocid,

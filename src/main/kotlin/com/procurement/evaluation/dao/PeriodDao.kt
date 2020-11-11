@@ -44,4 +44,23 @@ class PeriodDao(private val session: Session) {
             )
         else throw ErrorException(ErrorType.PERIOD_NOT_FOUND)
     }
+
+    fun getByCpid(cpid: Cpid): PeriodEntity {
+        val query = select()
+            .all()
+            .from(Database.KEYSPACE, Database.Period.TABLE)
+            .where(eq(Database.Period.CPID, cpid))
+            .limit(1)
+
+        val row = session.execute(query).one()
+        return if (row != null)
+            PeriodEntity(
+                cpid = cpid,
+                ocid = Ocid.tryCreateOrNull(row.getString(Database.Period.OCID))!!,
+                awardCriteria = row.getString(Database.Period.AWARD_CRITERIA),
+                startDate = row.getTimestamp(Database.Period.START_DATE).toLocalDateTime(),
+                endDate = row.getTimestamp(Database.Period.END_DATE).toLocalDateTime()
+            )
+        else throw ErrorException(ErrorType.PERIOD_NOT_FOUND)
+    }
 }

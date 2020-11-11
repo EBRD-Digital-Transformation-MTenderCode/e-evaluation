@@ -71,3 +71,15 @@ CREATE TABLE IF NOT EXISTS evaluation.periods
     end_date       TIMESTAMP,
     PRIMARY KEY (cpid, ocid)
 );
+
+CREATE TABLE IF NOT EXISTS evaluation.awards
+(
+    cpid           TEXT,
+    ocid           TEXT,
+    token_entity   UUID,
+    status         TEXT,
+    status_details TEXT,
+    owner          TEXT,
+    json_data      TEXT,
+    PRIMARY KEY (cpid, ocid, token_entity)
+);

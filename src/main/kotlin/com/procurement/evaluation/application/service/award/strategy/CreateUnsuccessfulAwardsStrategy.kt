@@ -64,8 +64,8 @@ class CreateUnsuccessfulAwardsStrategy(
         val awardEntities = awards
             .map { award ->
                 AwardEntity(
-                    cpId = params.cpid.toString(),
-                    stage = params.ocid.stage.toString(),
+                    cpid = params.cpid,
+                    ocid = params.ocid,
                     token = token,
                     status = award.status.toString(),
                     statusDetails = award.statusDetails.toString(),

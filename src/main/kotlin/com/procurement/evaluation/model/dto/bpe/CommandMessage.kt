@@ -132,11 +132,9 @@ data class Context @JsonCreator constructor(
 enum class CommandType(private val value: String) {
 
     AWARDS_CANCELLATION("awardsCancellation"),
-    AWARD_BY_BID("awardByBid"),
     CHECK_AWARD_STATUS("checkAwardStatus"),
     CREATE_AWARD("createAward"),
     CREATE_AWARDS("createAwards"),
-    CREATE_AWARDS_AUCTION("createAwardsAuction"),
     CREATE_AWARDS_AUCTION_END("createAwardsAuctionEnd"),
     CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards"),
     END_AWARD_PERIOD("endAwardPeriod"),

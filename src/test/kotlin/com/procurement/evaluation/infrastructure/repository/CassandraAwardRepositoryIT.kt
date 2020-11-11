@@ -15,6 +15,8 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.AwardRepository
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.entity.AwardEntity
@@ -35,8 +37,9 @@ import java.util.*
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class CassandraAwardRepositoryIT {
     companion object {
-        private const val CPID = "cpid-1"
-        private const val STAGE = "EV"
+        private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286")!!
+        private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
+
         private val TOKEN: UUID = UUID.randomUUID()
         private const val OWNER = "owner-1"
         private val AWARD_STATUS = AwardStatus.PENDING
@@ -112,7 +115,7 @@ class CassandraAwardRepositoryIT {
     fun findByCPIDAndStage() {
         insertAward()
 
-        val actualFundedAwards = awardRepository.findBy(cpid = CPID, stage = STAGE)
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID, ocid = OCID)
 
         assertEquals(1, actualFundedAwards.size)
         assertEquals(expectedFundedAward(), actualFundedAwards[0])
@@ -120,7 +123,7 @@ class CassandraAwardRepositoryIT {
 
     @Test
     fun awardByCPIDAndStageNotFound() {
-        val actualFundedAwards = awardRepository.findBy(cpid = CPID, stage = STAGE)
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID, ocid = OCID)
         assertEquals(0, actualFundedAwards.size)
     }
 
@@ -133,7 +136,7 @@ class CassandraAwardRepositoryIT {
             .execute(any<BoundStatement>())
 
         val exception = assertThrows<ReadEntityException> {
-            awardRepository.findBy(cpid = CPID, stage = STAGE)
+            awardRepository.findBy(cpid = CPID, ocid = OCID)
         }
         assertEquals("Error read Award(s) from the database.", exception.message)
     }
@@ -142,7 +145,7 @@ class CassandraAwardRepositoryIT {
     fun findByCPIDAndStageAndToken() {
         insertAward()
 
-        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
 
         assertNotNull(actualFundedAward)
         assertEquals(expectedFundedAward(), actualFundedAward)
@@ -150,7 +153,7 @@ class CassandraAwardRepositoryIT {
 
     @Test
     fun awardByCPIDAndStageAndTokenNotFound() {
-        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
         assertNull(actualFundedAward)
     }
 
@@ -163,7 +166,7 @@ class CassandraAwardRepositoryIT {
             .execute(any<BoundStatement>())
 
         val exception = assertThrows<ReadEntityException> {
-            awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+            awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
         }
         assertEquals("Error read Award(s) from the database.", exception.message)
     }
@@ -171,8 +174,8 @@ class CassandraAwardRepositoryIT {
     @Test
     fun saveNewAward() {
         val awardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             status = AWARD_STATUS.key,
             statusDetails = AWARD_STATUS_DETAILS.key,
@@ -190,8 +193,8 @@ class CassandraAwardRepositoryIT {
     @Test
     fun errorAlreadyAward() {
         val awardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             status = AWARD_STATUS.key,
             statusDetails = AWARD_STATUS_DETAILS.key,
@@ -205,7 +208,7 @@ class CassandraAwardRepositoryIT {
         }
 
         assertEquals(
-            "An error occurred when writing a record(s) of the award by cpid '$CPID' and stage '$STAGE' to the database. Record is already.",
+            "An error occurred when writing a record(s) of the award by cpid '$CPID' and ocid '$OCID' to the database. Record is already.",
             exception.message
         )
     }
@@ -217,8 +220,8 @@ class CassandraAwardRepositoryIT {
             .execute(any<BoundStatement>())
 
         val awardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             status = AWARD_STATUS.key,
             statusDetails = AWARD_STATUS_DETAILS.key,
@@ -237,8 +240,8 @@ class CassandraAwardRepositoryIT {
         insertAward()
 
         val updatedAwardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             owner = OWNER,
             status = UPDATED_AWARD_STATUS.key,
@@ -247,7 +250,7 @@ class CassandraAwardRepositoryIT {
         )
         awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
 
-        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
 
         assertNotNull(actualFundedAward)
         assertEquals(updatedAwardEntity, actualFundedAward)
@@ -256,8 +259,8 @@ class CassandraAwardRepositoryIT {
     @Test
     fun recordForUpdateNotFound() {
         val updatedAwardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             owner = OWNER,
             status = UPDATED_AWARD_STATUS.key,
@@ -269,7 +272,7 @@ class CassandraAwardRepositoryIT {
         }
 
         assertEquals(
-            "An error occurred when writing a record(s) of the award by cpid '$CPID' and stage '$STAGE' and token to the database. Record is already.",
+            "An error occurred when writing a record(s) of the award by cpid '$CPID' and ocid '$OCID' and token to the database. Record is already.",
             exception.message
         )
     }
@@ -281,8 +284,8 @@ class CassandraAwardRepositoryIT {
             .execute(any<BoundStatement>())
 
         val updatedAwardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             owner = OWNER,
             status = UPDATED_AWARD_STATUS.key,
@@ -301,8 +304,8 @@ class CassandraAwardRepositoryIT {
         insertAward()
 
         val updatedAwardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             owner = OWNER,
             status = UPDATED_AWARD_STATUS.key,
@@ -311,7 +314,7 @@ class CassandraAwardRepositoryIT {
         )
         awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
 
-        val actualFundedAward = awardRepository.findBy(cpid = CPID, stage = STAGE, token = TOKEN)
+        val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
 
         assertNotNull(actualFundedAward)
         assertEquals(updatedAwardEntity, actualFundedAward)
@@ -320,8 +323,8 @@ class CassandraAwardRepositoryIT {
     @Test
     fun recordForUpdateSomeNotFound() {
         val updatedAwardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             owner = OWNER,
             status = UPDATED_AWARD_STATUS.key,
@@ -345,8 +348,8 @@ class CassandraAwardRepositoryIT {
             .execute(any<BatchStatement>())
 
         val updatedAwardEntity = AwardEntity(
-            cpId = CPID,
-            stage = STAGE,
+            cpid = CPID,
+            ocid = OCID,
             token = TOKEN,
             owner = OWNER,
             status = UPDATED_AWARD_STATUS.key,
@@ -361,33 +364,33 @@ class CassandraAwardRepositoryIT {
     }
 
     private fun createKeyspace() {
-        session.execute("CREATE KEYSPACE ocds WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
+        session.execute("CREATE KEYSPACE ${Database.KEYSPACE} WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
     }
 
     private fun dropKeyspace() {
-        session.execute("DROP KEYSPACE ocds;")
+        session.execute("DROP KEYSPACE ${Database.KEYSPACE};")
     }
 
     private fun createTable() {
         session.execute(
             """
-                CREATE TABLE IF NOT EXISTS ocds.evaluation_award (
-                    cp_id text,
-                    stage text,
-                    token_entity UUID,
-                    owner text,
-                    status text,
-                    status_details text,
-                    json_data text,
-                    PRIMARY KEY(cp_id, stage, token_entity)
-                );
+                CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Awards.TABLE} (
+                    cpid           TEXT,
+                    ocid           TEXT,
+                    token_entity   UUID,
+                    status         TEXT,
+                    status_details TEXT,
+                    owner          TEXT,
+                    json_data      TEXT,
+                    PRIMARY KEY (cpid, ocid, token_entity)
+                  );
             """
         )
     }
 
     private fun expectedFundedAward() = AwardEntity(
-        cpId = CPID,
-        stage = STAGE,
+        cpid = CPID,
+        ocid = OCID,
         token = TOKEN,
         owner = OWNER,
         status = AWARD_STATUS.toString(),
@@ -400,14 +403,14 @@ class CassandraAwardRepositoryIT {
         statusDetails: AwardStatusDetails = AWARD_STATUS_DETAILS,
         jsonData: String = JSON_DATA
     ) {
-        val rec = QueryBuilder.insertInto("ocds", "evaluation_award")
-            .value("cp_id", CPID)
-            .value("stage", STAGE)
-            .value("token_entity", TOKEN)
-            .value("owner", OWNER)
-            .value("status", status.toString())
-            .value("status_details", statusDetails.toString())
-            .value("json_data", jsonData)
+        val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE)
+            .value(Database.Awards.CPID, CPID.toString())
+            .value(Database.Awards.OCID, OCID.toString())
+            .value(Database.Awards.TOKEN_ENTITY, TOKEN)
+            .value(Database.Awards.OWNER, OWNER)
+            .value(Database.Awards.STATUS, status.toString())
+            .value(Database.Awards.STATUS_DETAILS, statusDetails.toString())
+            .value(Database.Awards.JSON_DATA, jsonData)
         session.execute(rec)
     }
 }
