@@ -101,7 +101,6 @@ class CommandService(
                 val context = CreateAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     owner = cm.owner,
                     startDate = cm.startDate,
                     lotId = cm.lotId
@@ -350,7 +349,6 @@ class CommandService(
                 val context = CreateAwardsAuctionEndContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     owner = cm.owner,
                     startDate = cm.startDate
                 )
@@ -368,7 +366,6 @@ class CommandService(
                     ocid = cm.ocid,
                     owner = cm.owner,
                     startDate = cm.startDate,
-                    stage = cm.stage,
                     phase = cm.phase
                 )
                 val request: AwardCancellationRequest = toObject(AwardCancellationRequest::class.java, cm.data)
@@ -383,7 +380,6 @@ class CommandService(
                 val context = CheckAwardStatusContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     token = cm.token,
                     owner = UUID.fromString(cm.owner),
                     awardId = cm.awardId
@@ -426,7 +422,6 @@ class CommandService(
                 val context = GetEvaluatedAwardsContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     lotId = cm.lotId
                 )
                 awardService.getEvaluated(context = context)
@@ -494,11 +489,7 @@ class CommandService(
                     .convert()
             }
             CommandType.SET_AWARD_FOR_EVALUATION -> {
-                val context = SetAwardForEvaluationContext(
-                    cpid = cm.cpid,
-                    ocid = cm.ocid,
-                    stage = cm.stage
-                )
+                val context = SetAwardForEvaluationContext(cpid = cm.cpid, ocid = cm.ocid)
                 val request = toObject(SetAwardForEvaluationRequest::class.java, cm.data)
                 awardService.setAwardForEvaluation(context = context, data = request.convert())
                     .also { result: SetAwardForEvaluationResult ->
@@ -558,7 +549,6 @@ class CommandService(
                             startDate = cm.startDate,
                             cpid = cm.cpid,
                             ocid = cm.ocid,
-                            stage = cm.stage,
                             owner = cm.owner
                         )
                         val request = toObject(CreateUnsuccessfulAwardsRequest::class.java, cm.data)
@@ -580,7 +570,6 @@ class CommandService(
                 val context = StartConsiderationContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     token = cm.token,
                     owner = UUID.fromString(cm.owner),
                     awardId = cm.awardId

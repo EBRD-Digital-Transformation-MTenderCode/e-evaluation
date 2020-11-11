@@ -8,7 +8,6 @@ import java.util.*
 data class CreateAwardContext(
     val cpid: Cpid,
     val ocid: Ocid,
-    val stage: String,
     val owner: String,
     val startDate: LocalDateTime,
     val lotId: UUID

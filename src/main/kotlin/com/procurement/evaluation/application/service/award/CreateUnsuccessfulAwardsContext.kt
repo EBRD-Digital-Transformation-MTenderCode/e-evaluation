@@ -8,7 +8,6 @@ import java.time.LocalDateTime
 data class CreateUnsuccessfulAwardsContext(
     val cpid: Cpid,
     val ocid: Ocid,
-    val stage: String,
     val owner: String,
     val operationType: OperationType,
     val startDate: LocalDateTime
