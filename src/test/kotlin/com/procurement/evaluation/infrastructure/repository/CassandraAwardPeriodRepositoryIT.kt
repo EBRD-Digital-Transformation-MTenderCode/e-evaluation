@@ -166,7 +166,7 @@ class CassandraAwardPeriodRepositoryIT {
 
     private fun insertAwardPeriod(endDate: LocalDateTime? = null) {
         val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Period.TABLE_NAME)
-            .value(Database.Period.CPID, CPID.toString())
+            .value(Database.Period.CPID, CPID.underlying)
             .value(Database.Period.OCID, OCID.toString())
             .value(Database.Period.AWARD_CRITERIA, AWARD_CRITERIA)
             .value(Database.Period.START_DATE, START_DATE.toCassandraTimestamp())
@@ -177,7 +177,7 @@ class CassandraAwardPeriodRepositoryIT {
     private fun findAwardPeriodEnd(): LocalDateTime? {
         val query = QueryBuilder.select(Database.Period.END_DATE)
             .from(Database.KEYSPACE, Database.Period.TABLE_NAME)
-            .where(QueryBuilder.eq(Database.Period.CPID, CPID.toString()))
+            .where(QueryBuilder.eq(Database.Period.CPID, CPID.underlying))
             .and(QueryBuilder.eq(Database.Period.OCID, OCID.toString()))
 
         return session.execute(query)

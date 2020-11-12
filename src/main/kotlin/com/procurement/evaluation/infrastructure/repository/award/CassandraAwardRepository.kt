@@ -103,7 +103,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     override fun findBy(cpid: Cpid): Result<List<AwardEntity>, Fail.Incident.Database> {
         val query = preparedFindByCpidCQL.bind()
             .apply {
-                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.CPID, cpid.underlying)
             }
 
         val resultSet = query.tryExecute(session)
@@ -131,7 +131,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): Result<AwardEntity?, Fail.Incident.Database> {
         val query = preparedFindByCpidAndOcidAndTokenCQL.bind()
             .apply {
-                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.CPID, cpid.underlying)
                 setString(Database.Awards.OCID, ocid.toString())
                 setString(Database.Awards.TOKEN_ENTITY, token.toString())
             }
@@ -155,7 +155,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         award: AwardEntity
     ): BoundStatement = preparedSaveNewAwardCQL.bind()
         .apply {
-            setString(Database.Awards.CPID, cpid.toString())
+            setString(Database.Awards.CPID, cpid.underlying)
             setString(Database.Awards.OCID, award.ocid.toString())
             setString(Database.Awards.TOKEN_ENTITY, award.token.toString())
             setString(Database.Awards.OWNER, award.owner.toString())
@@ -208,7 +208,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident.Database> {
         val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
-                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.CPID, cpid.underlying)
                 setString(Database.Awards.OCID, ocid.toString())
             }
 
@@ -245,7 +245,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     private fun statementForUpdateAward(cpid: Cpid, updatedAward: AwardEntity): BoundStatement =
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {
-                setString(Database.Awards.CPID, cpid.toString())
+                setString(Database.Awards.CPID, cpid.underlying)
                 setString(Database.Awards.OCID, updatedAward.ocid.toString())
                 setString(Database.Awards.TOKEN_ENTITY, updatedAward.token.toString())
                 setString(Database.Awards.STATUS, updatedAward.status.toString())

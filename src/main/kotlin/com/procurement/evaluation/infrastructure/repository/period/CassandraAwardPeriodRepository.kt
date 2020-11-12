@@ -90,7 +90,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     override fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database> {
         preparedSavePeriodCQL.bind()
             .apply {
-                setString(Database.Period.CPID, entity.cpid.toString())
+                setString(Database.Period.CPID, entity.cpid.underlying)
                 setString(Database.Period.OCID, entity.ocid.toString())
                 setString(Database.Period.AWARD_CRITERIA, entity.awardCriteria.toString())
                 setTimestamp(Database.Period.START_DATE, entity.startDate?.toCassandraTimestamp())
@@ -106,7 +106,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     override fun findByCpid(cpid: Cpid): Result<PeriodEntity?, Fail.Incident.Database> {
         val statement = preparedFindPeriodByCpidCQL.bind()
             .apply {
-                setString(Database.Period.CPID, cpid.toString())
+                setString(Database.Period.CPID, cpid.underlying)
             }
         return statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
@@ -126,7 +126,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     override fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime? {
         val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
-                setString(Database.Period.CPID, cpid.toString())
+                setString(Database.Period.CPID, cpid.underlying)
                 setString(Database.Period.OCID, ocid.toString())
             }
 
@@ -143,7 +143,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     override fun saveNewStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime) {
         val statement = preparedSaveNewStartDateCQL.bind()
             .apply {
-                setString(Database.Period.CPID, cpid.toString())
+                setString(Database.Period.CPID, cpid.underlying)
                 setString(Database.Period.OCID, ocid.toString())
                 setTimestamp(Database.Period.START_DATE, start.toCassandraTimestamp())
             }
@@ -162,7 +162,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     override fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident> {
         val statement = preparedFindStartDateByCpidAndOcidCQL.bind()
             .apply {
-                setString(Database.Period.CPID, cpid.toString())
+                setString(Database.Period.CPID, cpid.underlying)
                 setString(Database.Period.OCID, ocid.toString())
             }
         return statement.tryExecute(session = session)
@@ -176,7 +176,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     override fun trySaveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Unit, Fail.Incident> {
         val statement = preparedSaveEndDateCQL.bind()
             .apply {
-                setString(Database.Period.CPID, cpid.toString())
+                setString(Database.Period.CPID, cpid.underlying)
                 setString(Database.Period.OCID, ocid.toString())
                 setTimestamp(Database.Period.END_DATE, endDate.toCassandraTimestamp())
             }
