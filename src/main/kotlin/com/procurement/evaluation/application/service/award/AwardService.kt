@@ -712,7 +712,7 @@ class AwardServiceImpl(
     }
 
     private fun getUpdatedValue(context: EvaluateAwardContext, data: EvaluateAwardData, award: Award): Value {
-        val stage = Stage.creator(context.stage)
+        val stage = context.ocid.stage
         val storedValue = award.value!!
         return when (stage) {
             Stage.NP -> {
@@ -737,7 +737,7 @@ class AwardServiceImpl(
         data: EvaluateAwardData,
         award: Award
     ) {
-        val stage = Stage.creator(context.stage)
+        val stage = context.ocid.stage
         when (data.award.statusDetails) {
             AwardStatusDetails.UNSUCCESSFUL -> {
                 checkStatusDetailsForStage(stage = stage, statusDetails = award.statusDetails)
@@ -979,7 +979,7 @@ class AwardServiceImpl(
 
         return getAwardsByLotId(lotId = context.lotId, entities = awardEntities)
             .apply {
-                forEach { award -> checkValueAmount(award.value!!, Stage.creator(context.stage)) }
+                forEach { award -> checkValueAmount(award.value!!, context.ocid.stage) }
             }
             .findActiveAward()
             ?.let { award ->
@@ -1575,7 +1575,7 @@ class AwardServiceImpl(
 
         val updatedAward: Award? = when (award.statusDetails) {
             AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
-            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(context.stage, awards = awardsToEntities.keys)
+            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(context.ocid.stage, awards = awardsToEntities.keys)
 
             AwardStatusDetails.AWAITING,
             AwardStatusDetails.CONSIDERATION,
@@ -1889,8 +1889,8 @@ class AwardServiceImpl(
         return null
     }
 
-    private fun getAwardForActiveStatusDetails(stage: String, awards: Collection<Award>): Award? {
-        when(Stage.creator(stage)){
+    private fun getAwardForActiveStatusDetails(stage: Stage, awards: Collection<Award>): Award? {
+        when(stage){
             Stage.EV,
             Stage.TP -> {
                 val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }

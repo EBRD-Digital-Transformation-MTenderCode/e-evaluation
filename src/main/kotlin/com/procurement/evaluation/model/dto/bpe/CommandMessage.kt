@@ -63,10 +63,6 @@ val CommandMessage.owner: String
     get() = this.context.owner
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'owner' attribute in context.")
 
-val CommandMessage.stage: String
-    get() = this.context.stage
-        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'stage' attribute in context.")
-
 val CommandMessage.phase: Phase
     get() = this.context.phase
         ?.let { Phase.creator(it) }

@@ -67,7 +67,6 @@ import com.procurement.evaluation.model.dto.bpe.operationType
 import com.procurement.evaluation.model.dto.bpe.owner
 import com.procurement.evaluation.model.dto.bpe.phase
 import com.procurement.evaluation.model.dto.bpe.pmd
-import com.procurement.evaluation.model.dto.bpe.stage
 import com.procurement.evaluation.model.dto.bpe.startDate
 import com.procurement.evaluation.model.dto.bpe.token
 import com.procurement.evaluation.utils.toJson
@@ -315,7 +314,6 @@ class CommandService(
                 val context = EvaluateAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     token = cm.token,
                     owner = cm.owner,
                     startDate = cm.startDate,
@@ -398,7 +396,6 @@ class CommandService(
                 val context = GetWinningAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     lotId = cm.lotId
                 )
                 awardService.getWinning(context = context)
@@ -585,7 +582,6 @@ class CommandService(
                 val context = GetNextAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
-                    stage = cm.stage,
                     awardId = cm.awardId
                 )
                 awardService.getNext(context)
