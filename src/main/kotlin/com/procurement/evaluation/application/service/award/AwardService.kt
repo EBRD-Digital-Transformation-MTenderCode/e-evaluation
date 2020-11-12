@@ -816,6 +816,7 @@ class AwardServiceImpl(
             Stage.NP -> {
                 val lots = award.relatedLots.toSet()
                 val relatedAwards = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
+                    .orThrow { it.exception }
                     .asSequence()
                     .map { entity ->
                         toObject(Award::class.java, entity.jsonData)
@@ -974,6 +975,8 @@ class AwardServiceImpl(
      */
     override fun getWinning(context: GetWinningAwardContext): WinningAward? {
         val awardEntities: List<AwardEntity> = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
+            .orThrow { it.exception }
+
         if (awardEntities.isEmpty())
             throw ErrorException(DATA_NOT_FOUND)
 
@@ -1086,6 +1089,7 @@ class AwardServiceImpl(
      */
     override fun getEvaluated(context: GetEvaluatedAwardsContext): List<EvaluatedAward> =
         awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
+            .orThrow { it.exception }
             .toSequenceOfAwards()
             .filterByLotId(lotId = context.lotId)
             .filter { award ->
@@ -1330,6 +1334,7 @@ class AwardServiceImpl(
         val awardEntityByAwardId: MutableMap<AwardId, AwardEntity> = mutableMapOf()
         val awards: MutableList<Award> = mutableListOf()
         awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
+            .orThrow { it.exception }
             .forEach { entity ->
                 val award: Award = toObject(Award::class.java, entity.jsonData)
                 val prev = awardEntityByAwardId.put(LotId.fromString(award.id), entity)
@@ -1555,6 +1560,7 @@ class AwardServiceImpl(
     override fun getNext(context: GetNextAwardContext): GetNextAwardResult {
         val allAwardsToEntities: Map<Award, AwardEntity> =
             awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
+                .orThrow { it.exception }
                 .takeIf { it.isNotEmpty() }
                 ?.asSequence()
                 ?.map { entity ->
@@ -1666,7 +1672,7 @@ class AwardServiceImpl(
     }
 
     override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail> {
-        val awardEntities = awardRepository.tryFindBy(
+        val awardEntities = awardRepository.findBy(
             cpid = params.cpid,
             ocid = params.ocid
         ).orForwardFail { incident -> return incident }
@@ -1705,7 +1711,7 @@ class AwardServiceImpl(
     }
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
-        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
+        val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .doReturn { fail -> return ValidationResult.error(fail) }
 
         val awardEntityById = awardEntities
@@ -1735,7 +1741,7 @@ class AwardServiceImpl(
     }
 
     override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
-        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
+        val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .doReturn { incident -> return ValidationResult.error(incident) }
             .takeIf { it.isNotEmpty() }
             ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
@@ -1781,7 +1787,7 @@ class AwardServiceImpl(
         createUnsuccessfulAwardsStrategy.execute(params = params)
 
     override fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail> {
-        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
+        val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .doReturn { fail -> return ValidationResult.error(fail) }
 
         val awardEntityById = awardEntities

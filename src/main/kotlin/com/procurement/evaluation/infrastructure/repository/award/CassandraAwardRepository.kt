@@ -126,17 +126,6 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         jsonData = row.getString(Database.Awards.JSON_DATA)
     )
 
-    override fun findBy(cpid: Cpid, ocid: Ocid): List<AwardEntity> {
-        val query = preparedFindByCpidAndOcidCQL.bind()
-            .apply {
-                setString(Database.Awards.CPID, cpid.toString())
-                setString(Database.Awards.OCID, ocid.toString())
-            }
-
-        val resultSet = load(query)
-        return resultSet.map { convertToAwardEntity(it) }
-    }
-
     override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): AwardEntity? {
         val query = preparedFindByCpidAndOcidAndTokenCQL.bind()
             .apply {
@@ -212,7 +201,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
     }
 
-    override fun tryFindBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident> {
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident.Database> {
         val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())

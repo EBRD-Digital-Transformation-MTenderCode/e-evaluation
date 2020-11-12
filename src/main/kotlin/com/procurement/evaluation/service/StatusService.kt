@@ -33,6 +33,8 @@ class StatusService(
         val bidId = cm.context.id ?: throw ErrorException(CONTEXT)
 
         val awardEntities = awardRepository.findBy(cpid, ocid)
+            .orThrow { it.exception }
+
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
@@ -51,6 +53,8 @@ class StatusService(
         val awardsIdsSet = dto.cans.asSequence().map { it.awardId }.toSet()
 
         val awardEntities = awardRepository.findBy(cpid, ocid)
+            .orThrow { it.exception }
+
         if (awardEntities.isEmpty()) throw ErrorException(DATA_NOT_FOUND)
 
         val awards = getAwardsFromEntities(awardEntities)
@@ -62,7 +66,6 @@ class StatusService(
 
     fun endAwardPeriod(cm: CommandMessage): EndAwardPeriodRs {
         val cpid = cm.cpid
-        val ocid = cm.ocid
 
         val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
         val awardPeriod = periodService.saveEndOfPeriod(cpid, endDate)

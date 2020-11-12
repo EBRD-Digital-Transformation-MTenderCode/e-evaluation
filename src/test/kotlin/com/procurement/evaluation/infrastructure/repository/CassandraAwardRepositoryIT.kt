@@ -26,6 +26,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -118,6 +119,7 @@ class CassandraAwardRepositoryIT {
         insertAward()
 
         val actualFundedAwards = awardRepository.findBy(cpid = CPID, ocid = OCID)
+            .orThrow { it.exception }
 
         assertEquals(1, actualFundedAwards.size)
         assertEquals(expectedFundedAward(), actualFundedAwards[0])
@@ -126,25 +128,26 @@ class CassandraAwardRepositoryIT {
     @Test
     fun awardByCPIDAndStageNotFound() {
         val actualFundedAwards = awardRepository.findBy(cpid = CPID, ocid = OCID)
+            .orThrow { it.exception }
+
         assertEquals(0, actualFundedAwards.size)
     }
 
     @Test
-    fun errorReadByCPIDAndStage() {
+    fun errorReadByCPIDAndOcid() {
         insertAward()
 
         doThrow(RuntimeException())
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<ReadEntityException> {
-            awardRepository.findBy(cpid = CPID, ocid = OCID)
-        }
-        assertEquals("Error read Award(s) from the database.", exception.message)
+        val result = awardRepository.findBy(cpid = CPID, ocid = OCID)
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is RuntimeException)
     }
 
     @Test
-    fun findByCPIDAndStageAndToken() {
+    fun findByCPIDAndOcidAndToken() {
         insertAward()
 
         val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
