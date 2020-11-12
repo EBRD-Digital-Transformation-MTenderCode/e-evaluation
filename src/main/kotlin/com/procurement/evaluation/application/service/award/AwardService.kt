@@ -16,6 +16,7 @@ import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.ValidationResult
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.bid.BidId
@@ -327,10 +328,10 @@ class AwardServiceImpl(
         val newAwardEntity = AwardEntity(
             cpid = cpid,
             ocid = ocid,
-            status = award.status.toString(),
-            statusDetails = award.statusDetails.toString(),
+            status = award.status,
+            statusDetails = award.statusDetails,
             token = UUID.fromString(award.token),
-            owner = context.owner,
+            owner = Owner.fromString(context.owner),
             jsonData = toJson(award)
         )
 
@@ -670,7 +671,7 @@ class AwardServiceImpl(
             throw ErrorException(error = INVALID_TOKEN)
 
         //VR-7.10.2
-        if (context.owner != awardEntity.owner)
+        if (Owner.fromString(context.owner) != awardEntity.owner)
             throw ErrorException(error = INVALID_OWNER)
 
         val award = toObject(Award::class.java, awardEntity.jsonData)
@@ -701,7 +702,7 @@ class AwardServiceImpl(
         )
 
         val updatedAwardEntity = awardEntity.copy(
-            statusDetails = updatedAward.statusDetails.toString(),
+            statusDetails = updatedAward.statusDetails,
             jsonData = toJson(updatedAward)
         )
 
@@ -1138,8 +1139,8 @@ class AwardServiceImpl(
             status == AwardStatus.PENDING && details == AwardStatusDetails.UNSUCCESSFUL
 
         fun isValidStatuses(entity: AwardEntity): Boolean {
-            val status = AwardStatus.creator(entity.status)
-            val details = AwardStatusDetails.creator(entity.statusDetails)
+            val status = entity.status
+            val details = entity.statusDetails
             return isActive(status, details) || isUnsuccessful(status, details)
         }
 
@@ -1174,8 +1175,8 @@ class AwardServiceImpl(
                 val updatedAward = award.updatingStatuses()
 
                 val updatedEntity = entity.copy(
-                    status = updatedAward.status.key,
-                    statusDetails = updatedAward.statusDetails.key,
+                    status = updatedAward.status,
+                    statusDetails = updatedAward.statusDetails,
                     jsonData = toJson(updatedAward)
                 )
 
@@ -1237,9 +1238,9 @@ class AwardServiceImpl(
                 cpid = context.cpid,
                 ocid = context.ocid,
                 token = UUID.fromString(award.token),
-                statusDetails = award.statusDetails.key,
-                status = award.status.key,
-                owner = context.owner,
+                statusDetails = award.statusDetails,
+                status = award.status,
+                owner = Owner.fromString(context.owner),
                 jsonData = toJson(award)
             )
         }
@@ -1301,9 +1302,9 @@ class AwardServiceImpl(
                 cpid = context.cpid,
                 ocid = context.ocid,
                 token = UUID.fromString(award.token),
-                statusDetails = award.statusDetails.key,
-                status = award.status.key,
-                owner = context.owner,
+                statusDetails = award.statusDetails,
+                status = award.status,
+                owner = Owner.fromString(context.owner),
                 jsonData = toJson(award)
             )
         }
@@ -1361,8 +1362,8 @@ class AwardServiceImpl(
                 val awardId = AwardId.fromString(award.id)
                 val entity = awardEntityByAwardId.getValue(awardId)
                 entity.copy(
-                    status = award.status.key,
-                    statusDetails = award.statusDetails.key,
+                    status = award.status,
+                    statusDetails = award.statusDetails,
                     jsonData = toJson(award)
                 )
             }
@@ -1457,10 +1458,10 @@ class AwardServiceImpl(
             AwardEntity(
                 cpid = context.cpid,
                 ocid = context.ocid,
-                owner = context.owner,
+                owner = Owner.fromString(context.owner),
                 token = Token.fromString(award.token!!),
-                status = award.status.key,
-                statusDetails = award.statusDetails.key,
+                status = award.status,
+                statusDetails = award.statusDetails,
                 jsonData = toJson(award)
             )
         }
@@ -1534,7 +1535,7 @@ class AwardServiceImpl(
         )
 
         val updatedAwardEntity = awardEntity.copy(
-            statusDetails = updatedAward.statusDetails.key,
+            statusDetails = updatedAward.statusDetails,
             jsonData = toJson(updatedAward)
         )
 
@@ -1601,8 +1602,8 @@ class AwardServiceImpl(
                 .associateBy(keySelector = { AwardId.fromString(it.key.id) }, valueTransform = { it.value })
             val updatedAwardEntity = awardEntitiesByAwardId.getValue(AwardId.fromString(updatedAward.id))
                 .copy(
-                    status = updatedAward.status.key,
-                    statusDetails = updatedAward.statusDetails.key,
+                    status = updatedAward.status,
+                    statusDetails = updatedAward.statusDetails,
                     jsonData = toJson(updatedAward)
                 )
             awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
@@ -1631,10 +1632,10 @@ class AwardServiceImpl(
                     AwardEntity(
                         cpid = context.cpid,
                         token = Token.fromString(award.token!!),
-                        owner = context.owner,
+                        owner = Owner.fromString(context.owner),
                         ocid = context.ocid,
-                        status = award.status.key,
-                        statusDetails = award.statusDetails.key,
+                        status = award.status,
+                        statusDetails = award.statusDetails,
                         jsonData = toJson(award)
                     )
                 }
@@ -1714,7 +1715,7 @@ class AwardServiceImpl(
                 ValidationError.AwardNotFoundOnCheckAccess(params.awardId)
             )
 
-        if (awardEntity.owner != params.owner.toString()) {
+        if (awardEntity.owner != params.owner) {
             return ValidationResult.error(ValidationError.InvalidOwner())
         }
 

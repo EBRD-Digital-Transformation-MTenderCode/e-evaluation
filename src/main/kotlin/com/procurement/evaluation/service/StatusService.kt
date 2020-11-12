@@ -2,6 +2,7 @@ package com.procurement.evaluation.service
 
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
+import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
@@ -78,7 +79,7 @@ class StatusService(
         val awardEntity = awardRepository.findBy(cpid, ocid, UUID.fromString(token))
             ?: throw ErrorException(DATA_NOT_FOUND)
 
-        if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
+        if (awardEntity.owner != Owner.fromString(owner)) throw ErrorException(ErrorType.INVALID_OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         return GetLotForCheckRs(awardByBid.relatedLots[0])
     }

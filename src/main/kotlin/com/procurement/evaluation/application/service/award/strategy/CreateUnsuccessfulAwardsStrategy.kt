@@ -67,8 +67,8 @@ class CreateUnsuccessfulAwardsStrategy(
                     cpid = params.cpid,
                     ocid = params.ocid,
                     token = token,
-                    status = award.status.toString(),
-                    statusDetails = award.statusDetails.toString(),
+                    status = award.status,
+                    statusDetails = award.statusDetails,
                     owner = null,
                     jsonData = toJson(award)
                 )

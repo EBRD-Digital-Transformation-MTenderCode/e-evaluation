@@ -18,6 +18,7 @@ import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.infrastructure.repository.award.CassandraAwardRepository
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
@@ -42,7 +43,7 @@ class CassandraAwardRepositoryIT {
         private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
 
         private val TOKEN: UUID = UUID.randomUUID()
-        private const val OWNER = "owner-1"
+        private val OWNER = Owner.fromString("9bd47f45-617f-4171-8673-80f40ced0774")
         private val AWARD_STATUS = AwardStatus.PENDING
         private val UPDATED_AWARD_STATUS = AwardStatus.ACTIVE
         private val AWARD_STATUS_DETAILS = AwardStatusDetails.EMPTY
@@ -178,8 +179,8 @@ class CassandraAwardRepositoryIT {
             cpid = CPID,
             ocid = OCID,
             token = TOKEN,
-            status = AWARD_STATUS.key,
-            statusDetails = AWARD_STATUS_DETAILS.key,
+            status = AWARD_STATUS,
+            statusDetails = AWARD_STATUS_DETAILS,
             owner = OWNER,
             jsonData = JSON_DATA
         )
@@ -197,8 +198,8 @@ class CassandraAwardRepositoryIT {
             cpid = CPID,
             ocid = OCID,
             token = TOKEN,
-            status = AWARD_STATUS.key,
-            statusDetails = AWARD_STATUS_DETAILS.key,
+            status = AWARD_STATUS,
+            statusDetails = AWARD_STATUS_DETAILS,
             owner = OWNER,
             jsonData = JSON_DATA
         )
@@ -224,8 +225,8 @@ class CassandraAwardRepositoryIT {
             cpid = CPID,
             ocid = OCID,
             token = TOKEN,
-            status = AWARD_STATUS.key,
-            statusDetails = AWARD_STATUS_DETAILS.key,
+            status = AWARD_STATUS,
+            statusDetails = AWARD_STATUS_DETAILS,
             owner = OWNER,
             jsonData = JSON_DATA
         )
@@ -245,8 +246,8 @@ class CassandraAwardRepositoryIT {
             ocid = OCID,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.key,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
+            status = UPDATED_AWARD_STATUS,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
         awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
@@ -264,8 +265,8 @@ class CassandraAwardRepositoryIT {
             ocid = OCID,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.key,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
+            status = UPDATED_AWARD_STATUS,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
         val exception = assertThrows<SaveEntityException> {
@@ -289,8 +290,8 @@ class CassandraAwardRepositoryIT {
             ocid = OCID,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.key,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
+            status = UPDATED_AWARD_STATUS,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
 
@@ -309,8 +310,8 @@ class CassandraAwardRepositoryIT {
             ocid = OCID,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.key,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
+            status = UPDATED_AWARD_STATUS,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
         awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
@@ -328,8 +329,8 @@ class CassandraAwardRepositoryIT {
             ocid = OCID,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.key,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
+            status = UPDATED_AWARD_STATUS,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
         val exception = assertThrows<SaveEntityException> {
@@ -353,8 +354,8 @@ class CassandraAwardRepositoryIT {
             ocid = OCID,
             token = TOKEN,
             owner = OWNER,
-            status = UPDATED_AWARD_STATUS.key,
-            statusDetails = UPDATED_AWARD_STATUS_DETAILS.key,
+            status = UPDATED_AWARD_STATUS,
+            statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
 
@@ -394,8 +395,8 @@ class CassandraAwardRepositoryIT {
         ocid = OCID,
         token = TOKEN,
         owner = OWNER,
-        status = AWARD_STATUS.toString(),
-        statusDetails = AWARD_STATUS_DETAILS.toString(),
+        status = AWARD_STATUS,
+        statusDetails = AWARD_STATUS_DETAILS,
         jsonData = JSON_DATA
     )
 
@@ -408,7 +409,7 @@ class CassandraAwardRepositoryIT {
             .value(Database.Awards.CPID, CPID.toString())
             .value(Database.Awards.OCID, OCID.toString())
             .value(Database.Awards.TOKEN_ENTITY, TOKEN.toString())
-            .value(Database.Awards.OWNER, OWNER)
+            .value(Database.Awards.OWNER, OWNER.toString())
             .value(Database.Awards.STATUS, status.toString())
             .value(Database.Awards.STATUS_DETAILS, statusDetails.toString())
             .value(Database.Awards.JSON_DATA, jsonData)

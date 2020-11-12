@@ -15,12 +15,15 @@ import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.model.dto.ocds.Award
+import com.procurement.evaluation.model.dto.ocds.AwardStatus
+import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Repository
 import java.util.*
@@ -120,9 +123,9 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
         token = UUID.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
         ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
-        owner = row.getString(Database.Awards.OWNER),
-        status = row.getString(Database.Awards.STATUS),
-        statusDetails = row.getString(Database.Awards.STATUS_DETAILS),
+        owner = Owner.fromString(row.getString(Database.Awards.OWNER)),
+        status = AwardStatus.creator(row.getString(Database.Awards.STATUS)),
+        statusDetails = AwardStatusDetails.creator(row.getString(Database.Awards.STATUS_DETAILS)),
         jsonData = row.getString(Database.Awards.JSON_DATA)
     )
 
@@ -165,9 +168,9 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             setString(Database.Awards.CPID, cpid.toString())
             setString(Database.Awards.OCID, award.ocid.toString())
             setString(Database.Awards.TOKEN_ENTITY, award.token.toString())
-            setString(Database.Awards.OWNER, award.owner)
-            setString(Database.Awards.STATUS, award.status)
-            setString(Database.Awards.STATUS_DETAILS, award.statusDetails)
+            setString(Database.Awards.OWNER, award.owner.toString())
+            setString(Database.Awards.STATUS, award.status.toString())
+            setString(Database.Awards.STATUS_DETAILS, award.statusDetails.toString())
             setString(Database.Awards.JSON_DATA, award.jsonData)
         }
 
@@ -273,8 +276,8 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(Database.Awards.CPID, cpid.toString())
                 setString(Database.Awards.OCID, updatedAward.ocid.toString())
                 setString(Database.Awards.TOKEN_ENTITY, updatedAward.token.toString())
-                setString(Database.Awards.STATUS, updatedAward.status)
-                setString(Database.Awards.STATUS_DETAILS, updatedAward.statusDetails)
+                setString(Database.Awards.STATUS, updatedAward.status.toString())
+                setString(Database.Awards.STATUS_DETAILS, updatedAward.statusDetails.toString())
                 setString(Database.Awards.JSON_DATA, updatedAward.jsonData)
             }
 
