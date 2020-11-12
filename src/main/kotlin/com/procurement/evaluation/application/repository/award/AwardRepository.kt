@@ -16,7 +16,7 @@ interface AwardRepository {
 
     fun saveNew(cpid: Cpid, award: AwardEntity)
 
-    fun saveNew(cpid: Cpid, awards: List<AwardEntity>)
+    fun saveNew(cpid: Cpid, awards: Collection<AwardEntity>)
 
     fun update(cpid: Cpid, updatedAward: AwardEntity)
 
@@ -24,7 +24,7 @@ interface AwardRepository {
 
     fun tryFindBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident>
 
-    fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident>
+    fun trySave(cpid: Cpid, awards: Collection<AwardEntity>): Result<Unit, Fail.Incident>
 
     fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident>
 }

@@ -177,7 +177,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         throw SaveEntityException(message = "Error writing new award to database.", cause = exception)
     }
 
-    override fun saveNew(cpid: Cpid, awards: List<AwardEntity>) {
+    override fun saveNew(cpid: Cpid, awards: Collection<AwardEntity>) {
         val statements = BatchStatement().apply {
             for (award in awards) {
                 add(statementForAwardSave(cpid = cpid, award = award))
@@ -224,7 +224,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
-    override fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident> {
+    override fun trySave(cpid: Cpid, awards: Collection<AwardEntity>): Result<Unit, Fail.Incident> {
         val statements = BatchStatement()
             .apply {
                 for (award in awards) {
