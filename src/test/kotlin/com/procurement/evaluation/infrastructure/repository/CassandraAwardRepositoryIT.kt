@@ -413,7 +413,7 @@ class CassandraAwardRepositoryIT {
     ) {
         val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE_NAME)
             .value(Database.Awards.CPID, CPID.underlying)
-            .value(Database.Awards.OCID, OCID.toString())
+            .value(Database.Awards.OCID, OCID.underlying)
             .value(Database.Awards.TOKEN_ENTITY, TOKEN.toString())
             .value(Database.Awards.OWNER, OWNER.toString())
             .value(Database.Awards.STATUS, status.toString())

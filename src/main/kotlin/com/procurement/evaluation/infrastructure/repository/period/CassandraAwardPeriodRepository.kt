@@ -91,7 +91,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         preparedSavePeriodCQL.bind()
             .apply {
                 setString(Database.Period.CPID, entity.cpid.underlying)
-                setString(Database.Period.OCID, entity.ocid.toString())
+                setString(Database.Period.OCID, entity.ocid.underlying)
                 setString(Database.Period.AWARD_CRITERIA, entity.awardCriteria.toString())
                 setTimestamp(Database.Period.START_DATE, entity.startDate?.toCassandraTimestamp())
                 setTimestamp(Database.Period.END_DATE, entity.endDate?.toCassandraTimestamp())
@@ -127,7 +127,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
-                setString(Database.Period.OCID, ocid.toString())
+                setString(Database.Period.OCID, ocid.underlying)
             }
 
         val resultSet = load(query)
@@ -144,7 +144,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         val statement = preparedSaveNewStartDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
-                setString(Database.Period.OCID, ocid.toString())
+                setString(Database.Period.OCID, ocid.underlying)
                 setTimestamp(Database.Period.START_DATE, start.toCassandraTimestamp())
             }
 
@@ -163,7 +163,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         val statement = preparedFindStartDateByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
-                setString(Database.Period.OCID, ocid.toString())
+                setString(Database.Period.OCID, ocid.underlying)
             }
         return statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
@@ -177,7 +177,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         val statement = preparedSaveEndDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
-                setString(Database.Period.OCID, ocid.toString())
+                setString(Database.Period.OCID, ocid.underlying)
                 setTimestamp(Database.Period.END_DATE, endDate.toCassandraTimestamp())
             }
         val result = statement.tryExecute(session = session)

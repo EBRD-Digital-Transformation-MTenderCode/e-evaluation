@@ -132,7 +132,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         val query = preparedFindByCpidAndOcidAndTokenCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
-                setString(Database.Awards.OCID, ocid.toString())
+                setString(Database.Awards.OCID, ocid.underlying)
                 setString(Database.Awards.TOKEN_ENTITY, token.toString())
             }
 
@@ -156,7 +156,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     ): BoundStatement = preparedSaveNewAwardCQL.bind()
         .apply {
             setString(Database.Awards.CPID, cpid.underlying)
-            setString(Database.Awards.OCID, award.ocid.toString())
+            setString(Database.Awards.OCID, award.ocid.underlying)
             setString(Database.Awards.TOKEN_ENTITY, award.token.toString())
             setString(Database.Awards.OWNER, award.owner.toString())
             setString(Database.Awards.STATUS, award.status.toString())
@@ -209,7 +209,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
-                setString(Database.Awards.OCID, ocid.toString())
+                setString(Database.Awards.OCID, ocid.underlying)
             }
 
         val resultSet = query.tryExecute(session)
@@ -246,7 +246,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         preparedUpdatedAwardStatusesCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
-                setString(Database.Awards.OCID, updatedAward.ocid.toString())
+                setString(Database.Awards.OCID, updatedAward.ocid.underlying)
                 setString(Database.Awards.TOKEN_ENTITY, updatedAward.token.toString())
                 setString(Database.Awards.STATUS, updatedAward.status.toString())
                 setString(Database.Awards.STATUS_DETAILS, updatedAward.statusDetails.toString())
