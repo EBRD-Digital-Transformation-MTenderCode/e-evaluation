@@ -128,7 +128,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         jsonData = row.getString(Database.Awards.JSON_DATA)
     )
 
-    override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): AwardEntity? {
+    override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): Result<AwardEntity?, Fail.Incident.Database> {
         val query = preparedFindByCpidAndOcidAndTokenCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())
@@ -136,8 +136,10 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(Database.Awards.TOKEN_ENTITY, token.toString())
             }
 
-        val resultSet = load(query)
-        return resultSet.one()?.let { convertToAwardEntity(it) }
+        val resultSet = query.tryExecute(session)
+            .doReturn { error -> return failure(error) }
+
+        return resultSet.one()?.let { convertToAwardEntity(it) }.asSuccess()
     }
 
     override fun saveNew(cpid: Cpid, award: AwardEntity) {

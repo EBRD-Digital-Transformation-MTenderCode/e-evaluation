@@ -663,6 +663,7 @@ class AwardServiceImpl(
         val cpid = context.cpid
 
         val awardEntity = awardRepository.findBy(cpid = cpid, ocid = context.ocid, token = context.token)
+            .orThrow { it.exception }
             ?: throw ErrorException(error = AWARD_NOT_FOUND)
 
         //VR-7.10.1
@@ -1492,6 +1493,7 @@ class AwardServiceImpl(
 
     override fun checkStatus(context: CheckAwardStatusContext): CheckAwardStatusResult {
         val awardEntity = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid, token = context.token)
+            .orThrow { it.exception }
             ?: throw ErrorException(
                 error = AWARD_NOT_FOUND,
                 message = "Record of the award by cpid '${context.cpid}', ocid '${context.ocid}' and token '${context.token}' not found."
@@ -1523,6 +1525,7 @@ class AwardServiceImpl(
 
     override fun startConsideration(context: StartConsiderationContext): StartConsiderationResult {
         val awardEntity = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid, token = context.token)
+            .orThrow { it.exception }
             ?.also { entity ->
                 entity.checkOwner(context.owner)
             }

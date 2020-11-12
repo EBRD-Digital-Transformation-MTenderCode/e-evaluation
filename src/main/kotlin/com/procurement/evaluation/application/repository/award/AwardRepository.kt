@@ -11,7 +11,7 @@ interface AwardRepository {
 
     fun findBy(cpid: Cpid): Result<List<AwardEntity>, Fail.Incident.Database>
 
-    fun findBy(cpid: Cpid, ocid: Ocid, token: Token): AwardEntity?
+    fun findBy(cpid: Cpid, ocid: Ocid, token: Token): Result<AwardEntity?, Fail.Incident.Database>
 
     fun saveNew(cpid: Cpid, award: AwardEntity)
 

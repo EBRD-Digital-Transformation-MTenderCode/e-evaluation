@@ -12,7 +12,6 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
@@ -150,6 +149,7 @@ class CassandraAwardRepositoryIT {
         insertAward()
 
         val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
+            .orThrow { it.exception }
 
         assertNotNull(actualFundedAward)
         assertEquals(expectedFundedAward(), actualFundedAward)
@@ -158,6 +158,8 @@ class CassandraAwardRepositoryIT {
     @Test
     fun awardByCPIDAndStageAndTokenNotFound() {
         val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
+            .orThrow { it.exception }
+
         assertNull(actualFundedAward)
     }
 
@@ -169,10 +171,10 @@ class CassandraAwardRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<ReadEntityException> {
-            awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
-        }
-        assertEquals("Error read Award(s) from the database.", exception.message)
+        val result = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
+
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is RuntimeException)
     }
 
     @Test
@@ -255,6 +257,7 @@ class CassandraAwardRepositoryIT {
         awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
 
         val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
+            .orThrow { it.exception }
 
         assertNotNull(actualFundedAward)
         assertEquals(updatedAwardEntity, actualFundedAward)
@@ -319,6 +322,7 @@ class CassandraAwardRepositoryIT {
         awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
 
         val actualFundedAward = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
+            .orThrow { it.exception }
 
         assertNotNull(actualFundedAward)
         assertEquals(updatedAwardEntity, actualFundedAward)

@@ -80,6 +80,7 @@ class StatusService(
         val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
 
         val awardEntity = awardRepository.findBy(cpid, ocid, UUID.fromString(token))
+            .orThrow { it.exception }
             ?: throw ErrorException(DATA_NOT_FOUND)
 
         if (awardEntity.owner != Owner.fromString(owner)) throw ErrorException(ErrorType.INVALID_OWNER)
