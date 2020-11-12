@@ -88,7 +88,7 @@ class CassandraAwardRepositoryIT {
     fun findByCPID() {
         insertAward()
 
-        val actualFundedAwards = awardRepository.findBy(cpid = CPID)
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID).orThrow { it.exception }
 
         assertEquals(1, actualFundedAwards.size)
         assertEquals(expectedFundedAward(), actualFundedAwards[0])
@@ -96,7 +96,7 @@ class CassandraAwardRepositoryIT {
 
     @Test
     fun awardByCPIDNotFound() {
-        val actualFundedAwards = awardRepository.findBy(cpid = CPID)
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID).orThrow { it.exception }
         assertEquals(0, actualFundedAwards.size)
     }
 
@@ -108,10 +108,9 @@ class CassandraAwardRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<ReadEntityException> {
-            awardRepository.findBy(cpid = CPID)
-        }
-        assertEquals("Error read Award(s) from the database.", exception.message)
+        val result = awardRepository.findBy(cpid = CPID)
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is RuntimeException)
     }
 
     @Test
@@ -189,7 +188,7 @@ class CassandraAwardRepositoryIT {
         )
         awardRepository.saveNew(cpid = CPID, award = awardEntity)
 
-        val actualFundedAwards = awardRepository.findBy(cpid = CPID)
+        val actualFundedAwards = awardRepository.findBy(cpid = CPID).orThrow { it.exception }
 
         assertEquals(1, actualFundedAwards.size)
         assertEquals(expectedFundedAward(), actualFundedAwards[0])

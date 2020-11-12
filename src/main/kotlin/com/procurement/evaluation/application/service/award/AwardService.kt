@@ -208,10 +208,9 @@ class AwardServiceImpl(
         //VR-7.10.8(1)
         checkSuppliersIdentifiers(suppliers = data.award.suppliers)
 
-        val awardsEntities = awardRepository.findBy(cpid = cpid)
-        val awards = awardsEntities.map {
-            toObject(Award::class.java, it.jsonData)
-        }
+        val awardsEntities = awardRepository.findBy(cpid = cpid).orThrow { it.exception }
+
+        val awards = awardsEntities.map { toObject(Award::class.java, it.jsonData) }
 
         //VR-7.10.8(2)
         checkSuppliers(lotId = context.lotId, suppliers = data.award.suppliers, awards = awards)
@@ -1203,6 +1202,7 @@ class AwardServiceImpl(
 
     private fun loadAwards(cpid: Cpid): Sequence<AwardEntity> =
         awardRepository.findBy(cpid = cpid)
+            .orThrow { it.exception }
             .takeIf { it.isNotEmpty() }
             ?.asSequence()
             ?: throw ErrorException(error = AWARD_NOT_FOUND)

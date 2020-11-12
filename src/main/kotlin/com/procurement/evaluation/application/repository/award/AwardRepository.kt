@@ -8,7 +8,8 @@ import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.infrastructure.fail.Fail
 
 interface AwardRepository {
-    fun findBy(cpid: Cpid): List<AwardEntity>
+
+    fun findBy(cpid: Cpid): Result<List<AwardEntity>, Fail.Incident.Database>
 
     fun findBy(cpid: Cpid, ocid: Ocid, token: Token): AwardEntity?
 

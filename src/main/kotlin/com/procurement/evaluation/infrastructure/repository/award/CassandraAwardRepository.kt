@@ -100,14 +100,16 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     private val preparedSaveNewAwardCQL = session.prepare(SAVE_NEW_AWARD_CQL)
     private val preparedUpdatedAwardStatusesCQL = session.prepare(UPDATE_AWARD_STATUSES_CQL)
 
-    override fun findBy(cpid: Cpid): List<AwardEntity> {
+    override fun findBy(cpid: Cpid): Result<List<AwardEntity>, Fail.Incident.Database> {
         val query = preparedFindByCpidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())
             }
 
-        val resultSet = load(query)
-        return resultSet.map { convertToAwardEntity(it) }
+        val resultSet = query.tryExecute(session)
+            .doReturn { error -> return failure(error) }
+
+        return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
     protected fun load(statement: BoundStatement): ResultSet = try {
