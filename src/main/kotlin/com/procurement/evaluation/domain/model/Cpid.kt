@@ -3,7 +3,7 @@ package com.procurement.evaluation.domain.model
 import com.fasterxml.jackson.annotation.JsonValue
 
 
-class Cpid private constructor(val underlying: String) {
+class Cpid private constructor(@JsonValue val underlying: String) {
 
     override fun equals(other: Any?): Boolean {
         return if (this !== other)
@@ -15,7 +15,6 @@ class Cpid private constructor(val underlying: String) {
 
     override fun hashCode(): Int = underlying.hashCode()
 
-    @JsonValue
     override fun toString(): String = underlying
 
     companion object {

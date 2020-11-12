@@ -7,7 +7,7 @@ import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Compani
 import com.procurement.evaluation.domain.model.enums.Stage
 import java.io.Serializable
 
-class Ocid private constructor(val underlying: String, val stage: Stage) : Serializable {
+class Ocid private constructor(@JsonValue val underlying: String, val stage: Stage) : Serializable {
     override fun equals(other: Any?): Boolean {
         return if (this !== other)
             other is Ocid
@@ -18,7 +18,6 @@ class Ocid private constructor(val underlying: String, val stage: Stage) : Seria
 
     override fun hashCode(): Int = underlying.hashCode()
 
-    @JsonValue
     override fun toString(): String = underlying
 
     companion object {
