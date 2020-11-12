@@ -35,7 +35,7 @@ class CassandraRuleRepository(private val session: Session) : RuleRepository {
         pmd: ProcurementMethod,
         operationType: OperationType?,
         parameter: String
-    ): Result<String?, Fail.Incident.Database.DatabaseInteractionIncident> =
+    ): Result<String?, Fail.Incident.Database> =
         preparedGetValueByCQL.bind()
             .apply {
                 setString(Database.Rules.COUNTRY, country)

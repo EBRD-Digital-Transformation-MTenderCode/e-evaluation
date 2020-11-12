@@ -39,7 +39,9 @@ sealed class Fail {
         sealed class Database(val number: String, override val description: String) :
             Incident(level = Level.ERROR, number = number, description = description) {
 
-            class DatabaseInteractionIncident(val exception: Exception) : Database(
+            abstract val exception: Exception
+
+            class DatabaseInteractionIncident(override val exception: Exception) : Database(
                 number = "1.1",
                 description = "Database incident."
             ) {
@@ -51,7 +53,10 @@ sealed class Fail {
             class RecordIsNotExist(override val description: String) : Database(
                 number = "1.2",
                 description = description
-            )
+            ) {
+                override val exception: Exception
+                    get() = RuntimeException(description)
+            }
 
             class DatabaseConsistencyIncident(message: String) : Incident(
                 level = Level.ERROR,

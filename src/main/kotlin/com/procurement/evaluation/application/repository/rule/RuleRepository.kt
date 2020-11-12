@@ -11,5 +11,5 @@ interface RuleRepository {
         pmd: ProcurementMethod,
         operationType: OperationType?,
         parameter: String
-    ): Result<String?, Fail.Incident.Database.DatabaseInteractionIncident>
+    ): Result<String?, Fail.Incident.Database>
 }

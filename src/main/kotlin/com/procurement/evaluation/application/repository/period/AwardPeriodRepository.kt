@@ -10,9 +10,9 @@ import java.time.LocalDateTime
 
 interface AwardPeriodRepository {
 
-    fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database.DatabaseInteractionIncident>
+    fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database>
 
-    fun findByCpid(cpid: Cpid): Result<PeriodEntity?, Fail.Incident.Database.DatabaseInteractionIncident>
+    fun findByCpid(cpid: Cpid): Result<PeriodEntity?, Fail.Incident.Database>
 
     fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime?
 

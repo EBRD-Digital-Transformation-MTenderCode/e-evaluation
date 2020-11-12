@@ -1705,12 +1705,20 @@ class AwardServiceImpl(
     }
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
-        val awardEntity = awardRepository.tryFindBy(
-            cpid = params.cpid,
-            ocid = params.ocid,
-            awardId = params.awardId
-        )
-            .doReturn { error -> return ValidationResult.error(error) }
+        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
+            .doReturn { fail -> return ValidationResult.error(fail) }
+
+        val awardEntityById = awardEntities
+            .associate { entity ->
+                val award = entity.jsonData
+                    .tryToObject(Award::class.java)
+                    .doReturn { error ->
+                        return ValidationResult.error(Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                    }
+                award.id to entity
+            }
+
+        val awardEntity = awardEntityById.get(params.awardId.toString())
             ?: return ValidationResult.error(
                 ValidationError.AwardNotFoundOnCheckAccess(params.awardId)
             )
@@ -1773,12 +1781,20 @@ class AwardServiceImpl(
         createUnsuccessfulAwardsStrategy.execute(params = params)
 
     override fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail> {
-        val awardEntity = awardRepository.tryFindBy(
-            cpid = params.cpid,
-            ocid = params.ocid,
-            awardId = params.award.id
-        )
-            .doReturn { error -> return ValidationResult.error(error) }
+        val awardEntities = awardRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
+            .doReturn { fail -> return ValidationResult.error(fail) }
+
+        val awardEntityById = awardEntities
+            .associate { entity ->
+                val award = entity.jsonData
+                    .tryToObject(Award::class.java)
+                    .doReturn { error ->
+                        return ValidationResult.error(Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                    }
+                award.id to entity
+            }
+
+        val awardEntity = awardEntityById.get(params.award.id.toString())
             ?: return ValidationResult.error(
                 ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id)
             )

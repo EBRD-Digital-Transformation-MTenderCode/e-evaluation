@@ -5,7 +5,6 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Token
-import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.infrastructure.fail.Fail
 
 interface AwardRepository {
@@ -24,8 +23,6 @@ interface AwardRepository {
     fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>)
 
     fun tryFindBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident>
-
-    fun tryFindBy(cpid: Cpid, ocid: Ocid, awardId: AwardId): Result<AwardEntity?, Fail>
 
     fun trySave(cpid: Cpid, awards: List<AwardEntity>): Result<Unit, Fail.Incident>
 

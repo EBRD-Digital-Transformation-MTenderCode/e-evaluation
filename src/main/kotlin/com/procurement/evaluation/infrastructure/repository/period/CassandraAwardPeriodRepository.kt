@@ -87,7 +87,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     private val preparedSaveEndDateCQL = session.prepare(SAVE_END_DATE_CQL)
     private val preparedFindStartDateByCpidAndOcidCQL = session.prepare(FIND_START_DATE_BY_CPID_AND_OCID_CQL)
 
-    override fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database.DatabaseInteractionIncident> {
+    override fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database> {
         preparedSavePeriodCQL.bind()
             .apply {
                 setString(Database.Period.CPID, entity.cpid.toString())
@@ -103,7 +103,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     }
 
 
-    override fun findByCpid(cpid: Cpid): Result<PeriodEntity?, Fail.Incident.Database.DatabaseInteractionIncident> {
+    override fun findByCpid(cpid: Cpid): Result<PeriodEntity?, Fail.Incident.Database> {
         val statement = preparedFindPeriodByCpidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.toString())
