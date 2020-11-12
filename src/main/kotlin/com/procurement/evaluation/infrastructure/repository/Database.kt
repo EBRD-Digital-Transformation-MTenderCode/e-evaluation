@@ -15,6 +15,7 @@ object Database {
         const val TABLE_NAME = "rules"
         const val COUNTRY = "country"
         const val PMD = "pmd"
+        const val OPERATION_TYPE = "operation_type"
         const val PARAMETER = "parameter"
         const val VALUE = "value"
     }

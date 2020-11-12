@@ -55,11 +55,12 @@ CREATE TABLE IF NOT EXISTS evaluation.history
 
 CREATE TABLE IF NOT EXISTS evaluation.rules
 (
-    country   TEXT,
-    pmd       TEXT,
-    parameter TEXT,
-    value     TEXT,
-    PRIMARY KEY (country, pmd, parameter)
+    country        TEXT,
+    pmd            TEXT,
+    operation_type TEXT,
+    parameter      TEXT,
+    value          TEXT,
+    PRIMARY KEY (country, pmd, operation_type, parameter)
 );
 
 CREATE TABLE IF NOT EXISTS evaluation.periods
