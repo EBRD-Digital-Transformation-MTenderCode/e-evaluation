@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS evaluation.awards
 (
     cpid           TEXT,
     ocid           TEXT,
-    token_entity   UUID,
+    token_entity   TEXT,
     status         TEXT,
     status_details TEXT,
     owner          TEXT,

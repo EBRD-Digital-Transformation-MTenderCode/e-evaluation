@@ -41,7 +41,6 @@ class CassandraAwardPeriodRepositoryIT {
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286")!!
         private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
         private val START_DATE = LocalDateTime.now()
-        private val END_DATE = START_DATE.plusMinutes(15)
     }
 
     @Autowired
@@ -140,39 +139,6 @@ class CassandraAwardPeriodRepositoryIT {
         assertEquals("Error writing start date of the award period.", exception.message)
     }
 
-    @Test
-    fun saveEnd() {
-        insertAwardPeriod()
-
-        awardPeriodRepository.saveEnd(cpid = CPID, ocid = OCID, end = END_DATE)
-
-        val actualFundedAwardPeriodEndDate = findAwardPeriodEnd()
-        assertNotNull(actualFundedAwardPeriodEndDate)
-        assertEquals(END_DATE, actualFundedAwardPeriodEndDate)
-    }
-
-    @Test
-    fun errorAwardPeriodNotExists() {
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveEnd(cpid = CPID, ocid = OCID, end = END_DATE)
-        }
-        assertEquals(
-            "An error occurred when writing a record(s) of the end award period '$END_DATE' by cpid '$CPID' and ocid '$OCID' to the database. Record is not exists.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun errorSaveEnd() {
-        doThrow(RuntimeException())
-            .whenever(session)
-            .execute(any<BoundStatement>())
-
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveEnd(cpid = CPID, ocid = OCID, end = END_DATE)
-        }
-        assertEquals("Error writing updated end period to database.", exception.message)
-    }
 
     private fun createKeyspace() {
         session.execute("CREATE KEYSPACE ${Database.KEYSPACE} WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")

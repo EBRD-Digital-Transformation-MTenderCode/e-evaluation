@@ -160,26 +160,13 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         throw SaveEntityException(message = "Error writing start date of the award period.", cause = exception)
     }
 
-    override fun saveEnd(cpid: Cpid, ocid: Ocid, end: LocalDateTime) {
-        val statement = preparedSaveEndDateCQL.bind()
-            .apply {
-                setString(Database.Period.CPID, cpid.toString())
-                setString(Database.Period.OCID, ocid.toString())
-                setTimestamp(Database.Period.END_DATE, end.toCassandraTimestamp())
-            }
-
-        val result = saveEnd(statement)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the end award period '$end' by cpid '$cpid' and ocid '$ocid' to the database. Record is not exists.")
-    }
-
     private fun saveEnd(statement: Statement): ResultSet = try {
         session.execute(statement)
     } catch (exception: Exception) {
         throw SaveEntityException(message = "Error writing updated end period to database.", cause = exception)
     }
 
-    override fun tryFindStartDateByCpidAndStage(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident> {
+    override fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident> {
         val statement = preparedFindStartDateByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.toString())

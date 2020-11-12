@@ -18,9 +18,7 @@ interface AwardPeriodRepository {
 
     fun saveNewStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime)
 
-    fun saveEnd(cpid: Cpid, ocid: Ocid, end: LocalDateTime)
-
-    fun tryFindStartDateByCpidAndStage(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident>
+    fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident>
 
     fun trySaveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Unit, Fail.Incident>
 }

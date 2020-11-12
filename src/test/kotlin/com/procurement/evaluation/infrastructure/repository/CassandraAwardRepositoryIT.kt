@@ -378,7 +378,7 @@ class CassandraAwardRepositoryIT {
                 CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME} (
                     cpid           TEXT,
                     ocid           TEXT,
-                    token_entity   UUID,
+                    token_entity   TEXT,
                     status         TEXT,
                     status_details TEXT,
                     owner          TEXT,
@@ -407,7 +407,7 @@ class CassandraAwardRepositoryIT {
         val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Awards.TABLE_NAME)
             .value(Database.Awards.CPID, CPID.toString())
             .value(Database.Awards.OCID, OCID.toString())
-            .value(Database.Awards.TOKEN_ENTITY, TOKEN)
+            .value(Database.Awards.TOKEN_ENTITY, TOKEN.toString())
             .value(Database.Awards.OWNER, OWNER)
             .value(Database.Awards.STATUS, status.toString())
             .value(Database.Awards.STATUS_DETAILS, statusDetails.toString())

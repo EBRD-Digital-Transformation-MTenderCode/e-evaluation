@@ -23,6 +23,7 @@ import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.utils.tryToObject
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 class CassandraAwardRepository(private val session: Session) : AwardRepository {
@@ -117,7 +118,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
 
     private fun convertToAwardEntity(row: Row): AwardEntity = AwardEntity(
         cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
-        token = row.getUUID(Database.Awards.TOKEN_ENTITY),
+        token = UUID.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
         ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
         owner = row.getString(Database.Awards.OWNER),
         status = row.getString(Database.Awards.STATUS),
@@ -141,7 +142,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())
                 setString(Database.Awards.OCID, ocid.toString())
-                setUUID(Database.Awards.TOKEN_ENTITY, token)
+                setString(Database.Awards.TOKEN_ENTITY, token.toString())
             }
 
         val resultSet = load(query)
@@ -163,7 +164,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         .apply {
             setString(Database.Awards.CPID, cpid.toString())
             setString(Database.Awards.OCID, award.ocid.toString())
-            setUUID(Database.Awards.TOKEN_ENTITY, award.token)
+            setString(Database.Awards.TOKEN_ENTITY, award.token.toString())
             setString(Database.Awards.OWNER, award.owner)
             setString(Database.Awards.STATUS, award.status)
             setString(Database.Awards.STATUS_DETAILS, award.statusDetails)
@@ -271,7 +272,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             .apply {
                 setString(Database.Awards.CPID, cpid.toString())
                 setString(Database.Awards.OCID, updatedAward.ocid.toString())
-                setUUID(Database.Awards.TOKEN_ENTITY, updatedAward.token)
+                setString(Database.Awards.TOKEN_ENTITY, updatedAward.token.toString())
                 setString(Database.Awards.STATUS, updatedAward.status)
                 setString(Database.Awards.STATUS_DETAILS, updatedAward.statusDetails)
                 setString(Database.Awards.JSON_DATA, updatedAward.jsonData)
