@@ -3,7 +3,6 @@ package com.procurement.evaluation.infrastructure.repository.period
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
-import com.datastax.driver.core.Statement
 import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
@@ -158,12 +157,6 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         session.execute(statement)
     } catch (exception: Exception) {
         throw SaveEntityException(message = "Error writing start date of the award period.", cause = exception)
-    }
-
-    private fun saveEnd(statement: Statement): ResultSet = try {
-        session.execute(statement)
-    } catch (exception: Exception) {
-        throw SaveEntityException(message = "Error writing updated end period to database.", cause = exception)
     }
 
     override fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident> {
