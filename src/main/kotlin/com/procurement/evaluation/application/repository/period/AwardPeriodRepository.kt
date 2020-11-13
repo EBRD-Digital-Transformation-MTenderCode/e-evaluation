@@ -12,7 +12,7 @@ interface AwardPeriodRepository {
 
     fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database>
 
-    fun findByCpid(cpid: Cpid): Result<PeriodEntity?, Fail.Incident.Database>
+    fun findByCpid(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database>
 
     fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime?
 
@@ -20,5 +20,5 @@ interface AwardPeriodRepository {
 
     fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident>
 
-    fun trySaveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Unit, Fail.Incident>
+    fun trySaveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Unit, Fail.Incident.Database>
 }

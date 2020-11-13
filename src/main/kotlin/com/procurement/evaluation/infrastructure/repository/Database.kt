@@ -24,7 +24,6 @@ object Database {
         const val TABLE_NAME = "periods"
         const val CPID = "cpid"
         const val OCID = "ocid"
-        const val AWARD_CRITERIA = "award_criteria"
         const val START_DATE = "start_date"
         const val END_DATE = "end_date"
     }

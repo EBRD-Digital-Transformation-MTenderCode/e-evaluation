@@ -14,19 +14,22 @@ import java.time.LocalDateTime
 class PeriodService(private val periodRepository: AwardPeriodRepository) {
 
     fun saveEndOfPeriod(cpid: Cpid, endDate: LocalDateTime): Period {
-        val period = periodRepository.findByCpid(cpid)
+        val periods = periodRepository.findByCpid(cpid)
             .orThrow { it.exception }
-            ?: throw ErrorException(ErrorType.PERIOD_NOT_FOUND)
 
-        val newPeriod = PeriodEntity(
-            cpid = period.cpid,
-            ocid = period.ocid,
-            awardCriteria = period.awardCriteria,
-            startDate = period.startDate!!,
-            endDate = endDate
-        )
-        periodRepository.save(newPeriod)
-            .doOnFail { throw it.exception }
+        if (periods.size > 1)
+            throw ErrorException(
+                error = ErrorType.PERIOD_INVALID,
+                message = "Expected 1 record, but founded ${periods.size}"
+            )
+
+        if (periods.isEmpty())
+            throw ErrorException(ErrorType.PERIOD_NOT_FOUND)
+
+        val period = periods.first()
+
+        periodRepository.trySaveEnd(period.cpid, period.ocid, endDate)
+            .orThrow { throw it.exception }
 
         return Period(period.startDate, endDate)
     }
@@ -41,7 +44,6 @@ class PeriodService(private val periodRepository: AwardPeriodRepository) {
         val period = PeriodEntity(
             cpid = cpid,
             ocid = ocid,
-            awardCriteria = awardCriteria,
             startDate = startDate,
             endDate = endDate
         )
@@ -49,17 +51,5 @@ class PeriodService(private val periodRepository: AwardPeriodRepository) {
             .doOnFail { throw it.exception }
 
         return Period(startDate, endDate)
-    }
-
-    fun saveAwardCriteria(cpid: Cpid, ocid: Ocid, awardCriteria: String) {
-        val period = PeriodEntity(
-            cpid = cpid,
-            ocid = ocid,
-            awardCriteria = awardCriteria,
-            startDate = null,
-            endDate = null
-        )
-        periodRepository.save(period)
-            .doOnFail { throw it.exception }
     }
 }

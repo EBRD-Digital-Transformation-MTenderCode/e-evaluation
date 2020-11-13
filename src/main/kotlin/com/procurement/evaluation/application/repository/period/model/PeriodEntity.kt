@@ -7,7 +7,6 @@ import java.time.LocalDateTime
 data class PeriodEntity(
     val cpid: Cpid,
     val ocid: Ocid,
-    val awardCriteria: String?,
-    val startDate: LocalDateTime?,
+    val startDate: LocalDateTime,
     val endDate: LocalDateTime?
 )

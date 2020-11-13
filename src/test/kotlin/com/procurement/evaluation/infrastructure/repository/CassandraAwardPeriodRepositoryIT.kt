@@ -36,7 +36,6 @@ import java.time.LocalDateTime
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class CassandraAwardPeriodRepositoryIT {
     companion object {
-        private const val AWARD_CRITERIA = "awardCriteria"
 
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286")!!
         private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
@@ -155,7 +154,6 @@ class CassandraAwardPeriodRepositoryIT {
                     (
                         cpid           TEXT,
                         ocid           TEXT,
-                        award_criteria TEXT,
                         start_date     TIMESTAMP,
                         end_date       TIMESTAMP,
                         PRIMARY KEY (cpid, ocid)
@@ -168,7 +166,6 @@ class CassandraAwardPeriodRepositoryIT {
         val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Period.TABLE_NAME)
             .value(Database.Period.CPID, CPID.underlying)
             .value(Database.Period.OCID, OCID.underlying)
-            .value(Database.Period.AWARD_CRITERIA, AWARD_CRITERIA)
             .value(Database.Period.START_DATE, START_DATE.toCassandraTimestamp())
             .value(Database.Period.END_DATE, endDate?.toCassandraTimestamp())
         session.execute(rec)
