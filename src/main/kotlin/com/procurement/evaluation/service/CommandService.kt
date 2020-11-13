@@ -391,7 +391,25 @@ class CommandService(
                         CheckAwardStatusResponse()
                     }
             }
-            CommandType.END_AWARD_PERIOD -> statusService.endAwardPeriod(cm)
+            CommandType.END_AWARD_PERIOD -> {
+                when (cm.pmd) {
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT ->  statusService.endAwardPeriod(cm)
+
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.CF, ProcurementMethod.TEST_CF,
+                    ProcurementMethod.OF, ProcurementMethod.TEST_OF,
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
+                }
+            }
             CommandType.GET_WINNING_AWARD -> {
                 val context = GetWinningAwardContext(
                     cpid = cm.cpid,
