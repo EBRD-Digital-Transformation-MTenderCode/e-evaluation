@@ -340,7 +340,12 @@ class AwardServiceImpl(
             prevAwardPeriodStart
         } else {
             val newAwardPeriodStart = context.startDate
-            awardPeriodRepository.saveNewStart(cpid = cpid, ocid = ocid, start = newAwardPeriodStart)
+            val wasApplied = awardPeriodRepository.saveStart(cpid = cpid, ocid = ocid, start = newAwardPeriodStart)
+                .orThrow { it.exception }
+
+            if (!wasApplied)
+                throw SaveEntityException(message = "An error occurred when writing a record(s) of the start award period '$newAwardPeriodStart' by cpid '$cpid' and ocid '$ocid' to the database. Record is already.")
+
             newAwardPeriodStart
         }
 
@@ -1424,7 +1429,12 @@ class AwardServiceImpl(
     }
 
     override fun startAwardPeriod(context: StartAwardPeriodContext): StartAwardPeriodResult {
-        awardPeriodRepository.saveNewStart(cpid = context.cpid, ocid = context.ocid, start = context.startDate)
+        val wasApplied = awardPeriodRepository.saveStart(cpid = context.cpid, ocid = context.ocid, start = context.startDate)
+            .orThrow { it.exception }
+
+        if (!wasApplied)
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the start award period '${context.startDate}' by cpid '${context.cpid}' and ocid '${context.ocid}' to the database. Record is already.")
+
         return StartAwardPeriodResult(
             StartAwardPeriodResult.AwardPeriod(
                 startDate = context.startDate

@@ -1,5 +1,6 @@
 package com.procurement.evaluation.infrastructure.repository.period
 
+import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
@@ -135,7 +136,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         throw ReadEntityException(message = "Error read Award(s) from the database.", cause = exception)
     }
 
-    override fun saveNewStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime) {
+    override fun saveStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime): Result<Boolean, Fail.Incident.Database> {
         val statement = preparedSaveNewStartDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
@@ -144,15 +145,25 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             }
 
         val result = saveNewStart(statement)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the start award period '$start' by cpid '$cpid' and ocid '$ocid' to the database. Record is already.")
+            .orForwardFail { return it }
+
+        return result.wasApplied().asSuccess()
     }
 
-    private fun saveNewStart(statement: BoundStatement): ResultSet = try {
-        session.execute(statement)
-    } catch (exception: Exception) {
-        throw SaveEntityException(message = "Error writing start date of the award period.", cause = exception)
-    }
+    private fun saveNewStart(statement: BoundStatement): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> =
+        try {
+            Result.success(session.execute(statement))
+        } catch (expected: Exception) {
+            val exception =  SaveEntityException(message = "Error writing start date of the award period.", cause = expected)
+            Result.failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = exception))
+        }
+
+    fun BatchStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> =
+        try {
+            Result.success(session.execute(this))
+        } catch (expected: Exception) {
+            Result.failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = expected))
+        }
 
     override fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident> {
         val statement = preparedFindStartDateByCpidAndOcidCQL.bind()

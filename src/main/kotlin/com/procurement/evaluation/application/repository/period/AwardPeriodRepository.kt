@@ -16,7 +16,7 @@ interface AwardPeriodRepository {
 
     fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime?
 
-    fun saveNewStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime)
+    fun saveStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime): Result<Boolean, Fail.Incident.Database>
 
     fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident>
 

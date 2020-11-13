@@ -21,8 +21,10 @@ import com.procurement.evaluation.infrastructure.tools.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -105,7 +107,7 @@ class CassandraAwardPeriodRepositoryIT {
 
     @Test
     fun saveNewStart() {
-        awardPeriodRepository.saveNewStart(cpid = CPID, ocid = OCID, start = START_DATE)
+        awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
 
         val actualFundedAwardPeriodStartDate = awardPeriodRepository.findStartDateBy(cpid = CPID, ocid = OCID)
 
@@ -115,15 +117,13 @@ class CassandraAwardPeriodRepositoryIT {
 
     @Test
     fun errorAlreadyNewStart() {
-        awardPeriodRepository.saveNewStart(cpid = CPID, ocid = OCID, start = START_DATE)
+        awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
 
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveNewStart(cpid = CPID, ocid = OCID, start = START_DATE)
-        }
-        assertEquals(
-            "An error occurred when writing a record(s) of the start award period '$START_DATE' by cpid '$CPID' and ocid '$OCID' to the database. Record is already.",
-            exception.message
-        )
+        val result = awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
+
+        assertTrue(result.isSuccess)
+        val wasApplied = result.get
+        assertFalse(wasApplied)
     }
 
     @Test
@@ -132,10 +132,11 @@ class CassandraAwardPeriodRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveNewStart(cpid = CPID, ocid = OCID, start = START_DATE)
-        }
-        assertEquals("Error writing start date of the award period.", exception.message)
+        val result = awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
+
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is SaveEntityException)
+
     }
 
 
