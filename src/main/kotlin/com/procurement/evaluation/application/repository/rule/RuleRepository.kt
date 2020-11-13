@@ -9,7 +9,7 @@ interface RuleRepository {
     fun find(
         country: String,
         pmd: ProcurementMethod,
-        operationType: OperationType?,
+        operationType: OperationType? = null,
         parameter: String
     ): Result<String?, Fail.Incident.Database>
 }
