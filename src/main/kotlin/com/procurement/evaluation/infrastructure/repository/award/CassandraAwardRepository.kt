@@ -6,7 +6,6 @@ import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.Statement
-import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
@@ -112,12 +111,6 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return resultSet.map { convertToAwardEntity(it) }.asSuccess()
     }
 
-    protected fun load(statement: BoundStatement): ResultSet = try {
-        session.execute(statement)
-    } catch (exception: Exception) {
-        throw ReadEntityException(message = "Error read Award(s) from the database.", cause = exception)
-    }
-
     private fun convertToAwardEntity(row: Row): AwardEntity = AwardEntity(
         cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
         token = UUID.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
@@ -168,12 +161,6 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         session.execute(statement)
     } catch (exception: Exception) {
         throw SaveEntityException(message = "Error writing new award to database.", cause = exception)
-    }
-
-    private fun saveNewAwards(statement: BatchStatement): ResultSet = try {
-        session.execute(statement)
-    } catch (exception: Exception) {
-        throw SaveEntityException(message = "Error writing new award(s) to database.", cause = exception)
     }
 
     override fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>) {
