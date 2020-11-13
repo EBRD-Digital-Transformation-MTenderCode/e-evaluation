@@ -11,14 +11,12 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.evaluation.application.exception.ReadEntityException
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepository
 import com.procurement.evaluation.infrastructure.tools.toCassandraTimestamp
-import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -27,7 +25,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -79,17 +76,18 @@ class CassandraAwardPeriodRepositoryIT {
     fun findBy() {
         insertAwardPeriod()
 
-        val actualFundedAwardPeriodStartDate = awardPeriodRepository.findStartDateBy(cpid = CPID, ocid = OCID)
+        val periodEntity = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID).get
+        assertNotNull(periodEntity)
 
-        assertNotNull(actualFundedAwardPeriodStartDate)
+        val actualFundedAwardPeriodStartDate = periodEntity!!.startDate
         assertEquals(START_DATE, actualFundedAwardPeriodStartDate)
     }
 
     @Test
     fun awardPeriodNotFound() {
         val UNKNOWN_CPID = Cpid.tryCreateOrNull("nope-t1s2t3-MD-1234564674286")!!
-        val actualFundedAwardPeriodStartDate = awardPeriodRepository.findStartDateBy(cpid = UNKNOWN_CPID, ocid = OCID)
-        assertNull(actualFundedAwardPeriodStartDate)
+        val periodEntity = awardPeriodRepository.findBy(cpid = UNKNOWN_CPID, ocid = OCID).get
+        assertNull(periodEntity)
     }
 
     @Test
@@ -99,19 +97,20 @@ class CassandraAwardPeriodRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<ReadEntityException> {
-            awardPeriodRepository.findStartDateBy(cpid = CPID, ocid = OCID)
-        }
-        assertEquals("Error read Award(s) from the database.", exception.message)
+        val result = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID)
+
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is RuntimeException)
     }
 
     @Test
     fun saveNewStart() {
         awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
 
-        val actualFundedAwardPeriodStartDate = awardPeriodRepository.findStartDateBy(cpid = CPID, ocid = OCID)
+        val periodEntity = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID).get
+        val actualFundedAwardPeriodStartDate = periodEntity?.startDate
 
-        assertNotNull(actualFundedAwardPeriodStartDate)
+        assertNotNull(periodEntity)
         assertEquals(START_DATE, actualFundedAwardPeriodStartDate)
     }
 
@@ -170,17 +169,5 @@ class CassandraAwardPeriodRepositoryIT {
             .value(Database.Period.START_DATE, START_DATE.toCassandraTimestamp())
             .value(Database.Period.END_DATE, endDate?.toCassandraTimestamp())
         session.execute(rec)
-    }
-
-    private fun findAwardPeriodEnd(): LocalDateTime? {
-        val query = QueryBuilder.select(Database.Period.END_DATE)
-            .from(Database.KEYSPACE, Database.Period.TABLE_NAME)
-            .where(QueryBuilder.eq(Database.Period.CPID, CPID.underlying))
-            .and(QueryBuilder.eq(Database.Period.OCID, OCID.underlying))
-
-        return session.execute(query)
-            .one()
-            ?.getTimestamp(Database.Period.END_DATE)
-            ?.toLocalDateTime()
     }
 }

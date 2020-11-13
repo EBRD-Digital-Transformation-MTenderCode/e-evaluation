@@ -12,7 +12,7 @@ class CloseAwardPeriodStrategy(val awardPeriodRepository: AwardPeriodRepository)
 
     fun execute(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail> {
 
-        awardPeriodRepository.tryFindStartDateByCpidAndOcid(cpid = params.cpid, ocid = params.ocid)
+        awardPeriodRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { error -> return error }
             ?: return Result.failure(ValidationError.PeriodNotFoundOnCloseAwardPeriod())
 

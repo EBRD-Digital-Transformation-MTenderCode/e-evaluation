@@ -5,7 +5,6 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.fail.Fail
-import com.procurement.evaluation.lib.functional.MaybeFail
 import java.time.LocalDateTime
 
 interface AwardPeriodRepository {
@@ -17,12 +16,5 @@ interface AwardPeriodRepository {
     fun findBy(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database>
 
     fun findBy(cpid: Cpid, ocid: Ocid): Result<PeriodEntity?, Fail.Incident.Database>
-
-
-    fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident>
-
-    fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database>
-
-    fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime?
 
 }
