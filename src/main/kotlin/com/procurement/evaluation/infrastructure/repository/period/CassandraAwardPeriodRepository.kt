@@ -168,7 +168,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             .asSuccess()
     }
 
-    override fun trySaveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Unit, Fail.Incident.Database> {
+    override fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Fail.Incident.Database> {
         val statement = preparedSaveEndDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
@@ -178,11 +178,6 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         val result = statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
 
-        if (!result.wasApplied())
-            return Result.failure(
-                Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the end award period '$endDate' by cpid '$cpid' and ocid '$ocid' to the database. Record is not exists.")
-            )
-
-        return Unit.asSuccess()
+        return result.wasApplied().asSuccess()
     }
 }

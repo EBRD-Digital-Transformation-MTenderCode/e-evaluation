@@ -28,8 +28,14 @@ class PeriodService(private val periodRepository: AwardPeriodRepository) {
 
         val period = periods.first()
 
-        periodRepository.trySaveEnd(period.cpid, period.ocid, endDate)
+        val wasApplied = periodRepository.saveEnd(period.cpid, period.ocid, endDate)
             .orThrow { throw it.exception }
+
+        if (!wasApplied)
+            throw ErrorException(
+                error = ErrorType.DATABASE,
+                message = "An error occurred when writing a record(s) of the end award period '$endDate' by cpid '$cpid' and ocid '${period.ocid}' to the database. Record is not exists."
+            )
 
         return Period(period.startDate, endDate)
     }
