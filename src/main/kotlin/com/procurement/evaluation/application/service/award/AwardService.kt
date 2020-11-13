@@ -356,7 +356,11 @@ class AwardServiceImpl(
             newAwardPeriodStart
         }
 
-        awardRepository.saveNew(cpid = cpid, award = newAwardEntity)
+        val wasApplied = awardRepository.save(cpid = cpid, award = newAwardEntity)
+            .orThrow { fail -> SaveEntityException(message = "Error writing new award to database.", cause = fail.exception) }
+
+        if(!wasApplied)
+            throw SaveEntityException("An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${newAwardEntity.ocid}' to the database. Record is already.")
 
         return getCreatedAwardData(award, awardPeriodStart, lotAwarded)
     }
@@ -1206,7 +1210,13 @@ class AwardServiceImpl(
             }
             .toMap()
 
-        awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwards.values)
+        val wasApplied = awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwards.values)
+            .orThrow { fail ->
+                throw SaveEntityException(message = "Error writing updated award to database.", cause = fail.exception)
+            }
+
+        if(!wasApplied)
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '${context.cpid}' to the database. Record(s) is not exists.")
 
         return FinalizedAwardsStatusByLots(
             awards = updatedAwards.keys.map { award ->
@@ -1431,7 +1441,14 @@ class AwardServiceImpl(
                 .toList()
         )
 
-        awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwardEntities)
+        val wasApplied = awardRepository.update(cpid = context.cpid, updatedAwards = updatedAwardEntities)
+            .orThrow { fail ->
+                throw SaveEntityException(message = "Error writing updated award to database.", cause = fail.exception)
+            }
+
+        if(!wasApplied)
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '${context.cpid}' to the database. Record(s) is not exists.")
+
         return result
     }
 

@@ -12,7 +12,6 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.model.Cpid
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -189,7 +187,7 @@ class CassandraAwardRepositoryIT {
             owner = OWNER,
             jsonData = JSON_DATA
         )
-        awardRepository.saveNew(cpid = CPID, award = awardEntity)
+        awardRepository.save(cpid = CPID, award = awardEntity)
 
         val actualFundedAwards = awardRepository.findBy(cpid = CPID).orThrow { it.exception }
 
@@ -208,16 +206,13 @@ class CassandraAwardRepositoryIT {
             owner = OWNER,
             jsonData = JSON_DATA
         )
-        awardRepository.saveNew(cpid = CPID, award = awardEntity)
+        awardRepository.save(cpid = CPID, award = awardEntity)
 
-        val exception = assertThrows<SaveEntityException> {
-            awardRepository.saveNew(cpid = CPID, award = awardEntity)
-        }
+        val result = awardRepository.save(cpid = CPID, award = awardEntity)
 
-        assertEquals(
-            "An error occurred when writing a record(s) of the award by cpid '$CPID' and ocid '$OCID' to the database. Record is already.",
-            exception.message
-        )
+        assertTrue(result.isSuccess)
+        val wasApplied = result.get
+        assertFalse(wasApplied)
     }
 
     @Test
@@ -236,10 +231,10 @@ class CassandraAwardRepositoryIT {
             jsonData = JSON_DATA
         )
 
-        val exception = assertThrows<SaveEntityException> {
-            awardRepository.saveNew(cpid = CPID, award = awardEntity)
-        }
-        assertEquals("Error writing new award to database.", exception.message)
+        val result = awardRepository.save(cpid = CPID, award = awardEntity)
+
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is RuntimeException)
     }
 
     @Test
@@ -280,7 +275,6 @@ class CassandraAwardRepositoryIT {
             .orThrow { it.exception }
 
         assertFalse(result)
-
     }
 
     @Test
@@ -338,14 +332,11 @@ class CassandraAwardRepositoryIT {
             statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
-        val exception = assertThrows<SaveEntityException> {
-            awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
-        }
+        val result = awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
 
-        assertEquals(
-            "An error occurred when writing a record(s) of the awards by cpid '$CPID' to the database. Record(s) is not exists.",
-            exception.message
-        )
+        assertTrue(result.isSuccess)
+        val wasApplied = result.get
+        assertFalse(wasApplied)
     }
 
     @Test
@@ -364,10 +355,10 @@ class CassandraAwardRepositoryIT {
             jsonData = UPDATED_JSON_DATA
         )
 
-        val exception = assertThrows<SaveEntityException> {
-            awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
-        }
-        assertEquals("Error writing updated award to database.", exception.message)
+        val result = awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
+
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is RuntimeException)
     }
 
     private fun createKeyspace() {

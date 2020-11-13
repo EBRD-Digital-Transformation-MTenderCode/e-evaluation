@@ -2,11 +2,8 @@ package com.procurement.evaluation.infrastructure.repository.award
 
 import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.BoundStatement
-import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
-import com.datastax.driver.core.Statement
-import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.functional.Result
@@ -99,112 +96,77 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     private val preparedSaveNewAwardCQL = session.prepare(SAVE_NEW_AWARD_CQL)
     private val preparedUpdatedAwardStatusesCQL = session.prepare(UPDATE_AWARD_STATUSES_CQL)
 
-    override fun findBy(cpid: Cpid): Result<List<AwardEntity>, Fail.Incident.Database> {
-        val query = preparedFindByCpidCQL.bind()
+    override fun findBy(cpid: Cpid): Result<List<AwardEntity>, Fail.Incident.Database> =
+        preparedFindByCpidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
             }
-
-        val resultSet = query.tryExecute(session)
+            .tryExecute(session)
             .doReturn { error -> return failure(error) }
+            .map { convertToAwardEntity(it) }
+            .asSuccess()
 
-        return resultSet.map { convertToAwardEntity(it) }.asSuccess()
-    }
-
-    private fun convertToAwardEntity(row: Row): AwardEntity = AwardEntity(
-        cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
-        token = UUID.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
-        ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
-        owner = Owner.fromString(row.getString(Database.Awards.OWNER)),
-        status = AwardStatus.creator(row.getString(Database.Awards.STATUS)),
-        statusDetails = AwardStatusDetails.creator(row.getString(Database.Awards.STATUS_DETAILS)),
-        jsonData = row.getString(Database.Awards.JSON_DATA)
-    )
-
-    override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): Result<AwardEntity?, Fail.Incident.Database> {
-        val query = preparedFindByCpidAndOcidAndTokenCQL.bind()
+    override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): Result<AwardEntity?, Fail.Incident.Database> =
+        preparedFindByCpidAndOcidAndTokenCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
                 setString(Database.Awards.OCID, ocid.underlying)
                 setString(Database.Awards.TOKEN_ENTITY, token.toString())
             }
+            .tryExecute(session)
+            .orForwardFail { error -> return error }
+            .one()
+            ?.let { convertToAwardEntity(it) }
+            .asSuccess()
 
-        val resultSet = query.tryExecute(session)
-            .doReturn { error -> return failure(error) }
+    override fun save(cpid: Cpid, award: AwardEntity): Result<Boolean, Fail.Incident.Database> =
+        statementForSaveAward(cpid, award)
+            .tryExecute(session)
+            .orForwardFail { fail -> return fail }
+            .wasApplied()
+            .asSuccess()
 
-        return resultSet.one()?.let { convertToAwardEntity(it) }.asSuccess()
-    }
-
-    override fun saveNew(cpid: Cpid, award: AwardEntity) {
-        val statement = statementForAwardSave(cpid, award)
-
-        val result = saveNew(statement)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${award.ocid}' to the database. Record is already.")
-    }
-
-    private fun statementForAwardSave(
-        cpid: Cpid,
-        award: AwardEntity
-    ): BoundStatement = preparedSaveNewAwardCQL.bind()
-        .apply {
-            setString(Database.Awards.CPID, cpid.underlying)
-            setString(Database.Awards.OCID, award.ocid.underlying)
-            setString(Database.Awards.TOKEN_ENTITY, award.token.toString())
-            setString(Database.Awards.OWNER, award.owner.toString())
-            setString(Database.Awards.STATUS, award.status.toString())
-            setString(Database.Awards.STATUS_DETAILS, award.statusDetails.toString())
-            setString(Database.Awards.JSON_DATA, award.jsonData)
-        }
-
-    private fun saveNew(statement: BoundStatement): ResultSet = try {
-        session.execute(statement)
-    } catch (exception: Exception) {
-        throw SaveEntityException(message = "Error writing new award to database.", cause = exception)
-    }
-
-    override fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>) {
-        val statements = BatchStatement().apply {
-            for (updatedAward in updatedAwards) {
-                add(statementForUpdateAward(cpid = cpid, updatedAward = updatedAward))
+    override fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>): Result<Boolean, Fail.Incident.Database> =
+        BatchStatement()
+            .apply {
+                for (updatedAward in updatedAwards) {
+                    add(statementForUpdateAward(cpid = cpid, updatedAward = updatedAward))
+                }
             }
-        }
-        val result = executeUpdating(statements)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '$cpid' to the database. Record(s) is not exists.")
-    }
+            .tryExecute(session)
+            .orForwardFail { fail -> return fail }
+            .wasApplied()
+            .asSuccess()
 
-    override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident.Database> {
-        val query = preparedFindByCpidAndOcidCQL.bind()
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident.Database> =
+        preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
                 setString(Database.Awards.OCID, ocid.underlying)
             }
-
-        val resultSet = query.tryExecute(session)
+            .tryExecute(session)
             .doReturn { error -> return failure(error) }
-        return resultSet.map { convertToAwardEntity(it) }.asSuccess()
-    }
+            .map { convertToAwardEntity(it) }
+            .asSuccess()
 
-    override fun save(cpid: Cpid, awards: Collection<AwardEntity>): Result<Boolean, Fail.Incident.Database> {
-        val statements = BatchStatement()
+    override fun save(cpid: Cpid, awards: Collection<AwardEntity>): Result<Boolean, Fail.Incident.Database> =
+        BatchStatement()
             .apply {
                 for (award in awards) {
-                    add(statementForAwardSave(cpid = cpid, award = award))
+                    add(statementForSaveAward(cpid = cpid, award = award))
                 }
             }
-        val result = statements.tryExecute(session = session)
+            .tryExecute(session = session)
             .orForwardFail { error -> return error }
+            .wasApplied()
+            .asSuccess()
 
-        return result.wasApplied().asSuccess()
-    }
-
-    override fun update(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident.Database> {
-        val statement = statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
-        val result = statement.tryExecute(session = session)
+    override fun update(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident.Database> =
+        statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
+            .tryExecute(session = session)
             .orForwardFail { error -> return error }
-        return result.wasApplied().asSuccess()
-    }
+            .wasApplied()
+            .asSuccess()
 
     private fun statementForUpdateAward(cpid: Cpid, updatedAward: AwardEntity): BoundStatement =
         preparedUpdatedAwardStatusesCQL.bind()
@@ -217,9 +179,25 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(Database.Awards.JSON_DATA, updatedAward.jsonData)
             }
 
-    private fun executeUpdating(statement: Statement): ResultSet = try {
-        session.execute(statement)
-    } catch (exception: Exception) {
-        throw SaveEntityException(message = "Error writing updated award to database.", cause = exception)
-    }
+    private fun statementForSaveAward(cpid: Cpid, award: AwardEntity): BoundStatement =
+        preparedSaveNewAwardCQL.bind()
+            .apply {
+                setString(Database.Awards.CPID, cpid.underlying)
+                setString(Database.Awards.OCID, award.ocid.underlying)
+                setString(Database.Awards.TOKEN_ENTITY, award.token.toString())
+                setString(Database.Awards.OWNER, award.owner?.toString())
+                setString(Database.Awards.STATUS, award.status.toString())
+                setString(Database.Awards.STATUS_DETAILS, award.statusDetails.toString())
+                setString(Database.Awards.JSON_DATA, award.jsonData)
+            }
+
+    private fun convertToAwardEntity(row: Row): AwardEntity = AwardEntity(
+        cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
+        token = UUID.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
+        ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
+        owner = Owner.fromString(row.getString(Database.Awards.OWNER)),
+        status = AwardStatus.creator(row.getString(Database.Awards.STATUS)),
+        statusDetails = AwardStatusDetails.creator(row.getString(Database.Awards.STATUS_DETAILS)),
+        jsonData = row.getString(Database.Awards.JSON_DATA)
+    )
 }

@@ -51,8 +51,7 @@ class CassandraHistoryRepository(private val session: Session) : HistoryReposito
                 setString(Database.History.COMMAND_NAME, command.key)
             }
             .tryExecute(session)
-            .doOnError { error -> return Result.failure(error) }
-            .get
+            .orForwardFail { error -> return error }
             .one()
             ?.getString(Database.History.JSON_DATA)
             .asSuccess()
