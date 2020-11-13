@@ -73,8 +73,14 @@ class CreateUnsuccessfulAwardsStrategy(
                     jsonData = toJson(award)
                 )
             }
-        awardRepository.trySave(cpid = params.cpid, awards = awardEntities)
+
+        val wasApplied = awardRepository.save(cpid = params.cpid, awards = awardEntities)
             .doReturn { error -> return error.asFailure() }
+
+        if (!wasApplied)
+            return failure(
+                Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '${params.cpid}' to the database. Record(s) is not exists.")
+            )
 
         return awards.map { award ->
             award.toResult()

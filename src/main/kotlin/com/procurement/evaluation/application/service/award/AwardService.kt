@@ -1259,7 +1259,9 @@ class AwardServiceImpl(
             }
         )
 
-        awardRepository.saveNew(context.cpid, entities)
+        awardRepository.save(context.cpid, entities)
+            .orThrow { it.exception }
+
         return result
     }
 
@@ -1323,7 +1325,9 @@ class AwardServiceImpl(
             }
         )
 
-        awardRepository.saveNew(context.cpid, entities)
+        awardRepository.save(context.cpid, entities)
+            .orThrow { it.exception }
+
         return result
     }
 
@@ -1487,7 +1491,9 @@ class AwardServiceImpl(
 
             }
         )
-        awardRepository.saveNew(cpid = context.cpid, awards = awardsEntities)
+        awardRepository.save(cpid = context.cpid, awards = awardsEntities)
+            .orThrow { it.exception }
+
         return response
     }
 
@@ -1662,7 +1668,9 @@ class AwardServiceImpl(
                         )
                     }
                 )
-                awardRepository.saveNew(cpid = context.cpid, awards = entities)
+                awardRepository.save(cpid = context.cpid, awards = entities)
+                    .orThrow { it.exception }
+
                 return result
             }
             Phase.AWARDING -> {
