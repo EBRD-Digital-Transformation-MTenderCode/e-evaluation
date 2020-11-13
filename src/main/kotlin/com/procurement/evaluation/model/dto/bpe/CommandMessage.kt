@@ -14,6 +14,7 @@ import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse
 import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.ocds.Phase
@@ -125,7 +126,7 @@ data class Context @JsonCreator constructor(
     val awardCriteria: String?
 )
 
-enum class CommandType(private val value: String) {
+enum class CommandType(@JsonValue override val key: String): Action {
 
     AWARDS_CANCELLATION("awardsCancellation"),
     CHECK_AWARD_STATUS("checkAwardStatus"),
@@ -147,13 +148,12 @@ enum class CommandType(private val value: String) {
     START_AWARD_PERIOD("startAwardPeriod"),
     START_CONSIDERATION("startConsideration");
 
-    @JsonValue
     fun value(): String {
-        return this.value
+        return this.key
     }
 
     override fun toString(): String {
-        return this.value
+        return this.key
     }
 }
 

@@ -88,7 +88,7 @@ class CommandService(
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
-        val history = historyRepository.getHistory(cm.id, cm.command.value())
+        val history = historyRepository.getHistory(cm.id, cm.command)
             .orThrow {
                 throw RuntimeException("Error of loading history. ${it.description}", it.exception)
             }
@@ -615,7 +615,7 @@ class CommandService(
                 if (log.isDebugEnabled)
                     log.debug("Response: ${toJson(it)}")
             }
-        historyRepository.saveHistory(cm.id, cm.command.value(), response)
+        historyRepository.saveHistory(cm.id, cm.command, response)
             .doOnError {
                 log.error("Error of save history. ${it.description}", it.exception)
             }

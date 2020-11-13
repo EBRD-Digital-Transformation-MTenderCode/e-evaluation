@@ -5,6 +5,7 @@ import com.procurement.evaluation.application.repository.history.HistoryReposito
 import com.procurement.evaluation.application.repository.history.model.HistoryEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.asSuccess
+import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.repository.Database
@@ -37,18 +38,17 @@ class CassandraHistoryRepository(private val session: Session) : HistoryReposito
                  FROM ${Database.KEYSPACE}.${Database.History.TABLE_NAME}
                 WHERE ${Database.History.COMMAND_ID}=?
                   AND ${Database.History.COMMAND_NAME}=?
-               LIMIT 1
             """
     }
 
     private val preparedSaveHistoryCQL = session.prepare(SAVE_HISTORY_CQL)
     private val preparedFindHistoryByCpidAndCommandCQL = session.prepare(FIND_HISTORY_ENTRY_CQL)
 
-    override fun getHistory(operationId: String, command: String): Result<String?, Fail.Incident.Database> =
+    override fun getHistory(operationId: String, command: Action): Result<String?, Fail.Incident.Database> =
         preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
                 setString(Database.History.COMMAND_ID, operationId)
-                setString(Database.History.COMMAND_NAME, command)
+                setString(Database.History.COMMAND_NAME, command.key)
             }
             .tryExecute(session)
             .doOnError { error -> return Result.failure(error) }
@@ -59,25 +59,24 @@ class CassandraHistoryRepository(private val session: Session) : HistoryReposito
 
     override fun saveHistory(
         operationId: String,
-        command: String,
+        command: Action,
         response: Any
     ): Result<HistoryEntity, Fail.Incident.Database> {
         val entity = HistoryEntity(
             operationId = operationId,
-            command = command,
+            command = command.key,
             operationDate = localNowUTC().toDate(),
             jsonData = toJson(response)
         )
 
-        val insert = preparedSaveHistoryCQL.bind()
+        preparedSaveHistoryCQL.bind()
             .apply {
                 setString(Database.History.COMMAND_ID, entity.operationId)
                 setString(Database.History.COMMAND_NAME, entity.command)
                 setTimestamp(Database.History.COMMAND_DATE, entity.operationDate)
                 setString(Database.History.JSON_DATA, entity.jsonData)
             }
-
-        insert.tryExecute(session)
+            .tryExecute(session)
             .doOnError { error -> return Result.failure(error) }
 
         return entity.asSuccess()
