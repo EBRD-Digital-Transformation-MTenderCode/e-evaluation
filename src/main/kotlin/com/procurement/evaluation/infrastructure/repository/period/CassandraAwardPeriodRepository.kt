@@ -103,8 +103,8 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setTimestamp(Database.Period.START_DATE, start.toCassandraTimestamp())
             }
             .tryExecute(session)
-            .map { it.wasApplied() }
             .orForwardFail { return it }
+            .wasApplied()
             .asSuccess()
 
     override fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Fail.Incident.Database> =
@@ -115,7 +115,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setTimestamp(Database.Period.END_DATE, endDate.toCassandraTimestamp())
             }
             .tryExecute(session = session)
-            .map { it.wasApplied() }
             .orForwardFail { error -> return error }
+            .wasApplied()
             .asSuccess()
 }
