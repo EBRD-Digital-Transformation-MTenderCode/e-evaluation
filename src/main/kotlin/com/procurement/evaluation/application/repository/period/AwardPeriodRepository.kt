@@ -10,15 +10,19 @@ import java.time.LocalDateTime
 
 interface AwardPeriodRepository {
 
-    fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database>
-
-    fun findByCpid(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database>
-
-    fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime?
-
     fun saveStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime): Result<Boolean, Fail.Incident.Database>
+
+    fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Fail.Incident.Database>
+
+    fun findBy(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database>
+
+    fun findBy(cpid: Cpid, ocid: Ocid): Result<PeriodEntity?, Fail.Incident.Database>
+
 
     fun tryFindStartDateByCpidAndOcid(cpid: Cpid, ocid: Ocid): Result<LocalDateTime?, Fail.Incident>
 
-    fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Fail.Incident.Database>
+    fun save(entity: PeriodEntity): MaybeFail<Fail.Incident.Database>
+
+    fun findStartDateBy(cpid: Cpid, ocid: Ocid): LocalDateTime?
+
 }

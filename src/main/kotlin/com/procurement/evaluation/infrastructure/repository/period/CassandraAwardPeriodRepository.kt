@@ -50,7 +50,15 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                       ${Database.Period.END_DATE}
                  FROM ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
                 WHERE ${Database.Period.CPID}=?
-                  LIMIT 1
+            """
+
+        private const val FIND_PERIOD_BY_CPID_AND_OCID_CQL = """
+               SELECT ${Database.Period.OCID},
+                      ${Database.Period.START_DATE},
+                      ${Database.Period.END_DATE}
+                 FROM ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
+                WHERE ${Database.Period.CPID}=?
+                  AND ${Database.Period.OCID}=?
             """
 
         private const val FIND_START_DATE_BY_CPID_AND_OCID_CQL = """
@@ -82,6 +90,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     private val preparedSavePeriodCQL = session.prepare(SAVE_PERIOD_CQL)
     private val preparedFindByCpidAndOcidCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
     private val preparedFindPeriodByCpidCQL = session.prepare(FIND_PERIOD_BY_CPID_CQL)
+    private val preparedFindPeriodByCpidAndOcidCQL = session.prepare(FIND_PERIOD_BY_CPID_AND_OCID_CQL)
     private val preparedSaveNewStartDateCQL = session.prepare(SAVE_NEW_START_DATE_CQL)
     private val preparedSaveEndDateCQL = session.prepare(SAVE_END_DATE_CQL)
     private val preparedFindStartDateByCpidAndOcidCQL = session.prepare(FIND_START_DATE_BY_CPID_AND_OCID_CQL)
@@ -100,8 +109,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         return MaybeFail.none()
     }
 
-
-    override fun findByCpid(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database> {
+    override fun findBy(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database> {
         val statement = preparedFindPeriodByCpidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
@@ -109,6 +117,26 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
         return statement.tryExecute(session = session)
             .orForwardFail { error -> return error }
             .map { row ->
+                PeriodEntity(
+                    cpid = cpid,
+                    ocid = Ocid.tryCreateOrNull(row.getString(Database.Period.OCID))!!,
+                    startDate = row.getTimestamp(Database.Period.START_DATE).toLocalDateTime(),
+                    endDate = row.getTimestamp(Database.Period.END_DATE).toLocalDateTime()
+                )
+            }
+            .asSuccess()
+    }
+
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<PeriodEntity?, Fail.Incident.Database> {
+        val statement = preparedFindPeriodByCpidAndOcidCQL.bind()
+            .apply {
+                setString(Database.Period.CPID, cpid.underlying)
+                setString(Database.Period.OCID, ocid.underlying)
+            }
+        return statement.tryExecute(session = session)
+            .orForwardFail { error -> return error }
+            .one()
+            ?.let { row ->
                 PeriodEntity(
                     cpid = cpid,
                     ocid = Ocid.tryCreateOrNull(row.getString(Database.Period.OCID))!!,

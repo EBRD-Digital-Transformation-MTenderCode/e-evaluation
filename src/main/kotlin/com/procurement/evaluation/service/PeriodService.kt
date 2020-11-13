@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 class PeriodService(private val periodRepository: AwardPeriodRepository) {
 
     fun saveEndOfPeriod(cpid: Cpid, endDate: LocalDateTime): Period {
-        val periods = periodRepository.findByCpid(cpid)
+        val periods = periodRepository.findBy(cpid)
             .orThrow { it.exception }
 
         if (periods.size > 1)
