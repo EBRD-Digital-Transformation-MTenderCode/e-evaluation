@@ -1,5 +1,6 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
@@ -706,7 +707,12 @@ class AwardServiceImpl(
             jsonData = toJson(updatedAward)
         )
 
-        awardRepository.update(cpid = cpid, updatedAward = updatedAwardEntity)
+        val wasApplied = awardRepository.update(cpid = cpid, updatedAward = updatedAwardEntity)
+            .orThrow { it.exception }
+
+        if(!wasApplied)
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${updatedAwardEntity.ocid}' and token to the database. Record is already.")
+
 
         return getEvaluateAwardResult(updatedAward = updatedAward)
     }
@@ -1561,7 +1567,11 @@ class AwardServiceImpl(
             )
         )
 
-        awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+        val wasApplied = awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+            .orThrow { it.exception }
+
+        if (!wasApplied)
+            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '${context.cpid}' and ocid '${updatedAwardEntity.ocid}' and token to the database. Record is already.")
 
         return result
     }
@@ -1621,7 +1631,11 @@ class AwardServiceImpl(
                     statusDetails = updatedAward.statusDetails,
                     jsonData = toJson(updatedAward)
                 )
-            awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+            val wasApplied = awardRepository.update(cpid = context.cpid, updatedAward = updatedAwardEntity)
+                .orThrow { it.exception }
+
+            if (!wasApplied)
+                throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '${context.cpid}' and ocid '${updatedAwardEntity.ocid}' and token to the database. Record is already.")
 
             result
         } else
@@ -1836,7 +1850,7 @@ class AwardServiceImpl(
             jsonData = toJson(updatedAward)
         )
 
-        awardRepository.tryUpdate(cpid = params.cpid, updatedAward = updatedAwardEntity)
+        awardRepository.update(cpid = params.cpid, updatedAward = updatedAwardEntity)
             .doReturn { error -> return ValidationResult.error(error) }
             .doOnFalse {
                 return ValidationResult.error(

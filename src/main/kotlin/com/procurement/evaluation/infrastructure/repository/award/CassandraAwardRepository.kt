@@ -176,13 +176,6 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         throw SaveEntityException(message = "Error writing new award(s) to database.", cause = exception)
     }
 
-    override fun update(cpid: Cpid, updatedAward: AwardEntity) {
-        val statement = statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
-        val result = executeUpdating(statement)
-        if (!result.wasApplied())
-            throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${updatedAward.ocid}' and token to the database. Record is already.")
-    }
-
     override fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>) {
         val statements = BatchStatement().apply {
             for (updatedAward in updatedAwards) {
@@ -219,7 +212,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         return result.wasApplied().asSuccess()
     }
 
-    override fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident> {
+    override fun update(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident.Database> {
         val statement = statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
         val result = statement.tryExecute(session = session)
             .orForwardFail { error -> return error }

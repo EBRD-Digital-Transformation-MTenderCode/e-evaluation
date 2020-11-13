@@ -23,6 +23,7 @@ import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -274,14 +275,12 @@ class CassandraAwardRepositoryIT {
             statusDetails = UPDATED_AWARD_STATUS_DETAILS,
             jsonData = UPDATED_JSON_DATA
         )
-        val exception = assertThrows<SaveEntityException> {
-            awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
-        }
 
-        assertEquals(
-            "An error occurred when writing a record(s) of the award by cpid '$CPID' and ocid '$OCID' and token to the database. Record is already.",
-            exception.message
-        )
+        val result = awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
+            .orThrow { it.exception }
+
+        assertFalse(result)
+
     }
 
     @Test
@@ -300,10 +299,10 @@ class CassandraAwardRepositoryIT {
             jsonData = UPDATED_JSON_DATA
         )
 
-        val exception = assertThrows<SaveEntityException> {
-            awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
-        }
-        assertEquals("Error writing updated award to database.", exception.message)
+        val result = awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
+
+        assertTrue(result.isFail)
+        assertTrue(result.error.exception is RuntimeException)
     }
 
     @Test

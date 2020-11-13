@@ -15,13 +15,11 @@ interface AwardRepository {
 
     fun saveNew(cpid: Cpid, award: AwardEntity)
 
-    fun update(cpid: Cpid, updatedAward: AwardEntity)
-
     fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>)
 
     fun findBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident.Database>
 
     fun save(cpid: Cpid, awards: Collection<AwardEntity>): Result<Boolean, Fail.Incident.Database>
 
-    fun tryUpdate(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident>
+    fun update(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident.Database>
 }
