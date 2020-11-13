@@ -11,7 +11,6 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
@@ -134,7 +133,7 @@ class CassandraAwardPeriodRepositoryIT {
         val result = awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
 
         assertTrue(result.isFail)
-        assertTrue(result.error.exception is SaveEntityException)
+        assertTrue(result.error.exception is RuntimeException)
 
     }
 

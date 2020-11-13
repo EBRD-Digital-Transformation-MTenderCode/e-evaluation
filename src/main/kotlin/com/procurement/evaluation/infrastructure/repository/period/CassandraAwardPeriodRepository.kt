@@ -1,10 +1,8 @@
 package com.procurement.evaluation.infrastructure.repository.period
 
 import com.datastax.driver.core.BatchStatement
-import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
-import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.period.model.PeriodEntity
 import com.procurement.evaluation.domain.functional.Result
@@ -32,8 +30,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             """
 
         private const val FIND_PERIOD_BY_CPID_AND_OCID_CQL = """
-               SELECT ${Database.Period.OCID},
-                      ${Database.Period.START_DATE},
+               SELECT ${Database.Period.START_DATE},
                       ${Database.Period.END_DATE}
                  FROM ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
                 WHERE ${Database.Period.CPID}=?
@@ -94,7 +91,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             ?.let { row ->
                 PeriodEntity(
                     cpid = cpid,
-                    ocid = Ocid.tryCreateOrNull(row.getString(Database.Period.OCID))!!,
+                    ocid = ocid,
                     startDate = row.getTimestamp(Database.Period.START_DATE).toLocalDateTime(),
                     endDate = row.getTimestamp(Database.Period.END_DATE)?.toLocalDateTime()
                 )
@@ -111,19 +108,11 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setTimestamp(Database.Period.START_DATE, start.toCassandraTimestamp())
             }
 
-        val result = saveNewStart(statement)
+        val result = statement.tryExecute(session)
             .orForwardFail { return it }
 
         return result.wasApplied().asSuccess()
     }
-
-    private fun saveNewStart(statement: BoundStatement): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> =
-        try {
-            Result.success(session.execute(statement))
-        } catch (expected: Exception) {
-            val exception =  SaveEntityException(message = "Error writing start date of the award period.", cause = expected)
-            Result.failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = exception))
-        }
 
     fun BatchStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> =
         try {
