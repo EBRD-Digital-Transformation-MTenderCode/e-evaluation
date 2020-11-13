@@ -35,7 +35,7 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
             }
             .get
         if (history != null) {
-            val data = history.jsonData
+            val data = history
             return data.tryToObject(target)
                 .doReturn { error ->
                     return generateResponseOnFailure(

@@ -44,27 +44,18 @@ class CassandraHistoryRepository(private val session: Session) : HistoryReposito
     private val preparedSaveHistoryCQL = session.prepare(SAVE_HISTORY_CQL)
     private val preparedFindHistoryByCpidAndCommandCQL = session.prepare(FIND_HISTORY_ENTRY_CQL)
 
-    override fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail.Incident.Database> {
-        val query = preparedFindHistoryByCpidAndCommandCQL.bind()
+    override fun getHistory(operationId: String, command: String): Result<String?, Fail.Incident.Database> =
+        preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
                 setString(Database.History.COMMAND_ID, operationId)
                 setString(Database.History.COMMAND_NAME, command)
             }
-
-        return query.tryExecute(session)
+            .tryExecute(session)
             .doOnError { error -> return Result.failure(error) }
             .get
             .one()
-            ?.let { row ->
-                HistoryEntity(
-                    row.getString(Database.History.COMMAND_ID),
-                    row.getString(Database.History.COMMAND_NAME),
-                    row.getTimestamp(Database.History.COMMAND_DATE),
-                    row.getString(Database.History.JSON_DATA)
-                )
-            }
+            ?.getString(Database.History.JSON_DATA)
             .asSuccess()
-    }
 
     override fun saveHistory(
         operationId: String,

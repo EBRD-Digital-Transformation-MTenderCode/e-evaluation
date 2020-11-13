@@ -88,12 +88,12 @@ class CommandService(
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
-        val historyEntity = historyRepository.getHistory(cm.id, cm.command.value())
+        val history = historyRepository.getHistory(cm.id, cm.command.value())
             .orThrow {
                 throw RuntimeException("Error of loading history. ${it.description}", it.exception)
             }
-        if (historyEntity != null) {
-            return toObject(ApiSuccessResponse::class.java, historyEntity.jsonData)
+        if (history != null) {
+            return toObject(ApiSuccessResponse::class.java, history)
         }
         val dataOfResponse: Any = when (cm.command) {
             CommandType.CREATE_AWARD -> {
