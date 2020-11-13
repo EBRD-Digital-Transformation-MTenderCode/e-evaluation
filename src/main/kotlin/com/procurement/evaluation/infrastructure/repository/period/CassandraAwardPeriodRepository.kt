@@ -1,7 +1,5 @@
 package com.procurement.evaluation.infrastructure.repository.period
 
-import com.datastax.driver.core.BatchStatement
-import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.period.model.PeriodEntity
@@ -61,12 +59,12 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     private val preparedSaveNewStartDateCQL = session.prepare(SAVE_NEW_START_DATE_CQL)
     private val preparedSaveEndDateCQL = session.prepare(SAVE_END_DATE_CQL)
 
-    override fun findBy(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database> {
-        val statement = preparedFindPeriodByCpidCQL.bind()
+    override fun findBy(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database> =
+        preparedFindPeriodByCpidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
             }
-        return statement.tryExecute(session = session)
+            .tryExecute(session = session)
             .orForwardFail { error -> return error }
             .map { row ->
                 PeriodEntity(
@@ -77,15 +75,14 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 )
             }
             .asSuccess()
-    }
 
-    override fun findBy(cpid: Cpid, ocid: Ocid): Result<PeriodEntity?, Fail.Incident.Database> {
-        val statement = preparedFindPeriodByCpidAndOcidCQL.bind()
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<PeriodEntity?, Fail.Incident.Database> =
+        preparedFindPeriodByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
                 setString(Database.Period.OCID, ocid.underlying)
             }
-        return statement.tryExecute(session = session)
+            .tryExecute(session = session)
             .orForwardFail { error -> return error }
             .one()
             ?.let { row ->
@@ -97,40 +94,28 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 )
             }
             .asSuccess()
-    }
 
-
-    override fun saveStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime): Result<Boolean, Fail.Incident.Database> {
-        val statement = preparedSaveNewStartDateCQL.bind()
+    override fun saveStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime): Result<Boolean, Fail.Incident.Database> =
+        preparedSaveNewStartDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
                 setString(Database.Period.OCID, ocid.underlying)
                 setTimestamp(Database.Period.START_DATE, start.toCassandraTimestamp())
             }
-
-        val result = statement.tryExecute(session)
+            .tryExecute(session)
+            .map { it.wasApplied() }
             .orForwardFail { return it }
+            .asSuccess()
 
-        return result.wasApplied().asSuccess()
-    }
-
-    fun BatchStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> =
-        try {
-            Result.success(session.execute(this))
-        } catch (expected: Exception) {
-            Result.failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = expected))
-        }
-
-    override fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Fail.Incident.Database> {
-        val statement = preparedSaveEndDateCQL.bind()
+    override fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Fail.Incident.Database> =
+        preparedSaveEndDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
                 setString(Database.Period.OCID, ocid.underlying)
                 setTimestamp(Database.Period.END_DATE, endDate.toCassandraTimestamp())
             }
-        val result = statement.tryExecute(session = session)
+            .tryExecute(session = session)
+            .map { it.wasApplied() }
             .orForwardFail { error -> return error }
-
-        return result.wasApplied().asSuccess()
-    }
+            .asSuccess()
 }
