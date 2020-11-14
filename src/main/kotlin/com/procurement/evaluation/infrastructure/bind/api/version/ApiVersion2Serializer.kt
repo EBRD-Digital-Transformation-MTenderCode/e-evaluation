@@ -1,4 +1,4 @@
-package com.procurement.revision.infrastructure.bind.apiversion
+package com.procurement.evaluation.infrastructure.bind.api.version
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
