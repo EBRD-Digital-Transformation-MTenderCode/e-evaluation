@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsRequest
 import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
 import com.procurement.evaluation.infrastructure.dto.convert.convert
@@ -24,9 +23,9 @@ class GetAwardStateByIdsHandler(
     override fun execute(node: JsonNode): Result<List<GetAwardStateByIdsResult>, Fail> {
         val params = node
             .tryGetParams(GetAwardStateByIdsRequest::class.java)
-            .doReturn { error -> return failure(error) }
+            .onFailure { return it }
             .convert()
-            .doReturn { error -> return failure(error) }
+            .onFailure { return it }
 
         return awardService.getAwardState(params = params)
     }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.bind
+import com.procurement.evaluation.domain.functional.flatMap
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
 import com.procurement.evaluation.domain.util.extension.toListOrEmpty
@@ -135,7 +135,7 @@ val NaN: UUID
 
 fun JsonNode.tryGetVersion(): Result<ApiVersion2, DataErrors> {
     val name = "version"
-    return tryGetTextAttribute(name).bind {
+    return tryGetTextAttribute(name).flatMap {
         when (val result = ApiVersion2.tryValueOf(it)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
@@ -154,11 +154,11 @@ fun JsonNode.tryGetAction(): Result<Command2Type, DataErrors> =
 
 fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
     val name = "params"
-    return tryGetAttribute(name).bind {
+    return tryGetAttribute(name).flatMap {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                BadRequest("Error parsing '$name'", result.error.exception)
+                BadRequest("Error parsing '$name'", result.reason.exception)
             )
         }
     }
@@ -167,7 +167,7 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
 fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
     val name = "id"
     return tryGetTextAttribute(name)
-        .bind {
+        .flatMap {
             when (val result = it.tryUUID()) {
                 is Result.Success -> result
                 is Result.Failure -> Result.failure(
@@ -184,6 +184,6 @@ fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
 fun String.tryGetNode(): Result<JsonNode, BadRequest> =
     when (val result = this.tryToNode()) {
         is Result.Success -> result
-        is Result.Failure -> Result.failure(BadRequest(exception = result.error.exception))
+        is Result.Failure -> Result.failure(BadRequest(exception = result.reason.exception))
     }
 

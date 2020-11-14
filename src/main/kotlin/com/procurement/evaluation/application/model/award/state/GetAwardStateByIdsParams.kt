@@ -29,21 +29,20 @@ class GetAwardStateByIdsParams private constructor(
 
             val awardIdsParsed = awardIds
                 .mapResultPair { awardId -> awardId.tryAwardId() }
-                .doReturn { failPair ->
-                    return failure(
-                        DataErrors.Validation.DataFormatMismatch(
-                            name = awardIdsAttribute,
-                            expectedFormat = "uuid",
-                            actualValue = failPair.element
-                        )
+                .mapFailure {
+                    DataErrors.Validation.DataFormatMismatch(
+                        name = awardIdsAttribute,
+                        expectedFormat = "uuid",
+                        actualValue = it.element
                     )
                 }
+                .onFailure { return it }
 
             val cpidParsed = parseCpid(cpid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val ocidParsed = parseOcid(ocid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             return GetAwardStateByIdsParams(
                 awardIds = awardIdsParsed,

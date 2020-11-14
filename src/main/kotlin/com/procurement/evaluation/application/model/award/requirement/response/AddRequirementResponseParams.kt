@@ -29,10 +29,10 @@ class AddRequirementResponseParams private constructor(
             cpid: String, ocid: String, award: Award
         ): Result<AddRequirementResponseParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val ocidParsed = parseOcid(ocid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             return AddRequirementResponseParams(
                 cpid = cpidParsed,
@@ -52,7 +52,7 @@ class AddRequirementResponseParams private constructor(
                 requirementResponse: RequirementResponse
             ): Result<Award, DataErrors> {
                 val awardIdParsed = parseAwardId(id)
-                    .doReturn { error -> return failure(error = error) }
+                    .onFailure { return it }
 
                 return Award(
                     id = awardIdParsed,
@@ -77,7 +77,7 @@ class AddRequirementResponseParams private constructor(
                     responder: Responder
                 ): Result<RequirementResponse, DataErrors> {
                     val parsedRRequirementResponseId = id.tryRequirementResponseId()
-                        .doReturn { error ->
+                        .onFailure {
                             return failure(
                                 DataErrors.Validation.DataFormatMismatch(
                                     name = "requirementResponseId",
@@ -102,7 +102,7 @@ class AddRequirementResponseParams private constructor(
                 companion object {
                     fun tryCreate(id: String): Result<RelatedTenderer, DataErrors> {
                         val parsedRelatedTendererId = id.tryTendererId()
-                            .doReturn { error ->
+                            .onFailure {
                                 return failure(
                                     DataErrors.Validation.DataFormatMismatch(
                                         name = "relatedTendererId",
@@ -122,7 +122,7 @@ class AddRequirementResponseParams private constructor(
                 companion object {
                     fun tryCreate(id: String): Result<Requirement, DataErrors> {
                         val parsedRequirementId = id.tryRequirementId()
-                            .doReturn { error ->
+                            .onFailure {
                                 return failure(
                                     DataErrors.Validation.DataFormatMismatch(
                                         name = "requirementId",
@@ -144,7 +144,7 @@ class AddRequirementResponseParams private constructor(
                     fun tryCreate(id: String, name: String) =
                         Responder(
                             id = PersonId.tryCreate(id)
-                                .orForwardFail { return it },
+                                .onFailure { return it },
                             name = name
                         ).asSuccess<Responder, DataErrors>()
                 }
@@ -153,7 +153,7 @@ class AddRequirementResponseParams private constructor(
                     companion object {
                         fun tryCreate(scheme: String, id: String): Result<Identifier, DataErrors> {
                             val parsedResponderId = id.tryResponderId()
-                                .doReturn { error ->
+                                .onFailure {
                                     return failure(
                                         DataErrors.Validation.DataFormatMismatch(
                                             name = "identifier.id",

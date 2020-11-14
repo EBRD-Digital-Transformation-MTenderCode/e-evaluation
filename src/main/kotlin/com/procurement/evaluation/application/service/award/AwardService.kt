@@ -1734,20 +1734,19 @@ class AwardServiceImpl(
         val awardEntities = awardRepository.findBy(
             cpid = params.cpid,
             ocid = params.ocid
-        ).orForwardFail { incident -> return incident }
+        ).onFailure { return it }
 
         val awardsIds = params.awardIds.toSetBy { it.toString() }
 
         val resultingAwards = awardEntities
             .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
-            .doReturn { failPair ->
-                return failure(
-                    Fail.Incident.Transform.ParseFromDatabaseIncident(
-                        jsonData = failPair.element.jsonData,
-                        exception = failPair.fail.exception
-                    )
+            .mapFailure {
+                Fail.Incident.Transform.ParseFromDatabaseIncident(
+                    jsonData = it.element.jsonData,
+                    exception = it.fail.exception
                 )
             }
+            .onFailure { return it }
             .filter { award -> testContains(award.id, awardsIds) }
 
         val resultingAwardIds = resultingAwards.toSetBy { it.id }
@@ -1771,15 +1770,16 @@ class AwardServiceImpl(
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
-            .doReturn { fail -> return ValidationResult.error(fail) }
+            .onFailure { return ValidationResult.error(it.reason) }
 
         val awardEntityById = awardEntities
             .associate { entity ->
                 val award = entity.jsonData
                     .tryToObject(Award::class.java)
-                    .doReturn { error ->
-                        return ValidationResult.error(Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                    .mapFailure {
+                        Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
                     }
+                    .onFailure { return ValidationResult.error(it.reason) }
                 award.id to entity
             }
 
@@ -1801,20 +1801,19 @@ class AwardServiceImpl(
 
     override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
-            .doReturn { incident -> return ValidationResult.error(incident) }
+            .onFailure { return ValidationResult.error(it.reason) }
             .takeIf { it.isNotEmpty() }
             ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
 
         val award = awardEntities
             .mapResultPair { entity -> entity.jsonData.tryToObject(Award::class.java) }
-            .doReturn { failPair ->
-                return ValidationResult.error(
-                    Fail.Incident.Transform.ParseFromDatabaseIncident(
-                        jsonData = failPair.element.jsonData,
-                        exception = failPair.fail.exception
-                    )
+            .mapFailure {
+                Fail.Incident.Transform.ParseFromDatabaseIncident(
+                    jsonData = it.element.jsonData,
+                    exception = it.fail.exception
                 )
             }
+            .onFailure { return ValidationResult.error(it.reason) }
             .firstOrNull { award -> award.id == params.awardId.toString() }
             ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
 
@@ -1847,32 +1846,31 @@ class AwardServiceImpl(
 
     override fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
-            .doReturn { fail -> return ValidationResult.error(fail) }
+            .onFailure { return ValidationResult.error(it.reason) }
 
         val awardEntityById = awardEntities
             .associate { entity ->
                 val award = entity.jsonData
                     .tryToObject(Award::class.java)
-                    .doReturn { error ->
-                        return ValidationResult.error(Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, error.exception))
+                    .mapFailure {
+                        Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
                     }
+                    .onFailure { return ValidationResult.error(it.reason) }
                 award.id to entity
             }
 
         val awardEntity = awardEntityById.get(params.award.id.toString())
-            ?: return ValidationResult.error(
-                ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id)
-            )
+            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id))
 
         val award = awardEntity.jsonData
             .tryToObject(Award::class.java)
-            .doReturn { error ->
-                return ValidationResult.error(
-                    Fail.Incident.Transform.ParseFromDatabaseIncident(
-                        jsonData = awardEntity.jsonData, exception = error.exception
-                    )
+            .mapFailure {
+                Fail.Incident.Transform.ParseFromDatabaseIncident(
+                    jsonData = awardEntity.jsonData,
+                    exception = it.exception
                 )
             }
+            .onFailure { return ValidationResult.error(it.reason) }
 
         val requirementResponse = convertToAwardRequirementResponse(params)
 
@@ -1885,7 +1883,7 @@ class AwardServiceImpl(
         )
 
         awardRepository.update(cpid = params.cpid, updatedAward = updatedAwardEntity)
-            .doReturn { error -> return ValidationResult.error(error) }
+            .onFailure { return ValidationResult.error(it.reason) }
             .doOnFalse {
                 return ValidationResult.error(
                     Fail.Incident.Database.DatabaseConsistencyIncident(

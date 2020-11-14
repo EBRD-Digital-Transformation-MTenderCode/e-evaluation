@@ -5,7 +5,6 @@ import com.procurement.evaluation.application.model.parseDate
 import com.procurement.evaluation.application.model.parseEnum
 import com.procurement.evaluation.application.model.parseOcid
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asFailure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
@@ -65,25 +64,26 @@ class CreateUnsuccessfulAwardsParams private constructor(
                     )
                 )
 
-            val lotIdsParsed = lotIds.map {
-                it.tryLotId()
-                    .doReturn { error ->
-                        return DataErrors.Validation.DataFormatMismatch(
+            val lotIdsParsed = lotIds.map {value ->
+                value.tryLotId()
+                    .mapFailure {
+                        DataErrors.Validation.DataFormatMismatch(
                             name = "lotIds",
-                            actualValue = it,
+                            actualValue = value,
                             expectedFormat = "uuid"
-                        ).asFailure()
+                        )
                     }
+                    .onFailure { return it }
             }
 
             val parsedCpid = parseCpid(value = cpid)
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             val parsedOcid = parseOcid(value = ocid)
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             val parsedDate = parseDate(value = date, attributeName = "date")
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             val parsedOperationType = parseEnum(
                 value = operationType,
@@ -91,7 +91,7 @@ class CreateUnsuccessfulAwardsParams private constructor(
                 allowedEnums = allowedOperationTypes,
                 attributeName = "operationType"
             )
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             return CreateUnsuccessfulAwardsParams(
                 cpid = parsedCpid,

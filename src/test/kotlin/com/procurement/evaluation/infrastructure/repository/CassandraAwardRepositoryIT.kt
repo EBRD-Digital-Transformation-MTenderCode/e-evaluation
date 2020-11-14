@@ -17,6 +17,7 @@ import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
+import com.procurement.evaluation.failure
 import com.procurement.evaluation.infrastructure.repository.award.CassandraAwardRepository
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
@@ -106,9 +107,9 @@ class CassandraAwardRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val result = awardRepository.findBy(cpid = CPID)
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        val failure = awardRepository.findBy(cpid = CPID).failure()
+
+        assertTrue(failure.exception is RuntimeException)
     }
 
     @Test
@@ -138,9 +139,9 @@ class CassandraAwardRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val result = awardRepository.findBy(cpid = CPID, ocid = OCID)
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        val failure = awardRepository.findBy(cpid = CPID, ocid = OCID).failure()
+
+        assertTrue(failure.exception is RuntimeException)
     }
 
     @Test
@@ -170,10 +171,9 @@ class CassandraAwardRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val result = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN)
+        val failure = awardRepository.findBy(cpid = CPID, ocid = OCID, token = TOKEN).failure()
 
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        assertTrue(failure.exception is RuntimeException)
     }
 
     @Test
@@ -231,10 +231,9 @@ class CassandraAwardRepositoryIT {
             jsonData = JSON_DATA
         )
 
-        val result = awardRepository.save(cpid = CPID, award = awardEntity)
+        val failure = awardRepository.save(cpid = CPID, award = awardEntity).failure()
 
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        assertTrue(failure.exception is RuntimeException)
     }
 
     @Test
@@ -293,10 +292,9 @@ class CassandraAwardRepositoryIT {
             jsonData = UPDATED_JSON_DATA
         )
 
-        val result = awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity)
+        val failure = awardRepository.update(cpid = CPID, updatedAward = updatedAwardEntity).failure()
 
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        assertTrue(failure.exception is RuntimeException)
     }
 
     @Test
@@ -355,10 +353,9 @@ class CassandraAwardRepositoryIT {
             jsonData = UPDATED_JSON_DATA
         )
 
-        val result = awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity))
+        val failure = awardRepository.update(cpid = CPID, updatedAwards = listOf(updatedAwardEntity)).failure()
 
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        assertTrue(failure.exception is RuntimeException)
     }
 
     private fun createKeyspace() {

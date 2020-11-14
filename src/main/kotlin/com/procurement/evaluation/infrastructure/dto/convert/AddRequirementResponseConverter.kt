@@ -10,7 +10,7 @@ fun AddRequirementResponseRequest.convert(): Result<AddRequirementResponseParams
         cpid = cpid,
         ocid = ocid,
         award = award.convert()
-            .orForwardFail { result -> return result }
+            .onFailure { return it }
     )
 
 private fun AddRequirementResponseRequest.Award.convert()
@@ -18,7 +18,7 @@ private fun AddRequirementResponseRequest.Award.convert()
     AddRequirementResponseParams.Award.tryCreate(
         id = id,
         requirementResponse = requirementResponse.convert()
-            .orForwardFail { result -> return result }
+            .onFailure { return it }
     )
 
 private fun AddRequirementResponseRequest.Award.RequirementResponse.convert()
@@ -27,11 +27,11 @@ private fun AddRequirementResponseRequest.Award.RequirementResponse.convert()
         id = id,
         value = value,
         relatedTenderer = relatedTenderer.convert()
-            .orForwardFail { result -> return result },
+            .onFailure { return it },
         requirement = requirement.convert()
-            .orForwardFail { result -> return result },
+            .onFailure { return it },
         responder = responder.convert()
-            .orForwardFail { result -> return result }
+            .onFailure { return it }
     )
 
 private fun AddRequirementResponseRequest.Award.RequirementResponse.RelatedTenderer.convert()

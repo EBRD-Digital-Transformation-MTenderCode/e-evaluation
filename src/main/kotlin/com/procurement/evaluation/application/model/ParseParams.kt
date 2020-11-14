@@ -41,7 +41,7 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
 
 fun parseAwardId(value: String): Result<AwardId, DataErrors.Validation.DataFormatMismatch> =
     value.tryAwardId()
-        .doReturn {
+        .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = "awardId",
@@ -54,7 +54,7 @@ fun parseAwardId(value: String): Result<AwardId, DataErrors.Validation.DataForma
 
 fun parseToken(value: String): Result<Token, DataErrors.Validation.DataFormatMismatch> =
     value.tryToken()
-        .doReturn {
+        .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = "token",
@@ -66,7 +66,7 @@ fun parseToken(value: String): Result<Token, DataErrors.Validation.DataFormatMis
 
 fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMismatch> =
     value.tryOwner()
-        .doReturn {
+        .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = "owner",
@@ -78,7 +78,7 @@ fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMis
 
 fun parseDate(value: String, attributeName: String): Result<LocalDateTime, DataErrors.Validation> =
     value.toLocalDateTime()
-        .mapError { fail ->
+        .mapFailure { fail ->
             when (fail) {
                 is DataTimeError.InvalidFormat -> DataErrors.Validation.DataFormatMismatch(
                     name = attributeName,

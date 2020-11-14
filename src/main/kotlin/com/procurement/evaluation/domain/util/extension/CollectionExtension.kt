@@ -33,7 +33,7 @@ fun <T, R, E> List<T>.mapResultPair(block: (T) -> Result<R, E>): Result<List<R>,
     for (element in this) {
         when (val result = block(element)) {
             is Result.Success -> r.add(result.get)
-            is Result.Failure -> return Result.failure(FailPair(result.error, element))
+            is Result.Failure -> return Result.failure(FailPair(result.reason, element))
         }
     }
     return Result.success(r)

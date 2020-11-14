@@ -44,7 +44,7 @@ class CassandraRuleRepository(private val session: Session) : RuleRepository {
                 setString(Database.Rules.PARAMETER, parameter)
             }
             .tryExecute(session)
-            .orForwardFail { return it }
+            .onFailure { return it }
             .one()
             ?.getString(Database.Rules.VALUE)
             .asSuccess()

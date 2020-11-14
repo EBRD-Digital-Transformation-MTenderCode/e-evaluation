@@ -6,7 +6,6 @@ import com.procurement.evaluation.application.model.parseOcid
 import com.procurement.evaluation.application.model.parseOwner
 import com.procurement.evaluation.application.model.parseToken
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
@@ -31,19 +30,19 @@ class CheckAccessToAwardParams private constructor(
             awardId: String
         ): Result<CheckAccessToAwardParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val ocidParsed = parseOcid(ocid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val tokenParsed = parseToken(token)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val ownerParsed = parseOwner(owner)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val awardIdParsed = parseAwardId(awardId)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             return CheckAccessToAwardParams(
                 cpid = cpidParsed,

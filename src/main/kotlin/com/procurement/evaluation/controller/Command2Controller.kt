@@ -31,20 +31,20 @@ class Command2Controller(private val commandService: Command2Service, private va
             logger.debug("RECEIVED COMMAND: '$requestBody'.")
 
         val node = requestBody.tryGetNode()
-            .doReturn { error -> return generateResponse(fail = error) }
+            .onFailure { return generateResponse(fail = it.reason) }
 
         val version = when (val versionResult = node.tryGetVersion()) {
             is Result.Success -> versionResult.get
             is Result.Failure -> {
                 when (val idResult = node.tryGetId()) {
-                    is Result.Success -> return generateResponse(fail = versionResult.error, id = idResult.get)
-                    is Result.Failure -> return generateResponse(fail = versionResult.error)
+                    is Result.Success -> return generateResponse(fail = versionResult.reason, id = idResult.get)
+                    is Result.Failure -> return generateResponse(fail = versionResult.reason)
                 }
             }
         }
 
         val id = node.tryGetId()
-            .doReturn { error -> return generateResponse(fail = error, version = version) }
+            .onFailure { return generateResponse(fail = it.reason, version = version) }
 
         val response =
             commandService.execute(node)

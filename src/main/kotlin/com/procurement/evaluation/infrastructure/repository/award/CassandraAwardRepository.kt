@@ -7,7 +7,6 @@ import com.datastax.driver.core.Session
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
@@ -102,7 +101,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(Database.Awards.CPID, cpid.underlying)
             }
             .tryExecute(session)
-            .doReturn { error -> return failure(error) }
+            .onFailure { return it }
             .map { convertToAwardEntity(it) }
             .asSuccess()
 
@@ -114,7 +113,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(Database.Awards.TOKEN_ENTITY, token.toString())
             }
             .tryExecute(session)
-            .orForwardFail { error -> return error }
+            .onFailure { return it }
             .one()
             ?.let { convertToAwardEntity(it) }
             .asSuccess()
@@ -122,7 +121,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     override fun save(cpid: Cpid, award: AwardEntity): Result<Boolean, Fail.Incident.Database> =
         statementForSaveAward(cpid, award)
             .tryExecute(session)
-            .orForwardFail { fail -> return fail }
+            .onFailure { return it }
             .wasApplied()
             .asSuccess()
 
@@ -134,7 +133,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 }
             }
             .tryExecute(session)
-            .orForwardFail { fail -> return fail }
+            .onFailure { return it }
             .wasApplied()
             .asSuccess()
 
@@ -145,7 +144,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 setString(Database.Awards.OCID, ocid.underlying)
             }
             .tryExecute(session)
-            .doReturn { error -> return failure(error) }
+            .onFailure { return it }
             .map { convertToAwardEntity(it) }
             .asSuccess()
 
@@ -157,14 +156,14 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
                 }
             }
             .tryExecute(session = session)
-            .orForwardFail { error -> return error }
+            .onFailure { return it }
             .wasApplied()
             .asSuccess()
 
     override fun update(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident.Database> =
         statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
             .tryExecute(session = session)
-            .orForwardFail { error -> return error }
+            .onFailure { return it }
             .wasApplied()
             .asSuccess()
 

@@ -34,16 +34,16 @@ class CheckRelatedTendererParams private constructor(
             responderId: String
         ): Result<CheckRelatedTendererParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val ocidParsed = parseOcid(ocid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val awardIdParsed = parseAwardId(awardId)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val requirementIdParsed = requirementId.tryRequirementId()
-                .doReturn {
+                .onFailure {
                     return failure(
                         DataErrors.Validation.DataFormatMismatch(
                             name = "requirementId",
@@ -54,7 +54,7 @@ class CheckRelatedTendererParams private constructor(
                 }
 
             val relatedTendererIdParsed = relatedTendererId.tryTendererId()
-                .doReturn {
+                .onFailure {
                     return failure(
                         DataErrors.Validation.DataFormatMismatch(
                             name = "relatedTendererId",
@@ -65,7 +65,7 @@ class CheckRelatedTendererParams private constructor(
                 }
 
             val responderIdParsed = PersonId.tryCreate(responderId)
-                .orForwardFail { fail -> return fail }
+                .onFailure { return it }
 
             return CheckRelatedTendererParams(
                 cpid = cpidParsed,

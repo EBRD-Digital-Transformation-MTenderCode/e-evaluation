@@ -25,7 +25,7 @@ abstract class AbstractHandler<ACTION : Action, R : Any>(private val logger: Log
                 return ApiSuccessResponse2(version = version, id = id, result = result.get)
             }
             is Result.Failure -> generateResponseOnFailure(
-                fail = result.error,
+                fail = result.reason,
                 version = version,
                 id = id,
                 logger = logger

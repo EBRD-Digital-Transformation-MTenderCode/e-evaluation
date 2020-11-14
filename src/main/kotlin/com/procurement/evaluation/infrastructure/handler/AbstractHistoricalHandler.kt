@@ -37,9 +37,9 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
         if (history != null) {
             val data = history
             return data.tryToObject(target)
-                .doReturn { error ->
+                .onFailure {
                     return generateResponseOnFailure(
-                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(data, error.exception),
+                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(data, it.reason.exception),
                         id = id,
                         version = version,
                         logger = logger
@@ -56,7 +56,7 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
                 }
             }
             is Result.Failure -> generateResponseOnFailure(
-                fail = result.error,
+                fail = result.reason,
                 version = version,
                 id = id,
                 logger = logger

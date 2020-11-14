@@ -65,7 +65,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setString(Database.Period.CPID, cpid.underlying)
             }
             .tryExecute(session = session)
-            .orForwardFail { error -> return error }
+            .onFailure { return it }
             .map { row ->
                 PeriodEntity(
                     cpid = cpid,
@@ -83,7 +83,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setString(Database.Period.OCID, ocid.underlying)
             }
             .tryExecute(session = session)
-            .orForwardFail { error -> return error }
+            .onFailure { return it }
             .one()
             ?.let { row ->
                 PeriodEntity(
@@ -103,7 +103,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setTimestamp(Database.Period.START_DATE, start.toCassandraTimestamp())
             }
             .tryExecute(session)
-            .orForwardFail { return it }
+            .onFailure { return it }
             .wasApplied()
             .asSuccess()
 
@@ -115,7 +115,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
                 setTimestamp(Database.Period.END_DATE, endDate.toCassandraTimestamp())
             }
             .tryExecute(session = session)
-            .orForwardFail { error -> return error }
+            .onFailure { return it }
             .wasApplied()
             .asSuccess()
 }

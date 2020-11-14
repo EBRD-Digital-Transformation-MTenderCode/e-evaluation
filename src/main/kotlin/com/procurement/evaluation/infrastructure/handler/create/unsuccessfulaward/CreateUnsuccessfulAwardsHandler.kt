@@ -29,9 +29,9 @@ class CreateUnsuccessfulAwardsHandler(
     override fun execute(node: JsonNode): Result<List<CreateUnsuccessfulAwardsResult>, Fail> {
         val params = node
             .tryGetParams(CreateUnsuccessfulAwardsRequest::class.java)
-            .orForwardFail { result -> return result }
+            .onFailure { return it }
             .convert()
-            .orForwardFail { result -> return result }
+            .onFailure { return it }
 
         return awardService.createUnsuccessfulAwards(params = params)
     }

@@ -5,7 +5,6 @@ import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.asFailure
 import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
@@ -33,7 +32,7 @@ class CreateUnsuccessfulAwardsStrategy(
         val awards = params.lotIds
             .map { lotId ->
                 val statusDetails = defineAwardStatusDetails(params.operationType)
-                    .orForwardFail { error -> return error }
+                    .onFailure { return it }
                 Award(
                     /*FR-10.4.5.2*/
                     id = generationService.awardId().toString(),
@@ -75,7 +74,7 @@ class CreateUnsuccessfulAwardsStrategy(
             }
 
         val wasApplied = awardRepository.save(cpid = params.cpid, awards = awardEntities)
-            .doReturn { error -> return error.asFailure() }
+            .onFailure { return it }
 
         if (!wasApplied)
             return failure(

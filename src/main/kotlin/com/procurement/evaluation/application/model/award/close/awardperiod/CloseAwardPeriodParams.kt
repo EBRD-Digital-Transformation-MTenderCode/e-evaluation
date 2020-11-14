@@ -23,13 +23,13 @@ class CloseAwardPeriodParams(
         ): Result<CloseAwardPeriodParams, DataErrors> {
 
             val parseCpid = parseCpid(value = cpid)
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             val parseOcid = parseOcid(value = ocid)
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             val parseEndDate = parseDate(value = endDate, attributeName = "endDate")
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             return CloseAwardPeriodParams(cpid = parseCpid, ocid = parseOcid, endDate = parseEndDate)
                 .asSuccess()

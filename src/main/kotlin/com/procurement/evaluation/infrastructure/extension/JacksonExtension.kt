@@ -7,7 +7,7 @@ import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
 import com.procurement.evaluation.domain.functional.Result.Companion.success
 import com.procurement.evaluation.domain.functional.asSuccess
-import com.procurement.evaluation.domain.functional.bind
+import com.procurement.evaluation.domain.functional.flatMap
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
@@ -32,7 +32,7 @@ fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, DataErrors.Validati
 
 fun JsonNode.tryGetAttribute(name: String, type: JsonNodeType): Result<JsonNode, DataErrors.Validation> =
     tryGetAttribute(name = name)
-        .bind { node ->
+        .flatMap { node ->
             if (node.nodeType == type)
                 success(node)
             else
@@ -60,7 +60,7 @@ fun JsonNode.tryGetBigDecimalAttribute(name: String): Result<BigDecimal, DataErr
 fun <T> JsonNode.tryGetAttributeAsEnum(name: String, enumProvider: EnumElementProvider<T>):
     Result<T, DataErrors.Validation> where T : Enum<T>,
                                            T : EnumElementProvider.Key = this.tryGetTextAttribute(name)
-    .bind { text ->
+    .flatMap { text ->
         enumProvider.orNull(text)
             ?.asSuccess<T, DataErrors.Validation>()
             ?: failure(

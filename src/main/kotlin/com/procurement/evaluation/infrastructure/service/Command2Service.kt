@@ -29,9 +29,9 @@ class Command2Service(
 
     fun execute(node: JsonNode): ApiResponse2 {
         val action = node.tryGetAction()
-            .doReturn { error ->
+            .onFailure {
                 return generateResponseOnFailure(
-                    fail = error,
+                    fail = it.reason,
                     id = node.tryGetId().get,
                     version = node.tryGetVersion().get,
                     logger = logger

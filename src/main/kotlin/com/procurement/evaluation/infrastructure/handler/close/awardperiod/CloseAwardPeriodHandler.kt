@@ -29,9 +29,9 @@ class CloseAwardPeriodHandler(
     override fun execute(node: JsonNode): Result<CloseAwardPeriodResult, Fail> {
         val params = node
             .tryGetParams(CloseAwardPeriodRequest::class.java)
-            .orForwardFail { result -> return result }
+            .onFailure { return it }
             .convert()
-            .orForwardFail { result -> return result }
+            .onFailure { return it }
 
         return awardService.closeAwardPeriod(params = params)
     }

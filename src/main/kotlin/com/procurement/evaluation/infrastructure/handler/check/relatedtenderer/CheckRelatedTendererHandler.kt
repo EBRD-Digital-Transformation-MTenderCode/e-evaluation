@@ -23,9 +23,9 @@ class CheckRelatedTendererHandler(
     override fun execute(node: JsonNode): ValidationResult<Fail> {
         val params = node
             .tryGetParams(CheckRelatedTendererRequest::class.java)
-            .doReturn { error -> return ValidationResult.error(error) }
+            .onFailure { return ValidationResult.error(it.reason) }
             .convert()
-            .doReturn { error -> return ValidationResult.error(error) }
+            .onFailure { return ValidationResult.error(it.reason) }
 
         return awardService.checkRelatedTenderer(params = params)
     }

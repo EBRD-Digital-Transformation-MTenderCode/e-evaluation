@@ -14,6 +14,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.failure
 import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepository
 import org.junit.jupiter.api.AfterEach
@@ -96,10 +97,9 @@ class CassandraAwardPeriodRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val result = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID)
+        val failure = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID).failure()
 
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        assertTrue(failure.exception is RuntimeException)
     }
 
     @Test
@@ -130,10 +130,9 @@ class CassandraAwardPeriodRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val result = awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
+        val failure = awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE).failure()
 
-        assertTrue(result.isFail)
-        assertTrue(result.error.exception is RuntimeException)
+        assertTrue(failure.exception is RuntimeException)
 
     }
 
