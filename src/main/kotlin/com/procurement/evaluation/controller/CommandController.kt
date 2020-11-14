@@ -1,11 +1,11 @@
 package com.procurement.evaluation.controller
 
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
+import com.procurement.evaluation.infrastructure.api.v1.CommandMessage
+import com.procurement.evaluation.infrastructure.api.v1.commandId
+import com.procurement.evaluation.infrastructure.api.v1.errorResponseDto
 import com.procurement.evaluation.infrastructure.dto.ApiResponse
 import com.procurement.evaluation.infrastructure.dto.ApiVersion
-import com.procurement.evaluation.model.dto.bpe.CommandMessage
-import com.procurement.evaluation.model.dto.bpe.commandId
-import com.procurement.evaluation.model.dto.bpe.errorResponseDto
 import com.procurement.evaluation.service.CommandService
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject

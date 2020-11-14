@@ -8,11 +8,11 @@ import com.datastax.driver.core.Session
 import com.nhaarman.mockito_kotlin.spy
 import com.procurement.evaluation.application.repository.history.HistoryRepository
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
+import com.procurement.evaluation.infrastructure.api.v1.CommandType
 import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.infrastructure.repository.DatabaseTestConfiguration
-import com.procurement.evaluation.model.dto.bpe.CommandType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
