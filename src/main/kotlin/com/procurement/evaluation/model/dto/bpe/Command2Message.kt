@@ -22,6 +22,8 @@ import com.procurement.evaluation.infrastructure.fail.error.BadRequest
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asFailure
+import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.lib.functional.flatMap
 import com.procurement.evaluation.utils.tryToNode
 import com.procurement.evaluation.utils.tryToObject
@@ -139,18 +141,16 @@ fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties2.servic
 
 fun JsonNode.tryGetVersion(): Result<ApiVersion2, DataErrors> {
     val name = "version"
-    return tryGetTextAttribute(name).flatMap {
-        when (val result = ApiVersion2.tryValueOf(it)) {
-            is Result.Success -> result
-            is Result.Failure -> Result.failure(
-                DataErrors.Validation.DataFormatMismatch(
+    return tryGetTextAttribute(name)
+        .flatMap { version ->
+            ApiVersion2.orNull(version)
+                ?.asSuccess<ApiVersion2, DataErrors>()
+                ?: DataErrors.Validation.DataFormatMismatch(
                     name = name,
-                    expectedFormat = "00.00.00",
-                    actualValue = it
-                )
-            )
+                    expectedFormat = ApiVersion2.pattern,
+                    actualValue = version
+                ).asFailure()
         }
-    }
 }
 
 fun JsonNode.tryGetAction(): Result<Command2Type, DataErrors> =
