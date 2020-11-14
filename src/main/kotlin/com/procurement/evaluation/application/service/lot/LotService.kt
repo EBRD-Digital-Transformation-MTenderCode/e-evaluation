@@ -1,8 +1,8 @@
 package com.procurement.evaluation.application.service.lot
 
+import com.procurement.evaluation.application.service.RulesService
 import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.lot.LotId
-import com.procurement.evaluation.service.RulesService
 import org.springframework.stereotype.Service
 
 interface LotService {

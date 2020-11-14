@@ -1,4 +1,4 @@
-package com.procurement.evaluation.service
+package com.procurement.evaluation.application.service
 
 import com.datastax.driver.core.utils.UUIDs
 import org.springframework.stereotype.Service

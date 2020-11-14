@@ -10,6 +10,7 @@ import com.procurement.evaluation.application.model.award.unsuccessful.CreateUns
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
+import com.procurement.evaluation.application.service.GenerationService
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.model.Cpid
@@ -79,7 +80,6 @@ import com.procurement.evaluation.model.dto.ocds.RequirementResponse
 import com.procurement.evaluation.model.dto.ocds.Value
 import com.procurement.evaluation.model.dto.ocds.asMoney
 import com.procurement.evaluation.model.dto.ocds.asValue
-import com.procurement.evaluation.service.GenerationService
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import com.procurement.evaluation.utils.tryToObject

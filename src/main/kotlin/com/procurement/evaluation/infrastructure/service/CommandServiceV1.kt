@@ -1,5 +1,6 @@
 package com.procurement.evaluation.infrastructure.service
 
+import com.procurement.evaluation.application.service.StatusService
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
 import com.procurement.evaluation.application.service.award.AwardCancellationResult
 import com.procurement.evaluation.application.service.award.AwardService
@@ -70,7 +71,6 @@ import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.Ge
 import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.lib.mapIfNotEmpty
 import com.procurement.evaluation.lib.orThrow
-import com.procurement.evaluation.service.StatusService
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory

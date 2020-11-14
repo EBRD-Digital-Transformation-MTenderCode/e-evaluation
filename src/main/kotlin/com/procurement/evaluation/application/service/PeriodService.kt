@@ -1,4 +1,4 @@
-package com.procurement.evaluation.service
+package com.procurement.evaluation.application.service
 
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.domain.model.Cpid
