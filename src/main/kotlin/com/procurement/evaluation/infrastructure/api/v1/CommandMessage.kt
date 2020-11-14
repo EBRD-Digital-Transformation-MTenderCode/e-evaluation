@@ -2,7 +2,6 @@ package com.procurement.evaluation.infrastructure.api.v1
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.evaluation.config.properties.GlobalProperties
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.ProcurementMethod
@@ -17,6 +16,7 @@ import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
+import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
@@ -164,7 +164,7 @@ private fun getApiResponse(id: CommandId, version: ApiVersion, code: String, mes
     return ApiErrorResponse(
         errors = listOf(
             ApiErrorResponse.Error(
-                code = "400.${GlobalProperties.serviceId}." + code,
+                code = "400.${GlobalProperties.service.id}." + code,
                 description = message
             )
         ),

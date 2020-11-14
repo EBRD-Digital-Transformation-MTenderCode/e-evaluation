@@ -5,7 +5,7 @@ import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
 import com.procurement.evaluation.domain.util.extension.toListOrEmpty
 import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties2
+import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
@@ -75,9 +75,9 @@ object ApiResponseV2Generator {
                 date = nowDefaultUTC(),
                 id = UUID.randomUUID(),
                 service = ApiIncidentResponse2.Incident.Service(
-                    id = GlobalProperties2.service.id,
-                    version = GlobalProperties2.service.version,
-                    name = GlobalProperties2.service.name
+                    id = GlobalProperties.service.id,
+                    version = GlobalProperties.service.version,
+                    name = GlobalProperties.service.name
                 ),
                 details = listOf(
                     ApiIncidentResponse2.Incident.Details(
@@ -89,5 +89,5 @@ object ApiResponseV2Generator {
             )
         )
 
-    fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties2.service.id}"
+    fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties.service.id}"
 }

@@ -1,4 +1,4 @@
-package com.procurement.evaluation.config
+package com.procurement.evaluation.infrastructure.configuration
 
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -11,4 +11,4 @@ import org.springframework.context.annotation.Configuration
         "com.procurement.evaluation.infrastructure.handler"
     ]
 )
-class ServiceConfig
+class ServiceConfiguration

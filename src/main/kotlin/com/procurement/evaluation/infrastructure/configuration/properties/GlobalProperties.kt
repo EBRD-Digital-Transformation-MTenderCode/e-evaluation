@@ -1,10 +1,9 @@
 package com.procurement.evaluation.infrastructure.configuration.properties
 
-import com.procurement.evaluation.config.properties.GlobalProperties
 import com.procurement.evaluation.infrastructure.io.orThrow
 import java.util.*
 
-object GlobalProperties2 {
+object GlobalProperties {
     val service = Service()
 
     class Service {

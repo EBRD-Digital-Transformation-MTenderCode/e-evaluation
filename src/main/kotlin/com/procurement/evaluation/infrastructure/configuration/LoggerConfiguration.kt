@@ -1,4 +1,4 @@
-package com.procurement.evaluation.config
+package com.procurement.evaluation.infrastructure.configuration
 
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.infrastructure.service.CustomLogger

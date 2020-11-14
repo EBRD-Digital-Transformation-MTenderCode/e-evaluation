@@ -1,4 +1,4 @@
-package com.procurement.evaluation.config
+package com.procurement.evaluation.infrastructure.configuration.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
