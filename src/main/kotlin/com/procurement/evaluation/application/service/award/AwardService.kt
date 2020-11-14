@@ -560,7 +560,7 @@ class AwardServiceImpl(
         awardPeriodStart: LocalDateTime,
         lotAwarded: Boolean?
     ): CreatedAwardData = CreatedAwardData(
-        token = award.token!!,
+        token = Token.fromString(award.token!!),
         awardPeriod = CreatedAwardData.AwardPeriod(startDate = awardPeriodStart),
         lotAwarded = lotAwarded,
         award = CreatedAwardData.Award(

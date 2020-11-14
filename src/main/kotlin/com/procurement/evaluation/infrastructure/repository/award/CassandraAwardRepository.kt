@@ -18,7 +18,6 @@ import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import org.springframework.stereotype.Repository
-import java.util.*
 
 @Repository
 class CassandraAwardRepository(private val session: Session) : AwardRepository {
@@ -192,7 +191,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
 
     private fun convertToAwardEntity(row: Row): AwardEntity = AwardEntity(
         cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
-        token = UUID.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
+        token = Token.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
         ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
         owner = Owner.fromString(row.getString(Database.Awards.OWNER)),
         status = AwardStatus.creator(row.getString(Database.Awards.STATUS)),
