@@ -1,7 +1,7 @@
-package com.procurement.evaluation.application.repository.history
+package com.procurement.evaluation.infrastructure.handler
 
+import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.lib.functional.Result
 

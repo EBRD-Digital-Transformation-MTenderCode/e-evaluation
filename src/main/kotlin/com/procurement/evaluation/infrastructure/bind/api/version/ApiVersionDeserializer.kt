@@ -3,7 +3,7 @@ package com.procurement.evaluation.infrastructure.bind.api.version
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.procurement.evaluation.infrastructure.dto.ApiVersion
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 
 class ApiVersionDeserializer : JsonDeserializer<ApiVersion>() {
     companion object {

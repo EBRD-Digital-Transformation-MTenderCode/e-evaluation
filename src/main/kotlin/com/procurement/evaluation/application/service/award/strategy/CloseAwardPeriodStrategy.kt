@@ -16,8 +16,10 @@ class CloseAwardPeriodStrategy(val awardPeriodRepository: AwardPeriodRepository)
             .onFailure { return it }
             ?: return Result.failure(ValidationError.PeriodNotFoundOnCloseAwardPeriod())
 
-        awardPeriodRepository.saveEnd(cpid = params.cpid, ocid = params.ocid, endDate = params.endDate)
-            .doOnError { error -> return Result.failure(error) }
+        val wasApplied = awardPeriodRepository.saveEnd(cpid = params.cpid, ocid = params.ocid, endDate = params.endDate)
+            .onFailure { return it }
+        if(!wasApplied)
+            Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the end award period '${params.endDate}' by cpid '${params.cpid.underlying}' and ocid '${params.ocid.underlying}' to the database. Record is not exists.")
 
         return CloseAwardPeriodResult(
             awardPeriod = CloseAwardPeriodResult.AwardPeriod(

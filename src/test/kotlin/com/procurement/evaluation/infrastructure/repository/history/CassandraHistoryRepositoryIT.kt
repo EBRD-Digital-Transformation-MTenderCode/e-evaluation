@@ -6,10 +6,10 @@ import com.datastax.driver.core.PlainTextAuthProvider
 import com.datastax.driver.core.PoolingOptions
 import com.datastax.driver.core.Session
 import com.nhaarman.mockito_kotlin.spy
-import com.procurement.evaluation.application.repository.history.HistoryRepository
+import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.api.v1.CommandType
-import com.procurement.evaluation.infrastructure.dto.Action
+import com.procurement.evaluation.infrastructure.api.v1.CommandTypeV1
+import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.infrastructure.repository.DatabaseTestConfiguration
@@ -31,7 +31,7 @@ class CassandraHistoryRepositoryIT {
 
     companion object {
         private val COMMAND_ID: CommandId = CommandId(UUID.randomUUID().toString())
-        private val ACTION: Action = CommandType.AWARDS_CANCELLATION
+        private val ACTION: Action = CommandTypeV1.AWARDS_CANCELLATION
         private const val JSON_DATA: String = """{"tender": {"title" : "Tender-Title"}}"""
     }
 

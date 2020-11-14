@@ -1,7 +1,6 @@
 package com.procurement.evaluation.infrastructure.api.v1
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.config.properties.GlobalProperties
 import com.procurement.evaluation.domain.model.Cpid
@@ -15,20 +14,19 @@ import com.procurement.evaluation.domain.util.extension.toLocalDateTime
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.api.Action
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.dto.Action
-import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse
-import com.procurement.evaluation.infrastructure.dto.ApiVersion
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
 data class CommandMessage @JsonCreator constructor(
 
+    val version: ApiVersion,
     val id: CommandId,
-    val command: CommandType,
+    val command: CommandTypeV1,
     val context: Context,
-    val data: JsonNode,
-    val version: ApiVersion
+    val data: JsonNode
 )
 
 val CommandMessage.commandId: CommandId
@@ -60,13 +58,15 @@ val CommandMessage.ocid: Ocid
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'ocid' attribute in context.")
 
 val CommandMessage.token: Token
-    get() = this.context.token?.let { id ->
-        try {
-            Token.fromString(id)
-        } catch (exception: Exception) {
-            throw ErrorException(error = ErrorType.INVALID_FORMAT_TOKEN)
+    get() = this.context.token
+        ?.let { id ->
+            try {
+                Token.fromString(id)
+            } catch (exception: Exception) {
+                throw ErrorException(error = ErrorType.INVALID_FORMAT_TOKEN)
+            }
         }
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'token' attribute in context.")
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'token' attribute in context.")
 
 val CommandMessage.owner: String
     get() = this.context.owner
@@ -82,9 +82,9 @@ val CommandMessage.country: String
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'country' attribute in context.")
 
 val CommandMessage.pmd: ProcurementMethod
-    get() = this.context.pmd?.let {
-        ProcurementMethod.fromString(it)
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'pmd' attribute in context.")
+    get() = this.context.pmd
+        ?.let { ProcurementMethod.fromString(it) }
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'pmd' attribute in context.")
 
 val CommandMessage.startDate: LocalDateTime
     get() = this.context.startDate
@@ -93,27 +93,34 @@ val CommandMessage.startDate: LocalDateTime
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'startDate' attribute in context.")
 
 val CommandMessage.operationType: OperationType
-    get() = this.context.operationType?.let {
-        OperationType.creator(it)
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'operationType' attribute in context.")
+    get() = this.context.operationType
+        ?.let { OperationType.creator(it) }
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'operationType' attribute in context."
+        )
 
 val CommandMessage.lotId: LotId
-    get() = this.context.id?.let {
-        try {
-            LotId.fromString(it)
-        } catch (exception: Exception) {
-            throw ErrorException(error = ErrorType.INVALID_FORMAT_LOT_ID)
+    get() = this.context.id
+        ?.let {
+            try {
+                LotId.fromString(it)
+            } catch (exception: Exception) {
+                throw ErrorException(error = ErrorType.INVALID_FORMAT_LOT_ID)
+            }
         }
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
 
 val CommandMessage.awardId: AwardId
-    get() = this.context.id?.let {
-        try {
-            AwardId.fromString(it)
-        } catch (exception: Exception) {
-            throw ErrorException(error = ErrorType.INVALID_FORMAT_AWARD_ID)
+    get() = this.context.id
+        ?.let {
+            try {
+                AwardId.fromString(it)
+            } catch (exception: Exception) {
+                throw ErrorException(error = ErrorType.INVALID_FORMAT_AWARD_ID)
+            }
         }
-    } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
+        ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'id' attribute in context.")
 
 data class Context @JsonCreator constructor(
     val operationId: String,
@@ -135,37 +142,6 @@ data class Context @JsonCreator constructor(
     val id: String?,
     val awardCriteria: String?
 )
-
-enum class CommandType(@JsonValue override val key: String): Action {
-
-    AWARDS_CANCELLATION("awardsCancellation"),
-    CHECK_AWARD_STATUS("checkAwardStatus"),
-    CREATE_AWARD("createAward"),
-    CREATE_AWARDS("createAwards"),
-    CREATE_AWARDS_AUCTION_END("createAwardsAuctionEnd"),
-    CREATE_UNSUCCESSFUL_AWARDS("createUnsuccessfulAwards"),
-    END_AWARD_PERIOD("endAwardPeriod"),
-    EVALUATE_AWARD("evaluateAward"),
-    FINAL_AWARDS_STATUS_BY_LOTS("finalAwardsStatusByLots"),
-    GET_AWARDS_FOR_AC("getAwardsForAc"),
-    GET_AWARD_ID_FOR_CHECK("getAwardIdForCheck"),
-    GET_EVALUATED_AWARDS("getEvaluatedAwards"),
-    GET_LOT_FOR_CHECK("getLotForCheck"),
-    GET_NEXT_AWARD("getNextAward"),
-    GET_UNSUCCESSFUL_LOTS("getUnsuccessfulLots"),
-    GET_WINNING_AWARD("getWinAward"),
-    SET_AWARD_FOR_EVALUATION("setAwardForEvaluation"),
-    START_AWARD_PERIOD("startAwardPeriod"),
-    START_CONSIDERATION("startConsideration");
-
-    fun value(): String {
-        return this.key
-    }
-
-    override fun toString(): String {
-        return this.key
-    }
-}
 
 fun errorResponseDto(exception: Exception, id: CommandId, version: ApiVersion): ApiErrorResponse =
     when (exception) {

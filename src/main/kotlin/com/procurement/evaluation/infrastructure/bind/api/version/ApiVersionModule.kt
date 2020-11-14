@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.bind.api.version
 
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.procurement.evaluation.infrastructure.dto.ApiVersion
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 
 class ApiVersionModule : SimpleModule() {
     companion object {

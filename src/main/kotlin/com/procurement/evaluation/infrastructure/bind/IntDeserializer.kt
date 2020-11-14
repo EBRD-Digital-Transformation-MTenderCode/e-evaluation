@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto.databinding
+package com.procurement.evaluation.infrastructure.bind
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonToken
@@ -8,7 +8,7 @@ import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import java.io.IOException
 
-
+@Deprecated(message = "Need remove")
 class IntDeserializer : JsonDeserializer<Int>() {
 
     @Throws(IOException::class)

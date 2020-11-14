@@ -1,13 +1,13 @@
 package com.procurement.evaluation.infrastructure.repository.history
 
 import com.datastax.driver.core.Session
-import com.procurement.evaluation.application.repository.history.HistoryRepository
 import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
+import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asSuccess

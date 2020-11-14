@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(CassandraProperties::class)
 @ComponentScan(
     basePackages = [
-        "com.procurement.evaluation.dao",
         "com.procurement.evaluation.infrastructure.repository"
     ]
 )

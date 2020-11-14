@@ -1,16 +1,16 @@
-package com.procurement.evaluation.controller
+package com.procurement.evaluation.infrastructure.web.controller
 
 import com.procurement.evaluation.application.service.Logger
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.dto.ApiResponse2
-import com.procurement.evaluation.infrastructure.dto.ApiVersion
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponse2
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.generateResponseOnFailure
+import com.procurement.evaluation.infrastructure.api.v2.tryGetId
+import com.procurement.evaluation.infrastructure.api.v2.tryGetNode
+import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
 import com.procurement.evaluation.infrastructure.fail.Fail
-import com.procurement.evaluation.infrastructure.service.Command2Service
+import com.procurement.evaluation.infrastructure.service.CommandServiceV2
 import com.procurement.evaluation.lib.functional.Result
-import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
-import com.procurement.evaluation.model.dto.bpe.tryGetId
-import com.procurement.evaluation.model.dto.bpe.tryGetNode
-import com.procurement.evaluation.model.dto.bpe.tryGetVersion
 import com.procurement.evaluation.utils.toJson
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/command2")
-class Command2Controller(private val commandService: Command2Service, private val logger: Logger) {
+class CommandControllerV2(private val commandService: CommandServiceV2, private val logger: Logger) {
 
     @PostMapping
     fun command(@RequestBody requestBody: String): ResponseEntity<ApiResponse2> {

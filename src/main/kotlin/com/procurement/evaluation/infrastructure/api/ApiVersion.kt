@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.dto
+package com.procurement.evaluation.infrastructure.api
 
 import com.fasterxml.jackson.annotation.JsonValue
 

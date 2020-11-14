@@ -1,6 +1,7 @@
-package com.procurement.evaluation.infrastructure.dto
+package com.procurement.evaluation.infrastructure.api.v1
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
 
 sealed class ApiResponse {

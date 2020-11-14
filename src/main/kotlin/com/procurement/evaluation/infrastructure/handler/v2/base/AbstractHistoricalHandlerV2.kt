@@ -1,20 +1,21 @@
-package com.procurement.evaluation.infrastructure.handler
+package com.procurement.evaluation.infrastructure.handler.v2.base
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.evaluation.application.repository.history.HistoryRepository
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.infrastructure.dto.Action
-import com.procurement.evaluation.infrastructure.dto.ApiResponse2
-import com.procurement.evaluation.infrastructure.dto.ApiSuccessResponse2
+import com.procurement.evaluation.infrastructure.api.Action
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponse2
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.generateResponseOnFailure
+import com.procurement.evaluation.infrastructure.api.v2.ApiSuccessResponse2
+import com.procurement.evaluation.infrastructure.api.v2.tryGetId
+import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.handler.Handler
+import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.lib.functional.Result
-import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
-import com.procurement.evaluation.model.dto.bpe.tryGetId
-import com.procurement.evaluation.model.dto.bpe.tryGetVersion
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.tryToObject
 
-abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
+abstract class AbstractHistoricalHandlerV2<ACTION : Action, R : Any>(
     private val target: Class<ApiSuccessResponse2>,
     private val historyRepository: HistoryRepository,
     private val logger: Logger
@@ -25,21 +26,15 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
         val version = node.tryGetVersion().get
 
         val history = historyRepository.getHistory(id, action)
-            .doOnError { error ->
-                return generateResponseOnFailure(
-                    fail = error,
-                    version = version,
-                    id = id,
-                    logger = logger
-                )
+            .onFailure {
+                return generateResponseOnFailure(fail = it.reason, version = version, id = id, logger = logger)
             }
-            .get
+
         if (history != null) {
-            val data = history
-            return data.tryToObject(target)
+            return history.tryToObject(target)
                 .onFailure {
                     return generateResponseOnFailure(
-                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(data, it.reason.exception),
+                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(history, it.reason.exception),
                         id = id,
                         version = version,
                         logger = logger

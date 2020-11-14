@@ -1,12 +1,12 @@
-package com.procurement.evaluation.controller
+package com.procurement.evaluation.infrastructure.web.controller
 
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
+import com.procurement.evaluation.infrastructure.api.v1.ApiResponse
 import com.procurement.evaluation.infrastructure.api.v1.CommandMessage
 import com.procurement.evaluation.infrastructure.api.v1.commandId
 import com.procurement.evaluation.infrastructure.api.v1.errorResponseDto
-import com.procurement.evaluation.infrastructure.dto.ApiResponse
-import com.procurement.evaluation.infrastructure.dto.ApiVersion
-import com.procurement.evaluation.service.CommandService
+import com.procurement.evaluation.infrastructure.service.CommandServiceV1
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory
@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 @RestController
 @RequestMapping("/command")
-class CommandController(private val commandService: CommandService) {
+class CommandControllerV1(private val commandService: CommandServiceV1) {
     companion object {
-        private val log = LoggerFactory.getLogger(CommandController::class.java)
+        private val log = LoggerFactory.getLogger(CommandControllerV1::class.java)
     }
 
     @PostMapping

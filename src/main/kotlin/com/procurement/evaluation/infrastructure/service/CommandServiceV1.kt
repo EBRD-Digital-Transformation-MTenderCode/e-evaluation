@@ -1,6 +1,5 @@
-package com.procurement.evaluation.service
+package com.procurement.evaluation.infrastructure.service
 
-import com.procurement.evaluation.application.repository.history.HistoryRepository
 import com.procurement.evaluation.application.service.award.AwardCancellationContext
 import com.procurement.evaluation.application.service.award.AwardCancellationResult
 import com.procurement.evaluation.application.service.award.AwardService
@@ -37,8 +36,9 @@ import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
+import com.procurement.evaluation.infrastructure.api.v1.ApiSuccessResponse
 import com.procurement.evaluation.infrastructure.api.v1.CommandMessage
-import com.procurement.evaluation.infrastructure.api.v1.CommandType
+import com.procurement.evaluation.infrastructure.api.v1.CommandTypeV1
 import com.procurement.evaluation.infrastructure.api.v1.awardId
 import com.procurement.evaluation.infrastructure.api.v1.commandId
 import com.procurement.evaluation.infrastructure.api.v1.country
@@ -51,7 +51,6 @@ import com.procurement.evaluation.infrastructure.api.v1.phase
 import com.procurement.evaluation.infrastructure.api.v1.pmd
 import com.procurement.evaluation.infrastructure.api.v1.startDate
 import com.procurement.evaluation.infrastructure.api.v1.token
-import com.procurement.evaluation.infrastructure.dto.ApiSuccessResponse
 import com.procurement.evaluation.infrastructure.dto.award.EvaluatedAwardsResponse
 import com.procurement.evaluation.infrastructure.dto.award.WinningAwardResponse
 import com.procurement.evaluation.infrastructure.dto.award.cancel.request.AwardCancellationRequest
@@ -68,8 +67,10 @@ import com.procurement.evaluation.infrastructure.dto.award.unsuccessful.request.
 import com.procurement.evaluation.infrastructure.dto.convert.convert
 import com.procurement.evaluation.infrastructure.dto.convert.converter
 import com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.request.GetUnsuccessfulLotsRequest
+import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.lib.mapIfNotEmpty
 import com.procurement.evaluation.lib.orThrow
+import com.procurement.evaluation.service.StatusService
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory
@@ -77,7 +78,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class CommandService(
+class CommandServiceV1(
     private val historyRepository: HistoryRepository,
     private val statusService: StatusService,
     private val awardService: AwardService,
@@ -85,7 +86,7 @@ class CommandService(
 ) {
 
     companion object {
-        private val log = LoggerFactory.getLogger(CommandService::class.java)
+        private val log = LoggerFactory.getLogger(CommandServiceV1::class.java)
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
@@ -97,7 +98,7 @@ class CommandService(
             return toObject(ApiSuccessResponse::class.java, history)
         }
         val dataOfResponse: Any = when (cm.command) {
-            CommandType.CREATE_AWARD -> {
+            CommandTypeV1.CREATE_AWARD -> {
                 val context = CreateAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -311,7 +312,7 @@ class CommandService(
                         )
                     }
             }
-            CommandType.EVALUATE_AWARD -> {
+            CommandTypeV1.EVALUATE_AWARD -> {
                 val context = EvaluateAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -329,7 +330,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.CREATE_AWARDS -> {
+            CommandTypeV1.CREATE_AWARDS -> {
                 val context = CreateAwardsContext(
                     cpid = cm.cpid,
                     owner = cm.owner,
@@ -344,7 +345,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.CREATE_AWARDS_AUCTION_END -> {
+            CommandTypeV1.CREATE_AWARDS_AUCTION_END -> {
                 val context = CreateAwardsAuctionEndContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -359,7 +360,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.AWARDS_CANCELLATION -> {
+            CommandTypeV1.AWARDS_CANCELLATION -> {
                 val context = AwardCancellationContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -375,7 +376,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.CHECK_AWARD_STATUS -> {
+            CommandTypeV1.CHECK_AWARD_STATUS -> {
                 val context = CheckAwardStatusContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -392,7 +393,7 @@ class CommandService(
                         CheckAwardStatusResponse()
                     }
             }
-            CommandType.END_AWARD_PERIOD -> {
+            CommandTypeV1.END_AWARD_PERIOD -> {
                 when (cm.pmd) {
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
@@ -411,7 +412,7 @@ class CommandService(
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
-            CommandType.GET_WINNING_AWARD -> {
+            CommandTypeV1.GET_WINNING_AWARD -> {
                 val context = GetWinningAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -434,7 +435,7 @@ class CommandService(
                         )
                     }
             }
-            CommandType.GET_EVALUATED_AWARDS -> {
+            CommandTypeV1.GET_EVALUATED_AWARDS -> {
                 val context = GetEvaluatedAwardsContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -460,10 +461,10 @@ class CommandService(
                         )
                     }
             }
-            CommandType.GET_AWARDS_FOR_AC -> statusService.getAwardsForAc(cm)
-            CommandType.GET_LOT_FOR_CHECK -> statusService.getLotForCheck(cm)
-            CommandType.GET_AWARD_ID_FOR_CHECK -> statusService.getAwardIdForCheck(cm)
-            CommandType.FINAL_AWARDS_STATUS_BY_LOTS -> {
+            CommandTypeV1.GET_AWARDS_FOR_AC -> statusService.getAwardsForAc(cm)
+            CommandTypeV1.GET_LOT_FOR_CHECK -> statusService.getLotForCheck(cm)
+            CommandTypeV1.GET_AWARD_ID_FOR_CHECK -> statusService.getAwardIdForCheck(cm)
+            CommandTypeV1.FINAL_AWARDS_STATUS_BY_LOTS -> {
                 val context = FinalAwardsStatusByLotsContext(cpid = cm.cpid, pmd = cm.pmd)
                 val request = toObject(FinalAwardsStatusByLotsRequest::class.java, cm.data)
                 val data = FinalAwardsStatusByLotsData(
@@ -491,7 +492,7 @@ class CommandService(
                         )
                     }
             }
-            CommandType.GET_UNSUCCESSFUL_LOTS -> {
+            CommandTypeV1.GET_UNSUCCESSFUL_LOTS -> {
                 val context = GetUnsuccessfulLotsContext(
                     country = cm.country,
                     pmd = cm.pmd
@@ -504,7 +505,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.SET_AWARD_FOR_EVALUATION -> {
+            CommandTypeV1.SET_AWARD_FOR_EVALUATION -> {
                 val context = SetAwardForEvaluationContext(cpid = cm.cpid, ocid = cm.ocid)
                 val request = toObject(SetAwardForEvaluationRequest::class.java, cm.data)
                 awardService.setAwardForEvaluation(context = context, data = request.convert())
@@ -514,7 +515,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.START_AWARD_PERIOD -> {
+            CommandTypeV1.START_AWARD_PERIOD -> {
                 when (cm.pmd) {
                     ProcurementMethod.CF, ProcurementMethod.TEST_CF,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
@@ -545,7 +546,7 @@ class CommandService(
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
-            CommandType.CREATE_UNSUCCESSFUL_AWARDS -> {
+            CommandTypeV1.CREATE_UNSUCCESSFUL_AWARDS -> {
                 when (cm.pmd) {
                     ProcurementMethod.CD, ProcurementMethod.TEST_CD,
                     ProcurementMethod.CF, ProcurementMethod.TEST_CF,
@@ -582,7 +583,7 @@ class CommandService(
 
                 }
             }
-            CommandType.START_CONSIDERATION -> {
+            CommandTypeV1.START_CONSIDERATION -> {
                 val context = StartConsiderationContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
@@ -597,7 +598,7 @@ class CommandService(
                     }
                     .convert()
             }
-            CommandType.GET_NEXT_AWARD -> {
+            CommandTypeV1.GET_NEXT_AWARD -> {
                 val context = GetNextAwardContext(
                     cpid = cm.cpid,
                     ocid = cm.ocid,

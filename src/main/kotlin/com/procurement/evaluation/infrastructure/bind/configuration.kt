@@ -10,8 +10,6 @@ import com.procurement.evaluation.infrastructure.bind.api.command.id.CommandIdMo
 import com.procurement.evaluation.infrastructure.bind.api.version.ApiVersionModule
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueModule
 import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeModule
-import com.procurement.evaluation.model.dto.databinding.IntDeserializer
-import com.procurement.evaluation.model.dto.databinding.StringsDeserializer
 
 fun ObjectMapper.configuration() {
     val module = SimpleModule()

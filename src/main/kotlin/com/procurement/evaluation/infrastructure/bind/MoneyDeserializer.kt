@@ -1,4 +1,4 @@
-package com.procurement.evaluation.model.dto.databinding
+package com.procurement.evaluation.infrastructure.bind
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -8,6 +8,7 @@ import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+@Deprecated(message = "Need remove")
 class MoneyDeserializer : JsonDeserializer<BigDecimal>() {
 
     private val delegate = NumberDeserializers.BigDecimalDeserializer.instance

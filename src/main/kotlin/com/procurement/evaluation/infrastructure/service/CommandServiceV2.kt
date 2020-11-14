@@ -2,22 +2,22 @@ package com.procurement.evaluation.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.infrastructure.dto.ApiResponse2
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponse2
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.generateResponseOnFailure
+import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
+import com.procurement.evaluation.infrastructure.api.v2.tryGetAction
+import com.procurement.evaluation.infrastructure.api.v2.tryGetId
+import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
 import com.procurement.evaluation.infrastructure.handler.check.accesstoaward.CheckAccessToAwardHandler
 import com.procurement.evaluation.infrastructure.handler.check.relatedtenderer.CheckRelatedTendererHandler
 import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.create.requirementresponsehandler.AddRequirementResponseHandler
 import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsHandler
 import com.procurement.evaluation.infrastructure.handler.get.awardstatebyids.GetAwardStateByIdsHandler
-import com.procurement.evaluation.model.dto.bpe.Command2Type
-import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
-import com.procurement.evaluation.model.dto.bpe.tryGetAction
-import com.procurement.evaluation.model.dto.bpe.tryGetId
-import com.procurement.evaluation.model.dto.bpe.tryGetVersion
 import org.springframework.stereotype.Service
 
 @Service
-class Command2Service(
+class CommandServiceV2(
     private val logger: Logger,
     private val getAwardStateByIdsHandler: GetAwardStateByIdsHandler,
     private val checkAccessToAwardHandler: CheckAccessToAwardHandler,
@@ -39,17 +39,17 @@ class Command2Service(
             }
 
         return when (action) {
-            Command2Type.GET_AWARD_STATES_BY_IDS -> getAwardStateByIdsHandler.handle(node)
+            CommandTypeV2.GET_AWARD_STATES_BY_IDS -> getAwardStateByIdsHandler.handle(node)
 
-            Command2Type.CHECK_ACCESS_TO_AWARD -> checkAccessToAwardHandler.handle(node)
+            CommandTypeV2.CHECK_ACCESS_TO_AWARD -> checkAccessToAwardHandler.handle(node)
 
-            Command2Type.CHECK_RELATED_TENDERER -> checkRelatedTendererHandler.handle(node)
+            CommandTypeV2.CHECK_RELATED_TENDERER -> checkRelatedTendererHandler.handle(node)
 
-            Command2Type.ADD_REQUIREMENT_RESPONSE -> addRequirementResponseHandler.handle(node)
+            CommandTypeV2.ADD_REQUIREMENT_RESPONSE -> addRequirementResponseHandler.handle(node)
 
-            Command2Type.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(node)
+            CommandTypeV2.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(node)
 
-            Command2Type.CLOSE_AWARD_PERIOD -> closeAwardPeriodHandler.handle(node)
+            CommandTypeV2.CLOSE_AWARD_PERIOD -> closeAwardPeriodHandler.handle(node)
         }
     }
 }

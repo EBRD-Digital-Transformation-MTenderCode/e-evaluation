@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.dto
+package com.procurement.evaluation.infrastructure.api.v2
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.fasterxml.jackson.annotation.JsonValue
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
 import java.time.LocalDateTime
 import java.util.*
