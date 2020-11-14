@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.procurement.evaluation.infrastructure.bind.api.command.id.CommandIdModule
 import com.procurement.evaluation.infrastructure.bind.api.version.ApiVersion2Module
 import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueModule
 import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeModule
@@ -21,6 +22,7 @@ fun ObjectMapper.configuration() {
 
     registerModule(module)
     registerModule(ApiVersion2Module())
+    registerModule(CommandIdModule())
     registerModule(RequirementValueModule())
     registerModule(JsonDateTimeModule())
     registerKotlinModule()

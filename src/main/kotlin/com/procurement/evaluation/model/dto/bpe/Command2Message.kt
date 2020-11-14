@@ -7,7 +7,7 @@ import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
 import com.procurement.evaluation.domain.util.extension.toListOrEmpty
-import com.procurement.evaluation.domain.util.extension.tryUUID
+import com.procurement.evaluation.infrastructure.api.command.id.CommandId
 import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties2
 import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse2
@@ -46,7 +46,10 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
 }
 
 fun generateResponseOnFailure(
-    fail: Fail, version: ApiVersion2, id: UUID, logger: Logger
+    fail: Fail,
+    version: ApiVersion2,
+    id: CommandId,
+    logger: Logger
 ): ApiResponse2 {
     fail.logging(logger)
     return when (fail) {
@@ -64,7 +67,9 @@ fun generateResponseOnFailure(
 }
 
 private fun generateDataErrorResponse(
-    dataError: DataErrors.Validation, version: ApiVersion2, id: UUID
+    dataError: DataErrors.Validation,
+    version: ApiVersion2,
+    id: CommandId
 ) =
     ApiErrorResponse2(
         version = version,
@@ -79,7 +84,9 @@ private fun generateDataErrorResponse(
     )
 
 private fun generateValidationErrorResponse(
-    validationError: ValidationError, version: ApiVersion2, id: UUID
+    validationError: ValidationError,
+    version: ApiVersion2,
+    id: CommandId
 ) =
     ApiErrorResponse2(
         version = version,
@@ -94,7 +101,7 @@ private fun generateValidationErrorResponse(
         )
     )
 
-private fun generateErrorResponse(version: ApiVersion2, id: UUID, error: Fail.Error) =
+private fun generateErrorResponse(version: ApiVersion2, id: CommandId, error: Fail.Error) =
     ApiErrorResponse2(
         version = version,
         id = id,
@@ -106,7 +113,7 @@ private fun generateErrorResponse(version: ApiVersion2, id: UUID, error: Fail.Er
         )
     )
 
-private fun generateIncidentResponse(incident: Fail.Incident, version: ApiVersion2, id: UUID) =
+private fun generateIncidentResponse(incident: Fail.Incident, version: ApiVersion2, id: CommandId) =
     ApiIncidentResponse2(
         version = version,
         id = id,
@@ -129,9 +136,6 @@ private fun generateIncidentResponse(incident: Fail.Incident, version: ApiVersio
     )
 
 fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties2.service.id}"
-
-val NaN: UUID
-    get() = UUID(0, 0)
 
 fun JsonNode.tryGetVersion(): Result<ApiVersion2, DataErrors> {
     val name = "version"
@@ -164,22 +168,7 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
     }
 }
 
-fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
-    val name = "id"
-    return tryGetTextAttribute(name)
-        .flatMap {
-            when (val result = it.tryUUID()) {
-                is Result.Success -> result
-                is Result.Failure -> Result.failure(
-                    DataErrors.Validation.DataFormatMismatch(
-                        name = name,
-                        actualValue = it,
-                        expectedFormat = "uuid"
-                    )
-                )
-            }
-        }
-}
+fun JsonNode.tryGetId(): Result<CommandId, DataErrors> = tryGetTextAttribute("id").map { CommandId(it) }
 
 fun String.tryGetNode(): Result<JsonNode, BadRequest> =
     when (val result = this.tryToNode()) {

@@ -1,8 +1,10 @@
 package com.procurement.evaluation.controller
 
 import com.procurement.evaluation.config.properties.GlobalProperties
+import com.procurement.evaluation.infrastructure.api.command.id.CommandId
 import com.procurement.evaluation.infrastructure.dto.ApiResponse
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
+import com.procurement.evaluation.model.dto.bpe.commandId
 import com.procurement.evaluation.model.dto.bpe.errorResponseDto
 import com.procurement.evaluation.service.CommandService
 import com.procurement.evaluation.utils.toJson
@@ -32,7 +34,7 @@ class CommandController(private val commandService: CommandService) {
         val cm: CommandMessage = try {
             toObject(CommandMessage::class.java, requestBody)
         } catch (exception: Exception) {
-            val response = errorResponseDto(exception, "N/A", GlobalProperties.App.apiVersion)
+            val response = errorResponseDto(exception, CommandId.NaN, GlobalProperties.App.apiVersion)
             return ResponseEntity(response, HttpStatus.OK)
         }
 
@@ -43,7 +45,7 @@ class CommandController(private val commandService: CommandService) {
                         log.debug("RESPONSE (operation-id: '${cm.context.operationId}'): '${toJson(response)}'.")
                 }
         } catch (exception: Exception) {
-            errorResponseDto(exception, cm.id, cm.version)
+            errorResponseDto(exception, cm.commandId, cm.version)
         }
         return ResponseEntity(response, HttpStatus.OK)
     }

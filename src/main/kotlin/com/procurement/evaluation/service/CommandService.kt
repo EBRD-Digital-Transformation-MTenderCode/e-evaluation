@@ -59,6 +59,7 @@ import com.procurement.evaluation.lib.orThrow
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.CommandType
 import com.procurement.evaluation.model.dto.bpe.awardId
+import com.procurement.evaluation.model.dto.bpe.commandId
 import com.procurement.evaluation.model.dto.bpe.country
 import com.procurement.evaluation.model.dto.bpe.cpid
 import com.procurement.evaluation.model.dto.bpe.lotId
@@ -88,7 +89,7 @@ class CommandService(
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
-        val history = historyRepository.getHistory(cm.id, cm.command)
+        val history = historyRepository.getHistory(cm.commandId, cm.command)
             .orThrow {
                 throw RuntimeException("Error of loading history. ${it.description}", it.exception)
             }
