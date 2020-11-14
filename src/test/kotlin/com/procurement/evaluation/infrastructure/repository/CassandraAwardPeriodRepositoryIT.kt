@@ -14,8 +14,8 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepository
-import com.procurement.evaluation.infrastructure.tools.toCassandraTimestamp
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
