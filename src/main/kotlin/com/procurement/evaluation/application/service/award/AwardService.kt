@@ -14,8 +14,9 @@ import com.procurement.evaluation.application.service.award.strategy.CloseAwardP
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.ValidationResult
+import com.procurement.evaluation.domain.functional.Validated
 import com.procurement.evaluation.domain.functional.asSuccess
+import com.procurement.evaluation.domain.functional.asValidationError
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
@@ -132,11 +133,11 @@ interface AwardService {
 
     fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail>
 
-    fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail>
+    fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Fail>
 
-    fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail>
+    fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Fail>
 
-    fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail>
+    fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Fail>
 
     fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
         : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
@@ -1768,9 +1769,9 @@ class AwardServiceImpl(
         }.asSuccess()
     }
 
-    override fun checkAccessToAward(params: CheckAccessToAwardParams): ValidationResult<Fail> {
+    override fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Fail> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
-            .onFailure { return ValidationResult.error(it.reason) }
+            .onFailure { return it.reason.asValidationError() }
 
         val awardEntityById = awardEntities
             .associate { entity ->
@@ -1779,31 +1780,28 @@ class AwardServiceImpl(
                     .mapFailure {
                         Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
                     }
-                    .onFailure { return ValidationResult.error(it.reason) }
+                    .onFailure { return it.reason.asValidationError() }
                 award.id to entity
             }
 
         val awardEntity = awardEntityById.get(params.awardId.toString())
-            ?: return ValidationResult.error(
-                ValidationError.AwardNotFoundOnCheckAccess(params.awardId)
-            )
+            ?: return ValidationError.AwardNotFoundOnCheckAccess(params.awardId).asValidationError()
 
-        if (awardEntity.owner != params.owner) {
-            return ValidationResult.error(ValidationError.InvalidOwner())
-        }
 
-        if (awardEntity.token != params.token) {
-            return ValidationResult.error(ValidationError.InvalidToken())
-        }
+        if (awardEntity.owner != params.owner)
+            return ValidationError.InvalidOwner().asValidationError()
 
-        return ValidationResult.ok()
+        if (awardEntity.token != params.token)
+            return ValidationError.InvalidToken().asValidationError()
+
+        return Validated.ok()
     }
 
-    override fun checkRelatedTenderer(params: CheckRelatedTendererParams): ValidationResult<Fail> {
+    override fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Fail> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
-            .onFailure { return ValidationResult.error(it.reason) }
+            .onFailure { return it.reason.asValidationError() }
             .takeIf { it.isNotEmpty() }
-            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
+            ?: return ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId).asValidationError()
 
         val award = awardEntities
             .mapResultPair { entity -> entity.jsonData.tryToObject(Award::class.java) }
@@ -1813,17 +1811,17 @@ class AwardServiceImpl(
                     exception = it.fail.exception
                 )
             }
-            .onFailure { return ValidationResult.error(it.reason) }
+            .onFailure { return it.reason.asValidationError() }
             .firstOrNull { award -> award.id == params.awardId.toString() }
-            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId))
+            ?: return ValidationError.AwardNotFoundOnCheckRelatedTenderer(params.awardId).asValidationError()
 
         if (award.suppliers == null || award.suppliers.isEmpty()) {
-            return ValidationResult.error(ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer())
+            return ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer().asValidationError()
         }
 
         award.suppliers
             .firstOrNull { supplier -> supplier.id == params.relatedTendererId }
-            ?: return ValidationResult.error(ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer())
+            ?: return ValidationError.TendererNotLinkedToAwardOnCheckRelatedTenderer().asValidationError()
 
         val previousRequirementResponseIsPresent = award.requirementResponses
             .any { requirementResponse ->
@@ -1833,9 +1831,9 @@ class AwardServiceImpl(
             }
 
         if (previousRequirementResponseIsPresent)
-            return ValidationResult.error(ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer())
+            return ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer().asValidationError()
 
-        return ValidationResult.ok()
+        return Validated.ok()
     }
 
     override fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail> =
@@ -1844,9 +1842,9 @@ class AwardServiceImpl(
     override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
         createUnsuccessfulAwardsStrategy.execute(params = params)
 
-    override fun addRequirementResponse(params: AddRequirementResponseParams): ValidationResult<Fail> {
+    override fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Fail> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
-            .onFailure { return ValidationResult.error(it.reason) }
+            .onFailure { return it.reason.asValidationError() }
 
         val awardEntityById = awardEntities
             .associate { entity ->
@@ -1855,12 +1853,12 @@ class AwardServiceImpl(
                     .mapFailure {
                         Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
                     }
-                    .onFailure { return ValidationResult.error(it.reason) }
+                    .onFailure { return it.reason.asValidationError() }
                 award.id to entity
             }
 
         val awardEntity = awardEntityById.get(params.award.id.toString())
-            ?: return ValidationResult.error(ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id))
+            ?: return ValidationError.AwardNotFoundOnAddRequirementRs(params.award.id).asValidationError()
 
         val award = awardEntity.jsonData
             .tryToObject(Award::class.java)
@@ -1870,7 +1868,7 @@ class AwardServiceImpl(
                     exception = it.exception
                 )
             }
-            .onFailure { return ValidationResult.error(it.reason) }
+            .onFailure { return it.reason.asValidationError() }
 
         val requirementResponse = convertToAwardRequirementResponse(params)
 
@@ -1883,16 +1881,14 @@ class AwardServiceImpl(
         )
 
         awardRepository.update(cpid = params.cpid, updatedAward = updatedAwardEntity)
-            .onFailure { return ValidationResult.error(it.reason) }
+            .onFailure { return it.reason.asValidationError() }
             .doOnFalse {
-                return ValidationResult.error(
-                    Fail.Incident.Database.DatabaseConsistencyIncident(
+                return Fail.Incident.Database.DatabaseConsistencyIncident(
                         "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpid}'. Record(s) does not exist."
-                    )
-                )
+                    ).asValidationError()
             }
 
-        return ValidationResult.ok()
+        return Validated.ok()
     }
 
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =

@@ -86,17 +86,15 @@ sealed class Result<out T, out E> {
     }
 }
 
-infix fun <T, E> T.validate(rule: ValidationRule<T, E>): Result<T, E> = when (val result = rule.test(this)) {
-    is ValidationResult.Ok -> Result.success(this)
-    is ValidationResult.Fail -> Result.failure(result.error)
+infix fun <T, E> T.validate(rule: ValidationRule<T, E>): Result<T, E> {
+    rule.test(this).onFailure { return it.reason.asFailure() }
+    return this.asSuccess()
 }
 
 infix fun <T, E> Result<T, E>.validate(rule: ValidationRule<T, E>): Result<T, E> = when (this) {
-    is Result.Success -> {
-        val result = rule.test(this.get)
-        if (result.isError) Result.failure(
-            result.error
-        ) else Result.success(this.get)
+    is Result.Success -> when (val result = rule.test(value)) {
+        is Validated.Ok -> this
+        is Validated.Error -> result.reason.asFailure()
     }
     is Result.Failure -> this
 }

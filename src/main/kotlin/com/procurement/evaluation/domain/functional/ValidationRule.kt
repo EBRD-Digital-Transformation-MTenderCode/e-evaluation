@@ -1,12 +1,12 @@
 package com.procurement.evaluation.domain.functional
 
-inline fun <T, E> validationRule(crossinline block: (value: T) -> ValidationResult<E>) = ValidationRule.invoke(block)
+inline fun <T, E> validationRule(crossinline block: (value: T) -> Validated<E>) = ValidationRule.invoke(block)
 
 interface ValidationRule<T, out E> {
-    fun test(value: T): ValidationResult<E>
+    fun test(value: T): Validated<E>
 
     companion object {
-        inline operator fun <T, E> invoke(crossinline block: (value: T) -> ValidationResult<E>): ValidationRule<T, E> =
+        inline operator fun <T, E> invoke(crossinline block: (value: T) -> Validated<E>): ValidationRule<T, E> =
             object : ValidationRule<T, E> {
                 override fun test(value: T) = block(value)
             }

@@ -2,7 +2,7 @@ package com.procurement.evaluation.infrastructure.fail
 
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.ValidationResult
+import com.procurement.evaluation.domain.functional.Validated
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 
 sealed class Fail {
@@ -17,7 +17,7 @@ sealed class Fail {
     abstract class Error(val prefix: String) : Fail() {
         companion object {
             fun <T, E : Error> E.toResult(): Result<T, E> = Result.failure(this)
-            fun <E : Error> E.toValidationResult(): ValidationResult<E> = ValidationResult.error(this)
+            fun <E : Error> E.toValidationResult(): Validated<E> = Validated.error(this)
         }
 
         override fun logging(logger: Logger) {
