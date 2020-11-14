@@ -14,7 +14,6 @@ import com.procurement.evaluation.application.service.GenerationService
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.model.Cpid
-import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.bid.BidId
@@ -339,7 +338,7 @@ class AwardServiceImpl(
             status = award.status,
             statusDetails = award.statusDetails,
             token = UUID.fromString(award.token),
-            owner = Owner.fromString(context.owner),
+            owner = context.owner,
             jsonData = toJson(award)
         )
 
@@ -689,7 +688,7 @@ class AwardServiceImpl(
             throw ErrorException(error = INVALID_TOKEN)
 
         //VR-7.10.2
-        if (Owner.fromString(context.owner) != awardEntity.owner)
+        if (context.owner != awardEntity.owner)
             throw ErrorException(error = INVALID_OWNER)
 
         val award = toObject(Award::class.java, awardEntity.jsonData)
@@ -1274,7 +1273,7 @@ class AwardServiceImpl(
                 token = UUID.fromString(award.token),
                 statusDetails = award.statusDetails,
                 status = award.status,
-                owner = Owner.fromString(context.owner),
+                owner = context.owner,
                 jsonData = toJson(award)
             )
         }
@@ -1340,7 +1339,7 @@ class AwardServiceImpl(
                 token = UUID.fromString(award.token),
                 statusDetails = award.statusDetails,
                 status = award.status,
-                owner = Owner.fromString(context.owner),
+                owner = context.owner,
                 jsonData = toJson(award)
             )
         }
@@ -1509,7 +1508,7 @@ class AwardServiceImpl(
             AwardEntity(
                 cpid = context.cpid,
                 ocid = context.ocid,
-                owner = Owner.fromString(context.owner),
+                owner = context.owner,
                 token = Token.fromString(award.token!!),
                 status = award.status,
                 statusDetails = award.statusDetails,
@@ -1696,7 +1695,7 @@ class AwardServiceImpl(
                     AwardEntity(
                         cpid = context.cpid,
                         token = Token.fromString(award.token!!),
-                        owner = Owner.fromString(context.owner),
+                        owner = context.owner,
                         ocid = context.ocid,
                         status = award.status,
                         statusDetails = award.statusDetails,

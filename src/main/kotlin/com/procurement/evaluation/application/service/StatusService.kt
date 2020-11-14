@@ -2,7 +2,6 @@ package com.procurement.evaluation.application.service
 
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
-import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.exception.ErrorType.CONTEXT
@@ -10,7 +9,9 @@ import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.infrastructure.api.v1.CommandMessage
 import com.procurement.evaluation.infrastructure.api.v1.cpid
 import com.procurement.evaluation.infrastructure.api.v1.ocid
+import com.procurement.evaluation.infrastructure.api.v1.owner
 import com.procurement.evaluation.infrastructure.api.v1.startDate
+import com.procurement.evaluation.infrastructure.api.v1.token
 import com.procurement.evaluation.model.dto.AwardForCansRs
 import com.procurement.evaluation.model.dto.AwardsForAcRq
 import com.procurement.evaluation.model.dto.AwardsForAcRs
@@ -19,7 +20,6 @@ import com.procurement.evaluation.model.dto.GetLotForCheckRs
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class StatusService(
@@ -74,15 +74,14 @@ class StatusService(
     fun getLotForCheck(cm: CommandMessage): GetLotForCheckRs {
         val cpid = cm.cpid
         val ocid = cm.ocid
+        val token = cm.token
+        val owner = cm.owner
 
-        val token = cm.context.token ?: throw ErrorException(CONTEXT)
-        val owner = cm.context.owner ?: throw ErrorException(CONTEXT)
-
-        val awardEntity = awardRepository.findBy(cpid, ocid, UUID.fromString(token))
+        val awardEntity = awardRepository.findBy(cpid, ocid, token)
             .orThrow { it.exception }
             ?: throw ErrorException(DATA_NOT_FOUND)
 
-        if (awardEntity.owner != Owner.fromString(owner)) throw ErrorException(ErrorType.INVALID_OWNER)
+        if (awardEntity.owner != owner) throw ErrorException(ErrorType.INVALID_OWNER)
         val awardByBid = toObject(Award::class.java, awardEntity.jsonData)
         return GetLotForCheckRs(awardByBid.relatedLots[0])
     }

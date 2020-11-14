@@ -75,7 +75,6 @@ import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class CommandServiceV1(
@@ -381,7 +380,7 @@ class CommandServiceV1(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
                     token = cm.token,
-                    owner = UUID.fromString(cm.owner),
+                    owner = cm.owner,
                     awardId = cm.awardId
                 )
                 awardService.checkStatus(context)
@@ -588,7 +587,7 @@ class CommandServiceV1(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
                     token = cm.token,
-                    owner = UUID.fromString(cm.owner),
+                    owner = cm.owner,
                     awardId = cm.awardId
                 )
                 awardService.startConsideration(context)

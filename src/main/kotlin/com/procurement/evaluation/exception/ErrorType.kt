@@ -38,5 +38,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_PHASE("17.01","Invalid phase"),
     UNKNOWN_SUPPLIER_COUNTRY("18.01", "A supplier country is unknown."),
     INVALID_ATTRIBUTE("19.01", "Invalid attribute."),
-    DATABASE("20.01", "Database.");
+    DATABASE("20.01", "Database."),
+    INVALID_FORMAT_OF_ATTRIBUTE("20.02", "Invalid attribute format.");
 }

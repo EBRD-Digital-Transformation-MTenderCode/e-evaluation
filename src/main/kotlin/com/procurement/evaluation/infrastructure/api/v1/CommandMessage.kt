@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
+import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.domain.util.extension.toLocalDateTime
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
@@ -68,8 +70,17 @@ val CommandMessage.token: Token
         }
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'token' attribute in context.")
 
-val CommandMessage.owner: String
+val CommandMessage.owner: Owner
     get() = this.context.owner
+        ?.let { value ->
+            value.tryOwner()
+                .onFailure {
+                    throw ErrorException(
+                        error = ErrorType.INVALID_FORMAT_OF_ATTRIBUTE,
+                        message = "Cannot parse 'owner' attribute '${value}'."
+                    )
+                }
+        }
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'owner' attribute in context.")
 
 val CommandMessage.phase: Phase
