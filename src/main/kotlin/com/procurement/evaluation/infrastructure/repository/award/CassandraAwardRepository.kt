@@ -6,8 +6,6 @@ import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
@@ -15,6 +13,8 @@ import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.repository.Database
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import org.springframework.stereotype.Repository

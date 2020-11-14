@@ -2,11 +2,11 @@ package com.procurement.evaluation.application.service.award.strategy
 
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 
 class CloseAwardPeriodStrategy(val awardPeriodRepository: AwardPeriodRepository) {
 

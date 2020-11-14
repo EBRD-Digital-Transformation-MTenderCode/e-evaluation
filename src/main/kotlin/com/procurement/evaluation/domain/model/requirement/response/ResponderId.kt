@@ -1,8 +1,8 @@
 package com.procurement.evaluation.domain.model.requirement.response
 
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 
 typealias ResponderId = String
 

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.flatMap
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
 import com.procurement.evaluation.domain.util.extension.toListOrEmpty
@@ -23,6 +21,8 @@ import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.BadRequest
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.flatMap
 import com.procurement.evaluation.utils.tryToNode
 import com.procurement.evaluation.utils.tryToObject
 import java.util.*

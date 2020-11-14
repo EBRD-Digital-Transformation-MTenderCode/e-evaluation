@@ -1,7 +1,7 @@
 package com.procurement.evaluation.domain.util.extension
 
-import com.procurement.evaluation.domain.functional.Option
-import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.lib.functional.Option
+import com.procurement.evaluation.lib.functional.Result
 
 fun <T, R, E> List<T>?.mapOptionalResult(block: (T) -> Result<R, E>): Result<Option<List<R>>, E> {
     if (this == null)

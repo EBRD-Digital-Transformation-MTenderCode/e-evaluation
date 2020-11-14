@@ -1,12 +1,12 @@
 package com.procurement.evaluation.controller
 
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties2
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
 import com.procurement.evaluation.infrastructure.dto.ApiVersion2
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.service.Command2Service
+import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.model.dto.bpe.NaN
 import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
 import com.procurement.evaluation.model.dto.bpe.tryGetId

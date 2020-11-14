@@ -1,7 +1,5 @@
 package com.procurement.evaluation.application.model
 
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
@@ -15,6 +13,8 @@ import com.procurement.evaluation.domain.model.tryToken
 import com.procurement.evaluation.domain.util.extension.toLocalDateTime
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.infrastructure.fail.error.DataTimeError
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 import java.time.LocalDateTime
 
 fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =

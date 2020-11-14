@@ -3,9 +3,6 @@ package com.procurement.evaluation.application.service.award.strategy
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.domain.model.enums.OperationType2
@@ -13,6 +10,9 @@ import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails

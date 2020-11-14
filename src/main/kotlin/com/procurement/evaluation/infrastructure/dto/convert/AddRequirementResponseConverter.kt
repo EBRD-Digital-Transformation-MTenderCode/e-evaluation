@@ -1,9 +1,9 @@
 package com.procurement.evaluation.infrastructure.dto.convert
 
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
-import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.infrastructure.dto.award.create.requirement.response.AddRequirementResponseRequest
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.lib.functional.Result
 
 fun AddRequirementResponseRequest.convert(): Result<AddRequirementResponseParams, DataErrors> =
     AddRequirementResponseParams.tryCreate(

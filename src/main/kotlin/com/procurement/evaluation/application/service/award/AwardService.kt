@@ -12,11 +12,6 @@ import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.Validated
-import com.procurement.evaluation.domain.functional.asSuccess
-import com.procurement.evaluation.domain.functional.asValidationError
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
@@ -54,6 +49,11 @@ import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateBy
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.Validated
+import com.procurement.evaluation.lib.functional.asSuccess
+import com.procurement.evaluation.lib.functional.asValidationError
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.lib.uniqueBy
 import com.procurement.evaluation.model.dto.ocds.Address

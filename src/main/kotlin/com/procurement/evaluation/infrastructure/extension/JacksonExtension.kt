@@ -3,14 +3,14 @@ package com.procurement.evaluation.infrastructure.extension
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.Result.Companion.success
-import com.procurement.evaluation.domain.functional.asSuccess
-import com.procurement.evaluation.domain.functional.flatMap
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.Result.Companion.success
+import com.procurement.evaluation.lib.functional.asSuccess
+import com.procurement.evaluation.lib.functional.flatMap
 import java.math.BigDecimal
 
 fun JsonNode.getOrNull(name: String): JsonNode? = if (this.has(name)) this.get(name) else null

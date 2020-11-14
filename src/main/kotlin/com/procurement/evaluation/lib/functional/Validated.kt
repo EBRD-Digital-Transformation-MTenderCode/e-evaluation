@@ -1,4 +1,4 @@
-package com.procurement.evaluation.domain.functional
+package com.procurement.evaluation.lib.functional
 
 fun <E> E.asValidationError(): Validated<E> = Validated.error(this)
 

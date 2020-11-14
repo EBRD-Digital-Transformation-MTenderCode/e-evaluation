@@ -2,9 +2,9 @@ package com.procurement.evaluation.domain.model
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.domain.model.enums.Stage
+import com.procurement.evaluation.lib.functional.Result
 import java.io.Serializable
 
 class Ocid private constructor(@JsonValue val underlying: String, val stage: Stage) : Serializable {

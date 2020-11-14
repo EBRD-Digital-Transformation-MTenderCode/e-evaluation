@@ -2,10 +2,10 @@ package com.procurement.evaluation.domain.model.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.Result.Companion.success
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.Result.Companion.success
 
 class PersonId private constructor(private val value: String) {
 

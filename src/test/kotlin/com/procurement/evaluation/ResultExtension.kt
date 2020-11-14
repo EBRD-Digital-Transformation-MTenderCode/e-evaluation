@@ -1,6 +1,6 @@
 package com.procurement.evaluation
 
-import com.procurement.evaluation.domain.functional.Result
+import com.procurement.evaluation.lib.functional.Result
 
 fun <T, E> Result<T, E>.get(): T = when (this) {
     is Result.Success -> this.value

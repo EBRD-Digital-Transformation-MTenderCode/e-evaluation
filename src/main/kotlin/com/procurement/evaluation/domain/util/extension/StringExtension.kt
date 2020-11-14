@@ -1,7 +1,7 @@
 package com.procurement.evaluation.domain.util.extension
 
-import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.lib.functional.Result
 import java.util.*
 
 fun String.tryUUID(): Result<UUID, Fail.Incident.Transform.Parsing> =

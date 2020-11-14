@@ -1,9 +1,9 @@
 package com.procurement.evaluation.domain.model.enums
 
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.Result.Companion.success
 import com.procurement.evaluation.exception.EnumElementProviderException
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.Result.Companion.success
 
 abstract class EnumElementProvider<T>(val info: EnumInfo<T>) where T : Enum<T>,
                                                                    T : EnumElementProvider.Key {

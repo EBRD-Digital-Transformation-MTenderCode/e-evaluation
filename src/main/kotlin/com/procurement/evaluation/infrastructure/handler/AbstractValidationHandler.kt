@@ -2,11 +2,11 @@ package com.procurement.evaluation.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.domain.functional.Validated
 import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
 import com.procurement.evaluation.infrastructure.dto.ApiSuccessResponse2
 import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.lib.functional.Validated
 import com.procurement.evaluation.model.dto.bpe.generateResponseOnFailure
 import com.procurement.evaluation.model.dto.bpe.tryGetId
 import com.procurement.evaluation.model.dto.bpe.tryGetVersion

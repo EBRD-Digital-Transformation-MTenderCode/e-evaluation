@@ -5,14 +5,14 @@ import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseOcid
 import com.procurement.evaluation.application.model.parseOwner
 import com.procurement.evaluation.application.model.parseToken
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 
 class CheckAccessToAwardParams private constructor(
     val cpid: Cpid,

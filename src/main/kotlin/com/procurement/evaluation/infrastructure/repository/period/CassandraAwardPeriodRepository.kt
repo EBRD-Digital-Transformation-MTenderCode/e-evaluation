@@ -3,8 +3,6 @@ package com.procurement.evaluation.infrastructure.repository.period
 import com.datastax.driver.core.Session
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.repository.period.model.PeriodEntity
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
@@ -12,6 +10,8 @@ import com.procurement.evaluation.infrastructure.extension.cassandra.toLocalDate
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.repository.Database
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 

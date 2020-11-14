@@ -1,9 +1,9 @@
 package com.procurement.evaluation.domain.util.extension
 
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asFailure
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.infrastructure.fail.error.DataTimeError
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asFailure
+import com.procurement.evaluation.lib.functional.asSuccess
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
