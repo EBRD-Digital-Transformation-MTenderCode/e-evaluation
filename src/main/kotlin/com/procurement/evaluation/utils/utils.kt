@@ -1,21 +1,11 @@
 package com.procurement.evaluation.utils
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.procurement.evaluation.domain.model.data.RequirementRsValue
-import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
-import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
+import com.procurement.evaluation.infrastructure.bind.configuration
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.lib.functional.Result
-import com.procurement.evaluation.model.dto.databinding.IntDeserializer
-import com.procurement.evaluation.model.dto.databinding.JsonDateDeserializer
-import com.procurement.evaluation.model.dto.databinding.JsonDateSerializer
-import com.procurement.evaluation.model.dto.databinding.StringsDeserializer
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
@@ -27,31 +17,11 @@ import java.util.*
 
 private object JsonMapper {
 
-    val mapper: ObjectMapper = ObjectMapper()
+    val mapper: ObjectMapper = ObjectMapper().apply { configuration() }
 
     var dateTimeFormatter: DateTimeFormatter
 
     init {
-        val module = SimpleModule()
-        module.addSerializer(LocalDateTime::class.java, JsonDateSerializer())
-        module.addDeserializer(LocalDateTime::class.java, JsonDateDeserializer())
-        module.addDeserializer(String::class.java, StringsDeserializer())
-        module.addDeserializer(Int::class.java, IntDeserializer())
-
-        /**
-         * Serializer/Deserializer for RequirementRsValue type
-         */
-        module.addSerializer(RequirementRsValue::class.java, RequirementValueSerializer())
-        module.addDeserializer(RequirementRsValue::class.java, RequirementValueDeserializer())
-
-        mapper.registerModule(module)
-        mapper.registerKotlinModule()
-        mapper.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true)
-        mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        mapper.configure(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS, true)
-        mapper.nodeFactory = JsonNodeFactory.withExactBigDecimals(true)
-
         dateTimeFormatter = DateTimeFormatterBuilder()
                 .parseCaseInsensitive()
                 .append(DateTimeFormatter.ISO_LOCAL_DATE)
