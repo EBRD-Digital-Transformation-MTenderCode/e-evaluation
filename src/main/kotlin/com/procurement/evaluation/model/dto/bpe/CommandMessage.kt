@@ -11,12 +11,12 @@ import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
+import com.procurement.evaluation.domain.util.extension.parseLocalDateTime
 import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse
-import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
@@ -79,7 +79,8 @@ val CommandMessage.pmd: ProcurementMethod
     } ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'pmd' attribute in context.")
 
 val CommandMessage.startDate: LocalDateTime
-    get() = this.context.startDate?.toLocalDateTime()
+    get() = this.context.startDate
+        ?.parseLocalDateTime()
         ?: throw ErrorException(error = ErrorType.CONTEXT, message = "Missing the 'startDate' attribute in context.")
 
 val CommandMessage.operationType: OperationType
