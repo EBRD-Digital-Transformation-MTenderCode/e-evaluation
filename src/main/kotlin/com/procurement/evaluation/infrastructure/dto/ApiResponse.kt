@@ -2,7 +2,6 @@ package com.procurement.evaluation.infrastructure.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.model.dto.bpe.ApiVersion
 
 sealed class ApiResponse {
     abstract val id: CommandId

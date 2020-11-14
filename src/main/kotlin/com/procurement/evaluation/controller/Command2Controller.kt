@@ -2,9 +2,8 @@ package com.procurement.evaluation.controller
 
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties2
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
-import com.procurement.evaluation.infrastructure.dto.ApiVersion2
+import com.procurement.evaluation.infrastructure.dto.ApiVersion
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.service.Command2Service
 import com.procurement.evaluation.lib.functional.Result
@@ -30,16 +29,17 @@ class Command2Controller(private val commandService: Command2Service, private va
             logger.debug("RECEIVED COMMAND: '$requestBody'.")
 
         val node = requestBody.tryGetNode()
-            .onFailure { return generateResponse(fail = it.reason, id = CommandId.NaN) }
+            .onFailure { return generateResponse(fail = it.reason, id = CommandId.NaN, version = ApiVersion.NaN) }
 
         val version = when (val versionResult = node.tryGetVersion()) {
             is Result.Success -> versionResult.get
-            is Result.Failure -> {
-                when (val idResult = node.tryGetId()) {
-                    is Result.Success -> return generateResponse(fail = versionResult.reason, id = idResult.get)
-                    is Result.Failure -> return generateResponse(fail = versionResult.reason, id = CommandId.NaN)
-                }
+            is Result.Failure -> when (val idResult = node.tryGetId()) {
+                is Result.Success ->
+                    return generateResponse(fail = versionResult.reason, id = idResult.get, version = ApiVersion.NaN)
+                is Result.Failure ->
+                    return generateResponse(fail = versionResult.reason, id = CommandId.NaN, version = ApiVersion.NaN)
             }
+
         }
 
         val id = node.tryGetId()
@@ -57,7 +57,7 @@ class Command2Controller(private val commandService: Command2Service, private va
 
     private fun generateResponse(
         fail: Fail,
-        version: ApiVersion2 = GlobalProperties2.App.apiVersion,
+        version: ApiVersion,
         id: CommandId
     ): ResponseEntity<ApiResponse2> {
         val response = generateResponseOnFailure(fail = fail, id = id, version = version, logger = logger)

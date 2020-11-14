@@ -18,6 +18,7 @@ import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
 import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse
+import com.procurement.evaluation.infrastructure.dto.ApiVersion
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
@@ -163,19 +164,6 @@ enum class CommandType(@JsonValue override val key: String): Action {
 
     override fun toString(): String {
         return this.key
-    }
-}
-
-enum class ApiVersion(private val value: String) {
-    V_0_0_1("0.0.1");
-
-    @JsonValue
-    fun value(): String {
-        return this.value
-    }
-
-    override fun toString(): String {
-        return this.value
     }
 }
 

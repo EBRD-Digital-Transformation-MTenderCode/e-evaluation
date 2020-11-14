@@ -1,8 +1,8 @@
 package com.procurement.evaluation.controller
 
-import com.procurement.evaluation.config.properties.GlobalProperties
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
 import com.procurement.evaluation.infrastructure.dto.ApiResponse
+import com.procurement.evaluation.infrastructure.dto.ApiVersion
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.commandId
 import com.procurement.evaluation.model.dto.bpe.errorResponseDto
@@ -34,7 +34,7 @@ class CommandController(private val commandService: CommandService) {
         val cm: CommandMessage = try {
             toObject(CommandMessage::class.java, requestBody)
         } catch (exception: Exception) {
-            val response = errorResponseDto(exception, CommandId.NaN, GlobalProperties.App.apiVersion)
+            val response = errorResponseDto(exception, CommandId.NaN, ApiVersion.NaN)
             return ResponseEntity(response, HttpStatus.OK)
         }
 

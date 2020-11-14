@@ -12,7 +12,7 @@ import java.util.*
 
 @JsonPropertyOrder("version", "id", "status", "result")
 sealed class ApiResponse2(
-    @field:JsonProperty("version") @param:JsonProperty("version") val version: ApiVersion2,
+    @field:JsonProperty("version") @param:JsonProperty("version") val version: ApiVersion,
     @field:JsonProperty("id") @param:JsonProperty("id") val id: CommandId,
     @field:JsonProperty("result") @param:JsonProperty("result") val result: Any?
 ) {
@@ -20,7 +20,7 @@ sealed class ApiResponse2(
 }
 
 class ApiSuccessResponse2(
-    version: ApiVersion2, id: CommandId,
+    version: ApiVersion, id: CommandId,
     @JsonInclude(JsonInclude.Include.NON_EMPTY) result: Any? = null
 ) : ApiResponse2(
     version = version,
@@ -32,7 +32,7 @@ class ApiSuccessResponse2(
 }
 
 class ApiErrorResponse2(
-    version: ApiVersion2, id: CommandId, result: List<Error>
+    version: ApiVersion, id: CommandId, result: List<Error>
 ) : ApiResponse2(version = version, result = result, id = id) {
     @field:JsonProperty("status")
     override val status: Response2Status = Response2Status.ERROR
@@ -57,7 +57,7 @@ class ApiErrorResponse2(
     }
 }
 
-class ApiIncidentResponse2(version: ApiVersion2, id: CommandId, result: Incident) :
+class ApiIncidentResponse2(version: ApiVersion, id: CommandId, result: Incident) :
     ApiResponse2(version = version, id = id, result = result) {
 
     @field:JsonProperty("status")

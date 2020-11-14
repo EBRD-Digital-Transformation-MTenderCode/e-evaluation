@@ -13,7 +13,7 @@ import com.procurement.evaluation.infrastructure.dto.Action
 import com.procurement.evaluation.infrastructure.dto.ApiErrorResponse2
 import com.procurement.evaluation.infrastructure.dto.ApiIncidentResponse2
 import com.procurement.evaluation.infrastructure.dto.ApiResponse2
-import com.procurement.evaluation.infrastructure.dto.ApiVersion2
+import com.procurement.evaluation.infrastructure.dto.ApiVersion
 import com.procurement.evaluation.infrastructure.extension.tryGetAttribute
 import com.procurement.evaluation.infrastructure.extension.tryGetAttributeAsEnum
 import com.procurement.evaluation.infrastructure.extension.tryGetTextAttribute
@@ -49,7 +49,7 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
 
 fun generateResponseOnFailure(
     fail: Fail,
-    version: ApiVersion2,
+    version: ApiVersion,
     id: CommandId,
     logger: Logger
 ): ApiResponse2 {
@@ -70,7 +70,7 @@ fun generateResponseOnFailure(
 
 private fun generateDataErrorResponse(
     dataError: DataErrors.Validation,
-    version: ApiVersion2,
+    version: ApiVersion,
     id: CommandId
 ) =
     ApiErrorResponse2(
@@ -87,7 +87,7 @@ private fun generateDataErrorResponse(
 
 private fun generateValidationErrorResponse(
     validationError: ValidationError,
-    version: ApiVersion2,
+    version: ApiVersion,
     id: CommandId
 ) =
     ApiErrorResponse2(
@@ -103,7 +103,7 @@ private fun generateValidationErrorResponse(
         )
     )
 
-private fun generateErrorResponse(version: ApiVersion2, id: CommandId, error: Fail.Error) =
+private fun generateErrorResponse(version: ApiVersion, id: CommandId, error: Fail.Error) =
     ApiErrorResponse2(
         version = version,
         id = id,
@@ -115,7 +115,7 @@ private fun generateErrorResponse(version: ApiVersion2, id: CommandId, error: Fa
         )
     )
 
-private fun generateIncidentResponse(incident: Fail.Incident, version: ApiVersion2, id: CommandId) =
+private fun generateIncidentResponse(incident: Fail.Incident, version: ApiVersion, id: CommandId) =
     ApiIncidentResponse2(
         version = version,
         id = id,
@@ -139,15 +139,15 @@ private fun generateIncidentResponse(incident: Fail.Incident, version: ApiVersio
 
 fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties2.service.id}"
 
-fun JsonNode.tryGetVersion(): Result<ApiVersion2, DataErrors> {
+fun JsonNode.tryGetVersion(): Result<ApiVersion, DataErrors> {
     val name = "version"
     return tryGetTextAttribute(name)
         .flatMap { version ->
-            ApiVersion2.orNull(version)
-                ?.asSuccess<ApiVersion2, DataErrors>()
+            ApiVersion.orNull(version)
+                ?.asSuccess<ApiVersion, DataErrors>()
                 ?: DataErrors.Validation.DataFormatMismatch(
                     name = name,
-                    expectedFormat = ApiVersion2.pattern,
+                    expectedFormat = ApiVersion.pattern,
                     actualValue = version
                 ).asFailure()
         }
