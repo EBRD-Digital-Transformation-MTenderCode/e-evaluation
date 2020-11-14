@@ -15,8 +15,8 @@ import com.procurement.evaluation.model.dto.GetLotForCheckRs
 import com.procurement.evaluation.model.dto.bpe.CommandMessage
 import com.procurement.evaluation.model.dto.bpe.cpid
 import com.procurement.evaluation.model.dto.bpe.ocid
+import com.procurement.evaluation.model.dto.bpe.startDate
 import com.procurement.evaluation.model.dto.ocds.Award
-import com.procurement.evaluation.utils.toLocal
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service
 import java.util.*
@@ -66,8 +66,7 @@ class StatusService(
 
     fun endAwardPeriod(cm: CommandMessage): EndAwardPeriodRs {
         val cpid = cm.cpid
-
-        val endDate = cm.context.startDate?.toLocal() ?: throw ErrorException(CONTEXT)
+        val endDate = cm.startDate
         val awardPeriod = periodService.saveEndOfPeriod(cpid, endDate)
         return EndAwardPeriodRs(awardPeriod)
     }

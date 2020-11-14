@@ -3,14 +3,14 @@ package com.procurement.evaluation.infrastructure.repository.history
 import com.datastax.driver.core.Session
 import com.procurement.evaluation.application.repository.history.HistoryRepository
 import com.procurement.evaluation.application.repository.history.model.HistoryEntity
+import com.procurement.evaluation.domain.util.extension.nowDefaultUTC
 import com.procurement.evaluation.infrastructure.dto.Action
+import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asSuccess
-import com.procurement.evaluation.utils.localNowUTC
-import com.procurement.evaluation.utils.toDate
 import com.procurement.evaluation.utils.toJson
 import org.springframework.stereotype.Repository
 
@@ -64,7 +64,7 @@ class CassandraHistoryRepository(private val session: Session) : HistoryReposito
         val entity = HistoryEntity(
             operationId = operationId,
             command = command.key,
-            operationDate = localNowUTC().toDate(),
+            operationDate = nowDefaultUTC().toCassandraTimestamp(),
             jsonData = toJson(response)
         )
 
