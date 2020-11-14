@@ -616,7 +616,7 @@ class CommandService(
                 if (log.isDebugEnabled)
                     log.debug("Response: ${toJson(it)}")
             }
-        historyRepository.saveHistory(cm.id, cm.command, response)
+        historyRepository.saveHistory(cm.id, cm.command, toJson(response))
             .doOnError {
                 log.error("Error of save history. ${it.description}", it.exception)
             }

@@ -49,18 +49,15 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
 
         return when (val result = execute(node)) {
             is Result.Success -> {
-                ApiSuccessResponse2(version = version, id = id, result = result.get).also {
-                    historyRepository.saveHistory(id, action, it)
+                ApiSuccessResponse2(version = version, id = id, result = result.get)
+                    .also {
+                    historyRepository.saveHistory(id, action, toJson(it))
                     if (logger.isDebugEnabled)
                         logger.debug("${action.key} has been executed. Response: ${toJson(it)}")
                 }
             }
-            is Result.Failure -> generateResponseOnFailure(
-                fail = result.reason,
-                version = version,
-                id = id,
-                logger = logger
-            )
+            is Result.Failure ->
+                generateResponseOnFailure(fail = result.reason, version = version, id = id, logger = logger)
         }
     }
 
