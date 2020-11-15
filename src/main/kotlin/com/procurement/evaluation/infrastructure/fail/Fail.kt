@@ -65,25 +65,34 @@ sealed class Fail {
             )
         }
 
-        sealed class Transform(val number: String, override val description: String, val exception: Exception) :
+        sealed class Transform(val number: String, override val description: String) :
             Incident(level = Level.ERROR, number = number, description = description) {
+
+            abstract val exception: Exception?
 
             override fun logging(logger: Logger) {
                 logger.error(message = message, exception = exception)
             }
 
-            class ParseFromDatabaseIncident(val jsonData: String, exception: Exception) : Transform(
-                number = "2.1",
-                description = "Could not parse data stored in database.",
-                exception = exception
-            ) {
+            class ParseFromDatabaseIncident(val jsonData: String, override val exception: Exception) :
+                Transform(number = "2.1", description = "Could not parse data stored in database.") {
+
                 override fun logging(logger: Logger) {
                     logger.error(message = message, mdc = mapOf("jsonData" to jsonData), exception = exception)
                 }
             }
 
-            class Parsing(className: String, exception: Exception) :
-                Transform(number = "2.2", description = "Error parsing to $className.", exception = exception)
+            class Parsing(className: String, override val exception: Exception) :
+                Transform(number = "2.2", description = "Error parsing to $className.")
+
+            class Mapping(description: String, override val exception: Exception? = null) :
+                Transform(number = "2.4", description = description)
+
+            class Deserialization(description: String, override val exception: Exception) :
+                Transform(number = "2.5", description = description)
+
+            class Serialization(description: String, override val exception: Exception) :
+                Transform(number = "2.6", description = description)
         }
 
         enum class Level(override val key: String) : EnumElementProvider.Key {

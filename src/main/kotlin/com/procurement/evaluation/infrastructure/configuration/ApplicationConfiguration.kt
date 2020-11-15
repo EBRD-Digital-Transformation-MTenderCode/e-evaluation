@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Import
     LoggerConfiguration::class,
     ObjectMapperConfiguration::class,
     ServiceConfiguration::class,
+    TransformConfiguration::class,
     WebConfiguration::class,
 )
 class ApplicationConfiguration
