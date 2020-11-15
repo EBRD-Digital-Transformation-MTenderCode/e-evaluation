@@ -12,11 +12,11 @@ import com.procurement.evaluation.infrastructure.api.v1.ocid
 import com.procurement.evaluation.infrastructure.api.v1.owner
 import com.procurement.evaluation.infrastructure.api.v1.startDate
 import com.procurement.evaluation.infrastructure.api.v1.token
-import com.procurement.evaluation.model.dto.AwardForCansRs
-import com.procurement.evaluation.model.dto.AwardsForAcRq
-import com.procurement.evaluation.model.dto.AwardsForAcRs
-import com.procurement.evaluation.model.dto.EndAwardPeriodRs
-import com.procurement.evaluation.model.dto.GetLotForCheckRs
+import com.procurement.evaluation.infrastructure.handler.v1.model.request.AwardsForAcRq
+import com.procurement.evaluation.infrastructure.handler.v1.model.request.AwardsForAcRs
+import com.procurement.evaluation.infrastructure.handler.v1.model.response.AwardForCansRs
+import com.procurement.evaluation.infrastructure.handler.v1.model.response.EndAwardPeriodRs
+import com.procurement.evaluation.infrastructure.handler.v1.model.response.GetLotForCheckRs
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.utils.toObject
 import org.springframework.stereotype.Service

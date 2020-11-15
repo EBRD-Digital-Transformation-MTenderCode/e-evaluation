@@ -8,12 +8,12 @@ import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
 import com.procurement.evaluation.infrastructure.api.v2.tryGetAction
 import com.procurement.evaluation.infrastructure.api.v2.tryGetId
 import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
-import com.procurement.evaluation.infrastructure.handler.check.accesstoaward.CheckAccessToAwardHandler
-import com.procurement.evaluation.infrastructure.handler.check.relatedtenderer.CheckRelatedTendererHandler
-import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodHandler
-import com.procurement.evaluation.infrastructure.handler.create.requirementresponsehandler.AddRequirementResponseHandler
-import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsHandler
-import com.procurement.evaluation.infrastructure.handler.get.awardstatebyids.GetAwardStateByIdsHandler
+import com.procurement.evaluation.infrastructure.handler.v2.AddRequirementResponseHandler
+import com.procurement.evaluation.infrastructure.handler.v2.CheckAccessToAwardHandler
+import com.procurement.evaluation.infrastructure.handler.v2.CheckRelatedTendererHandler
+import com.procurement.evaluation.infrastructure.handler.v2.CloseAwardPeriodHandler
+import com.procurement.evaluation.infrastructure.handler.v2.CreateUnsuccessfulAwardsHandler
+import com.procurement.evaluation.infrastructure.handler.v2.GetAwardStateByIdsHandler
 import org.springframework.stereotype.Service
 
 @Service

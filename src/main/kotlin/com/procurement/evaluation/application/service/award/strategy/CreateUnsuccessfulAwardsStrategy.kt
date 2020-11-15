@@ -10,7 +10,7 @@ import com.procurement.evaluation.domain.model.enums.OperationType2
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
-import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
 import com.procurement.evaluation.lib.functional.asSuccess

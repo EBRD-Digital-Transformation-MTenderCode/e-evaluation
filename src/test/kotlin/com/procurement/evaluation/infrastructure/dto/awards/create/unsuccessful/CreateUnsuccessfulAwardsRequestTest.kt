@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.awards.create.unsuccessful
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
-import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsRequest
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.CreateUnsuccessfulAwardsRequest
 import org.junit.jupiter.api.Test
 
 class CreateUnsuccessfulAwardsRequestTest : AbstractDTOTestBase<CreateUnsuccessfulAwardsRequest>(

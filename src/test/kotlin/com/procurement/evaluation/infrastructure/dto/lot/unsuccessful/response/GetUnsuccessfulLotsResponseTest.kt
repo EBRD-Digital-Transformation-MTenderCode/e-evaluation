@@ -1,6 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.lot.unsuccessful.response
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
+import com.procurement.evaluation.infrastructure.handler.v1.model.response.GetUnsuccessfulLotsResponse
 import org.junit.jupiter.api.Test
 
 class GetUnsuccessfulLotsResponseTest :

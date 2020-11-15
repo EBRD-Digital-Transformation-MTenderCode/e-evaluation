@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.awards.create.auction.end.request
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
-import com.procurement.evaluation.infrastructure.dto.award.create.auction.end.request.CreateAwardsAuctionEndRequest
+import com.procurement.evaluation.infrastructure.handler.v1.model.request.CreateAwardsAuctionEndRequest
 import org.junit.jupiter.api.Test
 
 class CreateAwardsauctionEndRequestTest : AbstractDTOTestBase<CreateAwardsAuctionEndRequest>(

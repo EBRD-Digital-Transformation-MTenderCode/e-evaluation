@@ -44,10 +44,10 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
-import com.procurement.evaluation.infrastructure.dto.award.state.GetAwardStateByIdsResult
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
-import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
 import com.procurement.evaluation.lib.functional.Validated
@@ -138,7 +138,7 @@ interface AwardService {
     fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Fail>
 
     fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
-        : Result<List<com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult>, Fail>
+        : Result<List<com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult>, Fail>
 
     fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail>
 }

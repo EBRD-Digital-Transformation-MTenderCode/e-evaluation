@@ -4,7 +4,7 @@ import com.procurement.evaluation.application.model.award.close.awardperiod.Clos
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.infrastructure.fail.Fail
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
-import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asSuccess
 
