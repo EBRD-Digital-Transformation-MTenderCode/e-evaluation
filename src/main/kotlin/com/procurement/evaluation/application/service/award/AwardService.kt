@@ -44,7 +44,7 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCALE_SUPPLIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SCHEME_IDENTIFIER
 import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
@@ -129,18 +129,18 @@ interface AwardService {
 
     fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
 
-    fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail>
+    fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Failure>
 
-    fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Fail>
+    fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure>
 
-    fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Fail>
+    fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Failure>
 
-    fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Fail>
+    fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Failure>
 
     fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
-        : Result<List<com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult>, Fail>
+        : Result<List<com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult>, Failure>
 
-    fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail>
+    fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Failure>
 }
 
 @Service
@@ -1725,7 +1725,7 @@ class AwardServiceImpl(
         }
     }
 
-    override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Fail> {
+    override fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Failure> {
         val awardEntities = awardRepository.findBy(
             cpid = params.cpid,
             ocid = params.ocid
@@ -1736,7 +1736,7 @@ class AwardServiceImpl(
         val resultingAwards = awardEntities
             .mapResultPair { award -> award.jsonData.tryToObject(Award::class.java) }
             .mapFailure {
-                Fail.Incident.Transform.ParseFromDatabaseIncident(
+                Failure.Incident.Transform.ParseFromDatabaseIncident(
                     jsonData = it.element.jsonData,
                     exception = it.fail.exception
                 )
@@ -1763,7 +1763,7 @@ class AwardServiceImpl(
         }.asSuccess()
     }
 
-    override fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Fail> {
+    override fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .onFailure { return it.reason.asValidationError() }
 
@@ -1772,7 +1772,7 @@ class AwardServiceImpl(
                 val award = entity.jsonData
                     .tryToObject(Award::class.java)
                     .mapFailure {
-                        Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
+                        Failure.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
                     }
                     .onFailure { return it.reason.asValidationError() }
                 award.id to entity
@@ -1791,7 +1791,7 @@ class AwardServiceImpl(
         return Validated.ok()
     }
 
-    override fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Fail> {
+    override fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Failure> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .onFailure { return it.reason.asValidationError() }
             .takeIf { it.isNotEmpty() }
@@ -1800,7 +1800,7 @@ class AwardServiceImpl(
         val award = awardEntities
             .mapResultPair { entity -> entity.jsonData.tryToObject(Award::class.java) }
             .mapFailure {
-                Fail.Incident.Transform.ParseFromDatabaseIncident(
+                Failure.Incident.Transform.ParseFromDatabaseIncident(
                     jsonData = it.element.jsonData,
                     exception = it.fail.exception
                 )
@@ -1830,13 +1830,13 @@ class AwardServiceImpl(
         return Validated.ok()
     }
 
-    override fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Fail> =
+    override fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Failure> =
         closeAwardPeriodStrategy.execute(params = params)
 
     override fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams) =
         createUnsuccessfulAwardsStrategy.execute(params = params)
 
-    override fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Fail> {
+    override fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Failure> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .onFailure { return it.reason.asValidationError() }
 
@@ -1845,7 +1845,7 @@ class AwardServiceImpl(
                 val award = entity.jsonData
                     .tryToObject(Award::class.java)
                     .mapFailure {
-                        Fail.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
+                        Failure.Incident.Transform.ParseFromDatabaseIncident(entity.jsonData, it.exception)
                     }
                     .onFailure { return it.reason.asValidationError() }
                 award.id to entity
@@ -1857,7 +1857,7 @@ class AwardServiceImpl(
         val award = awardEntity.jsonData
             .tryToObject(Award::class.java)
             .mapFailure {
-                Fail.Incident.Transform.ParseFromDatabaseIncident(
+                Failure.Incident.Transform.ParseFromDatabaseIncident(
                     jsonData = awardEntity.jsonData,
                     exception = it.exception
                 )
@@ -1877,7 +1877,7 @@ class AwardServiceImpl(
         awardRepository.update(cpid = params.cpid, updatedAward = updatedAwardEntity)
             .onFailure { return it.reason.asValidationError() }
             .doOnFalse {
-                return Fail.Incident.Database.DatabaseConsistencyIncident(
+                return Failure.Incident.Database.DatabaseConsistencyIncident(
                         "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpid}'. Record(s) does not exist."
                     ).asValidationError()
             }

@@ -1,9 +1,9 @@
 package com.procurement.evaluation.infrastructure.fail.error
 
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 
-sealed class DataErrors(numberError: String, override val description: String) : Fail.Error("DR-") {
+sealed class DataErrors(numberError: String, override val description: String) : Failure.Error("DR-") {
 
     override val code: String = prefix + numberError
 

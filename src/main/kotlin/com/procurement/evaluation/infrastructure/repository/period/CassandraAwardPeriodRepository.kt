@@ -8,7 +8,7 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.extension.cassandra.toLocalDateTime
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asSuccess
@@ -59,7 +59,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
     private val preparedSaveNewStartDateCQL = session.prepare(SAVE_NEW_START_DATE_CQL)
     private val preparedSaveEndDateCQL = session.prepare(SAVE_END_DATE_CQL)
 
-    override fun findBy(cpid: Cpid): Result<List<PeriodEntity>, Fail.Incident.Database> =
+    override fun findBy(cpid: Cpid): Result<List<PeriodEntity>, Failure.Incident.Database> =
         preparedFindPeriodByCpidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
@@ -76,7 +76,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             }
             .asSuccess()
 
-    override fun findBy(cpid: Cpid, ocid: Ocid): Result<PeriodEntity?, Fail.Incident.Database> =
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<PeriodEntity?, Failure.Incident.Database> =
         preparedFindPeriodByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
@@ -95,7 +95,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             }
             .asSuccess()
 
-    override fun saveStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime): Result<Boolean, Fail.Incident.Database> =
+    override fun saveStart(cpid: Cpid, ocid: Ocid, start: LocalDateTime): Result<Boolean, Failure.Incident.Database> =
         preparedSaveNewStartDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)
@@ -107,7 +107,7 @@ class CassandraAwardPeriodRepository(private val session: Session) : AwardPeriod
             .wasApplied()
             .asSuccess()
 
-    override fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Fail.Incident.Database> =
+    override fun saveEnd(cpid: Cpid, ocid: Ocid, endDate: LocalDateTime): Result<Boolean, Failure.Incident.Database> =
         preparedSaveEndDateCQL.bind()
             .apply {
                 setString(Database.Period.CPID, cpid.underlying)

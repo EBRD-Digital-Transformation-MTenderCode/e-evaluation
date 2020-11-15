@@ -7,7 +7,7 @@ import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.g
 import com.procurement.evaluation.infrastructure.api.v2.ApiSuccessResponse2
 import com.procurement.evaluation.infrastructure.api.v2.tryGetId
 import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.utils.toJson
 
@@ -28,5 +28,5 @@ abstract class AbstractQueryHandlerV2<R : Any>(private val logger: Logger) : Abs
         }
     }
 
-    abstract fun execute(node: JsonNode): Result<R, Fail>
+    abstract fun execute(node: JsonNode): Result<R, Failure>
 }

@@ -6,7 +6,7 @@ import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
 import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.lib.functional.Result
@@ -43,7 +43,7 @@ class CassandraHistoryRepository(private val session: Session) : HistoryReposito
     private val preparedSaveHistoryCQL = session.prepare(SAVE_HISTORY_CQL)
     private val preparedFindHistoryByCpidAndCommandCQL = session.prepare(FIND_HISTORY_ENTRY_CQL)
 
-    override fun getHistory(commandId: CommandId, action: Action): Result<String?, Fail.Incident.Database> =
+    override fun getHistory(commandId: CommandId, action: Action): Result<String?, Failure.Incident.Database> =
         preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
                 setString(Database.History.COMMAND_ID, commandId.underlying)
@@ -59,7 +59,7 @@ class CassandraHistoryRepository(private val session: Session) : HistoryReposito
         commandId: CommandId,
         action: Action,
         data: String
-    ): Result<Boolean, Fail.Incident.Database> = preparedSaveHistoryCQL.bind()
+    ): Result<Boolean, Failure.Incident.Database> = preparedSaveHistoryCQL.bind()
         .apply {
             setString(Database.History.COMMAND_ID, commandId.underlying)
             setString(Database.History.COMMAND_NAME, action.key)

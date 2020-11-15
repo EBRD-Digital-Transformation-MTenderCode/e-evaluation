@@ -6,7 +6,7 @@ import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
 import com.procurement.evaluation.infrastructure.api.v2.tryGetParams
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.handler.v2.base.AbstractValidationHandlerV2
 import com.procurement.evaluation.infrastructure.handler.v2.converter.convert
 import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAccessToAwardRequest
@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component
 @Component
 class CheckAccessToAwardHandler(
     private val awardService: AwardService, logger: Logger
-) : AbstractValidationHandlerV2<Fail>(logger) {
+) : AbstractValidationHandlerV2<Failure>(logger) {
 
     override val action: Action = CommandTypeV2.CHECK_ACCESS_TO_AWARD
 
-    override fun execute(node: JsonNode): Validated<Fail> {
+    override fun execute(node: JsonNode): Validated<Failure> {
         val params = node
             .tryGetParams(CheckAccessToAwardRequest::class.java)
             .onFailure { return it.reason.asValidationError() }

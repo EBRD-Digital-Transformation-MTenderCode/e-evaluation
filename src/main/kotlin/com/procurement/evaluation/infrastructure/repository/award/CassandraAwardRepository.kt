@@ -11,7 +11,7 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asSuccess
@@ -94,7 +94,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
     private val preparedSaveNewAwardCQL = session.prepare(SAVE_NEW_AWARD_CQL)
     private val preparedUpdatedAwardStatusesCQL = session.prepare(UPDATE_AWARD_STATUSES_CQL)
 
-    override fun findBy(cpid: Cpid): Result<List<AwardEntity>, Fail.Incident.Database> =
+    override fun findBy(cpid: Cpid): Result<List<AwardEntity>, Failure.Incident.Database> =
         preparedFindByCpidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
@@ -104,7 +104,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             .map { convertToAwardEntity(it) }
             .asSuccess()
 
-    override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): Result<AwardEntity?, Fail.Incident.Database> =
+    override fun findBy(cpid: Cpid, ocid: Ocid, token: Token): Result<AwardEntity?, Failure.Incident.Database> =
         preparedFindByCpidAndOcidAndTokenCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
@@ -117,14 +117,14 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             ?.let { convertToAwardEntity(it) }
             .asSuccess()
 
-    override fun save(cpid: Cpid, award: AwardEntity): Result<Boolean, Fail.Incident.Database> =
+    override fun save(cpid: Cpid, award: AwardEntity): Result<Boolean, Failure.Incident.Database> =
         statementForSaveAward(cpid, award)
             .tryExecute(session)
             .onFailure { return it }
             .wasApplied()
             .asSuccess()
 
-    override fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>): Result<Boolean, Fail.Incident.Database> =
+    override fun update(cpid: Cpid, updatedAwards: Collection<AwardEntity>): Result<Boolean, Failure.Incident.Database> =
         BatchStatement()
             .apply {
                 for (updatedAward in updatedAwards) {
@@ -136,7 +136,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             .wasApplied()
             .asSuccess()
 
-    override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Fail.Incident.Database> =
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<AwardEntity>, Failure.Incident.Database> =
         preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(Database.Awards.CPID, cpid.underlying)
@@ -147,7 +147,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             .map { convertToAwardEntity(it) }
             .asSuccess()
 
-    override fun save(cpid: Cpid, awards: Collection<AwardEntity>): Result<Boolean, Fail.Incident.Database> =
+    override fun save(cpid: Cpid, awards: Collection<AwardEntity>): Result<Boolean, Failure.Incident.Database> =
         BatchStatement()
             .apply {
                 for (award in awards) {
@@ -159,7 +159,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
             .wasApplied()
             .asSuccess()
 
-    override fun update(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Fail.Incident.Database> =
+    override fun update(cpid: Cpid, updatedAward: AwardEntity): Result<Boolean, Failure.Incident.Database> =
         statementForUpdateAward(cpid = cpid, updatedAward = updatedAward)
             .tryExecute(session = session)
             .onFailure { return it }

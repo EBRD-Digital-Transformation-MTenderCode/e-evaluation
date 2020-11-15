@@ -5,7 +5,7 @@ import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Validated
 
-sealed class Fail {
+sealed class Failure {
 
     abstract val code: String
     abstract val description: String
@@ -14,7 +14,7 @@ sealed class Fail {
 
     abstract fun logging(logger: Logger)
 
-    abstract class Error(val prefix: String) : Fail() {
+    abstract class Error(val prefix: String) : Failure() {
         companion object {
             fun <T, E : Error> E.toResult(): Result<T, E> = Result.failure(this)
             fun <E : Error> E.toValidationResult(): Validated<E> = Validated.error(this)
@@ -25,7 +25,7 @@ sealed class Fail {
         }
     }
 
-    sealed class Incident(val level: Level, number: String, override val description: String) : Fail() {
+    sealed class Incident(val level: Level, number: String, override val description: String) : Failure() {
         override val code: String = "INC-$number"
 
         override fun logging(logger: Logger) {

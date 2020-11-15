@@ -7,7 +7,7 @@ import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
 import com.procurement.evaluation.infrastructure.api.v2.tryGetParams
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.infrastructure.handler.v2.base.AbstractHistoricalHandlerV2
 import com.procurement.evaluation.infrastructure.handler.v2.converter.convert
@@ -30,7 +30,7 @@ class CreateUnsuccessfulAwardsHandler(
 
     override val action: Action = CommandTypeV2.CREATE_UNSUCCESSFUL_AWARDS
 
-    override fun execute(node: JsonNode): Result<List<CreateUnsuccessfulAwardsResult>, Fail> {
+    override fun execute(node: JsonNode): Result<List<CreateUnsuccessfulAwardsResult>, Failure> {
         val params = node
             .tryGetParams(CreateUnsuccessfulAwardsRequest::class.java)
             .onFailure { return it }

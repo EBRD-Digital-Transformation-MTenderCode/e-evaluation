@@ -9,7 +9,7 @@ import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.g
 import com.procurement.evaluation.infrastructure.api.v2.tryGetId
 import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
 import com.procurement.evaluation.infrastructure.extension.tryGetNode
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.service.CommandServiceV2
 import com.procurement.evaluation.utils.toJson
 import org.springframework.http.HttpStatus
@@ -55,7 +55,7 @@ class CommandControllerV2(
     }
 
     private fun generateResponse(
-        fail: Fail,
+        fail: Failure,
         version: ApiVersion,
         id: CommandId
     ): ResponseEntity<ApiResponse2> {

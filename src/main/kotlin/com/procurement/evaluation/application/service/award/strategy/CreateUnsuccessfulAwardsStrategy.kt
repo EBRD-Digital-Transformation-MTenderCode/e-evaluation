@@ -8,7 +8,7 @@ import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.domain.model.enums.OperationType2
 import com.procurement.evaluation.domain.model.lot.LotId
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult
 import com.procurement.evaluation.lib.functional.Result
@@ -24,7 +24,7 @@ class CreateUnsuccessfulAwardsStrategy(
     val generationService: GenerationService
 ) {
 
-    fun execute(params: CreateUnsuccessfulAwardsParams): Result<List<CreateUnsuccessfulAwardsResult>, Fail> {
+    fun execute(params: CreateUnsuccessfulAwardsParams): Result<List<CreateUnsuccessfulAwardsResult>, Failure> {
 
         val token = generationService.token()
 
@@ -78,7 +78,7 @@ class CreateUnsuccessfulAwardsStrategy(
 
         if (!wasApplied)
             return failure(
-                Fail.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '${params.cpid}' to the database. Record(s) is not exists.")
+                Failure.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '${params.cpid}' to the database. Record(s) is not exists.")
             )
 
         return awards.map { award ->

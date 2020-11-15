@@ -1,11 +1,11 @@
 package com.procurement.evaluation.infrastructure.fail.error
 
 import com.procurement.evaluation.domain.model.award.AwardId
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 
 sealed class ValidationError(
     numberError: String, override val description: String, val id: String? = null
-) : Fail.Error("VR-") {
+) : Failure.Error("VR-") {
     override val code: String = prefix + numberError
 
     class InvalidToken : ValidationError(

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.evaluation.infrastructure.bind.configuration
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.lib.functional.Result
 import java.io.IOException
 
@@ -37,16 +37,16 @@ fun <T> toObject(clazz: Class<T>, json: JsonNode): T {
     }
 }
 
-fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
+fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Failure.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.treeToValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Transform.Parsing(target.canonicalName, expected))
+    Result.failure(Failure.Incident.Transform.Parsing(target.canonicalName, expected))
 }
 
-fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Failure.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.readValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Transform.Parsing(target.canonicalName, expected))
+    Result.failure(Failure.Incident.Transform.Parsing(target.canonicalName, expected))
 }
 
 /*Collection*/

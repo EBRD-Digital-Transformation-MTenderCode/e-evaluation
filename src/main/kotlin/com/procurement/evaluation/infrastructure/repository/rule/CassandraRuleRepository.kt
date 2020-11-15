@@ -5,7 +5,7 @@ import com.procurement.evaluation.application.repository.rule.RuleRepository
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asSuccess
@@ -35,7 +35,7 @@ class CassandraRuleRepository(private val session: Session) : RuleRepository {
         pmd: ProcurementMethod,
         operationType: OperationType?,
         parameter: String
-    ): Result<String?, Fail.Incident.Database> =
+    ): Result<String?, Failure.Incident.Database> =
         preparedGetValueByCQL.bind()
             .apply {
                 setString(Database.Rules.COUNTRY, country)

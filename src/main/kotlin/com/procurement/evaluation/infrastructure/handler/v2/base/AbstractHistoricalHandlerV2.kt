@@ -9,7 +9,7 @@ import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.g
 import com.procurement.evaluation.infrastructure.api.v2.ApiSuccessResponse2
 import com.procurement.evaluation.infrastructure.api.v2.tryGetId
 import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.utils.toJson
@@ -33,7 +33,7 @@ abstract class AbstractHistoricalHandlerV2<R : Any>(
             return history.tryDeserialization<ApiSuccessResponse2>(transform)
                 .onFailure {
                     return generateResponseOnFailure(
-                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(history, it.reason.exception),
+                        fail = Failure.Incident.Transform.ParseFromDatabaseIncident(history, it.reason.exception),
                         id = id,
                         version = version,
                         logger = logger
@@ -55,6 +55,6 @@ abstract class AbstractHistoricalHandlerV2<R : Any>(
         }
     }
 
-    abstract fun execute(node: JsonNode): Result<R, Fail>
+    abstract fun execute(node: JsonNode): Result<R, Failure>
 }
 
