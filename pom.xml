@@ -61,6 +61,35 @@
 
     <profiles>
         <profile>
+            <id>checkstyle</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.ozsie</groupId>
+                        <artifactId>detekt-maven-plugin</artifactId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <report>
+                                        <report>txt:reports/detekt.txt</report>
+                                        <report>html:reports/detekt.html</report>
+                                        <report>xml:reports/detekt.xml</report>
+                                    </report>
+                                    <configResource>${project.basedir}/config/detekt/detekt.yml</configResource>
+                                    <config>${project.basedir}/config/detekt/detekt.yml</config>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>integration-test</id>
             <build>
                 <plugins>
