@@ -1,9 +1,13 @@
 package com.procurement.evaluation.infrastructure.api.v1
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
+import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.infrastructure.api.Action
 
-enum class CommandTypeV1(@JsonValue override val key: String, override val kind: Action.Kind) : Action {
+enum class CommandTypeV1(@JsonValue override val key: String, override val kind: Action.Kind) :
+    Action,
+    EnumElementProvider.Key {
 
     AWARDS_CANCELLATION(key = "awardsCancellation", kind = Action.Kind.COMMAND),
     CHECK_AWARD_STATUS(key = "checkAwardStatus", kind = Action.Kind.QUERY),
@@ -26,7 +30,12 @@ enum class CommandTypeV1(@JsonValue override val key: String, override val kind:
     START_CONSIDERATION(key = "startConsideration", kind = Action.Kind.COMMAND),
     ;
 
-    override fun toString(): String {
-        return this.key
+    override fun toString(): String = key
+
+    companion object : EnumElementProvider<CommandTypeV1>(info = info()) {
+
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = CommandTypeV1.orThrow(name)
     }
 }
