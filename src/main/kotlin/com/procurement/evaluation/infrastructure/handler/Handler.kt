@@ -1,12 +1,12 @@
 package com.procurement.evaluation.infrastructure.handler
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.ApiVersion
+import com.procurement.evaluation.infrastructure.handler.v2.model.CommandDescriptor
 
-interface Handler<R: Any> {
+interface Handler<R : Any> {
     val version: ApiVersion
     val action: Action
 
-    fun handle(node: JsonNode): R
+    fun handle(descriptor: CommandDescriptor): R
 }
