@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 @Component
 class CheckAccessToAwardHandler(
     private val awardService: AwardService, logger: Logger
-) : AbstractValidationHandlerV2<Failure>(logger) {
+) : AbstractValidationHandlerV2(logger) {
 
     override val action: Action = CommandTypeV2.CHECK_ACCESS_TO_AWARD
 

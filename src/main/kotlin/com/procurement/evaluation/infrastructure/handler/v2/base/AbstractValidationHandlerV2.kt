@@ -10,7 +10,7 @@ import com.procurement.evaluation.infrastructure.api.v2.tryGetVersion
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.lib.functional.Validated
 
-abstract class AbstractValidationHandlerV2<E : Failure>(private val logger: Logger) : AbstractHandlerV2<ApiResponse2>() {
+abstract class AbstractValidationHandlerV2(private val logger: Logger) : AbstractHandlerV2<ApiResponse2>() {
 
     override fun handle(node: JsonNode): ApiResponse2 {
         val id = node.tryGetId().get
@@ -28,5 +28,5 @@ abstract class AbstractValidationHandlerV2<E : Failure>(private val logger: Logg
         }
     }
 
-    abstract fun execute(node: JsonNode): Validated<E>
+    abstract fun execute(node: JsonNode): Validated<Failure>
 }

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component
 class CheckRelatedTendererHandler(
     private val awardService: AwardService,
     logger: Logger
-) : AbstractValidationHandlerV2<Failure>(logger) {
+) : AbstractValidationHandlerV2(logger) {
 
     override val action: Action = CommandTypeV2.CHECK_RELATED_TENDERER
 
