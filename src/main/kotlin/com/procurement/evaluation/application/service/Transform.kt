@@ -37,3 +37,6 @@ interface Transform {
      */
     fun tryToJson(value: JsonNode): Result<String, Fail.Incident.Transform.Serialization>
 }
+
+inline fun <reified T> String.tryDeserialization(transform: Transform) =
+    transform.tryDeserialization(this, T::class.java)

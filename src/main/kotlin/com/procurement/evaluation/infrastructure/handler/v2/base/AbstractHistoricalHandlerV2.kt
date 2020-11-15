@@ -2,7 +2,9 @@ package com.procurement.evaluation.infrastructure.handler.v2.base
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.infrastructure.api.Action
+import com.procurement.evaluation.application.service.Transform
+import com.procurement.evaluation.application.service.tryDeserialization
+import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.v2.ApiResponse2
 import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.generateResponseOnFailure
 import com.procurement.evaluation.infrastructure.api.v2.ApiSuccessResponse2
@@ -13,13 +15,15 @@ import com.procurement.evaluation.infrastructure.handler.Handler
 import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.utils.toJson
-import com.procurement.evaluation.utils.tryToObject
 
-abstract class AbstractHistoricalHandlerV2<ACTION : Action, R : Any>(
-    private val target: Class<ApiSuccessResponse2>,
+abstract class AbstractHistoricalHandlerV2<R : Any>(
+    private val transform: Transform,
     private val historyRepository: HistoryRepository,
     private val logger: Logger
-) : Handler<ACTION, ApiResponse2> {
+) : Handler<ApiResponse2> {
+
+    final override val version: ApiVersion
+        get() = ApiVersion(2, 0, 0)
 
     override fun handle(node: JsonNode): ApiResponse2 {
         val id = node.tryGetId().get
@@ -31,7 +35,7 @@ abstract class AbstractHistoricalHandlerV2<ACTION : Action, R : Any>(
             }
 
         if (history != null) {
-            return history.tryToObject(target)
+            return history.tryDeserialization<ApiSuccessResponse2>(transform)
                 .onFailure {
                     return generateResponseOnFailure(
                         fail = Fail.Incident.Transform.ParseFromDatabaseIncident(history, it.reason.exception),
@@ -46,10 +50,10 @@ abstract class AbstractHistoricalHandlerV2<ACTION : Action, R : Any>(
             is Result.Success -> {
                 ApiSuccessResponse2(version = version, id = id, result = result.get)
                     .also {
-                    historyRepository.saveHistory(id, action, toJson(it))
-                    if (logger.isDebugEnabled)
-                        logger.debug("${action.key} has been executed. Response: ${toJson(it)}")
-                }
+                        historyRepository.saveHistory(id, action, toJson(it))
+                        if (logger.isDebugEnabled)
+                            logger.debug("${action.key} has been executed. Response: ${toJson(it)}")
+                    }
             }
             is Result.Failure ->
                 generateResponseOnFailure(fail = result.reason, version = version, id = id, logger = logger)
