@@ -37,7 +37,6 @@ import com.procurement.evaluation.exception.ErrorType.INVALID_STAGE
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
 import com.procurement.evaluation.exception.ErrorType.INVALID_TOKEN
-import com.procurement.evaluation.exception.ErrorType.PERIOD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.RELATED_LOTS
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_AWARD
 import com.procurement.evaluation.exception.ErrorType.SUPPLIER_IS_NOT_UNIQUE_IN_LOT
@@ -327,10 +326,6 @@ class AwardServiceImpl(
         val prevAwardPeriodStart = awardPeriodRepository.findBy(cpid = cpid, ocid = ocid)
             .orThrow { it.exception }
             ?.startDate
-            ?: throw ErrorException(
-                error = PERIOD_NOT_FOUND,
-                message = "Cannot found period by cpid '${cpid}' and ocid '${ocid}'."
-            )
 
         val newAwardEntity = AwardEntity(
             cpid = cpid,
