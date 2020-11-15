@@ -1,6 +1,5 @@
 package com.procurement.evaluation.infrastructure.handler.v2.model.request
 
-
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class CheckAccessToAwardRequest(

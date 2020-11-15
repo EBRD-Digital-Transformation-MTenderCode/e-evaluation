@@ -1,6 +1,5 @@
 package com.procurement.evaluation.infrastructure.handler.v2.model.response
 
-
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
