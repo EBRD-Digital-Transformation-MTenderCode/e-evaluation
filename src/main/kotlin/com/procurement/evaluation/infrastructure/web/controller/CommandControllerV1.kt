@@ -1,11 +1,13 @@
 package com.procurement.evaluation.infrastructure.web.controller
 
+import com.procurement.evaluation.exception.EnumException
+import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.api.v1.ApiResponse
+import com.procurement.evaluation.infrastructure.api.v1.ApiResponseV1
 import com.procurement.evaluation.infrastructure.api.v1.CommandMessage
 import com.procurement.evaluation.infrastructure.api.v1.commandId
-import com.procurement.evaluation.infrastructure.api.v1.errorResponseDto
+import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.evaluation.infrastructure.service.CommandServiceV1
 import com.procurement.evaluation.utils.toJson
 import com.procurement.evaluation.utils.toObject
@@ -27,14 +29,14 @@ class CommandControllerV1(private val commandService: CommandServiceV1) {
     }
 
     @PostMapping
-    fun command(@RequestBody requestBody: String): ResponseEntity<ApiResponse> {
+    fun command(@RequestBody requestBody: String): ResponseEntity<ApiResponseV1> {
         if (log.isDebugEnabled)
             log.debug("RECEIVED COMMAND: '$requestBody'.")
 
         val cm: CommandMessage = try {
             toObject(CommandMessage::class.java, requestBody)
         } catch (exception: Exception) {
-            val response = errorResponseDto(exception, CommandId.NaN, ApiVersion.NaN)
+            val response = errorResponse(exception, CommandId.NaN, ApiVersion.NaN)
             return ResponseEntity(response, HttpStatus.OK)
         }
 
@@ -45,8 +47,29 @@ class CommandControllerV1(private val commandService: CommandServiceV1) {
                         log.debug("RESPONSE (operation-id: '${cm.context.operationId}'): '${toJson(response)}'.")
                 }
         } catch (exception: Exception) {
-            errorResponseDto(exception, cm.commandId, cm.version)
+            errorResponse(exception, cm.commandId, cm.version)
         }
         return ResponseEntity(response, HttpStatus.OK)
     }
+
+    fun errorResponse(exception: Exception, id: CommandId, version: ApiVersion) = when (exception) {
+        is ErrorException ->
+            getApiResponse(version = version, id = id, code = exception.code, message = exception.message!!)
+
+        is EnumException ->
+            getApiResponse(version = version, id = id, code = exception.code, message = exception.message!!)
+
+        else -> getApiResponse(version = version, id = id, code = "00.00", message = exception.message!!)
+    }
+
+    private fun getApiResponse(id: CommandId, version: ApiVersion, code: String, message: String) = ApiResponseV1.Failure(
+        version = version,
+        id = id,
+        errors = listOf(
+            ApiResponseV1.Failure.Error(
+                code = "400.${GlobalProperties.service.id}." + code,
+                description = message
+            )
+        )
+    )
 }

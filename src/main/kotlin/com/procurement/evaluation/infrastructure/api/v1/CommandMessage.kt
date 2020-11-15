@@ -12,13 +12,11 @@ import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.domain.util.extension.toLocalDateTime
-import com.procurement.evaluation.exception.EnumException
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
 import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.evaluation.model.dto.ocds.Phase
 import java.time.LocalDateTime
 
@@ -153,33 +151,3 @@ data class Context @JsonCreator constructor(
     val id: String?,
     val awardCriteria: String?
 )
-
-fun errorResponseDto(exception: Exception, id: CommandId, version: ApiVersion): ApiErrorResponse =
-    when (exception) {
-        is ErrorException -> getApiResponse(
-            id = id,
-            version = version,
-            code = exception.code,
-            message = exception.message!!
-        )
-        is EnumException -> getApiResponse(
-            id = id,
-            version = version,
-            code = exception.code,
-            message = exception.message!!
-        )
-        else -> getApiResponse(id = id, version = version, code = "00.00", message = exception.message!!)
-    }
-
-private fun getApiResponse(id: CommandId, version: ApiVersion, code: String, message: String): ApiErrorResponse {
-    return ApiErrorResponse(
-        errors = listOf(
-            ApiErrorResponse.Error(
-                code = "400.${GlobalProperties.service.id}." + code,
-                description = message
-            )
-        ),
-        id = id,
-        version = version
-    )
-}

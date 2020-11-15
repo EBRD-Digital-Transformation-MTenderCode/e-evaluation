@@ -37,7 +37,7 @@ import com.procurement.evaluation.application.service.lot.LotService
 import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
-import com.procurement.evaluation.infrastructure.api.v1.ApiSuccessResponse
+import com.procurement.evaluation.infrastructure.api.v1.ApiResponseV1
 import com.procurement.evaluation.infrastructure.api.v1.CommandMessage
 import com.procurement.evaluation.infrastructure.api.v1.CommandTypeV1
 import com.procurement.evaluation.infrastructure.api.v1.awardId
@@ -88,13 +88,13 @@ class CommandServiceV1(
         private val log = LoggerFactory.getLogger(CommandServiceV1::class.java)
     }
 
-    fun execute(cm: CommandMessage): ApiSuccessResponse {
+    fun execute(cm: CommandMessage): ApiResponseV1 {
         val history = historyRepository.getHistory(cm.commandId, cm.command)
             .orThrow {
                 throw RuntimeException("Error of loading history. ${it.description}", it.exception)
             }
         if (history != null) {
-            return toObject(ApiSuccessResponse::class.java, history)
+            return toObject(ApiResponseV1.Success::class.java, history)
         }
         val dataOfResponse: Any = when (cm.command) {
             CommandTypeV1.CREATE_AWARD -> {
@@ -611,7 +611,7 @@ class CommandServiceV1(
                     .convert()
             }
         }
-        val response = ApiSuccessResponse(id = cm.id, version = cm.version, data = dataOfResponse)
+        val response = ApiResponseV1.Success(id = cm.id, version = cm.version, data = dataOfResponse)
             .also {
                 if (log.isDebugEnabled)
                     log.debug("Response: ${toJson(it)}")
