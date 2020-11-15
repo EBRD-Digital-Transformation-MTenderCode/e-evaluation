@@ -29,7 +29,6 @@ fun <T> toObject(clazz: Class<T>, json: String): T {
     }
 }
 
-
 fun <T> toObject(clazz: Class<T>, json: JsonNode): T {
     try {
         return JsonMapper.mapper.treeToValue(json, clazz)
@@ -48,12 +47,6 @@ fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Tran
     Result.success(JsonMapper.mapper.readValue(this, target))
 } catch (expected: Exception) {
     Result.failure(Fail.Incident.Transform.Parsing(target.canonicalName, expected))
-}
-
-fun String.tryToNode(): Result<JsonNode, Fail.Incident.Transform.Parsing> = try {
-    Result.success(JsonMapper.mapper.readTree(this))
-} catch (exception: JsonProcessingException) {
-    Result.failure(Fail.Incident.Transform.Parsing(JsonNode::class.java.canonicalName, exception))
 }
 
 /*Collection*/

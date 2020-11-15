@@ -13,7 +13,6 @@ import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asFailure
 import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.lib.functional.flatMap
-import com.procurement.evaluation.utils.tryToNode
 import com.procurement.evaluation.utils.tryToObject
 
 fun JsonNode.tryGetVersion(): Result<ApiVersion, DataErrors> {
@@ -46,9 +45,3 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
 }
 
 fun JsonNode.tryGetId(): Result<CommandId, DataErrors> = tryGetTextAttribute("id").map { CommandId(it) }
-
-fun String.tryGetNode(): Result<JsonNode, BadRequest> =
-    when (val result = this.tryToNode()) {
-        is Result.Success -> result
-        is Result.Failure -> Result.failure(BadRequest(exception = result.reason.exception))
-    }
