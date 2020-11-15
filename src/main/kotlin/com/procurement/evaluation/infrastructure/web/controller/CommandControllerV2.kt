@@ -5,7 +5,7 @@ import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.application.service.Transform
 import com.procurement.evaluation.infrastructure.api.ApiVersion
 import com.procurement.evaluation.infrastructure.api.command.id.CommandId
-import com.procurement.evaluation.infrastructure.api.v2.ApiResponse2
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2
 import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.generateResponseOnFailure
 import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
 import com.procurement.evaluation.infrastructure.extension.tryGetAttributeAsEnum
@@ -36,7 +36,7 @@ class CommandControllerV2(
 ) {
 
     @PostMapping
-    fun command(@RequestBody requestBody: String): ResponseEntity<ApiResponse2> {
+    fun command(@RequestBody requestBody: String): ResponseEntity<ApiResponseV2> {
         if (logger.isDebugEnabled)
             logger.debug("RECEIVED COMMAND: '$requestBody'.")
 
@@ -94,7 +94,7 @@ class CommandControllerV2(
         fail: Failure,
         version: ApiVersion,
         id: CommandId
-    ): ResponseEntity<ApiResponse2> {
+    ): ResponseEntity<ApiResponseV2> {
         val response = generateResponseOnFailure(fail = fail, id = id, version = version, logger = logger)
         return ResponseEntity(response, HttpStatus.OK)
     }

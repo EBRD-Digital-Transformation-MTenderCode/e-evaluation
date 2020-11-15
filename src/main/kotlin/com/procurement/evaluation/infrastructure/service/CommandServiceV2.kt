@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.service
 
 import com.procurement.evaluation.application.service.Logger
-import com.procurement.evaluation.infrastructure.api.v2.ApiResponse2
+import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2
 import com.procurement.evaluation.infrastructure.api.v2.ApiResponseV2Generator.generateResponseOnFailure
 import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
 import com.procurement.evaluation.infrastructure.fail.error.BadRequest
@@ -25,7 +25,7 @@ class CommandServiceV2(
     private val closeAwardPeriodHandler: CloseAwardPeriodHandler
 ) {
 
-    fun execute(descriptor: CommandDescriptor): ApiResponse2 = when (descriptor.action) {
+    fun execute(descriptor: CommandDescriptor): ApiResponseV2 = when (descriptor.action) {
         CommandTypeV2.GET_AWARD_STATES_BY_IDS -> getAwardStateByIdsHandler.handle(descriptor)
         CommandTypeV2.CHECK_ACCESS_TO_AWARD -> checkAccessToAwardHandler.handle(descriptor)
         CommandTypeV2.CHECK_RELATED_TENDERER -> checkRelatedTendererHandler.handle(descriptor)

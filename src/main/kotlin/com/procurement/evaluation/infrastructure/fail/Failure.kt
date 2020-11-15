@@ -1,5 +1,7 @@
 package com.procurement.evaluation.infrastructure.fail
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 import com.procurement.evaluation.application.service.Logger
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.lib.functional.Result
@@ -95,16 +97,17 @@ sealed class Failure {
                 Transform(number = "2.6", description = description)
         }
 
-        enum class Level(override val key: String) : EnumElementProvider.Key {
+        enum class Level(@JsonValue override val key: String) : EnumElementProvider.Key {
             ERROR("error"),
             WARNING("warning"),
             INFO("info");
 
-            companion object : EnumElementProvider<Level>(info = info())
+            companion object : EnumElementProvider<Level>(info = info()) {
+
+                @JvmStatic
+                @JsonCreator
+                fun creator(name: String) = Level.orThrow(name)
+            }
         }
     }
 }
-
-
-
-
