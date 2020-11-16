@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.award.relatedTenderer.check
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
-import com.procurement.evaluation.infrastructure.dto.award.tenderer.CheckRelatedTendererRequest
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckRelatedTendererRequest
 import org.junit.jupiter.api.Test
 
 class CheckRelatedTendererRequestTest : AbstractDTOTestBase<CheckRelatedTendererRequest>(CheckRelatedTendererRequest::class.java) {

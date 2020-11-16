@@ -1,6 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.award.finalize.response
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
+import com.procurement.evaluation.infrastructure.handler.v1.model.response.FinalAwardsStatusByLotsResponse
 import org.junit.jupiter.api.Test
 
 class FinalAwardsStatusByLotsResponseTest :

@@ -7,7 +7,7 @@ spring:
 
 cassandra:
   contact-points: localhost
-  keyspace-name: ocds
+  keyspace-name: evaluation
   port: 9042
 
 health:

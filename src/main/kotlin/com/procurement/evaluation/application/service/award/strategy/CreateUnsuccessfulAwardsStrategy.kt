@@ -1,23 +1,22 @@
 package com.procurement.evaluation.application.service.award.strategy
 
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
-import com.procurement.evaluation.application.repository.AwardRepository
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.asFailure
-import com.procurement.evaluation.domain.functional.asSuccess
+import com.procurement.evaluation.application.repository.award.AwardRepository
+import com.procurement.evaluation.application.repository.award.model.AwardEntity
+import com.procurement.evaluation.application.service.GenerationService
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.domain.model.enums.OperationType2
 import com.procurement.evaluation.domain.model.lot.LotId
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
-import com.procurement.evaluation.infrastructure.handler.create.unsuccessfulaward.CreateUnsuccessfulAwardsResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
-import com.procurement.evaluation.model.entity.AwardEntity
-import com.procurement.evaluation.service.GenerationService
 import com.procurement.evaluation.utils.toJson
 
 class CreateUnsuccessfulAwardsStrategy(
@@ -25,7 +24,7 @@ class CreateUnsuccessfulAwardsStrategy(
     val generationService: GenerationService
 ) {
 
-    fun execute(params: CreateUnsuccessfulAwardsParams): Result<List<CreateUnsuccessfulAwardsResult>, Fail> {
+    fun execute(params: CreateUnsuccessfulAwardsParams): Result<List<CreateUnsuccessfulAwardsResult>, Failure> {
 
         val token = generationService.token()
 
@@ -33,7 +32,7 @@ class CreateUnsuccessfulAwardsStrategy(
         val awards = params.lotIds
             .map { lotId ->
                 val statusDetails = defineAwardStatusDetails(params.operationType)
-                    .orForwardFail { error -> return error }
+                    .onFailure { return it }
                 Award(
                     /*FR-10.4.5.2*/
                     id = generationService.awardId().toString(),
@@ -64,17 +63,23 @@ class CreateUnsuccessfulAwardsStrategy(
         val awardEntities = awards
             .map { award ->
                 AwardEntity(
-                    cpId = params.cpid.toString(),
-                    stage = params.ocid.stage.toString(),
+                    cpid = params.cpid,
+                    ocid = params.ocid,
                     token = token,
-                    status = award.status.toString(),
-                    statusDetails = award.statusDetails.toString(),
+                    status = award.status,
+                    statusDetails = award.statusDetails,
                     owner = null,
                     jsonData = toJson(award)
                 )
             }
-        awardRepository.trySave(cpid = params.cpid, awards = awardEntities)
-            .doReturn { error -> return error.asFailure() }
+
+        val wasApplied = awardRepository.save(cpid = params.cpid, awards = awardEntities)
+            .onFailure { return it }
+
+        if (!wasApplied)
+            return failure(
+                Failure.Incident.Database.RecordIsNotExist(description = "An error occurred when writing a record(s) of the awards by cpid '${params.cpid}' to the database. Record(s) is not exists.")
+            )
 
         return awards.map { award ->
             award.toResult()

@@ -3,11 +3,11 @@ package com.procurement.evaluation.application.model.award.close.awardperiod
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseDate
 import com.procurement.evaluation.application.model.parseOcid
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 import java.time.LocalDateTime
 
 class CloseAwardPeriodParams(
@@ -23,13 +23,13 @@ class CloseAwardPeriodParams(
         ): Result<CloseAwardPeriodParams, DataErrors> {
 
             val parseCpid = parseCpid(value = cpid)
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             val parseOcid = parseOcid(value = ocid)
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             val parseEndDate = parseDate(value = endDate, attributeName = "endDate")
-                .orForwardFail { error -> return error }
+                .onFailure { return it }
 
             return CloseAwardPeriodParams(cpid = parseCpid, ocid = parseOcid, endDate = parseEndDate)
                 .asSuccess()

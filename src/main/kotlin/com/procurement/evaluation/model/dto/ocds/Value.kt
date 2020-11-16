@@ -2,7 +2,7 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.procurement.evaluation.domain.model.money.Money
-import com.procurement.evaluation.model.dto.databinding.MoneyDeserializer
+import com.procurement.evaluation.infrastructure.bind.MoneyDeserializer
 import java.math.BigDecimal
 
 data class Value(

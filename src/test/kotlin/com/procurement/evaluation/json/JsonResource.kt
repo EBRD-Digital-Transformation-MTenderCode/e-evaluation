@@ -2,29 +2,18 @@ package com.procurement.evaluation.json
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.procurement.evaluation.domain.model.data.RequirementRsValue
-import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueDeserializer
-import com.procurement.evaluation.infrastructure.bind.criteria.RequirementValueSerializer
-import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeDeserializer
-import com.procurement.evaluation.infrastructure.bind.date.JsonDateTimeSerializer
+import com.procurement.evaluation.infrastructure.bind.configuration
 import com.procurement.evaluation.json.exception.JsonBindingException
 import com.procurement.evaluation.json.exception.JsonFileNotFoundException
 import com.procurement.evaluation.json.exception.JsonMappingException
 import com.procurement.evaluation.json.exception.JsonParsingException
-import com.procurement.evaluation.model.dto.databinding.IntDeserializer
-import com.procurement.evaluation.model.dto.databinding.StringsDeserializer
 import java.io.IOException
 import java.io.StringWriter
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDateTime
 
 typealias JSON = String
 
@@ -81,27 +70,5 @@ private object ClassPathResource {
 }
 
 object JsonMapper {
-    val mapper = ObjectMapper().apply {
-        registerKotlinModule()
-        registerModule(extendModule())
-
-        configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true)
-        configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
-        configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    }
-
-    private fun extendModule() =
-        SimpleModule().apply {
-            addSerializer(LocalDateTime::class.java, JsonDateTimeSerializer())
-            addDeserializer(LocalDateTime::class.java, JsonDateTimeDeserializer())
-            addDeserializer(String::class.java, StringsDeserializer())
-            addDeserializer(Int::class.java, IntDeserializer())
-
-            /**
-             * Serializer/Deserializer for RequirementRsValue type
-             */
-            addSerializer(RequirementRsValue::class.java, RequirementValueSerializer())
-            addDeserializer(RequirementRsValue::class.java, RequirementValueDeserializer())
-        }
+    val mapper = ObjectMapper().apply { configuration() }
 }

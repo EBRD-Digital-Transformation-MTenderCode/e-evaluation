@@ -1,7 +1,5 @@
 package com.procurement.evaluation.application.model
 
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
@@ -12,8 +10,11 @@ import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.domain.model.tryToken
-import com.procurement.evaluation.domain.util.extension.tryParseLocalDateTime
+import com.procurement.evaluation.domain.util.extension.toLocalDateTime
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.infrastructure.fail.error.DataTimeError
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.asSuccess
 import java.time.LocalDateTime
 
 fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
@@ -40,7 +41,7 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
 
 fun parseAwardId(value: String): Result<AwardId, DataErrors.Validation.DataFormatMismatch> =
     value.tryAwardId()
-        .doReturn {
+        .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = "awardId",
@@ -53,7 +54,7 @@ fun parseAwardId(value: String): Result<AwardId, DataErrors.Validation.DataForma
 
 fun parseToken(value: String): Result<Token, DataErrors.Validation.DataFormatMismatch> =
     value.tryToken()
-        .doReturn {
+        .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = "token",
@@ -65,7 +66,7 @@ fun parseToken(value: String): Result<Token, DataErrors.Validation.DataFormatMis
 
 fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMismatch> =
     value.tryOwner()
-        .doReturn {
+        .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = "owner",
@@ -75,17 +76,22 @@ fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMis
             )
         }.asSuccess()
 
-fun parseDate(value: String, attributeName: String): Result<LocalDateTime, DataErrors.Validation.DataFormatMismatch> =
-    value.tryParseLocalDateTime()
-        .doReturn { pattern ->
-            return Result.failure(
-                DataErrors.Validation.DataFormatMismatch(
+fun parseDate(value: String, attributeName: String): Result<LocalDateTime, DataErrors.Validation> =
+    value.toLocalDateTime()
+        .mapFailure { fail ->
+            when (fail) {
+                is DataTimeError.InvalidFormat -> DataErrors.Validation.DataFormatMismatch(
                     name = attributeName,
                     actualValue = value,
-                    expectedFormat = pattern
+                    expectedFormat = fail.pattern
                 )
-            )
-        }.asSuccess()
+
+                is DataTimeError.InvalidDateTime -> DataErrors.Validation.InvalidDateTime(
+                    name = attributeName,
+                    actualValue = value
+                )
+            }
+        }
 
 fun <T> parseEnum(value: String, allowedEnums: Set<T>, attributeName: String, target: EnumElementProvider<T>)
     : Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,

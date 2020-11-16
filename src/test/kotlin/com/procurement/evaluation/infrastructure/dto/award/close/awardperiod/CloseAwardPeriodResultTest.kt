@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.award.close.awardperiod
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
-import com.procurement.evaluation.infrastructure.handler.close.awardperiod.CloseAwardPeriodResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import org.junit.jupiter.api.Test
 
 class CloseAwardPeriodResultTest : AbstractDTOTestBase<CloseAwardPeriodResult>(

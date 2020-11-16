@@ -1,11 +1,13 @@
 package com.procurement.evaluation.application.service.award
 
-import com.procurement.evaluation.model.dto.ocds.AwardCriteria
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.Owner
 import java.time.LocalDateTime
 
-data class CreateAwardsAuctionEndContext (
-    val cpid: String,
-    val stage: String,
-    val owner: String,
+data class CreateAwardsAuctionEndContext(
+    val cpid: Cpid,
+    val ocid: Ocid,
+    val owner: Owner,
     val startDate: LocalDateTime
 )
