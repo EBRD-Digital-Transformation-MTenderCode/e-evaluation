@@ -15,7 +15,6 @@
   },
   "award": {
     "value": {
-      "amount": 100.01,
       "currency": "MDL"
     },
     "suppliers": [

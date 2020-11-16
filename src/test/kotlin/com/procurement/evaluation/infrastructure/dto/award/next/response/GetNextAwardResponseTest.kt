@@ -1,7 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.award.next.response
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
-import com.procurement.evaluation.infrastructure.dto.award.next.GetNextAwardResponse
+import com.procurement.evaluation.infrastructure.handler.v1.model.response.GetNextAwardResponse
 import org.junit.jupiter.api.Test
 
 class GetNextAwardResponseTest : AbstractDTOTestBase<GetNextAwardResponse>(GetNextAwardResponse::class.java) {

@@ -11,18 +11,20 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.evaluation.application.exception.ReadEntityException
-import com.procurement.evaluation.application.exception.SaveEntityException
-import com.procurement.evaluation.application.repository.AwardPeriodRepository
-import com.procurement.evaluation.infrastructure.tools.toCassandraTimestamp
-import com.procurement.evaluation.infrastructure.tools.toLocalDateTime
+import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
+import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.failure
+import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
+import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -33,11 +35,10 @@ import java.time.LocalDateTime
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class CassandraAwardPeriodRepositoryIT {
     companion object {
-        private const val CPID = "cpid-1"
-        private const val STAGE = "EV"
-        private const val AWARD_CRITERIA = "awardCriteria"
+
+        private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286")!!
+        private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
         private val START_DATE = LocalDateTime.now()
-        private val END_DATE = START_DATE.plusMinutes(15)
     }
 
     @Autowired
@@ -75,16 +76,18 @@ class CassandraAwardPeriodRepositoryIT {
     fun findBy() {
         insertAwardPeriod()
 
-        val actualFundedAwardPeriodStartDate = awardPeriodRepository.findStartDateBy(cpid = CPID, stage = STAGE)
+        val periodEntity = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID).get
+        assertNotNull(periodEntity)
 
-        assertNotNull(actualFundedAwardPeriodStartDate)
+        val actualFundedAwardPeriodStartDate = periodEntity!!.startDate
         assertEquals(START_DATE, actualFundedAwardPeriodStartDate)
     }
 
     @Test
     fun awardPeriodNotFound() {
-        val actualFundedAwardPeriodStartDate = awardPeriodRepository.findStartDateBy(cpid = "UNKNOWN", stage = STAGE)
-        assertNull(actualFundedAwardPeriodStartDate)
+        val UNKNOWN_CPID = Cpid.tryCreateOrNull("nope-t1s2t3-MD-1234564674286")!!
+        val periodEntity = awardPeriodRepository.findBy(cpid = UNKNOWN_CPID, ocid = OCID).get
+        assertNull(periodEntity)
     }
 
     @Test
@@ -94,33 +97,31 @@ class CassandraAwardPeriodRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<ReadEntityException> {
-            awardPeriodRepository.findStartDateBy(cpid = CPID, stage = STAGE)
-        }
-        assertEquals("Error read Award(s) from the database.", exception.message)
+        val failure = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID).failure()
+
+        assertTrue(failure.exception is RuntimeException)
     }
 
     @Test
     fun saveNewStart() {
-        awardPeriodRepository.saveNewStart(cpid = CPID, stage = STAGE, start = START_DATE)
+        awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
 
-        val actualFundedAwardPeriodStartDate = awardPeriodRepository.findStartDateBy(cpid = CPID, stage = STAGE)
+        val periodEntity = awardPeriodRepository.findBy(cpid = CPID, ocid = OCID).get
+        val actualFundedAwardPeriodStartDate = periodEntity?.startDate
 
-        assertNotNull(actualFundedAwardPeriodStartDate)
+        assertNotNull(periodEntity)
         assertEquals(START_DATE, actualFundedAwardPeriodStartDate)
     }
 
     @Test
     fun errorAlreadyNewStart() {
-        awardPeriodRepository.saveNewStart(cpid = CPID, stage = STAGE, start = START_DATE)
+        awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
 
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveNewStart(cpid = CPID, stage = STAGE, start = START_DATE)
-        }
-        assertEquals(
-            "An error occurred when writing a record(s) of the start award period '$START_DATE' by cpid '$CPID' and stage '$STAGE' to the database. Record is already.",
-            exception.message
-        )
+        val result = awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE)
+
+        assertTrue(result.isSuccess)
+        val wasApplied = result.get
+        assertFalse(wasApplied)
     }
 
     @Test
@@ -129,89 +130,42 @@ class CassandraAwardPeriodRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveNewStart(cpid = CPID, stage = STAGE, start = START_DATE)
-        }
-        assertEquals("Error writing start date of the award period.", exception.message)
+        val failure = awardPeriodRepository.saveStart(cpid = CPID, ocid = OCID, start = START_DATE).failure()
+
+        assertTrue(failure.exception is RuntimeException)
+
     }
 
-    @Test
-    fun saveEnd() {
-        insertAwardPeriod()
-
-        awardPeriodRepository.saveEnd(cpid = CPID, stage = STAGE, end = END_DATE)
-
-        val actualFundedAwardPeriodEndDate = findAwardPeriodEnd()
-        assertNotNull(actualFundedAwardPeriodEndDate)
-        assertEquals(END_DATE, actualFundedAwardPeriodEndDate)
-    }
-
-    @Test
-    fun errorAwardPeriodNotExists() {
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveEnd(cpid = CPID, stage = STAGE, end = END_DATE)
-        }
-        assertEquals(
-            "An error occurred when writing a record(s) of the end award period '$END_DATE' by cpid '$CPID' and stage '$STAGE' to the database. Record is not exists.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun errorSaveEnd() {
-        doThrow(RuntimeException())
-            .whenever(session)
-            .execute(any<BoundStatement>())
-
-        val exception = assertThrows<SaveEntityException> {
-            awardPeriodRepository.saveEnd(cpid = CPID, stage = STAGE, end = END_DATE)
-        }
-        assertEquals("Error writing updated end period to database.", exception.message)
-    }
 
     private fun createKeyspace() {
-        session.execute("CREATE KEYSPACE ocds WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
+        session.execute("CREATE KEYSPACE ${Database.KEYSPACE} WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
     }
 
     private fun dropKeyspace() {
-        session.execute("DROP KEYSPACE ocds;")
+        session.execute("DROP KEYSPACE ${Database.KEYSPACE};")
     }
 
     private fun createTable() {
         session.execute(
             """
-                CREATE TABLE IF NOT EXISTS ocds.evaluation_period (
-                    cp_id text,
-                    stage text,
-                    token_entity UUID,
-                    award_criteria text,
-                    start_date timestamp,
-                    end_date timestamp,
-                    PRIMARY KEY(cp_id, stage)
-                );
+                   CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
+                    (
+                        cpid           TEXT,
+                        ocid           TEXT,
+                        start_date     TIMESTAMP,
+                        end_date       TIMESTAMP,
+                        PRIMARY KEY (cpid, ocid)
+                    );
             """
         )
     }
 
     private fun insertAwardPeriod(endDate: LocalDateTime? = null) {
-        val rec = QueryBuilder.insertInto("ocds", "evaluation_period")
-            .value("cp_id", CPID)
-            .value("stage", STAGE)
-            .value("award_criteria", AWARD_CRITERIA)
-            .value("start_date", START_DATE.toCassandraTimestamp())
-            .value("end_date", endDate?.toCassandraTimestamp())
+        val rec = QueryBuilder.insertInto(Database.KEYSPACE, Database.Period.TABLE_NAME)
+            .value(Database.Period.CPID, CPID.underlying)
+            .value(Database.Period.OCID, OCID.underlying)
+            .value(Database.Period.START_DATE, START_DATE.toCassandraTimestamp())
+            .value(Database.Period.END_DATE, endDate?.toCassandraTimestamp())
         session.execute(rec)
-    }
-
-    private fun findAwardPeriodEnd(): LocalDateTime? {
-        val query = QueryBuilder.select("end_date")
-            .from("ocds", "evaluation_period")
-            .where(QueryBuilder.eq("cp_id", CPID))
-            .and(QueryBuilder.eq("stage", STAGE))
-
-        return session.execute(query)
-            .one()
-            ?.getTimestamp("end_date")
-            ?.toLocalDateTime()
     }
 }

@@ -3,9 +3,6 @@ package com.procurement.evaluation.application.model.award.tenderer
 import com.procurement.evaluation.application.model.parseAwardId
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseOcid
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.award.AwardId
@@ -15,6 +12,9 @@ import com.procurement.evaluation.domain.model.requirement.tryRequirementId
 import com.procurement.evaluation.domain.model.tenderer.TendererId
 import com.procurement.evaluation.domain.model.tenderer.tryTendererId
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.asSuccess
 
 class CheckRelatedTendererParams private constructor(
     val cpid: Cpid,
@@ -34,16 +34,16 @@ class CheckRelatedTendererParams private constructor(
             responderId: String
         ): Result<CheckRelatedTendererParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val ocidParsed = parseOcid(ocid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val awardIdParsed = parseAwardId(awardId)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val requirementIdParsed = requirementId.tryRequirementId()
-                .doReturn {
+                .onFailure {
                     return failure(
                         DataErrors.Validation.DataFormatMismatch(
                             name = "requirementId",
@@ -54,7 +54,7 @@ class CheckRelatedTendererParams private constructor(
                 }
 
             val relatedTendererIdParsed = relatedTendererId.tryTendererId()
-                .doReturn {
+                .onFailure {
                     return failure(
                         DataErrors.Validation.DataFormatMismatch(
                             name = "relatedTendererId",
@@ -65,7 +65,7 @@ class CheckRelatedTendererParams private constructor(
                 }
 
             val responderIdParsed = PersonId.tryCreate(responderId)
-                .orForwardFail { fail -> return fail }
+                .onFailure { return it }
 
             return CheckRelatedTendererParams(
                 cpid = cpidParsed,

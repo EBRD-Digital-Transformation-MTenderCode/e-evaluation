@@ -1,11 +1,11 @@
 package com.procurement.evaluation.domain.model.award
 
-import com.procurement.evaluation.domain.functional.Result
 import com.procurement.evaluation.domain.util.extension.tryUUID
-import com.procurement.evaluation.infrastructure.fail.Fail
+import com.procurement.evaluation.infrastructure.fail.Failure
+import com.procurement.evaluation.lib.functional.Result
 import java.util.*
 
 typealias AwardId = UUID
 
-fun String.tryAwardId(): Result<AwardId, Fail.Incident.Transform.Parsing> =
+fun String.tryAwardId(): Result<AwardId, Failure.Incident.Transform.Parsing> =
     this.tryUUID()

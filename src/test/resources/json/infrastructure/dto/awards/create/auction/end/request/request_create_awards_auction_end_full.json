@@ -12,7 +12,7 @@
 
         {
           "id": "coefficient-1557947503428",
-          "value": 2.00,
+          "value": 2.000,
           "coefficient": 0.85
         }
 
@@ -237,21 +237,21 @@
           {
             "relatedBid": "a80b61e0-c348-11e8-b9a8-dd319bd9bbdf",
             "value": {
-              "amount": 981.0,
+              "amount": 981.00,
               "currency": "MDL"
             }
           },
           {
             "relatedBid": "fcecd630-c63b-11e8-a76b-31c7a0ba1585",
             "value": {
-              "amount": 980.0,
+              "amount": 980.00,
               "currency": "MDL"
             }
           },
           {
             "relatedBid": "d80449c0-cc80-11e8-bfb9-f9c4db0b58fc",
             "value": {
-              "amount": 990.0,
+              "amount": 990.00,
               "currency": "MDL"
             }
           }

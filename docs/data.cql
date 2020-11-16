@@ -40,3 +40,52 @@ INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD'
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'SV', 'minBids', '1');
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_OT', 'minBids', '1');
 INSERT INTO ocds.evaluation_rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_SV', 'minBids', '1');
+
+
+CREATE KEYSPACE IF NOT EXISTS evaluation WITH replication = {'class':'SimpleStrategy', 'replication_factor':1};
+
+CREATE TABLE IF NOT EXISTS evaluation.history
+(
+    command_id   TEXT,
+    command_name TEXT,
+    command_date TIMESTAMP,
+    json_data    TEXT,
+    PRIMARY KEY (command_id, command_name)
+);
+
+CREATE TABLE IF NOT EXISTS evaluation.rules
+(
+    country        TEXT,
+    pmd            TEXT,
+    operation_type TEXT,
+    parameter      TEXT,
+    value          TEXT,
+    PRIMARY KEY (country, pmd, operation_type, parameter)
+);
+
+CREATE TABLE IF NOT EXISTS evaluation.periods
+(
+    cpid           TEXT,
+    ocid           TEXT,
+    award_criteria TEXT,
+    start_date     TIMESTAMP,
+    end_date       TIMESTAMP,
+    PRIMARY KEY (cpid, ocid)
+);
+
+CREATE TABLE IF NOT EXISTS evaluation.awards
+(
+    cpid           TEXT,
+    ocid           TEXT,
+    token_entity   TEXT,
+    status         TEXT,
+    status_details TEXT,
+    owner          TEXT,
+    json_data      TEXT,
+    PRIMARY KEY (cpid, ocid, token_entity)
+);
+
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'OT', 'minBids', '1');
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'SV', 'minBids', '1');
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_OT', 'minBids', '1');
+INSERT INTO evaluation.rules (country, pmd, parameter, value)  VALUES ('MD', 'TEST_SV', 'minBids', '1');

@@ -1,6 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.award.create.requirement.response
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.AddRequirementResponseRequest
 import org.junit.jupiter.api.Test
 
 internal class AddRequirementResponseRequestTest :

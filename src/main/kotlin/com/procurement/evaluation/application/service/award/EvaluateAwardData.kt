@@ -4,12 +4,14 @@ import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.DocumentType
+import com.procurement.evaluation.model.dto.ocds.Value
 
 class EvaluateAwardData(val award: Award) {
     data class Award(
         val statusDetails: AwardStatusDetails,
         val description: String?,
-        val documents: List<Document>
+        val documents: List<Document>,
+        val value: Value?
     ) {
 
         data class Document(
