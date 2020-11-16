@@ -1,8 +1,8 @@
 package com.procurement.evaluation.application.service.lot
 
+import com.procurement.evaluation.application.service.RulesService
 import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.lot.LotId
-import com.procurement.evaluation.service.RulesService
 import org.springframework.stereotype.Service
 
 interface LotService {
@@ -21,7 +21,7 @@ class LotServiceImpl(
         context: GetUnsuccessfulLotsContext,
         data: GetUnsuccessfulLotsData
     ): GetUnsuccessfulLotsResult {
-        val minNumberOfBids = rulesService.getRulesMinBids(country = context.country, method = context.pmd.name)
+        val minNumberOfBids = rulesService.getRulesMinBids(country = context.country, method = context.pmd, operationType = null)
 
         val bidsIdsByLotId: Map<LotId, Set<BidId>> = mutableMapOf<LotId, MutableSet<BidId>>()
             .apply {

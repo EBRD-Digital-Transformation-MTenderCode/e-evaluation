@@ -1,6 +1,7 @@
 package com.procurement.evaluation.infrastructure.dto.award.evaluate.request
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
+import com.procurement.evaluation.infrastructure.handler.v1.model.request.SetAwardForEvaluationRequest
 import org.junit.jupiter.api.Test
 
 class SetAwardForEvaluationRequestTest :

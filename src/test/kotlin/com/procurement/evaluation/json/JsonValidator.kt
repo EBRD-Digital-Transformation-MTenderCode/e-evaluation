@@ -39,7 +39,7 @@ object JsonValidator {
 
         private fun getActualValue(path: String): String {
             val actualValue = valueByPaths[path]
-            return actualValue ?: Assertions.fail<String>("The path $path to check value not found.")
+            return actualValue ?: fail<String>("The path $path to check value not found.")
         }
 
         private fun equalsValues(path: String, expected: String, actual: String) {
@@ -72,7 +72,7 @@ object JsonValidator {
             throw JsonCompareException(message)
         }
 
-        val message = buildString() {
+        val message = buildString {
             actualData.forEach { (path, value) ->
                 val expectedValue = expectedData[path]
                 if (expectedValue != null) {

@@ -1,12 +1,13 @@
 package com.procurement.evaluation.application.service.award
 
+import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class CreatedAwardData(
-    val token: String,
+    val token: Token,
     val awardPeriod: AwardPeriod?,
     val lotAwarded: Boolean?,
     val award: Award
@@ -28,7 +29,7 @@ data class CreatedAwardData(
     ) {
 
         data class Value(
-            val amount: BigDecimal,
+            val amount: BigDecimal?,
             val currency: String
         )
 

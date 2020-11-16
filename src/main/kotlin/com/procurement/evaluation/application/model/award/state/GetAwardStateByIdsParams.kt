@@ -2,15 +2,15 @@ package com.procurement.evaluation.application.model.award.state
 
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseOcid
-import com.procurement.evaluation.domain.functional.Result
-import com.procurement.evaluation.domain.functional.Result.Companion.failure
-import com.procurement.evaluation.domain.functional.asSuccess
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.award.tryAwardId
 import com.procurement.evaluation.domain.util.extension.mapResultPair
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
+import com.procurement.evaluation.lib.functional.Result
+import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.asSuccess
 
 class GetAwardStateByIdsParams private constructor(
     val awardIds: List<AwardId>,
@@ -29,21 +29,20 @@ class GetAwardStateByIdsParams private constructor(
 
             val awardIdsParsed = awardIds
                 .mapResultPair { awardId -> awardId.tryAwardId() }
-                .doReturn { failPair ->
-                    return failure(
-                        DataErrors.Validation.DataFormatMismatch(
-                            name = awardIdsAttribute,
-                            expectedFormat = "uuid",
-                            actualValue = failPair.element
-                        )
+                .mapFailure {
+                    DataErrors.Validation.DataFormatMismatch(
+                        name = awardIdsAttribute,
+                        expectedFormat = "uuid",
+                        actualValue = it.element
                     )
                 }
+                .onFailure { return it }
 
             val cpidParsed = parseCpid(cpid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             val ocidParsed = parseOcid(ocid)
-                .doReturn { error -> return failure(error = error) }
+                .onFailure { return it }
 
             return GetAwardStateByIdsParams(
                 awardIds = awardIdsParsed,
