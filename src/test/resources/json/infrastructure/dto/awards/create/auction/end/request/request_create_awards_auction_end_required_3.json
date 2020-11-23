@@ -45,7 +45,6 @@
             "telephone": "bid[0].tenderers[0].contactPoint.telephone"
           },
           "details": {
-            "typeOfSupplier": "company",
             "scale": "sme"
           }
         }
