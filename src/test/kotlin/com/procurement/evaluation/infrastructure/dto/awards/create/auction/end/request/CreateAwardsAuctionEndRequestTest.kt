@@ -4,7 +4,7 @@ import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
 import com.procurement.evaluation.infrastructure.handler.v1.model.request.CreateAwardsAuctionEndRequest
 import org.junit.jupiter.api.Test
 
-class CreateAwardsauctionEndRequestTest : AbstractDTOTestBase<CreateAwardsAuctionEndRequest>(
+class CreateAwardsAuctionEndRequestTest : AbstractDTOTestBase<CreateAwardsAuctionEndRequest>(
     CreateAwardsAuctionEndRequest::class.java
 ) {
 

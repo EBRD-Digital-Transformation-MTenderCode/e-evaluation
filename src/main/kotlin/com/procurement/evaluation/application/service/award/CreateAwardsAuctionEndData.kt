@@ -18,6 +18,7 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class CreateAwardsAuctionEndData(
@@ -301,8 +302,13 @@ data class CreateAwardsAuctionEndData(
         ) {
             data class ElectronicAuctionResult(
                 val relatedBid: BidId,
-                val value: Money
-            )
+                val value: Value
+            ) {
+                data class Value(
+                    val amount: BigDecimal,
+                    val currency: String?
+                )
+            }
         }
     }
 }
