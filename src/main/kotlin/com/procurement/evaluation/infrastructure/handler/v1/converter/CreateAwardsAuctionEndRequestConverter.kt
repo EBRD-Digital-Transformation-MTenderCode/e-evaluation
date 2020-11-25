@@ -446,6 +446,12 @@ fun CreateAwardsAuctionEndRequest.convert() = CreateAwardsAuctionEndData(
                                     CreateAwardsAuctionEndData.ElectronicAuctions.Detail.ElectronicAuctionResult(
                                         relatedBid = electronicAuctionResult.relatedBid,
                                         value = electronicAuctionResult.value
+                                            .let { value ->
+                                                CreateAwardsAuctionEndData.ElectronicAuctions.Detail.ElectronicAuctionResult.Value(
+                                                    amount = value.amount,
+                                                    currency = value.currency
+                                                )
+                                            }
                                     )
                                 }
                                 .orThrow {
