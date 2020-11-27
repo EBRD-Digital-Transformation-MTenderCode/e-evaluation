@@ -938,7 +938,7 @@ class AwardServiceImpl(
         documentType = document.documentType,
         title = document.title,
         description = document.description,
-        relatedLots = document.relatedLots.asSequence().map { it.toString() }.toHashSet()
+        relatedLots = document.relatedLots.map { it.toString() }
     )
 
     private fun getEvaluateAwardResult(updatedAward: Award) = EvaluateAwardResult(
