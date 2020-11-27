@@ -2365,7 +2365,8 @@ class AwardServiceImpl(
             if (bidFromAuction.value.amount > bid.value.amount)
                 bid.value
             else
-                bidFromAuction.value
+                Money(bidFromAuction.value.amount, bid.value.currency)
+
         } else {
             bid.value
         }
