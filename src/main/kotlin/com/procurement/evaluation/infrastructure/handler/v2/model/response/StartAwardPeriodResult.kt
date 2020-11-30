@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
 data class StartAwardPeriodResult(
-    @JsonProperty("tender") val tender: Tender
+    @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender
 ) {
     data class Tender(
-        @JsonProperty("awardPeriod") val awardPeriod: AwardPeriod
+        @field:JsonProperty("awardPeriod") @param:JsonProperty("awardPeriod") val awardPeriod: AwardPeriod
     ) {
         data class AwardPeriod(
-            @JsonProperty("startDate") val startDate: LocalDateTime
+            @field:JsonProperty("startDate") @param:JsonProperty("startDate") val startDate: LocalDateTime
         )
     }
 }
