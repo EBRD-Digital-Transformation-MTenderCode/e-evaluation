@@ -1899,7 +1899,7 @@ class AwardServiceImpl(
 
         if (!wasApplied) {
             return Failure.Incident.Database.DatabaseConsistencyIncident(
-                "Cannot save start award period. Maybe start period already set."
+                "Cannot save start award period. Record by cpid '${params.cpid}' and ocid '${params.ocid}' already exists."
             ).asFailure()
         }
 
