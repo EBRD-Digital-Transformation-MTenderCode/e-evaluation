@@ -11,6 +11,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.CheckRelatedTenderer
 import com.procurement.evaluation.infrastructure.handler.v2.CloseAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CreateUnsuccessfulAwardsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.GetAwardStateByIdsHandler
+import com.procurement.evaluation.infrastructure.handler.v2.StartAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.v2.model.CommandDescriptor
 import org.springframework.stereotype.Service
 
@@ -22,7 +23,8 @@ class CommandServiceV2(
     private val checkRelatedTendererHandler: CheckRelatedTendererHandler,
     private val addRequirementResponseHandler: AddRequirementResponseHandler,
     private val createUnsuccessfulAwardHandler: CreateUnsuccessfulAwardsHandler,
-    private val closeAwardPeriodHandler: CloseAwardPeriodHandler
+    private val closeAwardPeriodHandler: CloseAwardPeriodHandler,
+    private val startAwardPeriodHandler: StartAwardPeriodHandler
 ) {
 
     fun execute(descriptor: CommandDescriptor): ApiResponseV2 = when (descriptor.action) {
@@ -32,6 +34,7 @@ class CommandServiceV2(
         CommandTypeV2.ADD_REQUIREMENT_RESPONSE -> addRequirementResponseHandler.handle(descriptor)
         CommandTypeV2.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(descriptor)
         CommandTypeV2.CLOSE_AWARD_PERIOD -> closeAwardPeriodHandler.handle(descriptor)
+        CommandTypeV2.START_AWARD_PERIOD -> startAwardPeriodHandler.handle(descriptor)
         else -> {
             val errorDescription = "Unknown action '${descriptor.action.key}'."
             generateResponseOnFailure(
