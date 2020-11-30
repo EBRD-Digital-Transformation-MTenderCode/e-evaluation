@@ -4,6 +4,7 @@ import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
+import com.procurement.evaluation.application.model.award.start.awardperiod.StartAwardPeriodParams
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
@@ -50,7 +51,9 @@ import com.procurement.evaluation.infrastructure.handler.v2.model.response.Close
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.Result.Companion.success
 import com.procurement.evaluation.lib.functional.Validated
+import com.procurement.evaluation.lib.functional.asFailure
 import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.lib.functional.asValidationError
 import com.procurement.evaluation.lib.toSetBy
@@ -85,6 +88,7 @@ import org.springframework.stereotype.Service
 import java.math.RoundingMode
 import java.time.LocalDateTime
 import java.util.*
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.StartAwardPeriodResult as StartAwardPeriodResultV2
 
 interface AwardService {
     fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData
@@ -141,6 +145,8 @@ interface AwardService {
         : Result<List<com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult>, Failure>
 
     fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Failure>
+
+    fun startAwardPeriod(params: StartAwardPeriodParams): Result<StartAwardPeriodResultV2, Failure>
 }
 
 @Service
@@ -1883,6 +1889,29 @@ class AwardServiceImpl(
             }
 
         return Validated.ok()
+    }
+
+    override fun startAwardPeriod(params: StartAwardPeriodParams): Result<StartAwardPeriodResultV2, Failure> {
+        val wasApplied = awardPeriodRepository.saveStart(cpid = params.cpid, ocid = params.ocid, start = params.date)
+            .onFailure {
+                return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception).asFailure()
+            }
+
+        if (!wasApplied) {
+            return Failure.Incident.Database.DatabaseConsistencyIncident(
+                "Cannot save start award period. Record by cpid '${params.cpid}' and ocid '${params.ocid}' already exists."
+            ).asFailure()
+        }
+
+        val response = StartAwardPeriodResultV2(
+            tender = StartAwardPeriodResultV2.Tender(
+                awardPeriod = StartAwardPeriodResultV2.Tender.AwardPeriod(
+                    startDate = params.date
+                )
+            )
+        )
+
+        return success(response)
     }
 
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
