@@ -8,10 +8,12 @@ import com.procurement.evaluation.application.model.award.start.awardperiod.Star
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
+import com.procurement.evaluation.application.model.award.validate.ValidateAwardDataParams
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.GenerationService
+import com.procurement.evaluation.application.service.award.rules.ValidateAwardDataRules
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.model.Cpid
@@ -138,6 +140,8 @@ interface AwardService {
     fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure>
 
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Failure>
+
+    fun validateAwardData(params: ValidateAwardDataParams): Validated<Failure>
 
     fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Failure>
 
@@ -1832,6 +1836,40 @@ class AwardServiceImpl(
 
         if (previousRequirementResponseIsPresent)
             return ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer().asValidationError()
+
+        return Validated.ok()
+    }
+
+    override fun validateAwardData(params: ValidateAwardDataParams): Validated<Failure> {
+        val receivedLot = params.tender.lots.first()
+        val receivedAward = params.awards.first()
+        val receivedSuppliers = receivedAward.suppliers.map { it.id }
+
+        if (ValidateAwardDataRules.isNeedToCheckSuppliers(params.operationType)) {
+            val storedAwards = awardRepository.findBy(params.cpid, params.ocid)
+                .onFailure {
+                    return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception)
+                        .asValidationError()
+                }
+                .map { it.jsonData.tryToObject(Award::class.java).onFailure { return it.reason.asValidationError() } }
+
+            ValidateAwardDataRules.Supplier.checkAwardAlreadyExists(storedAwards, receivedLot.id, receivedSuppliers)
+                .onFailure { return it }
+
+        }
+
+        params.awards.forEach { award ->
+
+            ValidateAwardDataRules.Value.validate(award.value, receivedLot, params.operationType)
+                .onFailure { return it }
+
+            ValidateAwardDataRules.Supplier.validate(award)
+                .onFailure { return it }
+
+            ValidateAwardDataRules.Document.validate(award.documents)
+                .onFailure { return it }
+        }
+
 
         return Validated.ok()
     }
