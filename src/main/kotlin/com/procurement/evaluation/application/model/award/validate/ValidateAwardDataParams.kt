@@ -68,6 +68,9 @@ class ValidateAwardDataParams private constructor(
             )
                 .onFailure { return it }
 
+            if (awards.isEmpty())
+                return failure(DataErrors.Validation.EmptyArray(name = "awards"))
+
             return ValidateAwardDataParams(
                 cpid = parsedCpid,
                 ocid = parsedOcid,
@@ -78,9 +81,19 @@ class ValidateAwardDataParams private constructor(
         }
     }
 
-    class Tender(
+    class Tender private constructor(
         val lots: List<Lot>
     ) {
+        companion object {
+            fun tryCreate(lots: List<Lot>): Result<Tender, DataErrors> {
+
+                if (lots.isEmpty())
+                    return failure(DataErrors.Validation.EmptyArray(name = "tender.lots"))
+
+                return Tender(lots = lots).asSuccess()
+            }
+        }
+
         data class Lot(
             val id: String,
             val value: Value
@@ -458,7 +471,10 @@ class ValidateAwardDataParams private constructor(
                                             .onFailure { return it }
                                     }
 
-                                    return ValidityPeriod(startDate = parsedStartDate, endDate = parsedEndDate).asSuccess()
+                                    return ValidityPeriod(
+                                        startDate = parsedStartDate,
+                                        endDate = parsedEndDate
+                                    ).asSuccess()
                                 }
                             }
                         }

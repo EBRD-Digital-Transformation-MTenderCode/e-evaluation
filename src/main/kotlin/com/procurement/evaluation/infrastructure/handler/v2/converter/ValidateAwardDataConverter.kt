@@ -12,14 +12,14 @@ fun ValidateAwardDataRequest.convert(): Result<ValidateAwardDataParams, DataErro
         cpid = cpid,
         ocid = ocid,
         operationType = operationType,
-        tender = tender.convert(),
+        tender = tender.convert().onFailure { return it },
         awards = awards.map {
             it.convert().onFailure { fail -> return fail }
         }
     )
 
-fun ValidateAwardDataRequest.Tender.convert(): Tender =
-    Tender(lots = lots.map { it.convert() })
+fun ValidateAwardDataRequest.Tender.convert(): Result<Tender, DataErrors> =
+    Tender.tryCreate(lots = lots.map { it.convert() })
 
 fun ValidateAwardDataRequest.Tender.Lot.convert(): Tender.Lot =
     Tender.Lot(id = id, value = value.convert())
