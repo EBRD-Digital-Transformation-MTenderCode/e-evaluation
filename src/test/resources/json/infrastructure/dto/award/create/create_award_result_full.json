@@ -1,27 +1,20 @@
 {
-  "cpid": "ocds-b3wdp1-MD-1580458690892",
-  "ocid": "ocds-b3wdp1-MD-1580458690892-EV-1580458791896",
-  "operationType": "operationType",
-  "tender": {
-    "lots": [
-      {
-        "value": {
-          "amount": 12.40,
-          "currency": "string"
-        },
-        "id": "string"
-      }
-    ]
-  },
+  "token": "445f6851-c908-407d-9b45-14b92f3e964b",
   "awards": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "internalId": "string",
+      "status": "active",
+      "statusDetails": "empty",
+      "date": "2020-12-02T08:18:33Z",
       "description": "string",
       "value": {
         "amount": 12.50,
         "currency": "string"
       },
+      "relatedLots": [
+        "string"
+      ],
       "suppliers": [
         {
           "id": "string",
@@ -47,17 +40,20 @@
               "country": {
                 "id": "string",
                 "description": "string",
-                "scheme": "string"
+                "scheme": "string",
+                "uri": "string"
               },
               "region": {
                 "id": "string",
                 "description": "string",
-                "scheme": "string"
+                "scheme": "string",
+                "uri": "string"
               },
               "locality": {
                 "id": "string",
                 "description": "string",
-                "scheme": "string"
+                "scheme": "string",
+                "uri": "string"
               }
             }
           },
@@ -84,7 +80,7 @@
                   "type": "chairman",
                   "jobTitle": "string",
                   "period": {
-                    "startDate": "2020-12-01T07:50:01.483Z"
+                    "startDate": "2020-12-01T07:50:01Z"
                   },
                   "documents": [
                     {
@@ -124,8 +120,8 @@
                     "name": "string"
                   },
                   "validityPeriod": {
-                    "startDate": "2020-12-01T07:50:01.483Z",
-                    "endDate": "2020-12-01T07:50:01.483Z"
+                    "startDate": "2020-12-01T07:50:01Z",
+                    "endDate": "2020-12-01T07:50:01Z"
                   }
                 }
               }
@@ -141,17 +137,20 @@
                     "country": {
                       "id": "string",
                       "description": "string",
-                      "scheme": "string"
+                      "scheme": "string",
+                      "uri": "string"
                     },
                     "region": {
                       "id": "string",
                       "description": "string",
-                      "scheme": "string"
+                      "scheme": "string",
+                      "uri": "string"
                     },
                     "locality": {
                       "id": "string",
                       "description": "string",
-                      "scheme": "string"
+                      "scheme": "string",
+                      "uri": "string"
                     }
                   }
                 },

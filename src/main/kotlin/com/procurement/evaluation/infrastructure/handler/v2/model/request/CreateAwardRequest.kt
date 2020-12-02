@@ -9,10 +9,11 @@ import com.procurement.evaluation.infrastructure.bind.amount.AmountDeserializer
 import com.procurement.evaluation.infrastructure.bind.amount.AmountSerializer
 import java.math.BigDecimal
 
-data class ValidateAwardDataRequest(
+data class CreateAwardRequest(
     @field:JsonProperty("cpid") @param:JsonProperty("cpid") val cpid: String,
     @field:JsonProperty("ocid") @param:JsonProperty("ocid") val ocid: String,
-    @field:JsonProperty("operationType") @param:JsonProperty("operationType") val operationType: String,
+    @field:JsonProperty("date") @param:JsonProperty("date") val date: String,
+    @field:JsonProperty("owner") @param:JsonProperty("owner") val owner: String,
     @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender,
     @field:JsonProperty("awards") @param:JsonProperty("awards") val awards: List<Award>
 ) {
@@ -20,17 +21,8 @@ data class ValidateAwardDataRequest(
         @field:JsonProperty("lots") @param:JsonProperty("lots") val lots: List<Lot>
     ) {
         data class Lot(
-            @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
-            @field:JsonProperty("value") @param:JsonProperty("value") val value: Value
-        ) {
-            data class Value(
-                @JsonDeserialize(using = AmountDeserializer::class)
-                @JsonSerialize(using = AmountSerializer::class)
-                @field:JsonProperty("amount") @param:JsonProperty("amount") val amount: BigDecimal,
-
-                @field:JsonProperty("currency") @param:JsonProperty("currency") val currency: String
-            )
-        }
+            @field:JsonProperty("id") @param:JsonProperty("id") val id: String
+        )
     }
 
     data class Award(
@@ -42,8 +34,7 @@ data class ValidateAwardDataRequest(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        @field:JsonProperty("value") @param:JsonProperty("value") val value: Value?,
+        @field:JsonProperty("value") @param:JsonProperty("value") val value: Value,
 
         @field:JsonProperty("suppliers") @param:JsonProperty("suppliers") val suppliers: List<Supplier>,
 
@@ -56,8 +47,7 @@ data class ValidateAwardDataRequest(
             @JsonInclude(JsonInclude.Include.NON_NULL)
             @field:JsonProperty("amount") @param:JsonProperty("amount") val amount: BigDecimal?,
 
-            @JsonInclude(JsonInclude.Include.NON_NULL)
-            @field:JsonProperty("currency") @param:JsonProperty("currency") val currency: String?
+            @field:JsonProperty("currency") @param:JsonProperty("currency") val currency: String
         )
 
         data class Supplier(
@@ -101,19 +91,24 @@ data class ValidateAwardDataRequest(
                     data class Country(
                         @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
                         @field:JsonProperty("description") @param:JsonProperty("description") val description: String,
-                        @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String
+                        @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String,
+                        @field:JsonProperty("uri") @param:JsonProperty("uri") val uri: String
                     )
 
                     data class Region(
                         @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
                         @field:JsonProperty("description") @param:JsonProperty("description") val description: String,
-                        @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String
+                        @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String,
+                        @field:JsonProperty("uri") @param:JsonProperty("uri") val uri: String
                     )
 
                     data class Locality(
                         @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
                         @field:JsonProperty("description") @param:JsonProperty("description") val description: String,
-                        @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String
+                        @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String,
+
+                        @JsonInclude(JsonInclude.Include.NON_NULL)
+                        @field:JsonProperty("uri") @param:JsonProperty("uri") val uri: String?
                     )
                 }
             }
@@ -254,19 +249,24 @@ data class ValidateAwardDataRequest(
                             data class Country(
                                 @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
                                 @field:JsonProperty("description") @param:JsonProperty("description") val description: String,
-                                @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String
+                                @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String,
+                                @field:JsonProperty("uri") @param:JsonProperty("uri") val uri: String
                             )
 
                             data class Region(
                                 @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
                                 @field:JsonProperty("description") @param:JsonProperty("description") val description: String,
-                                @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String
+                                @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String,
+                                @field:JsonProperty("uri") @param:JsonProperty("uri") val uri: String
                             )
 
                             data class Locality(
                                 @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
                                 @field:JsonProperty("description") @param:JsonProperty("description") val description: String,
-                                @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String
+                                @field:JsonProperty("scheme") @param:JsonProperty("scheme") val scheme: String,
+
+                                @JsonInclude(JsonInclude.Include.NON_NULL)
+                                @field:JsonProperty("uri") @param:JsonProperty("uri") val uri: String?
                             )
                         }
                     }
