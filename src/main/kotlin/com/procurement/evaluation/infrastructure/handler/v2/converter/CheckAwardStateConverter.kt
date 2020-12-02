@@ -11,5 +11,9 @@ fun CheckAwardStateRequest.convert(): Result<CheckAwardStateParams, DataErrors> 
         ocid = ocid,
         country = country,
         operationType = operationType,
-        pmd = pmd
+        pmd = pmd,
+        awards = awards.map { it.convert() }
     )
+
+fun CheckAwardStateRequest.Award.convert(): CheckAwardStateParams.Award =
+    CheckAwardStateParams.Award(id = id)

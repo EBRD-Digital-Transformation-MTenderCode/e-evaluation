@@ -17,7 +17,8 @@ class CheckAwardStateParams private constructor(
     val ocid: Ocid,
     val pmd: ProcurementMethod,
     val country: String,
-    val operationType: OperationType2
+    val operationType: OperationType2,
+    val awards: List<Award>,
 ) {
     companion object {
 
@@ -68,7 +69,8 @@ class CheckAwardStateParams private constructor(
             ocid: String,
             pmd: String,
             country: String,
-            operationType: String
+            operationType: String,
+            awards: List<Award>,
         ): Result<CheckAwardStateParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .onFailure { return it }
@@ -95,8 +97,13 @@ class CheckAwardStateParams private constructor(
                 ocid = ocidParsed,
                 country = country,
                 operationType = parsedOperationType,
-                pmd = parsedPmd
+                pmd = parsedPmd,
+                awards = awards
             ).asSuccess()
         }
     }
+
+    data class Award(
+        val id: String
+    )
 }
