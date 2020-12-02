@@ -2,6 +2,7 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
 data class Award @JsonCreator constructor(
@@ -10,6 +11,9 @@ data class Award @JsonCreator constructor(
     var token: String?,
 
     val id: String,
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @field:JsonProperty("internalId") @param:JsonProperty("internalId") val internalId: String?,
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     var date: LocalDateTime?,
