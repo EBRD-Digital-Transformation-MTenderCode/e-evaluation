@@ -9,6 +9,8 @@ import com.procurement.evaluation.infrastructure.bind.amount.AmountDeserializer
 import com.procurement.evaluation.infrastructure.bind.amount.AmountSerializer
 import com.procurement.evaluation.model.dto.ocds.Address
 import com.procurement.evaluation.model.dto.ocds.AddressDetails
+import com.procurement.evaluation.model.dto.ocds.AwardStatus
+import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ContactPoint
 import com.procurement.evaluation.model.dto.ocds.CountryDetails
@@ -32,6 +34,9 @@ data class CreateAwardResult(
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @field:JsonProperty("internalId") @param:JsonProperty("internalId") val internalId: String?,
+
+        @field:JsonProperty("status") @param:JsonProperty("status") val status: AwardStatus,
+        @field:JsonProperty("statusDetails") @param:JsonProperty("statusDetails") val statusDetails: AwardStatusDetails,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @field:JsonProperty("date") @param:JsonProperty("date") val date: LocalDateTime?,
@@ -321,6 +326,8 @@ data class CreateAwardResult(
             Award(
                 id = award.id,
                 internalId = award.internalId,
+                status = award.status,
+                statusDetails = award.statusDetails,
                 date = award.date,
                 description = award.description,
                 value = award.value!!.fromDomain(),
