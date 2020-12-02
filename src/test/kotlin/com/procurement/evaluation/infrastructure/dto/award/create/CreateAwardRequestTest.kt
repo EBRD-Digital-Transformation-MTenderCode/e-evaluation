@@ -8,21 +8,21 @@ class CreateAwardRequestTest : AbstractDTOTestBase<CreateAwardRequest>(CreateAwa
 
     @Test
     fun fully() {
-        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_data_full.json")
+        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_request_full.json")
     }
 
     @Test
     fun required1() {
-        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_data_required_1.json")
+        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_request_required_1.json")
     }
 
     @Test
     fun required2() {
-        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_data_required_2.json")
+        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_request_required_2.json")
     }
 
     @Test
     fun required3() {
-        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_data_required_3.json")
+        testBindingAndMapping("json/infrastructure/dto/award/create/create_award_request_required_3.json")
     }
 }
