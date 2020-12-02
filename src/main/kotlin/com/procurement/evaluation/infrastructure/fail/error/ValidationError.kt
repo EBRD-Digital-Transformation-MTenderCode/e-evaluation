@@ -9,6 +9,11 @@ sealed class ValidationError(
 ) : Failure.Error("VR-") {
     override val code: String = prefix + numberError
 
+    class MissingRule(val params: Map<String, Any>) : ValidationError(
+        numberError = "17",
+        description = "Cannot find rules by specified parameters: $params."
+    )
+
     class InvalidToken : ValidationError(
         numberError = "10.4.2.1",
         description = "Request token doesn't match token from the database."

@@ -5,7 +5,7 @@ import com.procurement.evaluation.application.model.parseEnum
 import com.procurement.evaluation.application.model.parseOcid
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
-import com.procurement.evaluation.domain.model.ProcurementMethod
+import com.procurement.evaluation.domain.model.ProcurementMethodDetails
 import com.procurement.evaluation.domain.model.enums.OperationType2
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.lib.functional.Result
@@ -15,7 +15,7 @@ import com.procurement.evaluation.lib.toSetBy
 class CheckAwardStateParams private constructor(
     val cpid: Cpid,
     val ocid: Ocid,
-    val pmd: ProcurementMethod,
+    val pmd: ProcurementMethodDetails,
     val country: String,
     val operationType: OperationType2,
     val awards: List<Award>,
@@ -42,24 +42,24 @@ class CheckAwardStateParams private constructor(
             }
             .toSetBy { it }
 
-        private val allowedPmd = ProcurementMethod.allowedElements
+        private val allowedPmd = ProcurementMethodDetails.allowedElements
             .filter {
                 when (it) {
-                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
-                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
-                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
-                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
-                    ProcurementMethod.IP, ProcurementMethod.TEST_IP -> true
+                    ProcurementMethodDetails.DA, ProcurementMethodDetails.TEST_DA,
+                    ProcurementMethodDetails.DC, ProcurementMethodDetails.TEST_DC,
+                    ProcurementMethodDetails.NP, ProcurementMethodDetails.TEST_NP,
+                    ProcurementMethodDetails.CD, ProcurementMethodDetails.TEST_CD,
+                    ProcurementMethodDetails.IP, ProcurementMethodDetails.TEST_IP -> true
 
-                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
-                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
-                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
-                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
-                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
-                    ProcurementMethod.CF, ProcurementMethod.TEST_CF,
-                    ProcurementMethod.OF, ProcurementMethod.TEST_OF,
-                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> false
+                    ProcurementMethodDetails.GPA, ProcurementMethodDetails.TEST_GPA,
+                    ProcurementMethodDetails.RT, ProcurementMethodDetails.TEST_RT,
+                    ProcurementMethodDetails.OT, ProcurementMethodDetails.TEST_OT,
+                    ProcurementMethodDetails.MV, ProcurementMethodDetails.TEST_MV,
+                    ProcurementMethodDetails.SV, ProcurementMethodDetails.TEST_SV,
+                    ProcurementMethodDetails.FA, ProcurementMethodDetails.TEST_FA,
+                    ProcurementMethodDetails.CF, ProcurementMethodDetails.TEST_CF,
+                    ProcurementMethodDetails.OF, ProcurementMethodDetails.TEST_OF,
+                    ProcurementMethodDetails.OP, ProcurementMethodDetails.TEST_OP -> false
                 }
             }
             .toSetBy { it }
@@ -87,7 +87,7 @@ class CheckAwardStateParams private constructor(
 
             val parsedPmd = parseEnum(
                 value = pmd,
-                target = ProcurementMethod,
+                target = ProcurementMethodDetails,
                 allowedEnums = allowedPmd,
                 attributeName = "pmd"
             ).onFailure { return it }

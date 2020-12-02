@@ -8,7 +8,7 @@ import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.handler.v2.base.AbstractValidationHandlerV2
 import com.procurement.evaluation.infrastructure.handler.v2.converter.convert
 import com.procurement.evaluation.infrastructure.handler.v2.model.CommandDescriptor
-import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAccessToAwardRequest
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAwardStateRequest
 import com.procurement.evaluation.lib.functional.Validated
 import com.procurement.evaluation.lib.functional.asValidationError
 import com.procurement.evaluation.lib.functional.flatMap
@@ -24,10 +24,8 @@ class CheckAwardStateHandler(
 
     override fun execute(descriptor: CommandDescriptor): Validated<Failure> =
         descriptor.body.asJsonNode
-            .params<CheckAccessToAwardRequest>()
+            .params<CheckAwardStateRequest>()
             .flatMap { it.convert() }
             .onFailure { return it.reason.asValidationError() }
-            .let { params ->
-                awardService.checkAccessToAward(params)
-            }
+            .let { params -> awardService.checkAwardState(params) }
 }

@@ -2,6 +2,8 @@ package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
+import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateErrors
+import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
 import com.procurement.evaluation.application.model.award.start.awardperiod.StartAwardPeriodParams
@@ -13,6 +15,7 @@ import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.GenerationService
+import com.procurement.evaluation.application.service.RulesService
 import com.procurement.evaluation.application.service.award.rules.ValidateAwardDataRules
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
@@ -28,7 +31,9 @@ import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.enums.Stage
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.model.state.States
 import com.procurement.evaluation.domain.util.extension.doOnFalse
+import com.procurement.evaluation.domain.util.extension.mapResult
 import com.procurement.evaluation.domain.util.extension.mapResultPair
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -139,6 +144,8 @@ interface AwardService {
 
     fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure>
 
+    fun checkAwardState(params: CheckAwardStateParams): Validated<Failure>
+
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Failure>
 
     fun validateAwardData(params: ValidateAwardDataParams): Validated<Failure>
@@ -157,7 +164,8 @@ interface AwardService {
 class AwardServiceImpl(
     private val generationService: GenerationService,
     private val awardRepository: AwardRepository,
-    private val awardPeriodRepository: AwardPeriodRepository
+    private val awardPeriodRepository: AwardPeriodRepository,
+    private val rulesService: RulesService,
 ) : AwardService {
 
     val createUnsuccessfulAwardsStrategy = CreateUnsuccessfulAwardsStrategy(
@@ -1797,6 +1805,33 @@ class AwardServiceImpl(
 
         if (awardEntity.token != params.token)
             return ValidationError.InvalidToken().asValidationError()
+
+        return Validated.ok()
+    }
+
+    override fun checkAwardState(params: CheckAwardStateParams): Validated<Failure> {
+        val storedAwards = awardRepository.findBy(params.cpid, ocid = params.ocid)
+            .onFailure {
+                return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception)
+                    .asValidationError()
+            }
+            .mapResult { entity -> entity.jsonData.tryToObject(Award::class.java) }
+            .onFailure { return it.reason.asValidationError() }
+
+        val receivedAwardsIds = params.awards.map { it.id }
+        val storedAwardsIds = storedAwards.map { it.id }
+
+        if (!storedAwardsIds.containsAll(receivedAwardsIds))
+            return CheckAwardStateErrors.MissingAward(receivedAwardsIds-storedAwardsIds).asValidationError()
+
+        val validStates = rulesService.findValidStates(params.country, params.pmd, params.operationType)
+            .onFailure { return it.reason.asValidationError() }
+
+        storedAwards.forEach { award ->
+            val state = States.State(award.status, award.statusDetails)
+            if (state !in validStates)
+                return CheckAwardStateErrors.InvalidAwardState(award.id, state).asValidationError()
+        }
 
         return Validated.ok()
     }
