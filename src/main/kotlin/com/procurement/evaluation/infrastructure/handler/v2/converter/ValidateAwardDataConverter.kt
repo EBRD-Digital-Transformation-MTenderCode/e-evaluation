@@ -249,7 +249,7 @@ fun ValidateAwardDataRequest.Award.Supplier.Details.Permit.convert(): Result<Val
         id = id,
         scheme = scheme,
         permitDetails = permitDetails.convert().onFailure { fail -> return fail },
-        uri = uri
+        url = url
     ).asSuccess()
 
 fun ValidateAwardDataRequest.Award.Supplier.Details.Permit.PermitDetails.convert(): Result<ValidateAwardDataParams.Award.Supplier.Details.Permit.PermitDetails, DataErrors> =

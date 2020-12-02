@@ -202,7 +202,7 @@ data class ValidateAwardDataRequest(
                     @field:JsonProperty("permitDetails") @param:JsonProperty("permitDetails") val permitDetails: PermitDetails,
 
                     @JsonInclude(JsonInclude.Include.NON_NULL)
-                    @field:JsonProperty("uri") @param:JsonProperty("uri") val uri: String?
+                    @field:JsonProperty("url") @param:JsonProperty("url") val url: String?
                 ) {
                     data class PermitDetails(
                         @field:JsonProperty("issuedBy") @param:JsonProperty("issuedBy") val issuedBy: IssuedBy,

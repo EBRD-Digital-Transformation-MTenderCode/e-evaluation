@@ -439,7 +439,7 @@ class ValidateAwardDataParams private constructor(
                     val id: String,
                     val scheme: String,
                     val permitDetails: PermitDetails,
-                    val uri: String?
+                    val url: String?
                 ) {
                     data class PermitDetails(
                         val issuedBy: IssuedBy,
