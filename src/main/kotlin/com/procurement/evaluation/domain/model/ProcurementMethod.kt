@@ -1,10 +1,9 @@
 package com.procurement.evaluation.domain.model
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import com.procurement.evaluation.domain.model.enums.EnumElementProvider
+import com.procurement.evaluation.exception.EnumException
 
-enum class ProcurementMethod(@JsonValue override val key: String) : EnumElementProvider.Key  {
+enum class ProcurementMethod(@JsonValue val value: String) {
     CD("selective"),
     CF("selective"),
     DA("limited"),
@@ -35,13 +34,18 @@ enum class ProcurementMethod(@JsonValue override val key: String) : EnumElementP
     TEST_SV("open");
 
     override fun toString(): String {
-        return this.key
+        return this.value
     }
 
-    companion object : EnumElementProvider<ProcurementMethod>(info = info()) {
-
-        @JvmStatic
-        @JsonCreator
-        fun creator(name: String) = ProcurementMethod.orThrow(name)
+    companion object {
+        fun fromString(name: String): ProcurementMethod = try {
+            valueOf(name.toUpperCase())
+        } catch (exception: Exception) {
+            throw EnumException(
+                enumType = ProcurementMethod::class.java.name,
+                value = name,
+                values = values().toString()
+            )
+        }
     }
 }
