@@ -11,6 +11,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.CheckRelatedTenderer
 import com.procurement.evaluation.infrastructure.handler.v2.CloseAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CreateAwardHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CreateUnsuccessfulAwardsHandler
+import com.procurement.evaluation.infrastructure.handler.v2.GetAwardByIdsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.GetAwardStateByIdsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.StartAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.v2.ValidateAwardDataHandler
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service
 class CommandServiceV2(
     private val logger: Logger,
     private val getAwardStateByIdsHandler: GetAwardStateByIdsHandler,
+    private val getAwardByIdsHandler: GetAwardByIdsHandler,
     private val checkAccessToAwardHandler: CheckAccessToAwardHandler,
     private val checkRelatedTendererHandler: CheckRelatedTendererHandler,
     private val addRequirementResponseHandler: AddRequirementResponseHandler,
@@ -33,6 +35,7 @@ class CommandServiceV2(
 
     fun execute(descriptor: CommandDescriptor): ApiResponseV2 = when (descriptor.action) {
         CommandTypeV2.GET_AWARD_STATES_BY_IDS -> getAwardStateByIdsHandler.handle(descriptor)
+        CommandTypeV2.GET_AWARD_BY_IDS -> getAwardByIdsHandler.handle(descriptor)
         CommandTypeV2.CHECK_ACCESS_TO_AWARD -> checkAccessToAwardHandler.handle(descriptor)
         CommandTypeV2.CHECK_RELATED_TENDERER -> checkRelatedTendererHandler.handle(descriptor)
         CommandTypeV2.ADD_REQUIREMENT_RESPONSE -> addRequirementResponseHandler.handle(descriptor)
