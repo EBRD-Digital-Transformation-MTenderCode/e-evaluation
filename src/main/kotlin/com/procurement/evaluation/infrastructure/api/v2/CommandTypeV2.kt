@@ -17,6 +17,7 @@ enum class CommandTypeV2(@JsonValue override val key: String, override val kind:
     GET_AWARD_STATES_BY_IDS(key = "getAwardStateByIds", kind = Action.Kind.QUERY),
     START_AWARD_PERIOD(key = "startAwardPeriod", kind = Action.Kind.COMMAND),
     VALIDATE_AWARD_DATA(key = "validateAwardData", kind = Action.Kind.QUERY),
+    CREATE_AWARD(key = "createAward", kind = Action.Kind.COMMAND),
     ;
 
     override fun toString(): String = key
