@@ -2305,6 +2305,7 @@ class AwardServiceImpl(
                     persones = tenderer.persones
                         .map { person ->
                             OrganizationReference.Person(
+                                id = null,
                                 identifier = person.identifier
                                     .let { identifier ->
                                         OrganizationReference.Person.Identifier(
@@ -2584,6 +2585,7 @@ class AwardServiceImpl(
                 persones = tenderer.persones
                     .map { person ->
                         OrganizationReference.Person(
+                            id = null,
                             identifier = person.identifier
                                 .let { identifier ->
                                     OrganizationReference.Person.Identifier(

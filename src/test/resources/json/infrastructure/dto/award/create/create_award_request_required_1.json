@@ -149,7 +149,8 @@
             ],
             "legalForm": {
               "scheme": "MD-CFOJ",
-              "id": "string"
+              "id": "string",
+              "description": "string"
             }
           }
         }

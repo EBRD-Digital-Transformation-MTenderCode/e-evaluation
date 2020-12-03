@@ -364,7 +364,7 @@ data class CreateAwardResult(
 
         fun OrganizationReference.Person.fromDomain(): Award.Supplier.Person =
             Award.Supplier.Person(
-                id = "${identifier.id}-${identifier.scheme}",
+                id = id!!,
                 title = title,
                 identifier = identifier.fromDomain(),
                 name = name,

@@ -311,6 +311,7 @@ fun CreateAwardParams.Award.Supplier.toDomain(): OrganizationReference =
 
 fun CreateAwardParams.Award.Supplier.Person.toDomain(): OrganizationReference.Person =
     OrganizationReference.Person(
+        id = id,
         title = title,
         name = name,
         identifier = identifier.toDomain(),
@@ -506,6 +507,6 @@ fun CreateAwardParams.Award.Supplier.Details.LegalForm.toDomain(): Details.Legal
     Details.LegalForm(
         id = id,
         scheme = scheme,
-        description = description!!,
+        description = description,
         uri = uri
     )
