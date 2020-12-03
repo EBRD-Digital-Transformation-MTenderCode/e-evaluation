@@ -21,12 +21,10 @@ object ValidateAwardDataRules {
         ): Validated<Failure> {
             awardValue?.amount?.let {
                 // VR.COM-4.8.2
-                checkAmount(it)
-                    .onFailure { return it }
+                checkAmount(it).onFailure { return it }
 
                 // VR.COM-4.8.3
-                checkAmountConsistency(awardValue.amount, lotValue.value.amount)
-                    .onFailure { return it }
+                checkAmountConsistency(awardValue.amount, lotValue.value.amount).onFailure { return it }
 
                 // VR.COM-4.8.4
                 val isCurrencyMissing = isCurrencyMissing(awardValue, operationType)
@@ -91,64 +89,99 @@ object ValidateAwardDataRules {
                 isIdsUniq(suppliers.map { it.id })
                     .doOnFalse { return ValidationError.ValidateAwardData.SupplierDuplicatedIds().asValidationError() }
 
-                suppliers.forEach { supplier ->
-                    //VR.COM-4.8.7
-                    isIdentifiersUniq(supplier.additionalIdentifiers.map { it.id to it.scheme })
-                        .doOnFalse { return ValidationError.ValidateAwardData.SupplierIdentifiersDuplicatedIds().asValidationError() }
+                //VR.COM-4.8.7
+                val additionalIdentifiers = suppliers.asSequence()
+                    .flatMap { it.additionalIdentifiers.asSequence() }
+                    .map { it.id to it.scheme }
+                    .toList()
 
-                    //VR.COM-4.8.8
-                    isIdsUniq(supplier.persons.map { it.id })
-                        .doOnFalse { return ValidationError.ValidateAwardData.PersonsDuplicateIds().asValidationError() }
+                isIdentifiersUniq(additionalIdentifiers)
+                    .doOnFalse { return ValidationError.ValidateAwardData.SupplierIdentifiersDuplicatedIds().asValidationError() }
 
-                    supplier.persons.forEach { person ->
-                        // VR.COM-4.8.9
-                        isIdsUniq(person.businessFunctions.map { it.id })
-                            .doOnFalse { return ValidationError.ValidateAwardData.BusinessFunctionsDuplicateIds().asValidationError() }
+                //VR.COM-4.8.8
+                val personsIds = suppliers.asSequence()
+                    .flatMap { it.persons.asSequence() }
+                    .map { it.id }
+                    .toList()
 
-                        person.businessFunctions.forEach { businessFunction ->
-                            // VR.COM-4.8.10
-                            isIdsUniq(businessFunction.documents.map { it.id })
-                                .doOnFalse { return ValidationError.ValidateAwardData.BusinessFunctionsDocumentsDuplicateIds().asValidationError() }
-                        }
+                isIdsUniq(personsIds)
+                    .doOnFalse { return ValidationError.ValidateAwardData.PersonsDuplicateIds().asValidationError() }
 
-                    }
+                // VR.COM-4.8.9
+                val businessFunctionsIds = suppliers.asSequence()
+                    .flatMap { it.persons.asSequence() }
+                    .flatMap { it.businessFunctions.asSequence() }
+                    .map { it.id }
+                    .toList()
 
-                    // VR.COM-4.8.11
-                    val mainEconomicActivities = supplier.details.mainEconomicActivities.map { it.id to it.scheme }
-                    isIdentifiersUniq(mainEconomicActivities)
-                        .doOnFalse { return ValidationError.ValidateAwardData.MainEconomicActivitiesDuplicateIds().asValidationError() }
+                isIdsUniq(businessFunctionsIds)
+                    .doOnFalse { return ValidationError.ValidateAwardData.BusinessFunctionsDuplicateIds().asValidationError() }
 
-                    // VR.COM-4.8.13
-                    val permitsIdentifiers = supplier.details.permits.map { it.id to it.scheme }
-                    isIdentifiersUniq(permitsIdentifiers)
-                        .doOnFalse { return ValidationError.ValidateAwardData.PermitsDuplicateIds().asValidationError() }
+                // VR.COM-4.8.10
+                val businessFunctionsDocumentsIds = suppliers.asSequence()
+                    .flatMap { it.persons.asSequence() }
+                    .flatMap { it.businessFunctions.asSequence() }
+                    .flatMap { it.documents.asSequence() }
+                    .map { it.id }
+                    .toList()
 
-                    supplier.details.permits
-                        .map { it.permitDetails.validityPeriod }
-                        .forEach {
-                            // VR.COM-4.8.14
-                            validatePeriod(it).onFailure { return it }
-                        }
+                isIdsUniq(businessFunctionsDocumentsIds)
+                    .doOnFalse { return ValidationError.ValidateAwardData.BusinessFunctionsDocumentsDuplicateIds().asValidationError() }
 
-                    val bankAccountsIdentifiers = supplier.details.bankAccounts
-                        .map { it.identifier.id to it.identifier.id }
+                // VR.COM-4.8.11
+                val mainEconomicActivities = suppliers.asSequence()
+                    .map { it.details }
+                    .flatMap { it.mainEconomicActivities.asSequence() }
+                    .map { it.id to it.scheme }
+                    .toList()
 
-                    //VR.COM-4.8.15
-                    isIdentifiersUniq(bankAccountsIdentifiers)
-                        .doOnFalse { return ValidationError.ValidateAwardData.BankAccountsDuplicatedIds().asValidationError() }
+                isIdentifiersUniq(mainEconomicActivities)
+                    .doOnFalse { return ValidationError.ValidateAwardData.MainEconomicActivitiesDuplicateIds().asValidationError() }
 
-                    supplier.details.bankAccounts.asSequence()
-                        .map { it.additionalAccountIdentifiers }
-                        .forEach { additionalAccountIdentifiers ->
-                            val identifiers = additionalAccountIdentifiers.map { it.id to it.scheme }
-                            isIdentifiersUniq(identifiers)
-                                .doOnFalse { return ValidationError.ValidateAwardData.AdditionalIdentifiersDuplicatedIds().asValidationError() }
-                        }
+                // VR.COM-4.8.13
+                val permitsIdentifiers = suppliers.asSequence()
+                    .map { it.details }
+                    .flatMap { it.permits.asSequence() }
+                    .map { it.id to it.scheme }
+                    .toList()
 
-                }
+                isIdentifiersUniq(permitsIdentifiers)
+                    .doOnFalse { return ValidationError.ValidateAwardData.PermitsDuplicateIds().asValidationError() }
+
+                //VR.COM-4.8.15
+                val bankAccountsIdentifiers = suppliers.asSequence()
+                    .map { it.details }
+                    .flatMap { it.bankAccounts.asSequence() }
+                    .map { it.identifier.id to it.identifier.scheme }
+                    .toList()
+
+                isIdentifiersUniq(bankAccountsIdentifiers)
+                    .doOnFalse { return ValidationError.ValidateAwardData.BankAccountsDuplicatedIds().asValidationError() }
+
+                //VR.COM-4.8.16
+                val additionalAccountIdentifiers = suppliers.asSequence()
+                    .map { it.details }
+                    .flatMap { it.bankAccounts.asSequence() }
+                    .flatMap { it.additionalAccountIdentifiers.asSequence() }
+                    .map { it.id to it.scheme }
+                    .toList()
+
+                isIdentifiersUniq(additionalAccountIdentifiers)
+                    .doOnFalse { return ValidationError.ValidateAwardData.AdditionalIdentifiersDuplicatedIds().asValidationError() }
+
+                // VR.COM-4.8.14
+                suppliers.asSequence()
+                    .map { it.details }
+                    .flatMap { it.permits.asSequence() }
+                    .map { it.permitDetails.validityPeriod }
+                    .forEach { validatePeriod(it).onFailure { return it } }
 
                 //VR.COM-4.8.12
-                val legalForms = suppliers.mapNotNull { it.details.legalForm }.map { it.id to it.scheme }
+                val legalForms = suppliers.asSequence()
+                    .mapNotNull { it.details.legalForm }
+                    .map { it.id to it.scheme }
+                    .toList()
+
                 isIdentifiersUniq(legalForms)
                     .doOnFalse { return ValidationError.ValidateAwardData.LegalFormsDuplicateIds().asValidationError() }
 

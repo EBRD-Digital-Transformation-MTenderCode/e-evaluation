@@ -5,6 +5,7 @@ import com.procurement.evaluation.application.model.award.access.CheckAccessToAw
 import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateErrors
 import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
+import com.procurement.evaluation.application.model.award.create.CreateAwardParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
 import com.procurement.evaluation.application.model.award.start.awardperiod.StartAwardPeriodParams
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
@@ -16,6 +17,7 @@ import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.GenerationService
 import com.procurement.evaluation.application.service.RulesService
+import com.procurement.evaluation.application.service.Transform
 import com.procurement.evaluation.application.service.award.rules.ValidateAwardDataRules
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
@@ -54,7 +56,9 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
+import com.procurement.evaluation.infrastructure.handler.v2.converter.toDomain
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
@@ -150,6 +154,8 @@ interface AwardService {
 
     fun validateAwardData(params: ValidateAwardDataParams): Validated<Failure>
 
+    fun createAward(params: CreateAwardParams): Result<CreateAwardResult, Failure>
+
     fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Failure>
 
     fun createUnsuccessfulAwards(params: CreateUnsuccessfulAwardsParams)
@@ -165,7 +171,8 @@ class AwardServiceImpl(
     private val generationService: GenerationService,
     private val awardRepository: AwardRepository,
     private val awardPeriodRepository: AwardPeriodRepository,
-    private val rulesService: RulesService,
+    private val transform: Transform,
+    private val rulesService: RulesService
 ) : AwardService {
 
     val createUnsuccessfulAwardsStrategy = CreateUnsuccessfulAwardsStrategy(
@@ -338,7 +345,8 @@ class AwardServiceImpl(
             },
             documents = null,
             items = null,
-            weightedValue = null
+            weightedValue = null,
+            internalId = null
         )
 
         val prevAwardPeriodStart = awardPeriodRepository.findBy(cpid = cpid, ocid = ocid)
@@ -1513,7 +1521,8 @@ class AwardServiceImpl(
                     documents = null,
                     suppliers = null,
                     relatedBid = null,
-                    weightedValue = null
+                    weightedValue = null,
+                    internalId = null
                 )
             }
 
@@ -1909,6 +1918,52 @@ class AwardServiceImpl(
         return Validated.ok()
     }
 
+    override fun createAward(params: CreateAwardParams): Result<CreateAwardResult, Failure> {
+        val receivedAward = params.awards.first()
+        val receivedLot = params.tender.lots.first()
+
+        val generatedToken = Token.randomUUID()
+        val createdAward = Award(
+            id = receivedAward.id,                 // FR.COM-4.9.1
+            internalId = receivedAward.internalId, // FR.COM-4.9.2
+            date = params.date,            // FR.COM-4.9.3
+            status = AwardStatus.PENDING,  // FR.COM-4.9.4
+            statusDetails = AwardStatusDetails.EMPTY,  // FR.COM-4.9.4
+            description = receivedAward.description,   // FR.COM-4.9.5
+            value = receivedAward.value?.toDomain(),   // FR.COM-4.9.6
+            suppliers = receivedAward.suppliers.map { it.toDomain() },   // FR.COM-4.9.7
+            documents = receivedAward.documents.map { it.toDomain() },   // FR.COM-4.9.8
+            relatedLots = listOf(receivedLot.id),  // FR.COM-4.9.8
+            token = generatedToken.toString(),     // FR.COM-4.9.10
+            title = null,
+            weightedValue = null,
+            relatedBid = null,
+            bidDate = null,
+            items = emptyList()
+        )
+
+        val json = transform.trySerialization(createdAward)
+            .onFailure { return it }
+
+        val awardEntity = AwardEntity(
+            cpid = params.cpid,
+            ocid = params.ocid,
+            status = createdAward.status,
+            statusDetails = createdAward.statusDetails,
+            token = generatedToken,
+            owner = params.owner,
+            jsonData = json,
+        )
+
+        // FR.COM-4.9.11
+        awardRepository.save(cpid = params.cpid, award = awardEntity)
+
+        return CreateAwardResult.ResponseConverter
+            .fromDomain(createdAward)
+            .let { CreateAwardResult(generatedToken, listOf(it)) }
+            .asSuccess()
+    }
+
     override fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Failure> =
         closeAwardPeriodStrategy.execute(params = params)
 
@@ -2039,7 +2094,8 @@ class AwardServiceImpl(
             suppliers = null,
             documents = null,
             items = null,
-            weightedValue = null
+            weightedValue = null,
+            internalId = null
         )
     }
 
@@ -2454,7 +2510,8 @@ class AwardServiceImpl(
             description = null,
             title = null,
             documents = null,
-            items = null
+            items = null,
+            internalId = null
         )
 
     private fun defineAwardValue(
@@ -2732,7 +2789,8 @@ class AwardServiceImpl(
         description = null,
         title = null,
         documents = null,
-        items = null
+        items = null,
+        internalId = null
     )
 
     private fun canCalculateWeightedValue(

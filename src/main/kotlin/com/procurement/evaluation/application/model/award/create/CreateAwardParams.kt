@@ -1,4 +1,4 @@
-package com.procurement.evaluation.application.model.award.validate
+package com.procurement.evaluation.application.model.award.create
 
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseDate
@@ -6,12 +6,14 @@ import com.procurement.evaluation.application.model.parseEnum
 import com.procurement.evaluation.application.model.parseOcid
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
+import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
-import com.procurement.evaluation.domain.model.enums.OperationType2
 import com.procurement.evaluation.domain.model.enums.Scale
+import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.asFailure
 import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
@@ -20,61 +22,47 @@ import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-class ValidateAwardDataParams private constructor(
+class CreateAwardParams private constructor(
     val cpid: Cpid,
     val ocid: Ocid,
-    val operationType: OperationType2,
+    val date: LocalDateTime,
+    val owner: Owner,
     val tender: Tender,
     val awards: List<Award>
 ) {
     companion object {
-        private val allowedOperationTypes = OperationType2.allowedElements
-            .filter {
-                when (it) {
-                    OperationType2.CREATE_AWARD,
-                    OperationType2.UPDATE_AWARD -> true
-
-                    OperationType2.APPLY_QUALIFICATION_PROTOCOL,
-                    OperationType2.CREATE_PCR,
-                    OperationType2.CREATE_SUBMISSION,
-                    OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
-                    OperationType2.LOT_CANCELLATION,
-                    OperationType2.SUBMISSION_PERIOD_END,
-                    OperationType2.TENDER_CANCELLATION,
-                    OperationType2.TENDER_OR_LOT_AMENDMENT_CANCELLATION,
-                    OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION -> false
-                }
-            }
-            .toSetBy { it }
 
         fun tryCreate(
             cpid: String,
             ocid: String,
-            operationType: String,
+            date: String,
+            owner: String,
             tender: Tender,
             awards: List<Award>
-        ): Result<ValidateAwardDataParams, DataErrors> {
+        ): Result<CreateAwardParams, DataErrors> {
             val parsedCpid = parseCpid(cpid)
                 .onFailure { return it }
 
             val parsedOcid = parseOcid(ocid)
                 .onFailure { return it }
 
-            val parsedOperationType = parseEnum(
-                value = operationType,
-                target = OperationType2,
-                allowedEnums = allowedOperationTypes,
-                attributeName = "operationType"
-            )
+            val parsedOwner = owner.tryOwner()
+                .onFailure {
+                    return DataErrors.Validation.DataMismatchToPattern(name = "owner", pattern = "uuid", actualValue = owner)
+                        .asFailure()
+                }
+
+            val parsedDate = parseDate(value = date, attributeName = "date")
                 .onFailure { return it }
 
             if (awards.isEmpty())
                 return failure(DataErrors.Validation.EmptyArray(name = "awards"))
 
-            return ValidateAwardDataParams(
+            return CreateAwardParams(
                 cpid = parsedCpid,
                 ocid = parsedOcid,
-                operationType = parsedOperationType,
+                date = parsedDate,
+                owner = parsedOwner,
                 tender = tender,
                 awards = awards
             ).asSuccess()
@@ -95,14 +83,8 @@ class ValidateAwardDataParams private constructor(
         }
 
         data class Lot(
-            val id: String,
-            val value: Value
-        ) {
-            data class Value(
-                val amount: BigDecimal,
-                val currency: String
-            )
-        }
+            val id: String
+        )
     }
 
     class Award private constructor(
@@ -202,24 +184,27 @@ class ValidateAwardDataParams private constructor(
                 data class AddressDetails(
                     val country: Country,
                     val region: Region,
-                    val locality: Locality
+                    val locality: Locality,
                 ) {
                     data class Country(
                         val id: String,
                         val description: String,
-                        val scheme: String
+                        val scheme: String,
+                        val uri: String
                     )
 
                     data class Region(
                         val id: String,
                         val description: String,
-                        val scheme: String
+                        val scheme: String,
+                        val uri: String
                     )
 
                     data class Locality(
                         val id: String,
                         val description: String,
-                        val scheme: String
+                        val scheme: String,
+                        val uri: String?
                     )
                 }
             }
@@ -526,19 +511,22 @@ class ValidateAwardDataParams private constructor(
                             data class Country(
                                 val id: String,
                                 val description: String,
-                                val scheme: String
+                                val scheme: String,
+                                val uri: String
                             )
 
                             data class Region(
                                 val id: String,
                                 val description: String,
-                                val scheme: String
+                                val scheme: String,
+                                val uri: String
                             )
 
                             data class Locality(
                                 val id: String,
                                 val description: String,
-                                val scheme: String
+                                val scheme: String,
+                                val uri: String?
                             )
                         }
                     }
