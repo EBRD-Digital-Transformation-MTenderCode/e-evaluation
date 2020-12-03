@@ -14,5 +14,6 @@ data class Document @JsonCreator constructor(
 
         var description: String?,
 
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
         var relatedLots: List<String>?
 )
