@@ -2456,8 +2456,8 @@ class AwardServiceImpl(
                                                         validityPeriod = permitDetail.validityPeriod
                                                             .let { validityPeriod ->
                                                                 Details.Permit.PermitDetails.ValidityPeriod(
-                                                                    startDate = validityPeriod.startDate.toString(),
-                                                                    endDate = validityPeriod.endDate.toString()
+                                                                    startDate = validityPeriod.startDate,
+                                                                    endDate = validityPeriod.endDate
                                                                 )
                                                             }
                                                     )
@@ -2736,8 +2736,8 @@ class AwardServiceImpl(
                                                     validityPeriod = permitDetail.validityPeriod
                                                         .let { validityPeriod ->
                                                             Details.Permit.PermitDetails.ValidityPeriod(
-                                                                startDate = validityPeriod.startDate.toString(),
-                                                                endDate = validityPeriod.endDate.toString()
+                                                                startDate = validityPeriod.startDate,
+                                                                endDate = validityPeriod.endDate
                                                             )
                                                         }
                                                 )

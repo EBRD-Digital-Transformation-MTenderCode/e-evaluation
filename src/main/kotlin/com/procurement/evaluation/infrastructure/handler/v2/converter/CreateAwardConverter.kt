@@ -493,7 +493,7 @@ fun CreateAwardParams.Award.Supplier.Details.Permit.PermitDetails.IssuedThought.
     Details.Permit.PermitDetails.IssuedThought(id = id, name = name)
 
 fun CreateAwardParams.Award.Supplier.Details.Permit.PermitDetails.ValidityPeriod.toDomain(): Details.Permit.PermitDetails.ValidityPeriod =
-    Details.Permit.PermitDetails.ValidityPeriod(startDate = startDate.toString(), endDate = endDate.toString())
+    Details.Permit.PermitDetails.ValidityPeriod(startDate = startDate, endDate = endDate)
 
 fun CreateAwardParams.Award.Supplier.Details.MainEconomicActivity.toDomain(): MainEconomicActivity =
     MainEconomicActivity(
