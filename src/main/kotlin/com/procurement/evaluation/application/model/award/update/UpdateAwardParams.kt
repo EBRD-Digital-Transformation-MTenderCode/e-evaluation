@@ -1,4 +1,4 @@
-package com.procurement.evaluation.application.model.award.create
+package com.procurement.evaluation.application.model.award.update
 
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseDate
@@ -6,14 +6,11 @@ import com.procurement.evaluation.application.model.parseEnum
 import com.procurement.evaluation.application.model.parseOcid
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
-import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
 import com.procurement.evaluation.domain.model.enums.Scale
-import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
-import com.procurement.evaluation.lib.functional.asFailure
 import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
@@ -22,76 +19,32 @@ import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-class CreateAwardParams private constructor(
+class UpdateAwardParams private constructor(
     val cpid: Cpid,
     val ocid: Ocid,
-    val date: LocalDateTime,
-    val owner: Owner,
-    val tender: Tender,
     val awards: List<Award>
 ) {
     companion object {
 
-        fun tryCreate(
-            cpid: String,
-            ocid: String,
-            date: String,
-            owner: String,
-            tender: Tender,
-            awards: List<Award>
-        ): Result<CreateAwardParams, DataErrors> {
+        fun tryCreate(cpid: String, ocid: String, awards: List<Award>): Result<UpdateAwardParams, DataErrors> {
             val parsedCpid = parseCpid(cpid)
                 .onFailure { return it }
 
             val parsedOcid = parseOcid(ocid)
                 .onFailure { return it }
 
-            val parsedOwner = owner.tryOwner()
-                .onFailure {
-                    return DataErrors.Validation.DataMismatchToPattern(name = "owner", pattern = "uuid", actualValue = owner)
-                        .asFailure()
-                }
-
-            val parsedDate = parseDate(value = date, attributeName = "date")
-                .onFailure { return it }
-
             if (awards.isEmpty())
                 return failure(DataErrors.Validation.EmptyArray(name = "awards"))
 
-            return CreateAwardParams(
-                cpid = parsedCpid,
-                ocid = parsedOcid,
-                date = parsedDate,
-                owner = parsedOwner,
-                tender = tender,
-                awards = awards
-            ).asSuccess()
+            return UpdateAwardParams(parsedCpid, parsedOcid, awards).asSuccess()
         }
-    }
-
-    class Tender private constructor(
-        val lots: List<Lot>
-    ) {
-        companion object {
-            fun tryCreate(lots: List<Lot>): Result<Tender, DataErrors> {
-
-                if (lots.isEmpty())
-                    return failure(DataErrors.Validation.EmptyArray(name = "tender.lots"))
-
-                return Tender(lots = lots).asSuccess()
-            }
-        }
-
-        data class Lot(
-            val id: String
-        )
     }
 
     class Award private constructor(
         val id: String,
         val internalId: String?,
         val description: String?,
-        val value: Value,
+        val value: Value?,
         val suppliers: List<Supplier>,
         val documents: List<Document>
     ) {
@@ -101,7 +54,7 @@ class CreateAwardParams private constructor(
                 id: String,
                 internalId: String?,
                 description: String?,
-                value: Value,
+                value: Value?,
                 suppliers: List<Supplier>,
                 documents: List<Document>?
             ): Result<Award, DataErrors> {
@@ -124,8 +77,7 @@ class CreateAwardParams private constructor(
         }
 
         data class Value(
-            val amount: BigDecimal?,
-            val currency: String?
+            val amount: BigDecimal?
         )
 
         class Supplier private constructor(
