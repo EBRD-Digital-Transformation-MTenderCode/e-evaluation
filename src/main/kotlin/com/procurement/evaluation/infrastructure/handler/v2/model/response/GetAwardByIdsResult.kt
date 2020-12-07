@@ -227,10 +227,10 @@ data class GetAwardByIdsResult(
                         )
 
                         data class ValidityPeriod(
-                            @field:JsonProperty("startDate") @param:JsonProperty("startDate") val startDate: String,
+                            @field:JsonProperty("startDate") @param:JsonProperty("startDate") val startDate: LocalDateTime,
 
                             @JsonInclude(JsonInclude.Include.NON_NULL)
-                            @field:JsonProperty("endDate") @param:JsonProperty("endDate") val endDate: String?
+                            @field:JsonProperty("endDate") @param:JsonProperty("endDate") val endDate: LocalDateTime?
                         )
                     }
                 }
