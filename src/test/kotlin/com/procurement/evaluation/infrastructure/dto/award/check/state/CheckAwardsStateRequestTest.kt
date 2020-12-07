@@ -1,10 +1,10 @@
 package com.procurement.evaluation.infrastructure.dto.award.check.state
 
 import com.procurement.evaluation.infrastructure.AbstractDTOTestBase
-import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAwardStateRequest
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAwardsStateRequest
 import org.junit.jupiter.api.Test
 
-class CheckAwardStateRequestTest : AbstractDTOTestBase<CheckAwardStateRequest>(CheckAwardStateRequest::class.java) {
+class CheckAwardsStateRequestTest : AbstractDTOTestBase<CheckAwardsStateRequest>(CheckAwardsStateRequest::class.java) {
 
     @Test
     fun fully() {

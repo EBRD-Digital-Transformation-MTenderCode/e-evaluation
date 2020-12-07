@@ -2,7 +2,7 @@ package com.procurement.evaluation.infrastructure.handler.v2.model.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class CheckAwardStateRequest(
+data class CheckAwardsStateRequest(
     @param:JsonProperty("cpid") @field:JsonProperty("cpid") val cpid: String,
     @param:JsonProperty("ocid") @field:JsonProperty("ocid") val ocid: String,
     @param:JsonProperty("pmd") @field:JsonProperty("pmd") val pmd: String,

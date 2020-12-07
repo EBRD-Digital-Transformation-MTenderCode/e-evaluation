@@ -7,7 +7,7 @@ import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
 import com.procurement.evaluation.infrastructure.fail.error.BadRequest
 import com.procurement.evaluation.infrastructure.handler.v2.AddRequirementResponseHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CheckAccessToAwardHandler
-import com.procurement.evaluation.infrastructure.handler.v2.CheckAwardStateHandler
+import com.procurement.evaluation.infrastructure.handler.v2.CheckAwardsStateHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CheckRelatedTendererHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CloseAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CreateAwardHandler
@@ -27,7 +27,7 @@ class CommandServiceV2(
     private val addRequirementResponseHandler: AddRequirementResponseHandler,
     private val createUnsuccessfulAwardHandler: CreateUnsuccessfulAwardsHandler,
     private val closeAwardPeriodHandler: CloseAwardPeriodHandler,
-    private val checkAwardStateHandler: CheckAwardStateHandler,
+    private val checkAwardsStateHandler: CheckAwardsStateHandler,
     private val startAwardPeriodHandler: StartAwardPeriodHandler,
     private val validateAwardDataHandler: ValidateAwardDataHandler,
     private val createAwardHandler: CreateAwardHandler
@@ -40,7 +40,7 @@ class CommandServiceV2(
         CommandTypeV2.ADD_REQUIREMENT_RESPONSE -> addRequirementResponseHandler.handle(descriptor)
         CommandTypeV2.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(descriptor)
         CommandTypeV2.CLOSE_AWARD_PERIOD -> closeAwardPeriodHandler.handle(descriptor)
-        CommandTypeV2.CHECK_AWARD_STATE -> checkAwardStateHandler.handle(descriptor)
+        CommandTypeV2.CHECK_AWARD_STATE -> checkAwardsStateHandler.handle(descriptor)
         CommandTypeV2.START_AWARD_PERIOD -> startAwardPeriodHandler.handle(descriptor)
         CommandTypeV2.VALIDATE_AWARD_DATA -> validateAwardDataHandler.handle(descriptor)
         CommandTypeV2.CREATE_AWARD -> createAwardHandler.handle(descriptor)

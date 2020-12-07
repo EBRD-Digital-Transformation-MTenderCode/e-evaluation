@@ -8,14 +8,14 @@ import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.handler.v2.base.AbstractValidationHandlerV2
 import com.procurement.evaluation.infrastructure.handler.v2.converter.convert
 import com.procurement.evaluation.infrastructure.handler.v2.model.CommandDescriptor
-import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAwardStateRequest
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAwardsStateRequest
 import com.procurement.evaluation.lib.functional.Validated
 import com.procurement.evaluation.lib.functional.asValidationError
 import com.procurement.evaluation.lib.functional.flatMap
 import org.springframework.stereotype.Component
 
 @Component
-class CheckAwardStateHandler(
+class CheckAwardsStateHandler(
     private val awardService: AwardService,
     logger: Logger
 ) : AbstractValidationHandlerV2(logger) {
@@ -24,7 +24,7 @@ class CheckAwardStateHandler(
 
     override fun execute(descriptor: CommandDescriptor): Validated<Failure> =
         descriptor.body.asJsonNode
-            .params<CheckAwardStateRequest>()
+            .params<CheckAwardsStateRequest>()
             .flatMap { it.convert() }
             .onFailure { return it.reason.asValidationError() }
             .let { params -> awardService.checkAwardState(params) }
