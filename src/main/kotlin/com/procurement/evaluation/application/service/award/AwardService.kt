@@ -1842,6 +1842,8 @@ class AwardServiceImpl(
     }
 
     override fun checkAwardState(params: CheckAwardStateParams): Validated<Failure> {
+        val receivedAwardsIds = params.awards.map { it.id }
+
         val storedAwards = awardRepository.findBy(params.cpid, ocid = params.ocid)
             .onFailure {
                 return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception)
@@ -1849,8 +1851,8 @@ class AwardServiceImpl(
             }
             .mapResult { entity -> entity.jsonData.tryToObject(Award::class.java) }
             .onFailure { return it.reason.asValidationError() }
+            .filter { it.id in receivedAwardsIds }
 
-        val receivedAwardsIds = params.awards.map { it.id }
         val storedAwardsIds = storedAwards.map { it.id }
 
         if (!storedAwardsIds.containsAll(receivedAwardsIds))
