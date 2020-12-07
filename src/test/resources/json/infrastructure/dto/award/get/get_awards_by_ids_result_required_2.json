@@ -1,0 +1,88 @@
+{
+  "awards": [
+    {
+      "id": "string",
+      "date": "2020-12-02T15:42:19Z",
+      "status": "pending",
+      "statusDetails": "empty",
+      "value": {
+        "currency": "string"
+      },
+      "relatedLots": [
+        "string"
+      ],
+      "suppliers": [
+        {
+          "id": "string",
+          "name": "string",
+          "identifier": {
+            "id": "string",
+            "legalName": "string",
+            "scheme": "string",
+            "uri": "string"
+          },
+          "address": {
+            "streetAddress": "string",
+            "addressDetails": {
+              "country": {
+                "id": "string",
+                "description": "string",
+                "scheme": "string",
+                "uri": "string"
+              },
+              "region": {
+                "id": "string",
+                "description": "string",
+                "scheme": "string",
+                "uri": "string"
+              },
+              "locality": {
+                "id": "string",
+                "description": "string",
+                "scheme": "string",
+                "uri": "string"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "string",
+            "email": "string",
+            "telephone": "string"
+          },
+          "persones": [
+            {
+              "title": "string",
+              "id": "string",
+              "name": "string",
+              "identifier": {
+                "scheme": "string",
+                "id": "string",
+                "uri": "string"
+              },
+              "businessFunctions": [
+                {
+                  "id": "string",
+                  "type": "chairman",
+                  "jobTitle": "string",
+                  "period": {
+                    "startDate": "2020-12-02T15:42:19Z"
+                  },
+                  "documents": [
+                    {
+                      "id": "string",
+                      "documentType": "regulatoryDocument",
+                      "title": "string"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "details": {
+            "scale": "micro"
+          }
+        }
+      ]
+    }
+  ]
+}

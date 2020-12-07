@@ -16,6 +16,7 @@ enum class CommandTypeV2(@JsonValue override val key: String, override val kind:
     CLOSE_AWARD_PERIOD(key = "closeAwardPeriod", kind = Action.Kind.COMMAND),
     CREATE_UNSUCCESSFUL_AWARDS(key = "createUnsuccessfulAwards", kind = Action.Kind.COMMAND),
     GET_AWARD_STATES_BY_IDS(key = "getAwardStateByIds", kind = Action.Kind.QUERY),
+    GET_AWARD_BY_IDS(key = "getAwardByIds", kind = Action.Kind.QUERY),
     START_AWARD_PERIOD(key = "startAwardPeriod", kind = Action.Kind.COMMAND),
     VALIDATE_AWARD_DATA(key = "validateAwardData", kind = Action.Kind.QUERY),
     CREATE_AWARD(key = "createAward", kind = Action.Kind.COMMAND),

@@ -6,6 +6,7 @@ import com.procurement.evaluation.application.model.award.check.state.CheckAward
 import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.model.award.create.CreateAwardParams
+import com.procurement.evaluation.application.model.award.get.GetAwardByIdsParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
 import com.procurement.evaluation.application.model.award.start.awardperiod.StartAwardPeriodParams
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
@@ -59,6 +60,7 @@ import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.infrastructure.handler.v2.converter.toDomain
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardByIdsResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
@@ -145,6 +147,8 @@ interface AwardService {
     fun cancellation(context: AwardCancellationContext, data: AwardCancellationData): AwardCancellationResult
 
     fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Failure>
+
+    fun getAwardByIds(params: GetAwardByIdsParams): Result<GetAwardByIdsResult, Failure>
 
     fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure>
 
@@ -1788,6 +1792,19 @@ class AwardServiceImpl(
                 statusDetails = award.statusDetails
             )
         }.asSuccess()
+    }
+
+    override fun getAwardByIds(params: GetAwardByIdsParams): Result<GetAwardByIdsResult, Failure> {
+        val receivedIds = params.awards.map { it.id }
+
+        return awardRepository.findBy(params.cpid, params.ocid)
+            .onFailure { return it }
+            .mapResult { it.jsonData.tryToObject(Award::class.java) }
+            .onFailure { return it }
+            .filter { it.id in receivedIds }
+            .map { GetAwardByIdsResult.ResponseConverter.fromDomain(it) }
+            .let { GetAwardByIdsResult(awards = it) }
+            .asSuccess()
     }
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure> {
