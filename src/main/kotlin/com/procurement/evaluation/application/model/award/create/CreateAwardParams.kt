@@ -91,7 +91,7 @@ class CreateAwardParams private constructor(
         val id: String,
         val internalId: String?,
         val description: String?,
-        val value: Value?,
+        val value: Value,
         val suppliers: List<Supplier>,
         val documents: List<Document>
     ) {
@@ -101,7 +101,7 @@ class CreateAwardParams private constructor(
                 id: String,
                 internalId: String?,
                 description: String?,
-                value: Value?,
+                value: Value,
                 suppliers: List<Supplier>,
                 documents: List<Document>?
             ): Result<Award, DataErrors> {
@@ -263,7 +263,7 @@ class CreateAwardParams private constructor(
                         ): Result<BusinessFunction, DataErrors> {
 
                             if (documents != null && documents.isEmpty())
-                                return failure(DataErrors.Validation.EmptyArray(name = "persones[$id].businessFunctions"))
+                                return failure(DataErrors.Validation.EmptyArray(name = "businessFunctions[$id].documents"))
 
                             val parsedBusinessFunctionType = parseEnum(
                                 value = type,
@@ -485,7 +485,7 @@ class CreateAwardParams private constructor(
                         ): Result<BankAccount, DataErrors> {
 
                             if (additionalAccountIdentifiers != null && additionalAccountIdentifiers.isEmpty())
-                                return failure(DataErrors.Validation.EmptyArray(name = "bankAccount[${identifier.id}-${identifier.scheme}].additionalAccountIdentifiers"))
+                                return failure(DataErrors.Validation.EmptyArray(name = "bankAccount[${identifier.scheme}-${identifier.id}].additionalAccountIdentifiers"))
 
                             return BankAccount(
                                 bankName = bankName,

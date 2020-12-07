@@ -9,12 +9,15 @@ import com.procurement.evaluation.application.model.award.start.awardperiod.Star
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
+import com.procurement.evaluation.application.model.award.update.UpdateAwardErrors
+import com.procurement.evaluation.application.model.award.update.UpdateAwardParams
 import com.procurement.evaluation.application.model.award.validate.ValidateAwardDataParams
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.GenerationService
 import com.procurement.evaluation.application.service.Transform
+import com.procurement.evaluation.application.service.award.rules.UpdateAwardRules
 import com.procurement.evaluation.application.service.award.rules.ValidateAwardDataRules
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
@@ -52,6 +55,7 @@ import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
 import com.procurement.evaluation.infrastructure.handler.v2.converter.toDomain
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.UpdateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
@@ -148,6 +152,8 @@ interface AwardService {
     fun validateAwardData(params: ValidateAwardDataParams): Validated<Failure>
 
     fun createAward(params: CreateAwardParams): Result<CreateAwardResult, Failure>
+
+    fun updateAward(params: UpdateAwardParams): Result<UpdateAwardResult, Failure>
 
     fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Failure>
 
@@ -1895,7 +1901,7 @@ class AwardServiceImpl(
             status = AwardStatus.PENDING,  // FR.COM-4.9.4
             statusDetails = AwardStatusDetails.EMPTY,  // FR.COM-4.9.4
             description = receivedAward.description,   // FR.COM-4.9.5
-            value = receivedAward.value?.toDomain(),   // FR.COM-4.9.6
+            value = receivedAward.value.toDomain(),   // FR.COM-4.9.6
             suppliers = receivedAward.suppliers.map { it.toDomain() },   // FR.COM-4.9.7
             documents = receivedAward.documents.map { it.toDomain() },   // FR.COM-4.9.8
             relatedLots = listOf(receivedLot.id),  // FR.COM-4.9.8
@@ -1926,6 +1932,36 @@ class AwardServiceImpl(
         return CreateAwardResult.ResponseConverter
             .fromDomain(createdAward)
             .let { CreateAwardResult(generatedToken, listOf(it)) }
+            .asSuccess()
+    }
+
+    override fun updateAward(params: UpdateAwardParams): Result<UpdateAwardResult, Failure> {
+        val receivedAward = params.awards.first()
+
+        val storedAwards = awardRepository.findBy(params.cpid, params.ocid)
+            .onFailure { return it }
+            .associateBy { it.jsonData.tryToObject(Award::class.java).onFailure { return it } }
+            .filter { (award, _) -> award.id == receivedAward.id }
+
+        val storedAward =
+            if (storedAwards.isEmpty())
+                return UpdateAwardErrors.AwardNotFound().asFailure()
+            else
+                storedAwards.keys.first()
+
+        val awardEntity = storedAwards
+            .mapKeys { it.key.id }
+            .getValue(storedAward.id)
+
+        val updatedAward = UpdateAwardRules.update(target = storedAward, source = receivedAward)
+
+        val json = transform.trySerialization(updatedAward).onFailure { return it }
+        val updatedAwardEntity = awardEntity.copy(jsonData = json)
+
+        awardRepository.save(params.cpid, updatedAwardEntity)
+
+        return UpdateAwardResult.ResponseConverter.fromDomain(updatedAward)
+            .let { UpdateAwardResult(listOf(it)) }
             .asSuccess()
     }
 
