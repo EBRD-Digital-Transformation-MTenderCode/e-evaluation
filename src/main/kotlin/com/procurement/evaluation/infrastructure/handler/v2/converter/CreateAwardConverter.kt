@@ -311,6 +311,7 @@ fun CreateAwardParams.Award.Supplier.toDomain(): OrganizationReference =
 
 fun CreateAwardParams.Award.Supplier.Person.toDomain(): OrganizationReference.Person =
     OrganizationReference.Person(
+        id = id,
         title = title,
         name = name,
         identifier = identifier.toDomain(),
@@ -492,7 +493,7 @@ fun CreateAwardParams.Award.Supplier.Details.Permit.PermitDetails.IssuedThought.
     Details.Permit.PermitDetails.IssuedThought(id = id, name = name)
 
 fun CreateAwardParams.Award.Supplier.Details.Permit.PermitDetails.ValidityPeriod.toDomain(): Details.Permit.PermitDetails.ValidityPeriod =
-    Details.Permit.PermitDetails.ValidityPeriod(startDate = startDate.toString(), endDate = endDate.toString())
+    Details.Permit.PermitDetails.ValidityPeriod(startDate = startDate, endDate = endDate)
 
 fun CreateAwardParams.Award.Supplier.Details.MainEconomicActivity.toDomain(): MainEconomicActivity =
     MainEconomicActivity(
@@ -506,6 +507,6 @@ fun CreateAwardParams.Award.Supplier.Details.LegalForm.toDomain(): Details.Legal
     Details.LegalForm(
         id = id,
         scheme = scheme,
-        description = description!!,
+        description = description,
         uri = uri
     )

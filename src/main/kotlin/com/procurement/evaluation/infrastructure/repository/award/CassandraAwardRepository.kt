@@ -8,8 +8,8 @@ import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
-import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.Token
+import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.repository.Database
@@ -193,7 +193,7 @@ class CassandraAwardRepository(private val session: Session) : AwardRepository {
         cpid = Cpid.tryCreateOrNull(row.getString(Database.Awards.CPID))!!,
         token = Token.fromString(row.getString(Database.Awards.TOKEN_ENTITY)),
         ocid = Ocid.tryCreateOrNull(row.getString(Database.Awards.OCID))!!,
-        owner = Owner.fromString(row.getString(Database.Awards.OWNER)),
+        owner = row.getString(Database.Awards.OWNER)?.tryOwner()?.orNull,
         status = AwardStatus.creator(row.getString(Database.Awards.STATUS)),
         statusDetails = AwardStatusDetails.creator(row.getString(Database.Awards.STATUS_DETAILS)),
         jsonData = row.getString(Database.Awards.JSON_DATA)

@@ -2,6 +2,7 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
 data class OrganizationReference @JsonCreator constructor(
@@ -25,6 +26,9 @@ data class OrganizationReference @JsonCreator constructor(
     val persones: List<Person>?
 ) {
     data class Person(
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @param:JsonProperty("id") @field:JsonProperty("id") val id: String?,
+
         val title: String,
         val name: String,
         val identifier: Identifier,

@@ -2340,6 +2340,7 @@ class AwardServiceImpl(
                     persones = tenderer.persones
                         .map { person ->
                             OrganizationReference.Person(
+                                id = null,
                                 identifier = person.identifier
                                     .let { identifier ->
                                         OrganizationReference.Person.Identifier(
@@ -2490,8 +2491,8 @@ class AwardServiceImpl(
                                                         validityPeriod = permitDetail.validityPeriod
                                                             .let { validityPeriod ->
                                                                 Details.Permit.PermitDetails.ValidityPeriod(
-                                                                    startDate = validityPeriod.startDate.toString(),
-                                                                    endDate = validityPeriod.endDate.toString()
+                                                                    startDate = validityPeriod.startDate,
+                                                                    endDate = validityPeriod.endDate
                                                                 )
                                                             }
                                                     )
@@ -2619,6 +2620,7 @@ class AwardServiceImpl(
                 persones = tenderer.persones
                     .map { person ->
                         OrganizationReference.Person(
+                            id = null,
                             identifier = person.identifier
                                 .let { identifier ->
                                     OrganizationReference.Person.Identifier(
@@ -2769,8 +2771,8 @@ class AwardServiceImpl(
                                                     validityPeriod = permitDetail.validityPeriod
                                                         .let { validityPeriod ->
                                                             Details.Permit.PermitDetails.ValidityPeriod(
-                                                                startDate = validityPeriod.startDate.toString(),
-                                                                endDate = validityPeriod.endDate.toString()
+                                                                startDate = validityPeriod.startDate,
+                                                                endDate = validityPeriod.endDate
                                                             )
                                                         }
                                                 )

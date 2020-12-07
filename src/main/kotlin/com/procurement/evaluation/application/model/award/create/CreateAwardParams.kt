@@ -545,7 +545,7 @@ class CreateAwardParams private constructor(
                 data class LegalForm(
                     val scheme: String,
                     val id: String,
-                    val description: String?,
+                    val description: String,
                     val uri: String?
                 )
             }

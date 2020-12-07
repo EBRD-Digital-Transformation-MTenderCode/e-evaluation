@@ -228,10 +228,10 @@ data class CreateAwardResult(
                         )
 
                         data class ValidityPeriod(
-                            @field:JsonProperty("startDate") @param:JsonProperty("startDate") val startDate: String,
+                            @field:JsonProperty("startDate") @param:JsonProperty("startDate") val startDate: LocalDateTime,
 
                             @JsonInclude(JsonInclude.Include.NON_NULL)
-                            @field:JsonProperty("endDate") @param:JsonProperty("endDate") val endDate: String?
+                            @field:JsonProperty("endDate") @param:JsonProperty("endDate") val endDate: LocalDateTime?
                         )
                     }
                 }
@@ -364,7 +364,7 @@ data class CreateAwardResult(
 
         fun OrganizationReference.Person.fromDomain(): Award.Supplier.Person =
             Award.Supplier.Person(
-                id = "${identifier.id}-${identifier.scheme}",
+                id = id!!,
                 title = title,
                 identifier = identifier.fromDomain(),
                 name = name,
