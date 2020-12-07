@@ -1,0 +1,186 @@
+{
+  "cpid": "ocds-b3wdp1-MD-1580458690892",
+  "ocid": "ocds-b3wdp1-MD-1580458690892-EV-1580458791896",
+  "awards": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "internalId": "string",
+      "description": "string",
+      "value": {
+        "amount": 12.50
+      },
+      "suppliers": [
+        {
+          "id": "string",
+          "name": "string",
+          "identifier": {
+            "id": "string",
+            "legalName": "string",
+            "scheme": "string",
+            "uri": "string"
+          },
+          "additionalIdentifiers": [
+            {
+              "id": "string",
+              "legalName": "string",
+              "scheme": "string",
+              "uri": "string"
+            }
+          ],
+          "address": {
+            "streetAddress": "string",
+            "postalCode": "string",
+            "addressDetails": {
+              "country": {
+                "id": "string",
+                "description": "string",
+                "scheme": "string",
+                "uri": "string"
+              },
+              "region": {
+                "id": "string",
+                "description": "string",
+                "scheme": "string",
+                "uri": "string"
+              },
+              "locality": {
+                "id": "string",
+                "description": "string",
+                "scheme": "string",
+                "uri": "string"
+              }
+            }
+          },
+          "contactPoint": {
+            "name": "string",
+            "email": "string",
+            "telephone": "string",
+            "faxNumber": "string",
+            "url": "string"
+          },
+          "persones": [
+            {
+              "title": "string",
+              "id": "string",
+              "name": "string",
+              "identifier": {
+                "scheme": "string",
+                "id": "string",
+                "uri": "string"
+              },
+              "businessFunctions": [
+                {
+                  "id": "string",
+                  "type": "chairman",
+                  "jobTitle": "string",
+                  "period": {
+                    "startDate": "2020-12-01T07:50:01.483Z"
+                  },
+                  "documents": [
+                    {
+                      "id": "string",
+                      "documentType": "regulatoryDocument",
+                      "title": "string",
+                      "description": "string"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "details": {
+            "typeOfSupplier": "company",
+            "mainEconomicActivities": [
+              {
+                "id": "string",
+                "scheme": "string",
+                "description": "string",
+                "uri": "string"
+              }
+            ],
+            "scale": "micro",
+            "permits": [
+              {
+                "id": "string",
+                "scheme": "string",
+                "url": "string",
+                "permitDetails": {
+                  "issuedBy": {
+                    "id": "string",
+                    "name": "string"
+                  },
+                  "issuedThought": {
+                    "id": "string",
+                    "name": "string"
+                  },
+                  "validityPeriod": {
+                    "startDate": "2020-12-01T07:50:01.483Z",
+                    "endDate": "2020-12-01T07:50:01.483Z"
+                  }
+                }
+              }
+            ],
+            "bankAccounts": [
+              {
+                "description": "string",
+                "bankName": "string",
+                "address": {
+                  "streetAddress": "string",
+                  "postalCode": "string",
+                  "addressDetails": {
+                    "country": {
+                      "id": "string",
+                      "description": "string",
+                      "scheme": "string",
+                      "uri": "string"
+                    },
+                    "region": {
+                      "id": "string",
+                      "description": "string",
+                      "scheme": "string",
+                      "uri": "string"
+                    },
+                    "locality": {
+                      "id": "string",
+                      "description": "string",
+                      "scheme": "string",
+                      "uri": "string"
+                    }
+                  }
+                },
+                "identifier": {
+                  "scheme": "UA-MFO",
+                  "id": "string"
+                },
+                "accountIdentification": {
+                  "scheme": "IBAN",
+                  "id": "string"
+                },
+                "additionalAccountIdentifiers": [
+                  {
+                    "scheme": "fiscal",
+                    "id": "string"
+                  }
+                ]
+              }
+            ],
+            "legalForm": {
+              "scheme": "MD-CFOJ",
+              "id": "string",
+              "description": "string",
+              "uri": "string"
+            }
+          }
+        }
+      ],
+      "documents": [
+        {
+          "id": "string",
+          "title": "string",
+          "description": "string",
+          "documentType": "awardNotice"
+        }
+      ]
+    }
+  ]
+}
