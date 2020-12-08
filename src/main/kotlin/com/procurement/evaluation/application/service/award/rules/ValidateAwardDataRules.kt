@@ -225,10 +225,14 @@ object ValidateAwardDataRules {
     }
 
     fun validatePeriod(period: ValidateAwardDataParams.Award.Supplier.Details.Permit.PermitDetails.ValidityPeriod): Validated<Failure> =
-        if (period.startDate.isBefore(period.endDate))
-            Validated.ok()
-        else
-            ValidationError.ValidateAwardData.InvalidValidityPeriod().asValidationError()
+        period.endDate
+            ?.let {
+                if (period.startDate.isBefore(period.endDate))
+                    Validated.ok()
+                else
+                    ValidationError.ValidateAwardData.InvalidValidityPeriod().asValidationError()
+            }
+            ?: Validated.ok()
 
     fun isNeedToCheckSuppliers(operationType2: OperationType2): Boolean =
         when (operationType2) {
