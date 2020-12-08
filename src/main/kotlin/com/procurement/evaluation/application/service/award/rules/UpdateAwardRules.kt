@@ -354,7 +354,7 @@ private fun Details.Permit.PermitDetails.ValidityPeriod.updateBy(source: UpdateA
 private fun OrganizationReference.Person.updateBy(source: UpdateAwardParams.Award.Supplier.Person): OrganizationReference.Person =
     this.copy(
         name = source.name,
-        title = source.title,
+        title = source.title.key,
         identifier = this.identifier.updateBy(source.identifier),
         businessFunctions = updateBusinessFunctions(source.businessFunctions, this.businessFunctions)
     )
