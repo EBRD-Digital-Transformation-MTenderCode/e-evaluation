@@ -736,8 +736,6 @@ class AwardServiceImpl(
 
         //FR-7.1.2.1.1
         val updatedDocuments = updateDocuments(data = data, award = award)
-        
-        val updatedValue = getUpdatedValue(context, data, award)
 
         val updatedAward = award.copy(
             description = data.award.description,
@@ -745,8 +743,7 @@ class AwardServiceImpl(
             documents = updatedDocuments,
 
             statusDetails = data.award.statusDetails,
-            date = context.startDate,
-            value = updatedValue
+            date = context.startDate
         )
 
         val updatedAwardEntity = awardEntity.copy(
@@ -762,27 +759,6 @@ class AwardServiceImpl(
 
 
         return getEvaluateAwardResult(updatedAward = updatedAward)
-    }
-
-    private fun getUpdatedValue(context: EvaluateAwardContext, data: EvaluateAwardData, award: Award): Value {
-        val stage = context.ocid.stage
-        val storedValue = award.value!!
-        return when (stage) {
-            Stage.NP -> {
-                val receivedValue = data.award.value
-                if (receivedValue != null)
-                    storedValue.copy(amount = receivedValue.amount)
-                else storedValue
-            }
-            Stage.AC,
-            Stage.EI,
-            Stage.EV,
-            Stage.FE,
-            Stage.FS,
-            Stage.PC,
-            Stage.PN,
-            Stage.TP -> storedValue
-        }
     }
 
     private fun checkStatusDetails(
@@ -980,6 +956,7 @@ class AwardServiceImpl(
     private fun getEvaluateAwardResult(updatedAward: Award) = EvaluateAwardResult(
         award = EvaluateAwardResult.Award(
             id = AwardId.fromString(updatedAward.id),
+            internalId = updatedAward.internalId,
             date = updatedAward.date!!,
             description = updatedAward.description,
             status = updatedAward.status,
