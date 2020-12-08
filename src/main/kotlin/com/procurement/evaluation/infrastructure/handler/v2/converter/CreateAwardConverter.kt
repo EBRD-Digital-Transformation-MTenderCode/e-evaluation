@@ -79,7 +79,7 @@ fun CreateAwardRequest.Award.Supplier.convert(): Result<CreateAwardParams.Award.
     )
 
 fun CreateAwardRequest.Award.Supplier.Person.convert(): Result<CreateAwardParams.Award.Supplier.Person, DataErrors> =
-    CreateAwardParams.Award.Supplier.Person(
+    CreateAwardParams.Award.Supplier.Person.tryCreate(
         id = id,
         title = title,
         identifier = identifier.convert(),
@@ -87,7 +87,7 @@ fun CreateAwardRequest.Award.Supplier.Person.convert(): Result<CreateAwardParams
         businessFunctions = businessFunctions.map {
             it.convert().onFailure { fail -> return fail }
         }
-    ).asSuccess()
+    )
 
 fun CreateAwardRequest.Award.Supplier.Person.Identifier.convert(): CreateAwardParams.Award.Supplier.Person.Identifier =
     CreateAwardParams.Award.Supplier.Person.Identifier(
@@ -312,7 +312,7 @@ fun CreateAwardParams.Award.Supplier.toDomain(): OrganizationReference =
 fun CreateAwardParams.Award.Supplier.Person.toDomain(): OrganizationReference.Person =
     OrganizationReference.Person(
         id = id,
-        title = title,
+        title = title.key,
         name = name,
         identifier = identifier.toDomain(),
         businessFunctions = businessFunctions.map { it.toDomain() }

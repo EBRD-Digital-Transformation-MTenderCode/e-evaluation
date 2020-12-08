@@ -9,6 +9,7 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
 import com.procurement.evaluation.domain.model.enums.Scale
+import com.procurement.evaluation.domain.model.person.PersonTitle
 import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.lib.functional.Result
@@ -219,11 +220,42 @@ class CreateAwardParams private constructor(
 
             data class Person(
                 val id: String,
-                val title: String,
+                val title: PersonTitle,
                 val name: String,
                 val identifier: Identifier,
                 val businessFunctions: List<BusinessFunction>
             ) {
+
+                companion object {
+                    fun tryCreate(
+                        id: String,
+                        title: String,
+                        name: String,
+                        identifier: Identifier,
+                        businessFunctions: List<BusinessFunction>
+                    ): Result<Person, DataErrors> {
+
+                        if (businessFunctions.isEmpty())
+                            return failure(DataErrors.Validation.EmptyArray(name = "persones[$id].businessFunctions"))
+
+                        val parsedTitle = parseEnum(
+                            value = title,
+                            target = PersonTitle,
+                            allowedEnums = PersonTitle.allowedElements.toSet(),
+                            attributeName = "persones[$id].title"
+                        )
+                            .onFailure { return it }
+
+                        return Person(
+                            id = id,
+                            title = parsedTitle,
+                            name = name,
+                            identifier = identifier,
+                            businessFunctions = businessFunctions
+                        ).asSuccess()
+                    }
+                }
+
                 data class Identifier(
                     val id: String,
                     val scheme: String,
