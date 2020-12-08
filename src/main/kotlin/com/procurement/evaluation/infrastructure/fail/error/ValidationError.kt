@@ -132,7 +132,7 @@ sealed class ValidationError(
 
         class InvalidValidityPeriod: ValidationError(
             numberError = "4.8.14",
-            description = "Invalid validity period. Start date cannot be greater than end date."
+            description = "Invalid validity period. Start date cannot be greater or equals to end date."
         )
 
         class BankAccountsDuplicatedIds: ValidationError(
