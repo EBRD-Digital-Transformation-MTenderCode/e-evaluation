@@ -14,6 +14,7 @@ import java.time.LocalDateTime
 class EvaluateAwardResult(val award: Award) {
     data class Award(
         val id: AwardId,
+        val internalId: String?,
         val date: LocalDateTime,
         val description: String?,
         val status: AwardStatus,
