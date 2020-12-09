@@ -30,12 +30,14 @@ class CreateUnsuccessfulAwardsParams private constructor(
                     OperationType2.SUBMISSION_PERIOD_END,
                     OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION -> true
 
+                    OperationType2.CREATE_AWARD,
                     OperationType2.CREATE_PCR,
                     OperationType2.CREATE_SUBMISSION,
                     OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
                     OperationType2.LOT_CANCELLATION,
                     OperationType2.TENDER_CANCELLATION,
-                    OperationType2.TENDER_OR_LOT_AMENDMENT_CANCELLATION -> false
+                    OperationType2.TENDER_OR_LOT_AMENDMENT_CANCELLATION,
+                    OperationType2.UPDATE_AWARD -> false
                 }
             }
             .toSetBy { it }

@@ -2,6 +2,7 @@ package com.procurement.evaluation.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
+import java.time.LocalDateTime
 
 data class Details @JsonCreator constructor(
 
@@ -47,10 +48,10 @@ data class Details @JsonCreator constructor(
             )
 
             data class ValidityPeriod(
-                val startDate: String,
+                val startDate: LocalDateTime,
 
                 @JsonInclude(JsonInclude.Include.NON_NULL)
-                val endDate: String?
+                val endDate: LocalDateTime?
             )
         }
     }

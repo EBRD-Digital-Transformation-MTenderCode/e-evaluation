@@ -35,3 +35,8 @@ inline fun <T, reified C : Collection<T>, E : RuntimeException> C?.orThrow(excep
 
 inline fun <reified T, E : RuntimeException> T?.orThrow(exceptionBuilder: () -> E): T =
     this ?: throw exceptionBuilder()
+
+fun <T> getNewElements(received: Iterable<T>, known: Iterable<T>): Set<T> =
+    received.toSet().subtract(known.toSet())
+
+fun <T> getElementsForUpdate(received: Set<T>, known: Set<T>) = known.intersect(received)
