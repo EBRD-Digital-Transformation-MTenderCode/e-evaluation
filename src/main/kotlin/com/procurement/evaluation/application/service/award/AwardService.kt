@@ -1989,7 +1989,11 @@ class AwardServiceImpl(
         val json = transform.trySerialization(updatedAward).onFailure { return it }
         val updatedAwardEntity = awardEntity.copy(jsonData = json)
 
-        awardRepository.save(params.cpid, updatedAwardEntity)
+        val wasApplied = awardRepository.update(params.cpid, updatedAwardEntity)
+            .onFailure { return it }
+
+        if (!wasApplied)
+            return Failure.Incident.Database.DatabaseConsistencyIncident("Record not exists.").asFailure()
 
         return UpdateAwardResult.ResponseConverter.fromDomain(updatedAward)
             .let { UpdateAwardResult(listOf(it)) }
