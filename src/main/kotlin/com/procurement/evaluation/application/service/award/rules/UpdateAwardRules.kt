@@ -2,7 +2,6 @@ package com.procurement.evaluation.application.service.award.rules
 
 import com.procurement.evaluation.application.model.award.update.UpdateAwardParams
 import com.procurement.evaluation.infrastructure.handler.v2.converter.toDomain
-import com.procurement.evaluation.lib.getElementsForUpdate
 import com.procurement.evaluation.lib.getNewElements
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.model.dto.ocds.Address
@@ -55,11 +54,14 @@ object UpdateAwardRules {
         val newElements = getNewElements(received = receivedIds, known = knownIds)
             .map { id -> receivedElementsById.getValue(id).createBlock() }
 
-        val updatedElements = getElementsForUpdate(received = receivedIds, known = knownIds)
+        val updatedElements = knownIds
             .map { id ->
                 val stored = storedElementsById.getValue(id)
-                val received = receivedElementsById.getValue(id)
-                stored.updateBlock(received)
+                val received = receivedElementsById[id]
+
+                received
+                    ?.let { stored.updateBlock(it) }
+                    ?: stored
             }
 
         return updatedElements + newElements
