@@ -3,7 +3,6 @@ package com.procurement.evaluation.infrastructure.repository.rule
 import com.datastax.driver.core.Session
 import com.procurement.evaluation.application.repository.rule.RuleRepository
 import com.procurement.evaluation.domain.model.ProcurementMethod
-import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.infrastructure.extension.cassandra.tryExecute
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.repository.Database
@@ -33,14 +32,14 @@ class CassandraRuleRepository(private val session: Session) : RuleRepository {
     override fun find(
         country: String,
         pmd: ProcurementMethod,
-        operationType: OperationType?,
+        operationType: String?,
         parameter: String
     ): Result<String?, Failure.Incident.Database> =
         preparedGetValueByCQL.bind()
             .apply {
                 setString(Database.Rules.COUNTRY, country)
                 setString(Database.Rules.PMD, pmd.name)
-                setString(Database.Rules.OPERATION_TYPE, operationType?.key ?: ALL_OPERATION_TYPE)
+                setString(Database.Rules.OPERATION_TYPE, operationType ?: ALL_OPERATION_TYPE)
                 setString(Database.Rules.PARAMETER, parameter)
             }
             .tryExecute(session)

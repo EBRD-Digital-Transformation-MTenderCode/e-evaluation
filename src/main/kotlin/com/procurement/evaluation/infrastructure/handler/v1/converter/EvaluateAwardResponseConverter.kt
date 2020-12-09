@@ -8,6 +8,7 @@ fun EvaluateAwardResult.convert() = EvaluateAwardResponse(
         .let { award ->
             EvaluateAwardResponse.Award(
                 id = award.id,
+                internalId = award.internalId,
                 date = award.date,
                 description = award.description,
                 status = award.status,

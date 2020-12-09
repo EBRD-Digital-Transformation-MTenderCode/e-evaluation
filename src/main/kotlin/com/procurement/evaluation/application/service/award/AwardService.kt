@@ -2,15 +2,27 @@ package com.procurement.evaluation.application.service.award
 
 import com.procurement.evaluation.application.exception.SaveEntityException
 import com.procurement.evaluation.application.model.award.access.CheckAccessToAwardParams
+import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateErrors
+import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
+import com.procurement.evaluation.application.model.award.create.CreateAwardParams
+import com.procurement.evaluation.application.model.award.get.GetAwardByIdsParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
+import com.procurement.evaluation.application.model.award.start.awardperiod.StartAwardPeriodParams
 import com.procurement.evaluation.application.model.award.state.GetAwardStateByIdsParams
 import com.procurement.evaluation.application.model.award.tenderer.CheckRelatedTendererParams
 import com.procurement.evaluation.application.model.award.unsuccessful.CreateUnsuccessfulAwardsParams
+import com.procurement.evaluation.application.model.award.update.UpdateAwardErrors
+import com.procurement.evaluation.application.model.award.update.UpdateAwardParams
+import com.procurement.evaluation.application.model.award.validate.ValidateAwardDataParams
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.GenerationService
+import com.procurement.evaluation.application.service.RulesService
+import com.procurement.evaluation.application.service.Transform
+import com.procurement.evaluation.application.service.award.rules.UpdateAwardRules
+import com.procurement.evaluation.application.service.award.rules.ValidateAwardDataRules
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.model.Cpid
@@ -25,7 +37,9 @@ import com.procurement.evaluation.domain.model.enums.OperationType
 import com.procurement.evaluation.domain.model.enums.Stage
 import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.model.state.States
 import com.procurement.evaluation.domain.util.extension.doOnFalse
+import com.procurement.evaluation.domain.util.extension.mapResult
 import com.procurement.evaluation.domain.util.extension.mapResultPair
 import com.procurement.evaluation.exception.ErrorException
 import com.procurement.evaluation.exception.ErrorType
@@ -46,11 +60,17 @@ import com.procurement.evaluation.exception.ErrorType.UNKNOWN_SUPPLIER_COUNTRY
 import com.procurement.evaluation.exception.ErrorType.WRONG_NUMBER_OF_SUPPLIERS
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.fail.error.ValidationError
+import com.procurement.evaluation.infrastructure.handler.v2.converter.toDomain
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.UpdateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardByIdsResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
+import com.procurement.evaluation.lib.functional.Result.Companion.success
 import com.procurement.evaluation.lib.functional.Validated
+import com.procurement.evaluation.lib.functional.asFailure
 import com.procurement.evaluation.lib.functional.asSuccess
 import com.procurement.evaluation.lib.functional.asValidationError
 import com.procurement.evaluation.lib.toSetBy
@@ -85,6 +105,7 @@ import org.springframework.stereotype.Service
 import java.math.RoundingMode
 import java.time.LocalDateTime
 import java.util.*
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.StartAwardPeriodResult as StartAwardPeriodResultV2
 
 interface AwardService {
     fun create(context: CreateAwardContext, data: CreateAwardData): CreatedAwardData
@@ -131,9 +152,19 @@ interface AwardService {
 
     fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Failure>
 
+    fun getAwardByIds(params: GetAwardByIdsParams): Result<GetAwardByIdsResult, Failure>
+
     fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure>
 
+    fun checkAwardState(params: CheckAwardStateParams): Validated<Failure>
+
     fun checkRelatedTenderer(params: CheckRelatedTendererParams): Validated<Failure>
+
+    fun validateAwardData(params: ValidateAwardDataParams): Validated<Failure>
+
+    fun createAward(params: CreateAwardParams): Result<CreateAwardResult, Failure>
+
+    fun updateAward(params: UpdateAwardParams): Result<UpdateAwardResult, Failure>
 
     fun addRequirementResponse(params: AddRequirementResponseParams): Validated<Failure>
 
@@ -141,13 +172,17 @@ interface AwardService {
         : Result<List<com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateUnsuccessfulAwardsResult>, Failure>
 
     fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Failure>
+
+    fun startAwardPeriod(params: StartAwardPeriodParams): Result<StartAwardPeriodResultV2, Failure>
 }
 
 @Service
 class AwardServiceImpl(
     private val generationService: GenerationService,
     private val awardRepository: AwardRepository,
-    private val awardPeriodRepository: AwardPeriodRepository
+    private val awardPeriodRepository: AwardPeriodRepository,
+    private val transform: Transform,
+    private val rulesService: RulesService
 ) : AwardService {
 
     val createUnsuccessfulAwardsStrategy = CreateUnsuccessfulAwardsStrategy(
@@ -320,7 +355,8 @@ class AwardServiceImpl(
             },
             documents = null,
             items = null,
-            weightedValue = null
+            weightedValue = null,
+            internalId = null
         )
 
         val prevAwardPeriodStart = awardPeriodRepository.findBy(cpid = cpid, ocid = ocid)
@@ -700,8 +736,6 @@ class AwardServiceImpl(
 
         //FR-7.1.2.1.1
         val updatedDocuments = updateDocuments(data = data, award = award)
-        
-        val updatedValue = getUpdatedValue(context, data, award)
 
         val updatedAward = award.copy(
             description = data.award.description,
@@ -709,8 +743,7 @@ class AwardServiceImpl(
             documents = updatedDocuments,
 
             statusDetails = data.award.statusDetails,
-            date = context.startDate,
-            value = updatedValue
+            date = context.startDate
         )
 
         val updatedAwardEntity = awardEntity.copy(
@@ -726,27 +759,6 @@ class AwardServiceImpl(
 
 
         return getEvaluateAwardResult(updatedAward = updatedAward)
-    }
-
-    private fun getUpdatedValue(context: EvaluateAwardContext, data: EvaluateAwardData, award: Award): Value {
-        val stage = context.ocid.stage
-        val storedValue = award.value!!
-        return when (stage) {
-            Stage.NP -> {
-                val receivedValue = data.award.value
-                if (receivedValue != null)
-                    storedValue.copy(amount = receivedValue.amount)
-                else storedValue
-            }
-            Stage.AC,
-            Stage.EI,
-            Stage.EV,
-            Stage.FE,
-            Stage.FS,
-            Stage.PC,
-            Stage.PN,
-            Stage.TP -> storedValue
-        }
     }
 
     private fun checkStatusDetails(
@@ -938,12 +950,13 @@ class AwardServiceImpl(
         documentType = document.documentType,
         title = document.title,
         description = document.description,
-        relatedLots = document.relatedLots.asSequence().map { it.toString() }.toHashSet()
+        relatedLots = document.relatedLots.map { it.toString() }
     )
 
     private fun getEvaluateAwardResult(updatedAward: Award) = EvaluateAwardResult(
         award = EvaluateAwardResult.Award(
             id = AwardId.fromString(updatedAward.id),
+            internalId = updatedAward.internalId,
             date = updatedAward.date!!,
             description = updatedAward.description,
             status = updatedAward.status,
@@ -1495,7 +1508,8 @@ class AwardServiceImpl(
                     documents = null,
                     suppliers = null,
                     relatedBid = null,
-                    weightedValue = null
+                    weightedValue = null,
+                    internalId = null
                 )
             }
 
@@ -1763,6 +1777,19 @@ class AwardServiceImpl(
         }.asSuccess()
     }
 
+    override fun getAwardByIds(params: GetAwardByIdsParams): Result<GetAwardByIdsResult, Failure> {
+        val receivedIds = params.awards.map { it.id }
+
+        return awardRepository.findBy(params.cpid, params.ocid)
+            .onFailure { return it }
+            .mapResult { it.jsonData.tryToObject(Award::class.java) }
+            .onFailure { return it }
+            .filter { it.id in receivedIds }
+            .map { GetAwardByIdsResult.ResponseConverter.fromDomain(it) }
+            .let { GetAwardByIdsResult(awards = it) }
+            .asSuccess()
+    }
+
     override fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .onFailure { return it.reason.asValidationError() }
@@ -1787,6 +1814,35 @@ class AwardServiceImpl(
 
         if (awardEntity.token != params.token)
             return ValidationError.InvalidToken().asValidationError()
+
+        return Validated.ok()
+    }
+
+    override fun checkAwardState(params: CheckAwardStateParams): Validated<Failure> {
+        val receivedAwardsIds = params.awards.map { it.id }
+
+        val storedAwards = awardRepository.findBy(params.cpid, ocid = params.ocid)
+            .onFailure {
+                return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception)
+                    .asValidationError()
+            }
+            .mapResult { entity -> entity.jsonData.tryToObject(Award::class.java) }
+            .onFailure { return it.reason.asValidationError() }
+            .filter { it.id in receivedAwardsIds }
+
+        val storedAwardsIds = storedAwards.map { it.id }
+
+        if (!storedAwardsIds.containsAll(receivedAwardsIds))
+            return CheckAwardStateErrors.MissingAward(receivedAwardsIds-storedAwardsIds).asValidationError()
+
+        val validStates = rulesService.findValidStates(params.country, params.pmd, params.operationType)
+            .onFailure { return it.reason.asValidationError() }
+
+        storedAwards.forEach { award ->
+            val state = States.State(award.status, award.statusDetails)
+            if (state !in validStates)
+                return CheckAwardStateErrors.InvalidAwardState(award.id, state).asValidationError()
+        }
 
         return Validated.ok()
     }
@@ -1828,6 +1884,120 @@ class AwardServiceImpl(
             return ValidationError.DuplicateRequirementResponseOnCheckRelatedTenderer().asValidationError()
 
         return Validated.ok()
+    }
+
+    override fun validateAwardData(params: ValidateAwardDataParams): Validated<Failure> {
+        val receivedLot = params.tender.lots.first()
+        val receivedAward = params.awards.first()
+        val receivedSuppliers = receivedAward.suppliers.map { it.id }
+
+        if (ValidateAwardDataRules.isNeedToCheckSuppliers(params.operationType)) {
+            val storedAwards = awardRepository.findBy(params.cpid, params.ocid)
+                .onFailure {
+                    return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception)
+                        .asValidationError()
+                }
+                .map { it.jsonData.tryToObject(Award::class.java).onFailure { return it.reason.asValidationError() } }
+
+            ValidateAwardDataRules.Supplier.checkAwardAlreadyExists(storedAwards, receivedLot.id, receivedSuppliers)
+                .onFailure { return it }
+
+        }
+
+        params.awards.forEach { award ->
+
+            ValidateAwardDataRules.Value.validate(award.value, receivedLot, params.operationType)
+                .onFailure { return it }
+
+            ValidateAwardDataRules.Supplier.validate(award)
+                .onFailure { return it }
+
+            ValidateAwardDataRules.Document.validate(award.documents)
+                .onFailure { return it }
+        }
+
+
+        return Validated.ok()
+    }
+
+    override fun createAward(params: CreateAwardParams): Result<CreateAwardResult, Failure> {
+        val receivedAward = params.awards.first()
+        val receivedLot = params.tender.lots.first()
+
+        val generatedToken = Token.randomUUID()
+        val createdAward = Award(
+            id = receivedAward.id,                 // FR.COM-4.9.1
+            internalId = receivedAward.internalId, // FR.COM-4.9.2
+            date = params.date,            // FR.COM-4.9.3
+            status = AwardStatus.PENDING,  // FR.COM-4.9.4
+            statusDetails = AwardStatusDetails.EMPTY,  // FR.COM-4.9.4
+            description = receivedAward.description,   // FR.COM-4.9.5
+            value = receivedAward.value.toDomain(),   // FR.COM-4.9.6
+            suppliers = receivedAward.suppliers.map { it.toDomain() },   // FR.COM-4.9.7
+            documents = receivedAward.documents.map { it.toDomain() },   // FR.COM-4.9.8
+            relatedLots = listOf(receivedLot.id),  // FR.COM-4.9.8
+            token = generatedToken.toString(),     // FR.COM-4.9.10
+            title = null,
+            weightedValue = null,
+            relatedBid = null,
+            bidDate = null,
+            items = emptyList()
+        )
+
+        val json = transform.trySerialization(createdAward)
+            .onFailure { return it }
+
+        val awardEntity = AwardEntity(
+            cpid = params.cpid,
+            ocid = params.ocid,
+            status = createdAward.status,
+            statusDetails = createdAward.statusDetails,
+            token = generatedToken,
+            owner = params.owner,
+            jsonData = json,
+        )
+
+        // FR.COM-4.9.11
+        awardRepository.save(cpid = params.cpid, award = awardEntity)
+
+        return CreateAwardResult.ResponseConverter
+            .fromDomain(createdAward)
+            .let { CreateAwardResult(generatedToken, listOf(it)) }
+            .asSuccess()
+    }
+
+    override fun updateAward(params: UpdateAwardParams): Result<UpdateAwardResult, Failure> {
+        val receivedAward = params.awards.first()
+
+        val storedAwards = awardRepository.findBy(params.cpid, params.ocid)
+            .onFailure { return it }
+            .associateBy { it.jsonData.tryToObject(Award::class.java).onFailure { return it } }
+            .filter { (award, _) -> award.id == receivedAward.id }
+
+        val storedAward =
+            if (storedAwards.isEmpty())
+                return UpdateAwardErrors.AwardNotFound().asFailure()
+            else
+                storedAwards.keys.first()
+
+        val awardEntity = storedAwards
+            .mapKeys { it.key.id }
+            .getValue(storedAward.id)
+
+        val updatedAward = UpdateAwardRules.update(target = storedAward, source = receivedAward)
+
+        val json = transform.trySerialization(updatedAward).onFailure { return it }
+        val updatedAwardEntity = awardEntity.copy(jsonData = json)
+
+        val wasApplied = awardRepository.update(params.cpid, updatedAwardEntity)
+            .onFailure { return it }
+
+        if (!wasApplied)
+            return Failure.Incident.Database.DatabaseConsistencyIncident("Record not exists.").asFailure()
+
+        return UpdateAwardResult.ResponseConverter.fromDomain(updatedAward)
+            .let { UpdateAwardResult(listOf(it)) }
+            .asSuccess()
     }
 
     override fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Failure> =
@@ -1885,6 +2055,29 @@ class AwardServiceImpl(
         return Validated.ok()
     }
 
+    override fun startAwardPeriod(params: StartAwardPeriodParams): Result<StartAwardPeriodResultV2, Failure> {
+        val wasApplied = awardPeriodRepository.saveStart(cpid = params.cpid, ocid = params.ocid, start = params.date)
+            .onFailure {
+                return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception).asFailure()
+            }
+
+        if (!wasApplied) {
+            return Failure.Incident.Database.DatabaseConsistencyIncident(
+                "Cannot save start award period. Record by cpid '${params.cpid}' and ocid '${params.ocid}' already exists."
+            ).asFailure()
+        }
+
+        val response = StartAwardPeriodResultV2(
+            tender = StartAwardPeriodResultV2.Tender(
+                awardPeriod = StartAwardPeriodResultV2.Tender.AwardPeriod(
+                    startDate = params.date
+                )
+            )
+        )
+
+        return success(response)
+    }
+
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
         if (patterns.isNotEmpty()) value in patterns else true
 
@@ -1937,7 +2130,8 @@ class AwardServiceImpl(
             suppliers = null,
             documents = null,
             items = null,
-            weightedValue = null
+            weightedValue = null,
+            internalId = null
         )
     }
 
@@ -2182,6 +2376,7 @@ class AwardServiceImpl(
                     persones = tenderer.persones
                         .map { person ->
                             OrganizationReference.Person(
+                                id = null,
                                 identifier = person.identifier
                                     .let { identifier ->
                                         OrganizationReference.Person.Identifier(
@@ -2332,8 +2527,8 @@ class AwardServiceImpl(
                                                         validityPeriod = permitDetail.validityPeriod
                                                             .let { validityPeriod ->
                                                                 Details.Permit.PermitDetails.ValidityPeriod(
-                                                                    startDate = validityPeriod.startDate.toString(),
-                                                                    endDate = validityPeriod.endDate.toString()
+                                                                    startDate = validityPeriod.startDate,
+                                                                    endDate = validityPeriod.endDate
                                                                 )
                                                             }
                                                     )
@@ -2352,7 +2547,8 @@ class AwardServiceImpl(
             description = null,
             title = null,
             documents = null,
-            items = null
+            items = null,
+            internalId = null
         )
 
     private fun defineAwardValue(
@@ -2365,7 +2561,8 @@ class AwardServiceImpl(
             if (bidFromAuction.value.amount > bid.value.amount)
                 bid.value
             else
-                bidFromAuction.value
+                Money(bidFromAuction.value.amount, bid.value.currency)
+
         } else {
             bid.value
         }
@@ -2459,6 +2656,7 @@ class AwardServiceImpl(
                 persones = tenderer.persones
                     .map { person ->
                         OrganizationReference.Person(
+                            id = null,
                             identifier = person.identifier
                                 .let { identifier ->
                                     OrganizationReference.Person.Identifier(
@@ -2609,8 +2807,8 @@ class AwardServiceImpl(
                                                     validityPeriod = permitDetail.validityPeriod
                                                         .let { validityPeriod ->
                                                             Details.Permit.PermitDetails.ValidityPeriod(
-                                                                startDate = validityPeriod.startDate.toString(),
-                                                                endDate = validityPeriod.endDate.toString()
+                                                                startDate = validityPeriod.startDate,
+                                                                endDate = validityPeriod.endDate
                                                             )
                                                         }
                                                 )
@@ -2629,7 +2827,8 @@ class AwardServiceImpl(
         description = null,
         title = null,
         documents = null,
-        items = null
+        items = null,
+        internalId = null
     )
 
     private fun canCalculateWeightedValue(

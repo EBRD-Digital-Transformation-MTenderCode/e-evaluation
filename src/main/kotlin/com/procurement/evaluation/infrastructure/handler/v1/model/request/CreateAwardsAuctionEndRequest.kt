@@ -15,6 +15,8 @@ import com.procurement.evaluation.domain.model.lot.LotId
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
+import com.procurement.evaluation.infrastructure.bind.amount.AmountDeserializer
+import com.procurement.evaluation.infrastructure.bind.amount.AmountSerializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateDeserializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateSerializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
@@ -33,6 +35,7 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class CreateAwardsAuctionEndRequest(
@@ -218,7 +221,8 @@ data class CreateAwardsAuctionEndRequest(
             }
 
             data class Details(
-                @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: TypeOfSupplier,
+                @JsonInclude(JsonInclude.Include.NON_NULL)
+                @param:JsonProperty("typeOfSupplier") @field:JsonProperty("typeOfSupplier") val typeOfSupplier: TypeOfSupplier?,
 
                 @JsonInclude(JsonInclude.Include.NON_EMPTY)
                 @param:JsonProperty("mainEconomicActivities") @field:JsonProperty("mainEconomicActivities") val mainEconomicActivities: List<MainEconomicActivity>?,
@@ -415,11 +419,17 @@ data class CreateAwardsAuctionEndRequest(
         ) {
             data class ElectronicAuctionResult(
                 @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: BidId,
+                @param:JsonProperty("value") @field:JsonProperty("value") val value: Value
+            ) {
+                data class Value(
+                    @JsonDeserialize(using = AmountDeserializer::class)
+                    @JsonSerialize(using = AmountSerializer::class)
+                    @field:JsonProperty("amount") @param:JsonProperty("amount") val amount: BigDecimal,
 
-                @JsonDeserialize(using = MoneyDeserializer::class)
-                @JsonSerialize(using = MoneySerializer::class)
-                @param:JsonProperty("value") @field:JsonProperty("value") val value: Money
-            )
+                    @JsonInclude(JsonInclude.Include.NON_NULL)
+                    @field:JsonProperty("currency") @param:JsonProperty("currency") val currency: String?
+                )
+            }
         }
     }
 }
