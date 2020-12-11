@@ -20,7 +20,7 @@ class CheckAwardsStateHandler(
     logger: Logger
 ) : AbstractValidationHandlerV2(logger) {
 
-    override val action: Action = CommandTypeV2.CHECK_AWARD_STATE
+    override val action: Action = CommandTypeV2.CHECK_AWARDS_STATE
 
     override fun execute(descriptor: CommandDescriptor): Validated<Failure> =
         descriptor.body.asJsonNode

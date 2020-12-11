@@ -21,6 +21,7 @@ import com.procurement.evaluation.application.repository.period.AwardPeriodRepos
 import com.procurement.evaluation.application.service.GenerationService
 import com.procurement.evaluation.application.service.RulesService
 import com.procurement.evaluation.application.service.Transform
+import com.procurement.evaluation.application.service.award.rules.CheckAwardsStateRules
 import com.procurement.evaluation.application.service.award.rules.UpdateAwardRules
 import com.procurement.evaluation.application.service.award.rules.ValidateAwardDataRules
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
@@ -1819,26 +1820,21 @@ class AwardServiceImpl(
     }
 
     override fun checkAwardState(params: CheckAwardStateParams): Validated<Failure> {
-        val receivedAwardsIds = params.awards.map { it.id }
 
         val storedAwards = awardRepository.findBy(params.cpid, ocid = params.ocid)
             .onFailure {
-                return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception)
-                    .asValidationError()
+                return Failure.Incident.Database.DatabaseInteractionIncident(it.reason.exception).asValidationError()
             }
             .mapResult { entity -> entity.jsonData.tryToObject(Award::class.java) }
             .onFailure { return it.reason.asValidationError() }
-            .filter { it.id in receivedAwardsIds }
 
-        val storedAwardsIds = storedAwards.map { it.id }
-
-        if (!storedAwardsIds.containsAll(receivedAwardsIds))
-            return CheckAwardStateErrors.MissingAward(receivedAwardsIds-storedAwardsIds).asValidationError()
+        val filteredAwards = CheckAwardsStateRules.filterAwards(storedAwards, params)
+            .onFailure { return it.reason.asValidationError() }
 
         val validStates = rulesService.findValidStates(params.country, params.pmd, params.operationType)
             .onFailure { return it.reason.asValidationError() }
 
-        storedAwards.forEach { award ->
+        filteredAwards.forEach { award ->
             val state = States.State(award.status, award.statusDetails)
             if (state !in validStates)
                 return CheckAwardStateErrors.InvalidAwardState(award.id, state).asValidationError()
