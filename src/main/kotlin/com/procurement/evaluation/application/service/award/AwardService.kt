@@ -6,6 +6,7 @@ import com.procurement.evaluation.application.model.award.check.state.CheckAward
 import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.model.award.create.CreateAwardParams
+import com.procurement.evaluation.application.model.award.find.FindAwardsForProtocolParams
 import com.procurement.evaluation.application.model.award.get.GetAwardByIdsParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
 import com.procurement.evaluation.application.model.award.start.awardperiod.StartAwardPeriodParams
@@ -64,6 +65,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.converter.toDomain
 import com.procurement.evaluation.infrastructure.handler.v2.model.request.UpdateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.FindAwardsForProtocolResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardByIdsResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
 import com.procurement.evaluation.lib.functional.Result
@@ -153,6 +155,8 @@ interface AwardService {
     fun getAwardState(params: GetAwardStateByIdsParams): Result<List<GetAwardStateByIdsResult>, Failure>
 
     fun getAwardByIds(params: GetAwardByIdsParams): Result<GetAwardByIdsResult, Failure>
+
+    fun findAwardsForProtocol(params: FindAwardsForProtocolParams): Result<FindAwardsForProtocolResult?, Failure>
 
     fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure>
 
@@ -1789,6 +1793,24 @@ class AwardServiceImpl(
             .let { GetAwardByIdsResult(awards = it) }
             .asSuccess()
     }
+
+    override fun findAwardsForProtocol(params: FindAwardsForProtocolParams): Result<FindAwardsForProtocolResult?, Failure> {
+        val receivedRelatedLotIds = params.tender.lots.map { it.id }
+
+        fun Award.isRelatedLotMatched() : Boolean = this.relatedLots.any { it in receivedRelatedLotIds }
+        fun Award.isSuccessfullyAwarded() : Boolean = this.status == AwardStatus.PENDING && this.statusDetails == AwardStatusDetails.ACTIVE
+
+        return awardRepository.findBy(params.cpid, params.ocid)
+            .onFailure { return it }
+            .mapResult { it.jsonData.tryToObject(Award::class.java) }
+            .onFailure { return it }
+            .filter { it.isSuccessfullyAwarded() && it.isRelatedLotMatched() }
+            .map { FindAwardsForProtocolResult.ResponseConverter.fromDomain(it) }
+            .takeIf { it.isNotEmpty() }
+            ?.let { awards -> FindAwardsForProtocolResult(awards = awards) }
+            .asSuccess()
+    }
+
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
