@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.repository
+package com.procurement.evaluation.infrastructure.repository.period
 
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.Cluster
@@ -16,42 +16,36 @@ import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.failure
 import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
-import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepository
+import com.procurement.evaluation.infrastructure.repository.CassandraContainer
+import com.procurement.evaluation.infrastructure.repository.CassandraContainerInteractor
+import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
+import com.procurement.evaluation.infrastructure.repository.Database
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.testcontainers.containers.Container
 import java.time.LocalDateTime
 
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class CassandraAwardPeriodRepositoryIT {
     companion object {
 
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286")!!
         private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
         private val START_DATE = LocalDateTime.now()
-    }
 
-    @Autowired
-    private lateinit var container: CassandraTestContainer
+        private val initialScripts = CassandraAwardPeriodRepositoryIT::class.java.getResource("/data.cql").readText()
 
-    private lateinit var session: Session
-    private lateinit var awardPeriodRepository: AwardPeriodRepository
+        private var container: CassandraTestContainer = CassandraContainer.container
+        private val containerInteractor: CassandraContainerInteractor = CassandraContainerInteractor(container)
 
-    @BeforeEach
-    fun init() {
-        val poolingOptions = PoolingOptions()
+        private val poolingOptions = PoolingOptions()
             .setMaxConnectionsPerHost(HostDistance.LOCAL, 1)
-        val cluster = Cluster.builder()
+        private val cluster = Cluster.builder()
             .addContactPoints(container.contractPoint)
             .withPort(container.port)
             .withoutJMXReporting()
@@ -59,17 +53,23 @@ class CassandraAwardPeriodRepositoryIT {
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
 
-        session = spy(cluster.connect())
+        private fun createKeyspace(): Container.ExecResult = containerInteractor.cqlsh(initialScripts)
 
-        createKeyspace()
-        createTable()
+        @BeforeAll
+        @JvmStatic
+        internal fun init() {
+            createKeyspace()
+        }
 
-        awardPeriodRepository = CassandraAwardPeriodRepository(session)
     }
+
+    private var session: Session = spy(cluster.connect())
+    private var awardPeriodRepository: AwardPeriodRepository = CassandraAwardPeriodRepository(session)
+
 
     @AfterEach
     fun clean() {
-        dropKeyspace()
+        clearTables();
     }
 
     @Test
@@ -137,27 +137,8 @@ class CassandraAwardPeriodRepositoryIT {
     }
 
 
-    private fun createKeyspace() {
-        session.execute("CREATE KEYSPACE ${Database.KEYSPACE} WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
-    }
-
-    private fun dropKeyspace() {
-        session.execute("DROP KEYSPACE ${Database.KEYSPACE};")
-    }
-
-    private fun createTable() {
-        session.execute(
-            """
-                   CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}
-                    (
-                        cpid           TEXT,
-                        ocid           TEXT,
-                        start_date     TIMESTAMP,
-                        end_date       TIMESTAMP,
-                        PRIMARY KEY (cpid, ocid)
-                    );
-            """
-        )
+    private fun clearTables() {
+        session.execute("TRUNCATE ${Database.KEYSPACE}.${Database.Period.TABLE_NAME}")
     }
 
     private fun insertAwardPeriod(endDate: LocalDateTime? = null) {
