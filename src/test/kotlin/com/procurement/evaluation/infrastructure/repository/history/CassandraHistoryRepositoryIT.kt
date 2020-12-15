@@ -20,7 +20,7 @@ import com.procurement.evaluation.infrastructure.repository.CassandraContainer
 import com.procurement.evaluation.infrastructure.repository.CassandraContainerInteractor
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
-import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepositoryIT
+import com.procurement.evaluation.utils.readFile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -37,7 +37,7 @@ class CassandraHistoryRepositoryIT {
         private val COMMAND_ID: CommandId = CommandId(UUID.randomUUID().toString())
         private val ACTION: Action = CommandTypeV1.AWARDS_CANCELLATION
         private const val JSON_DATA: String = """{"tender": {"title" : "Tender-Title"}}"""
-        private val initialScripts = CassandraAwardPeriodRepositoryIT::class.java.getResource("/data.cql").readText()
+        private val initialScripts = readFile("docs/data.cql")
 
         private val container: CassandraTestContainer = CassandraContainer.container
         private val containerInteractor: CassandraContainerInteractor = CassandraContainerInteractor(container)

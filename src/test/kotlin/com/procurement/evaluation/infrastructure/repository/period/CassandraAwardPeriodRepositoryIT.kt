@@ -20,6 +20,7 @@ import com.procurement.evaluation.infrastructure.repository.CassandraContainer
 import com.procurement.evaluation.infrastructure.repository.CassandraContainerInteractor
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
+import com.procurement.evaluation.utils.readFile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -38,7 +39,7 @@ class CassandraAwardPeriodRepositoryIT {
         private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
         private val START_DATE = LocalDateTime.now()
 
-        private val initialScripts = CassandraAwardPeriodRepositoryIT::class.java.getResource("/data.cql").readText()
+        private val initialScripts = readFile("docs/data.cql")
 
         private var container: CassandraTestContainer = CassandraContainer.container
         private val containerInteractor: CassandraContainerInteractor = CassandraContainerInteractor(container)

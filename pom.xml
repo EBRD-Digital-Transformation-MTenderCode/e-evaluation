@@ -330,13 +330,6 @@
                     <include>git.properties</include>
                 </includes>
             </resource>
-            <resource>
-                <directory>docs</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>data.cql</include>
-                </includes>
-            </resource>
         </resources>
 
         <plugins>

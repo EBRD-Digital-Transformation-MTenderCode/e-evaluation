@@ -23,9 +23,9 @@ import com.procurement.evaluation.infrastructure.repository.CassandraContainer
 import com.procurement.evaluation.infrastructure.repository.CassandraContainerInteractor
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
-import com.procurement.evaluation.infrastructure.repository.period.CassandraAwardPeriodRepositoryIT
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
+import com.procurement.evaluation.utils.readFile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -51,7 +51,7 @@ class CassandraAwardRepositoryIT {
         private const val JSON_DATA = """ {"award": "data"} """
         private const val UPDATED_JSON_DATA = """ {"award": "updated data"} """
 
-        private val initialScripts = CassandraAwardPeriodRepositoryIT::class.java.getResource("/data.cql").readText()
+        private val initialScripts = readFile("docs/data.cql")
 
         private var container: CassandraTestContainer = CassandraContainer.container
         private val containerInteractor: CassandraContainerInteractor = CassandraContainerInteractor(container)
