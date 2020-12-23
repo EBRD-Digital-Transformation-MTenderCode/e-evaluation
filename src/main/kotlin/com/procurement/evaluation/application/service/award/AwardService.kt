@@ -66,6 +66,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.model.response.Close
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardByIdsResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
+import com.procurement.evaluation.lib.errorIfBlank
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
 import com.procurement.evaluation.lib.functional.Result.Companion.success
@@ -708,6 +709,7 @@ class AwardServiceImpl(
      *   - Award.documents;
      */
     override fun evaluate(context: EvaluateAwardContext, data: EvaluateAwardData): EvaluateAwardResult {
+        data.validateTextAttributes()
         val cpid = context.cpid
 
         val awardEntity = awardRepository.findBy(cpid = cpid, ocid = context.ocid, token = context.token)
@@ -2947,6 +2949,21 @@ class AwardServiceImpl(
             }
         }
     }
+}
+
+private fun EvaluateAwardData.validateTextAttributes() {
+    award.description.checkForBlank("award.description")
+    award.documents.forEachIndexed { i, document ->
+        document.title.checkForBlank("award.title.documents[$i]")
+        document.description.checkForBlank("award.description.documents[$i]")
+    }
+}
+
+private fun String?.checkForBlank(name: String) = this.errorIfBlank {
+    ErrorException(
+        error = ErrorType.INVALID_ATTRIBUTE,
+        message = "The attribute '$name' is empty or blank."
+    )
 }
 
 private val weightedValueComparator = Comparator<Award> { left, right ->
