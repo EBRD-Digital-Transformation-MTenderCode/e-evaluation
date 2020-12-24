@@ -4,6 +4,7 @@
     "documents": [
       {
         "id": "9264f875-2c3b-46b4-a928-a60beefe5e73",
+        "title": "award.documents[0].title",
         "documentType": "contractDraft"
       }
     ]
