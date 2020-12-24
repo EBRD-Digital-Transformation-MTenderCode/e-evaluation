@@ -14,7 +14,7 @@ class EvaluateAwardData(val award: Award) {
 
         data class Document(
             val id: DocumentId,
-            val title: String?,
+            val title: String,
             val description: String?,
             val relatedLots: List<LotId>,
             val documentType: DocumentType
