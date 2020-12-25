@@ -55,11 +55,11 @@ class UpdateAwardHandler(
                     supplier.identifier.id.checkForBlank("awards[$i].suppliers[$k].identifier.id")
                     supplier.identifier.legalName.checkForBlank("awards[$i].suppliers[$k].identifier.legalName")
                     supplier.identifier.uri.checkForBlank("awards[$i].suppliers[$k].identifier.uri")
-                    supplier.additionalIdentifiers?.map { identifier ->
-                        identifier.scheme.checkForBlank("awards[$i].suppliers[$k].identifier.scheme")
-                        identifier.id.checkForBlank("awards[$i].suppliers[$k].identifier.id")
-                        identifier.legalName.checkForBlank("awards[$i].suppliers[$k].identifier.legalName")
-                        identifier.uri.checkForBlank("awards[$i].suppliers[$k].identifier.uri")
+                    supplier.additionalIdentifiers?.forEachIndexed { l, identifier ->
+                        identifier.scheme.checkForBlank("awards[$i].suppliers[$k].additionalIdentifiers[$l].scheme")
+                        identifier.id.checkForBlank("awards[$i].suppliers[$k].additionalIdentifiers[$l].id")
+                        identifier.legalName.checkForBlank("awards[$i].suppliers[$k].additionalIdentifiers[$l].legalName")
+                        identifier.uri.checkForBlank("awards[$i].suppliers[$k].additionalIdentifiers[$l].uri")
                     }
                     supplier.address.let { address ->
                         address.streetAddress.checkForBlank("awards[$i].suppliers[$k].address.streetAddress")
