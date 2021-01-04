@@ -10,4 +10,9 @@ class CheckAwardsStateRequestTest : AbstractDTOTestBase<CheckAwardsStateRequest>
     fun fully() {
         testBindingAndMapping("json/infrastructure/dto/award/check/state/check_awards_state_params_full.json")
     }
+
+    @Test
+    fun required1() {
+        testBindingAndMapping("json/infrastructure/dto/award/check/state/check_awards_state_params_required_1.json")
+    }
 }

@@ -11,7 +11,7 @@ enum class CommandTypeV2(@JsonValue override val key: String, override val kind:
 
     ADD_REQUIREMENT_RESPONSE(key = "addRequirementResponse", kind = Action.Kind.COMMAND),
     CHECK_ACCESS_TO_AWARD(key = "checkAccessToAward", kind = Action.Kind.QUERY),
-    CHECK_AWARD_STATE(key = "checkAwardsState", kind = Action.Kind.QUERY),
+    CHECK_AWARDS_STATE(key = "checkAwardsState", kind = Action.Kind.QUERY),
     CHECK_RELATED_TENDERER(key = "checkRelatedTenderer", kind = Action.Kind.QUERY),
     CLOSE_AWARD_PERIOD(key = "closeAwardPeriod", kind = Action.Kind.COMMAND),
     CREATE_AWARD(key = "createAward", kind = Action.Kind.COMMAND),

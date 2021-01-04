@@ -8,5 +8,12 @@
     {
       "id": "string"
     }
-  ]
+  ],
+  "tender": {
+    "lots": [
+      {
+        "id": "string"
+      }
+    ]
+  }
 }

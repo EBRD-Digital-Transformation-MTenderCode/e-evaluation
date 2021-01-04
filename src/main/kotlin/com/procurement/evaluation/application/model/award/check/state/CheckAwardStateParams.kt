@@ -19,12 +19,14 @@ class CheckAwardStateParams private constructor(
     val country: String,
     val operationType: OperationType2,
     val awards: List<Award>,
+    val tender: Tender?
 ) {
     companion object {
 
-        private val allowedOperationTypes = OperationType2.allowedElements
+        val allowedOperationTypes = OperationType2.allowedElements
             .filter {
                 when (it) {
+                    OperationType2.PCR_PROTOCOL,
                     OperationType2.UPDATE_AWARD -> true
 
                     OperationType2.APPLY_QUALIFICATION_PROTOCOL,
@@ -71,6 +73,7 @@ class CheckAwardStateParams private constructor(
             country: String,
             operationType: String,
             awards: List<Award>,
+            tender: Tender?
         ): Result<CheckAwardStateParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .onFailure { return it }
@@ -98,7 +101,8 @@ class CheckAwardStateParams private constructor(
                 country = country,
                 operationType = parsedOperationType,
                 pmd = parsedPmd,
-                awards = awards
+                awards = awards,
+                tender = tender
             ).asSuccess()
         }
     }
@@ -106,4 +110,12 @@ class CheckAwardStateParams private constructor(
     data class Award(
         val id: String
     )
+
+    data class Tender(
+        val lots: List<Lot>
+    ) {
+        data class Lot(
+            val id: String
+        )
+    }
 }
