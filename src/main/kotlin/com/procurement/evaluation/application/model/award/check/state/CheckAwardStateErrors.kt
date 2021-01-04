@@ -8,10 +8,26 @@ sealed class CheckAwardStateErrors(
 ) : Failure.Error("VR.COM-") {
     override val code: String = prefix + numberError
 
-    class MissingAward(awardIds: List<String>) : CheckAwardStateErrors(
+    class MissingAwardsAttribute : CheckAwardStateErrors(
         numberError = "4.11.1",
+        description = "Missing 'awards' attribute in request."
+    )
+
+    class MissingLotsAttribute : CheckAwardStateErrors(
+        numberError = "4.11.2",
+        description = "Missing 'tender.lots' attribute in request."
+    )
+
+    class MissingAwardById(awardIds: List<String>) : CheckAwardStateErrors(
+        numberError = "4.11.3",
         description = "Cannot find awards from request. Ids: ${awardIds}"
     )
+
+    class MissingAwardByRelatedLot(relatedLots: List<String>) : CheckAwardStateErrors(
+        numberError = "4.11.4",
+        description = "Cannot find awards by related lots specified in request. Ids: ${relatedLots}"
+    )
+
 
     class InvalidAwardState(awardId: String, state: States.State) : CheckAwardStateErrors(
         numberError = "4.11.2",
