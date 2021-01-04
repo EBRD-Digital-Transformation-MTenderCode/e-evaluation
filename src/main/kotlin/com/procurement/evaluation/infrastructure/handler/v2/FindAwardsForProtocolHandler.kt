@@ -5,27 +5,27 @@ import com.procurement.evaluation.application.service.award.AwardService
 import com.procurement.evaluation.infrastructure.api.Action
 import com.procurement.evaluation.infrastructure.api.v2.CommandTypeV2
 import com.procurement.evaluation.infrastructure.fail.Failure
-import com.procurement.evaluation.infrastructure.handler.v2.base.AbstractValidationHandlerV2
+import com.procurement.evaluation.infrastructure.handler.v2.base.AbstractQueryHandlerV2
 import com.procurement.evaluation.infrastructure.handler.v2.converter.convert
 import com.procurement.evaluation.infrastructure.handler.v2.model.CommandDescriptor
-import com.procurement.evaluation.infrastructure.handler.v2.model.request.CheckAwardsStateRequest
-import com.procurement.evaluation.lib.functional.Validated
-import com.procurement.evaluation.lib.functional.asValidationError
+import com.procurement.evaluation.infrastructure.handler.v2.model.request.FindAwardsForProtocolRequest
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.FindAwardsForProtocolResult
+import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.flatMap
 import org.springframework.stereotype.Component
 
 @Component
-class CheckAwardsStateHandler(
+class FindAwardsForProtocolHandler(
     private val awardService: AwardService,
     logger: Logger
-) : AbstractValidationHandlerV2(logger) {
+) : AbstractQueryHandlerV2<FindAwardsForProtocolResult?>(logger) {
 
-    override val action: Action = CommandTypeV2.CHECK_AWARDS_STATE
+    override val action: Action = CommandTypeV2.FIND_AWARDS_FOR_PROTOCOL
 
-    override fun execute(descriptor: CommandDescriptor): Validated<Failure> =
+    override fun execute(descriptor: CommandDescriptor): Result<FindAwardsForProtocolResult?, Failure> =
         descriptor.body.asJsonNode
-            .params<CheckAwardsStateRequest>()
+            .params<FindAwardsForProtocolRequest>()
             .flatMap { it.convert() }
-            .onFailure { return it.reason.asValidationError() }
-            .let { params -> awardService.checkAwardState(params) }
+            .onFailure { return it }
+            .let { params -> awardService.findAwardsForProtocol(params) }
 }

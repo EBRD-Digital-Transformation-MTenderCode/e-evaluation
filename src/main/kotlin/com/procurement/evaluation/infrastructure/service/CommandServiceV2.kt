@@ -12,6 +12,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.CheckRelatedTenderer
 import com.procurement.evaluation.infrastructure.handler.v2.CloseAwardPeriodHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CreateAwardHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CreateUnsuccessfulAwardsHandler
+import com.procurement.evaluation.infrastructure.handler.v2.FindAwardsForProtocolHandler
 import com.procurement.evaluation.infrastructure.handler.v2.GetAwardByIdsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.GetAwardStateByIdsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.StartAwardPeriodHandler
@@ -25,6 +26,7 @@ class CommandServiceV2(
     private val logger: Logger,
     private val getAwardStateByIdsHandler: GetAwardStateByIdsHandler,
     private val getAwardByIdsHandler: GetAwardByIdsHandler,
+    private val findAwardsForProtocolHandler: FindAwardsForProtocolHandler,
     private val checkAccessToAwardHandler: CheckAccessToAwardHandler,
     private val checkRelatedTendererHandler: CheckRelatedTendererHandler,
     private val addRequirementResponseHandler: AddRequirementResponseHandler,
@@ -40,12 +42,13 @@ class CommandServiceV2(
     fun execute(descriptor: CommandDescriptor): ApiResponseV2 = when (descriptor.action) {
         CommandTypeV2.GET_AWARD_STATES_BY_IDS -> getAwardStateByIdsHandler.handle(descriptor)
         CommandTypeV2.GET_AWARD_BY_IDS -> getAwardByIdsHandler.handle(descriptor)
+        CommandTypeV2.FIND_AWARDS_FOR_PROTOCOL -> findAwardsForProtocolHandler.handle(descriptor)
         CommandTypeV2.CHECK_ACCESS_TO_AWARD -> checkAccessToAwardHandler.handle(descriptor)
         CommandTypeV2.CHECK_RELATED_TENDERER -> checkRelatedTendererHandler.handle(descriptor)
         CommandTypeV2.ADD_REQUIREMENT_RESPONSE -> addRequirementResponseHandler.handle(descriptor)
         CommandTypeV2.CREATE_UNSUCCESSFUL_AWARDS -> createUnsuccessfulAwardHandler.handle(descriptor)
         CommandTypeV2.CLOSE_AWARD_PERIOD -> closeAwardPeriodHandler.handle(descriptor)
-        CommandTypeV2.CHECK_AWARD_STATE -> checkAwardsStateHandler.handle(descriptor)
+        CommandTypeV2.CHECK_AWARDS_STATE -> checkAwardsStateHandler.handle(descriptor)
         CommandTypeV2.START_AWARD_PERIOD -> startAwardPeriodHandler.handle(descriptor)
         CommandTypeV2.VALIDATE_AWARD_DATA -> validateAwardDataHandler.handle(descriptor)
         CommandTypeV2.CREATE_AWARD -> createAwardHandler.handle(descriptor)
