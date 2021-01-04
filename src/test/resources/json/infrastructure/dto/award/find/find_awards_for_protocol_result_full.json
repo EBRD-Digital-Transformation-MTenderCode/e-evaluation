@@ -1,0 +1,13 @@
+{
+  "awards": [
+    {
+      "id": "string",
+      "suppliers": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    }
+  ]
+}
