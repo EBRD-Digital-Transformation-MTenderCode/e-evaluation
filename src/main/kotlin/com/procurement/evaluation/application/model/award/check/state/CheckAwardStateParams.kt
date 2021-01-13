@@ -47,11 +47,13 @@ class CheckAwardStateParams private constructor(
         private val allowedPmd = ProcurementMethodDetails.allowedElements
             .filter {
                 when (it) {
+                    ProcurementMethodDetails.CD, ProcurementMethodDetails.TEST_CD,
+                    ProcurementMethodDetails.CF, ProcurementMethodDetails.TEST_CF,
                     ProcurementMethodDetails.DA, ProcurementMethodDetails.TEST_DA,
                     ProcurementMethodDetails.DC, ProcurementMethodDetails.TEST_DC,
+                    ProcurementMethodDetails.IP, ProcurementMethodDetails.TEST_IP,
                     ProcurementMethodDetails.NP, ProcurementMethodDetails.TEST_NP,
-                    ProcurementMethodDetails.CD, ProcurementMethodDetails.TEST_CD,
-                    ProcurementMethodDetails.IP, ProcurementMethodDetails.TEST_IP -> true
+                    ProcurementMethodDetails.OF, ProcurementMethodDetails.TEST_OF -> true
 
                     ProcurementMethodDetails.GPA, ProcurementMethodDetails.TEST_GPA,
                     ProcurementMethodDetails.RT, ProcurementMethodDetails.TEST_RT,
@@ -59,8 +61,6 @@ class CheckAwardStateParams private constructor(
                     ProcurementMethodDetails.MV, ProcurementMethodDetails.TEST_MV,
                     ProcurementMethodDetails.SV, ProcurementMethodDetails.TEST_SV,
                     ProcurementMethodDetails.FA, ProcurementMethodDetails.TEST_FA,
-                    ProcurementMethodDetails.CF, ProcurementMethodDetails.TEST_CF,
-                    ProcurementMethodDetails.OF, ProcurementMethodDetails.TEST_OF,
                     ProcurementMethodDetails.OP, ProcurementMethodDetails.TEST_OP -> false
                 }
             }
