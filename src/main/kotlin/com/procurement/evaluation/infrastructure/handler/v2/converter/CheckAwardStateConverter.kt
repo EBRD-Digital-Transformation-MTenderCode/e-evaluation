@@ -12,8 +12,15 @@ fun CheckAwardsStateRequest.convert(): Result<CheckAwardStateParams, DataErrors>
         country = country,
         operationType = operationType,
         pmd = pmd,
-        awards = awards.map { it.convert() }
+        awards = awards?.map { it.convert() }.orEmpty(),
+        tender = tender?.convert()
     )
 
 fun CheckAwardsStateRequest.Award.convert(): CheckAwardStateParams.Award =
     CheckAwardStateParams.Award(id = id)
+
+fun CheckAwardsStateRequest.Tender.convert(): CheckAwardStateParams.Tender =
+    CheckAwardStateParams.Tender(lots = lots.map { it.convert() })
+
+fun CheckAwardsStateRequest.Tender.Lot.convert(): CheckAwardStateParams.Tender.Lot =
+    CheckAwardStateParams.Tender.Lot(id = id)

@@ -8,7 +8,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.model.CommandDescrip
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.utils.toJson
 
-abstract class AbstractQueryHandlerV2<R : Any>(private val logger: Logger) : AbstractHandlerV2<ApiResponseV2>() {
+abstract class AbstractQueryHandlerV2<R : Any?>(private val logger: Logger) : AbstractHandlerV2<ApiResponseV2>() {
 
     override fun handle(descriptor: CommandDescriptor): ApiResponseV2 =
         when (val result = execute(descriptor)) {
