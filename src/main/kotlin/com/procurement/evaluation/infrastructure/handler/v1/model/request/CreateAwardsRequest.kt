@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.evaluation.domain.model.data.CoefficientRate
 import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.money.Money
+import com.procurement.evaluation.domain.model.requirement.RequirementId
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateDeserializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateSerializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
@@ -36,7 +38,9 @@ data class CreateAwardsRequest(
     @param:JsonProperty("conversions") @field:JsonProperty("conversions") val conversions: List<Conversion>?,
 
     @param:JsonProperty("bids") @field:JsonProperty("bids") val bids: List<Bid>,
-    @param:JsonProperty("lots") @field:JsonProperty("lots") val lots: List<Lot>
+    @param:JsonProperty("lots") @field:JsonProperty("lots") val lots: List<Lot>,
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @field:JsonProperty("criteria") @param:JsonProperty("criteria") val criteria: List<Criterion>?
 ) {
     data class Conversion(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
@@ -364,22 +368,27 @@ data class CreateAwardsRequest(
         data class RequirementResponse(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
 
-            @JsonInclude(JsonInclude.Include.NON_NULL)
-            @param:JsonProperty("title") @field:JsonProperty("title") val title: String?,
-
-            @JsonInclude(JsonInclude.Include.NON_NULL)
-            @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
-
             @JsonDeserialize(using = RequirementValueDeserializer::class)
             @JsonSerialize(using = RequirementValueSerializer::class)
             @param:JsonProperty("value") @field:JsonProperty("value") val value: RequirementRsValue,
             @param:JsonProperty("requirement") @field:JsonProperty("requirement") val requirement: Requirement,
 
             @JsonInclude(JsonInclude.Include.NON_NULL)
-            @param:JsonProperty("period") @field:JsonProperty("period") val period: Period?
-        ) {
+            @param:JsonProperty("relatedTenderer") @field:JsonProperty("relatedTenderer") val relatedTenderer: RelatedTenderer?,
+
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @param:JsonProperty("period") @field:JsonProperty("period") val period: Period?,
+
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
+            @param:JsonProperty("evidences") @field:JsonProperty("evidences") val evidences: List<Evidence>?
+            ) {
             data class Requirement(
                 @param:JsonProperty("id") @field:JsonProperty("id") val id: String
+            )
+
+            data class RelatedTenderer(
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+                @param:JsonProperty("name") @field:JsonProperty("name") val name: String
             )
 
             data class Period(
@@ -391,10 +400,88 @@ data class CreateAwardsRequest(
                 @JsonSerialize(using = JsonDateTimeSerializer::class)
                 @param:JsonProperty("endDate") @field:JsonProperty("endDate") val endDate: LocalDateTime
             )
+
+            data class Evidence(
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+                @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+
+                @JsonInclude(JsonInclude.Include.NON_NULL)
+                @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
+
+                @JsonInclude(JsonInclude.Include.NON_NULL)
+                @param:JsonProperty("relatedDocument") @field:JsonProperty("relatedDocument") val relatedDocument: RelatedDocument?
+            ) {
+                data class RelatedDocument(
+                    @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId
+                )
+            }
         }
     }
 
     data class Lot(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String
     )
+
+    data class Criterion(
+        @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+        @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+        @param:JsonProperty("classification") @field:JsonProperty("classification") val classification: Classification,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
+
+        @param:JsonProperty("source") @field:JsonProperty("source") val source: String,
+        @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: String,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @param:JsonProperty("relatedItem") @field:JsonProperty("relatedItem") val relatedItem: String?,
+
+        @param:JsonProperty("requirementGroups") @field:JsonProperty("requirementGroups") val requirementGroups: List<RequirementGroup>,
+    ) {
+        data class RequirementGroup(
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
+
+            @param:JsonProperty("requirements") @field:JsonProperty("requirements") val requirements: List<Requirement>
+        ) {
+            data class Requirement(
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: RequirementId,
+                @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+
+                @JsonInclude(JsonInclude.Include.NON_NULL)
+                @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
+
+                @param:JsonProperty("status") @field:JsonProperty("status") val status: String,
+                @param:JsonProperty("dataType") @field:JsonProperty("dataType") val dataType: String,
+                @param:JsonProperty("datePublished") @field:JsonProperty("datePublished") val datePublished: LocalDateTime,
+
+                @JsonInclude(JsonInclude.Include.NON_EMPTY)
+                @param:JsonProperty("eligibleEvidences") @field:JsonProperty("eligibleEvidences") val eligibleEvidences: List<EligibleEvidence>?
+            ) {
+                data class EligibleEvidence(
+                    @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+                    @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+
+                    @JsonInclude(JsonInclude.Include.NON_NULL)
+                    @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
+
+                    @param:JsonProperty("type") @field:JsonProperty("type") val type: String,
+
+                    @JsonInclude(JsonInclude.Include.NON_NULL)
+                    @param:JsonProperty("relatedDocument") @field:JsonProperty("relatedDocument") val relatedDocument: RelatedDocument?
+                ) {
+                    data class RelatedDocument(
+                        @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId
+                    )
+                }
+            }
+        }
+
+        data class Classification(
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+            @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String
+        )
+    }
 }
