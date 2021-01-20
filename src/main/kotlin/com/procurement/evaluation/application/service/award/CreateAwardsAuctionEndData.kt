@@ -4,6 +4,7 @@ import com.procurement.evaluation.domain.model.bid.BidId
 import com.procurement.evaluation.domain.model.data.CoefficientRate
 import com.procurement.evaluation.domain.model.data.CoefficientValue
 import com.procurement.evaluation.domain.model.data.RequirementRsValue
+import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.enums.BusinessFunctionDocumentType
 import com.procurement.evaluation.domain.model.enums.Scale
 import com.procurement.evaluation.domain.model.lot.LotId
@@ -27,7 +28,8 @@ data class CreateAwardsAuctionEndData(
     val conversions: List<Conversion>,
     val bids: List<Bid>,
     val lots: List<Lot>,
-    val electronicAuctions: ElectronicAuctions
+    val electronicAuctions: ElectronicAuctions,
+    val criteria: List<Criterion>
 ) {
     data class Conversion(
         val id: String,
@@ -271,11 +273,11 @@ data class CreateAwardsAuctionEndData(
 
         data class RequirementResponse(
             val id: RequirementResponseId,
-            val title: String?,
-            val description: String?,
             val value: RequirementRsValue,
             val requirement: Requirement,
-            val period: Period?
+            val period: Period?,
+            val relatedTenderer: RelatedTenderer?,
+            val evidences: List<Evidence>
         ) {
             data class Requirement(
                 val id: RequirementId
@@ -285,6 +287,22 @@ data class CreateAwardsAuctionEndData(
                 val startDate: LocalDateTime,
                 val endDate: LocalDateTime
             )
+
+            data class RelatedTenderer(
+                val id: String,
+                val name: String
+            )
+
+            data class Evidence(
+                val id: String,
+                val title: String,
+                val description: String?,
+                val relatedDocument: RelatedDocument?
+            ) {
+                data class RelatedDocument(
+                    val id: DocumentId
+                )
+            }
         }
     }
 
@@ -310,5 +328,49 @@ data class CreateAwardsAuctionEndData(
                 )
             }
         }
+    }
+
+    data class Criterion(
+        val id: String,
+        val title: String,
+        val classification: Classification,
+        val description: String?,
+        val source: String,
+        val relatesTo: String,
+        val relatedItem: String?,
+        val requirementGroups: List<RequirementGroup>,
+    ) {
+        data class RequirementGroup(
+            val id: String,
+            val description: String?,
+            val requirements: List<Requirement>
+        ) {
+            data class Requirement(
+                val id: RequirementId,
+                val title: String,
+                val description: String?,
+                val status: String,
+                val dataType: String,
+                val datePublished: LocalDateTime,
+                val eligibleEvidences: List<EligibleEvidence>?
+            ) {
+                data class EligibleEvidence(
+                    val id: String,
+                    val title: String,
+                    val description: String?,
+                    val type: String,
+                    val relatedDocument: RelatedDocument?
+                ) {
+                    data class RelatedDocument(
+                        val id: DocumentId
+                    )
+                }
+            }
+        }
+
+        data class Classification(
+            val id: String,
+            val scheme: String
+        )
     }
 }
