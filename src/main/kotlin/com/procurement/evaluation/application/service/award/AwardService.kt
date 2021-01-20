@@ -2912,7 +2912,7 @@ class AwardServiceImpl(
         val criteriaRequirements = data.criteria
             .asSequence()
             .filter { belongsToSelectionOrOtherCategory(it) }
-            .filter { isRelatedToAppropriateEntity(pmd, it) }
+            .filter { isRelatedToAppropriateEntity(pmd, it.relatesTo) }
             .flatMap { it.requirementGroups }
             .flatMap { it.requirements }
             .associateBy { it.id }
@@ -2957,12 +2957,12 @@ class AwardServiceImpl(
 
     private fun isRelatedToAppropriateEntity(
         pmd: ProcurementMethod,
-        it: CreateAwardsData.Criterion
+        relatesTo: CriteriaRelatesTo
     ) = when (pmd) {
         ProcurementMethod.OT, ProcurementMethod.TEST_OT,
         ProcurementMethod.MV, ProcurementMethod.TEST_MV,
         ProcurementMethod.SV, ProcurementMethod.TEST_SV ->
-            when (it.relatesTo) {
+            when (relatesTo) {
                 CriteriaRelatesTo.ITEM,
                 CriteriaRelatesTo.LOT,
                 CriteriaRelatesTo.TENDER,
@@ -2970,7 +2970,7 @@ class AwardServiceImpl(
             }
         ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
         ProcurementMethod.RT, ProcurementMethod.TEST_RT ->
-            when (it.relatesTo) {
+            when (relatesTo) {
                 CriteriaRelatesTo.ITEM,
                 CriteriaRelatesTo.LOT,
                 CriteriaRelatesTo.TENDER -> true
