@@ -405,75 +405,73 @@ fun CreateAwardsRequest.convert(): CreateAwardsData = CreateAwardsData(
                 message = "Request contains empty list of lots."
             )
         },
-    criteria = this.criteria.errorIfEmpty {
+    criteria = this.criteria.mapIfNotEmpty { criterion ->
+        CreateAwardsData.Criterion(
+            id = criterion.id,
+            title = criterion.title,
+            description = criterion.description,
+            source = criterion.source,
+            relatesTo = criterion.relatesTo,
+            relatedItem = criterion.relatedItem,
+            requirementGroups = criterion.requirementGroups.mapIfNotEmpty { requirementGroup ->
+                CreateAwardsData.Criterion.RequirementGroup(
+                    id = requirementGroup.id,
+                    description = requirementGroup.description,
+                    requirements = requirementGroup.requirements.mapIfNotEmpty { requirement ->
+                        CreateAwardsData.Criterion.RequirementGroup.Requirement(
+                            id = requirement.id,
+                            title = requirement.title,
+                            description = requirement.description,
+                            status = requirement.status,
+                            dataType = requirement.dataType,
+                            datePublished = requirement.datePublished,
+                            eligibleEvidences = requirement.eligibleEvidences.errorIfEmpty {
+                                ErrorException(
+                                    error = ErrorType.IS_EMPTY,
+                                    message = "Criterion '${criterion.id}' contains empty list of eligibleEvidences."
+                                )
+                            }
+                                ?.map { eligibleEvidence ->
+                                    CreateAwardsData.Criterion.RequirementGroup.Requirement.EligibleEvidence(
+                                        id = eligibleEvidence.id,
+                                        title = eligibleEvidence.title,
+                                        type = eligibleEvidence.type,
+                                        description = eligibleEvidence.description,
+                                        relatedDocument = eligibleEvidence.relatedDocument?.let { relatedDocument ->
+                                            CreateAwardsData.Criterion.RequirementGroup.Requirement.EligibleEvidence.RelatedDocument(
+                                                relatedDocument.id
+                                            )
+                                        }
+                                    )
+
+                                }.orEmpty()
+                        )
+                    }
+                        .orThrow {
+                            ErrorException(
+                                error = ErrorType.IS_EMPTY,
+                                message = "Criterion '${criterion.id}' contains empty list of requirementGroups."
+                            )
+                        },
+                )
+
+            }.orThrow {
+                ErrorException(
+                    error = ErrorType.IS_EMPTY,
+                    message = "Criterion '${criterion.id}' contains empty list of requirementGroups."
+                )
+            },
+            classification = criterion.classification.let { classification ->
+                CreateAwardsData.Criterion.Classification(
+                    id = classification.id,
+                    scheme = classification.scheme
+                )
+            }
+        )
+    }.orThrow {
         ErrorException(
             error = ErrorType.IS_EMPTY,
             message = "Request contains empty list of criteria."
         )
     }
-        ?.map { criterion ->
-            CreateAwardsData.Criterion(
-                id = criterion.id,
-                title = criterion.title,
-                description = criterion.description,
-                source = criterion.source,
-                relatesTo = criterion.relatesTo,
-                relatedItem = criterion.relatedItem,
-                requirementGroups = criterion.requirementGroups.mapIfNotEmpty { requirementGroup ->
-                    CreateAwardsData.Criterion.RequirementGroup(
-                        id = requirementGroup.id,
-                        description = requirementGroup.description,
-                        requirements = requirementGroup.requirements.mapIfNotEmpty { requirement ->
-                            CreateAwardsData.Criterion.RequirementGroup.Requirement(
-                                id = requirement.id,
-                                title = requirement.title,
-                                description = requirement.description,
-                                status = requirement.status,
-                                dataType = requirement.dataType,
-                                datePublished = requirement.datePublished,
-                                eligibleEvidences = requirement.eligibleEvidences.errorIfEmpty {
-                                    ErrorException(
-                                        error = ErrorType.IS_EMPTY,
-                                        message = "Criterion '${criterion.id}' contains empty list of eligibleEvidences."
-                                    )
-                                }
-                                    ?.map { eligibleEvidence ->
-                                        CreateAwardsData.Criterion.RequirementGroup.Requirement.EligibleEvidence(
-                                            id = eligibleEvidence.id,
-                                            title = eligibleEvidence.title,
-                                            type = eligibleEvidence.type,
-                                            description = eligibleEvidence.description,
-                                            relatedDocument = eligibleEvidence.relatedDocument?.let { relatedDocument ->
-                                                CreateAwardsData.Criterion.RequirementGroup.Requirement.EligibleEvidence.RelatedDocument(
-                                                    relatedDocument.id
-                                                )
-                                            }
-                                        )
-
-                                    }.orEmpty()
-                            )
-                        }
-                            .orThrow {
-                                ErrorException(
-                                    error = ErrorType.IS_EMPTY,
-                                    message = "Criterion '${criterion.id}' contains empty list of requirementGroups."
-                                )
-                            },
-                    )
-
-                }.orThrow {
-                    ErrorException(
-                        error = ErrorType.IS_EMPTY,
-                        message = "Criterion '${criterion.id}' contains empty list of requirementGroups."
-                    )
-                },
-                classification = criterion.classification.let { classification ->
-                    CreateAwardsData.Criterion.Classification(
-                        id = classification.id,
-                        scheme = classification.scheme
-                    )
-                }
-            )
-        }
-        .orEmpty()
 )
