@@ -2911,7 +2911,7 @@ class AwardServiceImpl(
 
         val criteriaRequirements = data.criteria
             .asSequence()
-            .filter { belongsToSelectionOrOtherCategory(it) }
+            .filter { belongsToSelectionOrOtherCategory(it.classification.id) }
             .filter { isRelatedToAppropriateEntity(pmd, it.relatesTo) }
             .flatMap { it.requirementGroups }
             .flatMap { it.requirements }
@@ -2926,12 +2926,7 @@ class AwardServiceImpl(
 
         val coefficientRates = getCoefficientRates(responsesToCriteriaRequirements, conversionsByRelatedItem)
 
-        return if (coefficientRates.isNotEmpty()) {
-            val amount = coefficientRates.fold(bid.value.amount, { acc, rate -> acc.multiply(rate.rate) })
-                .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
-            Money(amount = amount, currency = bid.value.currency)
-        } else
-            bid.value
+        return bid.value.calculateWeightedValue(coefficientRates)
     }
 
     private fun getCoefficientRates(
@@ -2987,9 +2982,9 @@ class AwardServiceImpl(
         ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(INVALID_PMD)
     }
 
-    private fun belongsToSelectionOrOtherCategory(it: CreateAwardsData.Criterion) =
-        (it.classification.id.startsWith("CRITERION.SELECTION.")
-            || it.classification.id.startsWith("CRITERION.OTHER."))
+    private fun belongsToSelectionOrOtherCategory(classificationId: String) =
+        (classificationId.startsWith("CRITERION.SELECTION.")
+            || classificationId.startsWith("CRITERION.OTHER."))
 
     private fun RequirementRsValue.matchesDateType(dataType: DataType) =
         when (dataType) {
