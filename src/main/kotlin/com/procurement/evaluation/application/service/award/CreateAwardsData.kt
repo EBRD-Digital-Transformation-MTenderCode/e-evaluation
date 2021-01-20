@@ -6,6 +6,7 @@ import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.domain.model.requirement.RequirementId
+import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
 import com.procurement.evaluation.model.dto.ocds.AwardCriteria
 import com.procurement.evaluation.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.evaluation.model.dto.ocds.BidDocumentType
@@ -13,6 +14,8 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
+import com.procurement.evaluation.model.dto.ocds.CriteriaRelatesTo
+import com.procurement.evaluation.model.dto.ocds.DataType
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.time.LocalDateTime
 
@@ -267,7 +270,7 @@ data class CreateAwardsData(
         )
 
         data class RequirementResponse(
-            val id: String,
+            val id: RequirementResponseId,
             val value: RequirementRsValue,
             val requirement: Requirement,
             val relatedTenderer: RelatedTenderer?,
@@ -275,7 +278,7 @@ data class CreateAwardsData(
             val evidences: List<Evidence>
         ) {
             data class Requirement(
-                val id: String
+                val id: RequirementId
             )
 
             data class RelatedTenderer(
@@ -306,14 +309,14 @@ data class CreateAwardsData(
     )
 
     data class Criterion(
-         val id: String,
-         val title: String,
-         val classification: Classification,
-         val description: String?,
-         val source: String,
-         val relatesTo: String,
-         val relatedItem: String?,
-         val requirementGroups: List<RequirementGroup>,
+        val id: String,
+        val title: String,
+        val classification: Classification,
+        val description: String?,
+        val source: String,
+        val relatesTo: CriteriaRelatesTo,
+        val relatedItem: String?,
+        val requirementGroups: List<RequirementGroup>,
     ) {
         data class RequirementGroup(
              val id: String,
@@ -321,13 +324,13 @@ data class CreateAwardsData(
              val requirements: List<Requirement>
         ) {
             data class Requirement(
-                 val id: RequirementId,
-                 val title: String,
-                 val description: String?,
-                 val status: String,
-                 val dataType: String,
-                 val datePublished: LocalDateTime,
-                 val eligibleEvidences: List<EligibleEvidence>?
+                val id: RequirementId,
+                val title: String,
+                val description: String?,
+                val status: String,
+                val dataType: DataType,
+                val datePublished: LocalDateTime,
+                val eligibleEvidences: List<EligibleEvidence>?
             ) {
                 data class EligibleEvidence(
                      val id: String,

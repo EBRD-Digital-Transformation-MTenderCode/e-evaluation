@@ -10,6 +10,7 @@ import com.procurement.evaluation.domain.model.data.RequirementRsValue
 import com.procurement.evaluation.domain.model.document.DocumentId
 import com.procurement.evaluation.domain.model.money.Money
 import com.procurement.evaluation.domain.model.requirement.RequirementId
+import com.procurement.evaluation.domain.model.requirement.response.RequirementResponseId
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateDeserializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.rate.CoefficientRateSerializer
 import com.procurement.evaluation.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
@@ -27,6 +28,8 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
+import com.procurement.evaluation.model.dto.ocds.CriteriaRelatesTo
+import com.procurement.evaluation.model.dto.ocds.DataType
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.time.LocalDateTime
 
@@ -366,7 +369,7 @@ data class CreateAwardsRequest(
         )
 
         data class RequirementResponse(
-            @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: RequirementResponseId,
 
             @JsonDeserialize(using = RequirementValueDeserializer::class)
             @JsonSerialize(using = RequirementValueSerializer::class)
@@ -383,7 +386,7 @@ data class CreateAwardsRequest(
             @param:JsonProperty("evidences") @field:JsonProperty("evidences") val evidences: List<Evidence>?
             ) {
             data class Requirement(
-                @param:JsonProperty("id") @field:JsonProperty("id") val id: String
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: RequirementId
             )
 
             data class RelatedTenderer(
@@ -431,7 +434,7 @@ data class CreateAwardsRequest(
         @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
         @param:JsonProperty("source") @field:JsonProperty("source") val source: String,
-        @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: String,
+        @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: CriteriaRelatesTo,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("relatedItem") @field:JsonProperty("relatedItem") val relatedItem: String?,
@@ -454,7 +457,7 @@ data class CreateAwardsRequest(
                 @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
                 @param:JsonProperty("status") @field:JsonProperty("status") val status: String,
-                @param:JsonProperty("dataType") @field:JsonProperty("dataType") val dataType: String,
+                @param:JsonProperty("dataType") @field:JsonProperty("dataType") val dataType: DataType,
                 @param:JsonProperty("datePublished") @field:JsonProperty("datePublished") val datePublished: LocalDateTime,
 
                 @JsonInclude(JsonInclude.Include.NON_EMPTY)
