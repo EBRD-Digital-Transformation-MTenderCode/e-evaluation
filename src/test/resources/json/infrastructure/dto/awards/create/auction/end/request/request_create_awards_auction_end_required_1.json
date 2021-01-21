@@ -189,11 +189,16 @@
       "requirementResponses": [
         {
           "id": "9830e4c4-1ce9-11ea-978f-2e728ce88125",
-          "title": "bid[0].requirementResponses[0].title",
           "value": "requirementResponses",
           "requirement": {
             "id": "9830e4c4-1ce9-11ea-978f-2e728ce88125"
-          }
+          },
+          "evidences": [
+            {
+              "id": "string",
+              "title": "string"
+            }
+          ]
         }
       ],
       "relatedLots": [
@@ -235,5 +240,39 @@
         ]
       }
     ]
-  }
+  },
+  "criteria": [
+    {
+      "id": "d3732c09-7d62-4edc-a172-241da6636e7c",
+      "title": "Bankruptcy",
+      "classification": {
+        "id": "string",
+        "scheme": "string"
+      },
+      "source": "tenderer",
+      "relatesTo": "tender",
+      "requirementGroups": [
+        {
+          "id": "d91c11a1-f19e-4b83-8ade-c4be2bf00555",
+          "description": "string",
+          "requirements": [
+            {
+              "id": "974c8196-9d1c-419c-9ca9-45bb9f5fd59a",
+              "title": "Your answer?",
+              "dataType": "boolean",
+              "status": "active",
+              "datePublished": "2019-03-16T11:54:13Z",
+              "eligibleEvidences": [
+                {
+                  "id": "string",
+                  "title": "string",
+                  "type": "string"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

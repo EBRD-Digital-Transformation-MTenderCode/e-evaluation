@@ -1355,7 +1355,7 @@ class AwardServiceImpl(
             )
             val awardValue = defineAwardValue(bid, electronicAuctionsByLots)
             val weightedValue = if (canCalculateWeightedValue) {
-                val coefficientRates: List<CoefficientRate> = getCoefficients(bid, conversionsByRelatedItem)
+                val coefficientRates: List<CoefficientRate> = getCoefficients(data, bid, conversionsByRelatedItem, context.pmd)
                 awardValue.calculateWeightedValue(coefficientRates)
             } else
                 null
@@ -3003,25 +3003,45 @@ class AwardServiceImpl(
             this
 
     private fun getCoefficients(
+        data: CreateAwardsAuctionEndData,
         bid: CreateAwardsAuctionEndData.Bid,
-        conversionsByRelatedItem: Map<String, CreateAwardsAuctionEndData.Conversion>
-    ): List<CoefficientRate> = bid.requirementResponses
-        .asSequence()
-        .flatMap { response ->
-            conversionsByRelatedItem[response.requirement.id.toString()]
-                ?.let { conversion ->
-                    conversion.coefficients
-                        .asSequence()
-                        .filter { coefficient ->
-                            compare(coefficient.value, response.value)
-                        }
-                        .map { coefficient ->
-                            coefficient.coefficient
-                        }
-                }
-                ?: emptySequence()
-        }
-        .toList()
+        conversionsByRelatedItem: Map<String, CreateAwardsAuctionEndData.Conversion>,
+        pmd: ProcurementMethod
+    ): List<CoefficientRate> {
+
+        val criteriaRequirements = data.criteria
+            .asSequence()
+            .filter { belongsToSelectionOrOtherCategory(it.classification.id) }
+            .filter { isRelatedToAppropriateEntity(pmd, it.relatesTo) }
+            .flatMap { it.requirementGroups }
+            .flatMap { it.requirements }
+            .associateBy { it.id }
+
+        val responsesToCriteriaRequirements = bid.requirementResponses
+            .filter { it.requirement.id in criteriaRequirements }
+            .filter {
+                val dataType = criteriaRequirements.getValue(it.requirement.id).dataType
+                it.value.matchesDateType(dataType)
+            }
+
+        return responsesToCriteriaRequirements
+            .asSequence()
+            .flatMap { response ->
+                conversionsByRelatedItem[response.requirement.id.toString()]
+                    ?.let { conversion ->
+                        conversion.coefficients
+                            .asSequence()
+                            .filter { coefficient ->
+                                compare(coefficient.value, response.value)
+                            }
+                            .map { coefficient ->
+                                coefficient.coefficient
+                            }
+                    }
+                    ?: emptySequence()
+            }
+            .toList()
+    }
 
     private fun compare(coef: CoefficientValue, req: RequirementRsValue): Boolean {
         return when (req) {

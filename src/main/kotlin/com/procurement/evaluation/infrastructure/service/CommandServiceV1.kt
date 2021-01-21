@@ -350,7 +350,8 @@ class CommandServiceV1(
                     cpid = cm.cpid,
                     ocid = cm.ocid,
                     owner = cm.owner,
-                    startDate = cm.startDate
+                    startDate = cm.startDate,
+                    pmd = cm.pmd
                 )
                 val request = toObject(CreateAwardsAuctionEndRequest::class.java, cm.data)
                 awardService.createAwardsAuctionEnd(context = context, data = request.convert())
