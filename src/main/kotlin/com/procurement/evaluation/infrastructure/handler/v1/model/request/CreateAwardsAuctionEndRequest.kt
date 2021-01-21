@@ -34,6 +34,8 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
+import com.procurement.evaluation.model.dto.ocds.CriteriaRelatesTo
+import com.procurement.evaluation.model.dto.ocds.DataType
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -465,7 +467,7 @@ data class CreateAwardsAuctionEndRequest(
         @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
         @param:JsonProperty("source") @field:JsonProperty("source") val source: String,
-        @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: String,
+        @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: CriteriaRelatesTo,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("relatedItem") @field:JsonProperty("relatedItem") val relatedItem: String?,
@@ -488,7 +490,7 @@ data class CreateAwardsAuctionEndRequest(
                 @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
                 @param:JsonProperty("status") @field:JsonProperty("status") val status: String,
-                @param:JsonProperty("dataType") @field:JsonProperty("dataType") val dataType: String,
+                @param:JsonProperty("dataType") @field:JsonProperty("dataType") val dataType: DataType,
                 @param:JsonProperty("datePublished") @field:JsonProperty("datePublished") val datePublished: LocalDateTime,
 
                 @JsonInclude(JsonInclude.Include.NON_EMPTY)

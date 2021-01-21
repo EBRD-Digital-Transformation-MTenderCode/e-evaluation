@@ -18,6 +18,8 @@ import com.procurement.evaluation.model.dto.ocds.BidStatusDetailsType
 import com.procurement.evaluation.model.dto.ocds.BidStatusType
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
+import com.procurement.evaluation.model.dto.ocds.CriteriaRelatesTo
+import com.procurement.evaluation.model.dto.ocds.DataType
 import com.procurement.evaluation.model.dto.ocds.TypeOfSupplier
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -336,7 +338,7 @@ data class CreateAwardsAuctionEndData(
         val classification: Classification,
         val description: String?,
         val source: String,
-        val relatesTo: String,
+        val relatesTo: CriteriaRelatesTo,
         val relatedItem: String?,
         val requirementGroups: List<RequirementGroup>,
     ) {
@@ -350,7 +352,7 @@ data class CreateAwardsAuctionEndData(
                 val title: String,
                 val description: String?,
                 val status: String,
-                val dataType: String,
+                val dataType: DataType,
                 val datePublished: LocalDateTime,
                 val eligibleEvidences: List<EligibleEvidence>?
             ) {
