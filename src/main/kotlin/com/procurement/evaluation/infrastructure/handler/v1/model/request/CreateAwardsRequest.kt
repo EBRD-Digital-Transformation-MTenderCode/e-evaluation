@@ -42,7 +42,9 @@ data class CreateAwardsRequest(
 
     @param:JsonProperty("bids") @field:JsonProperty("bids") val bids: List<Bid>,
     @param:JsonProperty("lots") @field:JsonProperty("lots") val lots: List<Lot>,
-    @field:JsonProperty("criteria") @param:JsonProperty("criteria") val criteria: List<Criterion>
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @field:JsonProperty("criteria") @param:JsonProperty("criteria") val criteria: List<Criterion>?
 ) {
     data class Conversion(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
