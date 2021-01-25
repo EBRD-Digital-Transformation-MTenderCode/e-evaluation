@@ -2963,8 +2963,10 @@ class AwardServiceImpl(
                 CriteriaRelatesTo.TENDER,
                 CriteriaRelatesTo.TENDERER -> true
             }
+        ProcurementMethod.CF, ProcurementMethod.TEST_CF,
         ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
-        ProcurementMethod.RT, ProcurementMethod.TEST_RT ->
+        ProcurementMethod.OF, ProcurementMethod.TEST_OF,
+        ProcurementMethod.RT, ProcurementMethod.TEST_RT, ->
             when (relatesTo) {
                 CriteriaRelatesTo.ITEM,
                 CriteriaRelatesTo.LOT,
@@ -2977,8 +2979,6 @@ class AwardServiceImpl(
         ProcurementMethod.DC, ProcurementMethod.TEST_DC,
         ProcurementMethod.IP, ProcurementMethod.TEST_IP,
         ProcurementMethod.FA, ProcurementMethod.TEST_FA,
-        ProcurementMethod.CF, ProcurementMethod.TEST_CF,
-        ProcurementMethod.OF, ProcurementMethod.TEST_OF,
         ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(INVALID_PMD)
     }
 
