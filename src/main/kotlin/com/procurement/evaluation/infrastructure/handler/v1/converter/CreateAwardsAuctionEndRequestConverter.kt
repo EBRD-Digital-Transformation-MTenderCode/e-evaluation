@@ -60,8 +60,6 @@ fun CreateAwardsAuctionEndRequest.convert() = CreateAwardsAuctionEndData(
                     ?.map { requirementResponse ->
                         CreateAwardsAuctionEndData.Bid.RequirementResponse(
                             id = requirementResponse.id,
-                            title = requirementResponse.title,
-                            description = requirementResponse.description,
                             period = requirementResponse.period
                                 ?.let { period ->
                                     CreateAwardsAuctionEndData.Bid.RequirementResponse.Period(
@@ -75,7 +73,33 @@ fun CreateAwardsAuctionEndRequest.convert() = CreateAwardsAuctionEndData(
                                         id = requirement.id
                                     )
                                 },
-                            value = requirementResponse.value
+                            value = requirementResponse.value,
+                            relatedTenderer = requirementResponse.relatedTenderer?.let { relatedTenderer ->
+                                CreateAwardsAuctionEndData.Bid.RequirementResponse.RelatedTenderer(
+                                    id = relatedTenderer.id,
+                                    name = relatedTenderer.name
+                                )
+                            },
+                            evidences = requirementResponse.evidences
+                                .errorIfEmpty {
+                                    ErrorException(
+                                        error = ErrorType.IS_EMPTY,
+                                        message = "The requirementResponse '${requirementResponse.id}' contains empty list of evidences."
+                                    )
+                                }
+                                ?.map { evidence ->
+                                    CreateAwardsAuctionEndData.Bid.RequirementResponse.Evidence(
+                                        id = evidence.id,
+                                        title = evidence.title,
+                                        description = evidence.description,
+                                        relatedDocument = evidence.relatedDocument?.let { relatedDocument ->
+                                            CreateAwardsAuctionEndData.Bid.RequirementResponse.Evidence.RelatedDocument(
+                                                id = relatedDocument.id
+                                            )
+                                        }
+                                    )
+                                }.orEmpty()
+
                         )
                     }
                     .orEmpty(),
@@ -469,5 +493,76 @@ fun CreateAwardsAuctionEndRequest.convert() = CreateAwardsAuctionEndData(
                         )
                     }
             )
+        },
+    criteria = this.criteria.errorIfEmpty {
+        ErrorException(
+            error = ErrorType.IS_EMPTY,
+            message = "Request contains empty list of criteria."
+        )
+    }
+        ?.map { criterion ->
+            CreateAwardsAuctionEndData.Criterion(
+                id = criterion.id,
+                title = criterion.title,
+                description = criterion.description,
+                source = criterion.source,
+                relatesTo = criterion.relatesTo,
+                relatedItem = criterion.relatedItem,
+                requirementGroups = criterion.requirementGroups.mapIfNotEmpty { requirementGroup ->
+                    CreateAwardsAuctionEndData.Criterion.RequirementGroup(
+                        id = requirementGroup.id,
+                        description = requirementGroup.description,
+                        requirements = requirementGroup.requirements.mapIfNotEmpty { requirement ->
+                            CreateAwardsAuctionEndData.Criterion.RequirementGroup.Requirement(
+                                id = requirement.id,
+                                title = requirement.title,
+                                description = requirement.description,
+                                status = requirement.status,
+                                dataType = requirement.dataType,
+                                datePublished = requirement.datePublished,
+                                eligibleEvidences = requirement.eligibleEvidences.errorIfEmpty {
+                                    ErrorException(
+                                        error = ErrorType.IS_EMPTY,
+                                        message = "Criterion '${criterion.id}' contains empty list of eligibleEvidences."
+                                    )
+                                }
+                                    ?.map { eligibleEvidence ->
+                                        CreateAwardsAuctionEndData.Criterion.RequirementGroup.Requirement.EligibleEvidence(
+                                            id = eligibleEvidence.id,
+                                            title = eligibleEvidence.title,
+                                            type = eligibleEvidence.type,
+                                            description = eligibleEvidence.description,
+                                            relatedDocument = eligibleEvidence.relatedDocument?.let { relatedDocument ->
+                                                CreateAwardsAuctionEndData.Criterion.RequirementGroup.Requirement.EligibleEvidence.RelatedDocument(
+                                                    relatedDocument.id
+                                                )
+                                            }
+                                        )
+
+                                    }.orEmpty()
+                            )
+                        }
+                            .orThrow {
+                                ErrorException(
+                                    error = ErrorType.IS_EMPTY,
+                                    message = "Criterion '${criterion.id}' contains empty list of requirementGroups."
+                                )
+                            },
+                    )
+
+                }.orThrow {
+                    ErrorException(
+                        error = ErrorType.IS_EMPTY,
+                        message = "Criterion '${criterion.id}' contains empty list of requirementGroups."
+                    )
+                },
+                classification = criterion.classification.let { classification ->
+                    CreateAwardsAuctionEndData.Criterion.Classification(
+                        id = classification.id,
+                        scheme = classification.scheme
+                    )
+                }
+            )
         }
+        .orEmpty()
 )

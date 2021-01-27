@@ -9,13 +9,11 @@
       "rationale": "Number of years for product guarantee",
       "description": "data.conversions[0].description",
       "coefficients": [
-
         {
           "id": "coefficient-1557947503428",
           "value": 2.000,
           "coefficient": 0.85
         }
-
       ]
     }
   ],
@@ -205,17 +203,29 @@
       ],
       "requirementResponses": [
         {
-          "id": "bid[0].requirementResponses[0].id",
-          "title": "bid[0].requirementResponses[0].title",
-          "description": "bid[0].requirementResponses[0].description",
+          "id": "46614e8f-682b-4c0e-8940-18bf19ae3bc0",
           "value": "requirementResponses",
           "requirement": {
-            "id": "bid[0].requirementResponses[0].requirement.id"
+            "id": "0c50da52-2750-4c63-8f6a-928308b8f4da"
           },
           "period": {
             "startDate": "2019-03-16T11:54:13Z",
             "endDate": "2019-03-16T11:54:13Z"
-          }
+          },
+          "relatedTenderer": {
+            "name": "",
+            "id": ""
+          },
+          "evidences": [
+            {
+              "id": "string",
+              "title": "string",
+              "description": "string",
+              "relatedDocument": {
+                "id": ""
+              }
+            }
+          ]
         }
       ],
       "relatedLots": [
@@ -226,6 +236,47 @@
   "lots": [
     {
       "id": "123e4567-e89b-12d3-a456-426655440000"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "d3732c09-7d62-4edc-a172-241da6636e7c",
+      "title": "Bankruptcy",
+      "classification": {
+        "id": "string",
+        "scheme": "string"
+      },
+      "description": "Is the economic operator bankrupt?",
+      "source": "tenderer",
+      "relatesTo": "tender",
+      "relatedItem": "string",
+      "requirementGroups": [
+        {
+          "id": "d91c11a1-f19e-4b83-8ade-c4be2bf00555",
+          "description": "string",
+          "requirements": [
+            {
+              "id": "974c8196-9d1c-419c-9ca9-45bb9f5fd59a",
+              "title": "Your answer?",
+              "description": "string",
+              "dataType": "boolean",
+              "status": "active",
+              "datePublished": "2019-03-16T11:54:13Z",
+              "eligibleEvidences": [
+                {
+                  "id": "string",
+                  "title": "string",
+                  "description": "string",
+                  "type": "string",
+                  "relatedDocument": {
+                    "id": ""
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
