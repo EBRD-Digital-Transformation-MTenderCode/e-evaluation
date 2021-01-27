@@ -119,15 +119,21 @@ object ValidateAwardDataRules {
                     .doOnFalse { return ValidationError.ValidateAwardData.BusinessFunctionsDuplicateIds().asValidationError() }
 
                 // VR.COM-4.8.10
-                val businessFunctionsDocumentsIds = suppliers.asSequence()
+                val documentsIdsByPerson = suppliers.asSequence()
                     .flatMap { it.persons.asSequence() }
-                    .flatMap { it.businessFunctions.asSequence() }
-                    .flatMap { it.documents.asSequence() }
-                    .map { it.id }
+                    .map { person ->
+                        person.businessFunctions
+                            .asSequence()
+                            .flatMap { it.documents.asSequence() }
+                            .map { it.id }
+                            .toList()
+                    }
                     .toList()
 
-                isIdsUniq(businessFunctionsDocumentsIds)
-                    .doOnFalse { return ValidationError.ValidateAwardData.BusinessFunctionsDocumentsDuplicateIds().asValidationError() }
+                documentsIdsByPerson.map { documentIds ->
+                    isIdsUniq(documentIds)
+                        .doOnFalse { return ValidationError.ValidateAwardData.BusinessFunctionsDocumentsDuplicateIds().asValidationError() }
+                }
 
                 // VR.COM-4.8.11
                 val mainEconomicActivities = suppliers.asSequence()

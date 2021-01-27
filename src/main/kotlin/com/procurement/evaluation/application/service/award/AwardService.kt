@@ -28,6 +28,7 @@ import com.procurement.evaluation.application.service.award.rules.ValidateAwardD
 import com.procurement.evaluation.application.service.award.strategy.CloseAwardPeriodStrategy
 import com.procurement.evaluation.application.service.award.strategy.CreateUnsuccessfulAwardsStrategy
 import com.procurement.evaluation.domain.model.Cpid
+import com.procurement.evaluation.domain.model.ProcurementMethod
 import com.procurement.evaluation.domain.model.Token
 import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.bid.BidId
@@ -49,6 +50,7 @@ import com.procurement.evaluation.exception.ErrorType.ALREADY_HAVE_ACTIVE_AWARDS
 import com.procurement.evaluation.exception.ErrorType.AWARD_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.DATA_NOT_FOUND
 import com.procurement.evaluation.exception.ErrorType.INVALID_OWNER
+import com.procurement.evaluation.exception.ErrorType.INVALID_PMD
 import com.procurement.evaluation.exception.ErrorType.INVALID_STAGE
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS
 import com.procurement.evaluation.exception.ErrorType.INVALID_STATUS_DETAILS
@@ -89,6 +91,8 @@ import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import com.procurement.evaluation.model.dto.ocds.ContactPoint
 import com.procurement.evaluation.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.evaluation.model.dto.ocds.CountryDetails
+import com.procurement.evaluation.model.dto.ocds.CriteriaRelatesTo
+import com.procurement.evaluation.model.dto.ocds.DataType
 import com.procurement.evaluation.model.dto.ocds.Details
 import com.procurement.evaluation.model.dto.ocds.Document
 import com.procurement.evaluation.model.dto.ocds.DocumentType
@@ -385,7 +389,12 @@ class AwardServiceImpl(
         } else {
             val newAwardPeriodStart = context.startDate
             val wasApplied = awardPeriodRepository.saveStart(cpid = cpid, ocid = ocid, start = newAwardPeriodStart)
-                .orThrow { SaveEntityException(message = "Error writing start date of the award period.", cause = it.exception) }
+                .orThrow {
+                    SaveEntityException(
+                        message = "Error writing start date of the award period.",
+                        cause = it.exception
+                    )
+                }
 
             if (!wasApplied)
                 throw SaveEntityException(message = "An error occurred when writing a record(s) of the start award period '$newAwardPeriodStart' by cpid '$cpid' and ocid '$ocid' to the database. Record is already.")
@@ -394,9 +403,14 @@ class AwardServiceImpl(
         }
 
         val wasApplied = awardRepository.save(cpid = cpid, award = newAwardEntity)
-            .orThrow { fail -> SaveEntityException(message = "Error writing new award to database.", cause = fail.exception) }
+            .orThrow { fail ->
+                SaveEntityException(
+                    message = "Error writing new award to database.",
+                    cause = fail.exception
+                )
+            }
 
-        if(!wasApplied)
+        if (!wasApplied)
             throw SaveEntityException("An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${newAwardEntity.ocid}' to the database. Record is already.")
 
         return getCreatedAwardData(award, awardPeriodStart, lotAwarded)
@@ -761,7 +775,7 @@ class AwardServiceImpl(
         val wasApplied = awardRepository.update(cpid = cpid, updatedAward = updatedAwardEntity)
             .orThrow { it.exception }
 
-        if(!wasApplied)
+        if (!wasApplied)
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the award by cpid '$cpid' and ocid '${updatedAwardEntity.ocid}' and token to the database. Record is already.")
 
 
@@ -1230,7 +1244,7 @@ class AwardServiceImpl(
                 throw SaveEntityException(message = "Error writing updated award to database.", cause = fail.exception)
             }
 
-        if(!wasApplied)
+        if (!wasApplied)
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '${context.cpid}' to the database. Record(s) is not exists.")
 
         return FinalizedAwardsStatusByLots(
@@ -1276,7 +1290,7 @@ class AwardServiceImpl(
                 BidId.fromString(bid.id)
             )
             val weightedValue = if (canCalculateWeightedValue)
-                calculateWeightedValue(bid, conversionsByRelatedItem)
+                calculateWeightedValue(bid, conversionsByRelatedItem, data, context.pmd)
             else
                 null
             generateAward(bid, context, weightedValue)
@@ -1341,7 +1355,7 @@ class AwardServiceImpl(
             )
             val awardValue = defineAwardValue(bid, electronicAuctionsByLots)
             val weightedValue = if (canCalculateWeightedValue) {
-                val coefficientRates: List<CoefficientRate> = getCoefficients(bid, conversionsByRelatedItem)
+                val coefficientRates: List<CoefficientRate> = getCoefficients(data, bid, conversionsByRelatedItem, context.pmd)
                 awardValue.calculateWeightedValue(coefficientRates)
             } else
                 null
@@ -1461,15 +1475,24 @@ class AwardServiceImpl(
                 throw SaveEntityException(message = "Error writing updated award to database.", cause = fail.exception)
             }
 
-        if(!wasApplied)
+        if (!wasApplied)
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the awards by cpid '${context.cpid}' to the database. Record(s) is not exists.")
 
         return result
     }
 
     override fun startAwardPeriod(context: StartAwardPeriodContext): StartAwardPeriodResult {
-        val wasApplied = awardPeriodRepository.saveStart(cpid = context.cpid, ocid = context.ocid, start = context.startDate)
-            .orThrow { SaveEntityException(message = "Error writing start date of the award period.", cause = it.exception) }
+        val wasApplied = awardPeriodRepository.saveStart(
+            cpid = context.cpid,
+            ocid = context.ocid,
+            start = context.startDate
+        )
+            .orThrow {
+                SaveEntityException(
+                    message = "Error writing start date of the award period.",
+                    cause = it.exception
+                )
+            }
 
         if (!wasApplied)
             throw SaveEntityException(message = "An error occurred when writing a record(s) of the start award period '${context.startDate}' by cpid '${context.cpid}' and ocid '${context.ocid}' to the database. Record is already.")
@@ -1650,7 +1673,10 @@ class AwardServiceImpl(
 
         val updatedAward: Award? = when (award.statusDetails) {
             AwardStatusDetails.UNSUCCESSFUL -> getAwardForUnsuccessfulStatusDetails(awards = awardsToEntities.keys)
-            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(context.ocid.stage, awards = awardsToEntities.keys)
+            AwardStatusDetails.ACTIVE -> getAwardForActiveStatusDetails(
+                context.ocid.stage,
+                awards = awardsToEntities.keys
+            )
 
             AwardStatusDetails.AWAITING,
             AwardStatusDetails.CONSIDERATION,
@@ -1800,8 +1826,8 @@ class AwardServiceImpl(
     override fun findAwardsForProtocol(params: FindAwardsForProtocolParams): Result<FindAwardsForProtocolResult?, Failure> {
         val receivedRelatedLotIds = params.tender.lots.map { it.id }
 
-        fun Award.isRelatedLotMatched() : Boolean = this.relatedLots.any { it in receivedRelatedLotIds }
-        fun Award.isSuccessfullyAwarded() : Boolean = this.status == AwardStatus.PENDING && this.statusDetails == AwardStatusDetails.ACTIVE
+        fun Award.isRelatedLotMatched(): Boolean = this.relatedLots.any { it in receivedRelatedLotIds }
+        fun Award.isSuccessfullyAwarded(): Boolean = this.status == AwardStatus.PENDING && this.statusDetails == AwardStatusDetails.ACTIVE
 
         return awardRepository.findBy(params.cpid, params.ocid)
             .onFailure { return it }
@@ -1813,7 +1839,6 @@ class AwardServiceImpl(
             ?.let { awards -> FindAwardsForProtocolResult(awards = awards) }
             .asSuccess()
     }
-
 
     override fun checkAccessToAward(params: CheckAccessToAwardParams): Validated<Failure> {
         val awardEntities = awardRepository.findBy(cpid = params.cpid, ocid = params.ocid)
@@ -1921,7 +1946,6 @@ class AwardServiceImpl(
 
             ValidateAwardDataRules.Supplier.checkAwardAlreadyExists(storedAwards, receivedLot.id, receivedSuppliers)
                 .onFailure { return it }
-
         }
 
         params.awards.forEach { award ->
@@ -2068,8 +2092,8 @@ class AwardServiceImpl(
             .onFailure { return it.reason.asValidationError() }
             .doOnFalse {
                 return Failure.Incident.Database.DatabaseConsistencyIncident(
-                        "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpid}'. Record(s) does not exist."
-                    ).asValidationError()
+                    "An error occurred upon updating a record(s) of the awards by cpid '${updatedAwardEntity.cpid}'. Record(s) does not exist."
+                ).asValidationError()
             }
 
         return Validated.ok()
@@ -2173,7 +2197,7 @@ class AwardServiceImpl(
     }
 
     private fun getAwardForActiveStatusDetails(stage: Stage, awards: Collection<Award>): Award? {
-        when(stage){
+        when (stage) {
             Stage.EV,
             Stage.TP -> {
                 val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
@@ -2199,7 +2223,6 @@ class AwardServiceImpl(
                 return ratingByValueOrWeightedValue(awards)
                     .first { it.statusDetails == AwardStatusDetails.EMPTY }
                     .copy(statusDetails = AwardStatusDetails.AWAITING)
-
             }
             Stage.PN,
             Stage.FS,
@@ -2582,7 +2605,6 @@ class AwardServiceImpl(
                 bid.value
             else
                 Money(bidFromAuction.value.amount, bid.value.currency)
-
         } else {
             bid.value
         }
@@ -2882,46 +2904,35 @@ class AwardServiceImpl(
 
     private fun calculateWeightedValue(
         bid: CreateAwardsData.Bid,
-        conversionsByRelatedItem: Map<String, CreateAwardsData.Conversion>
+        conversionsByRelatedItem: Map<String, CreateAwardsData.Conversion>,
+        data: CreateAwardsData,
+        pmd: ProcurementMethod
     ): Money {
-        val coefficientRates = bid.requirementResponses
-            .asSequence()
-            .flatMap { response ->
-                conversionsByRelatedItem[response.requirement.id]
-                    ?.let { conversion ->
-                        conversion.coefficients
-                            .asSequence()
-                            .filter { coefficient ->
-                                compare(coefficient.value, response.value)
-                            }
-                            .map { coefficient ->
-                                coefficient.coefficient
-                            }
-                    }
-                    ?: emptySequence()
-            }
-            .toList()
 
-        return if (coefficientRates.isNotEmpty()) {
-            val amount = coefficientRates.fold(bid.value.amount, { acc, rate -> acc.multiply(rate.rate) })
-                .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
-            Money(amount = amount, currency = bid.value.currency)
-        } else
-            bid.value
+        val criteriaRequirements = data.criteria
+            .asSequence()
+            .filter { belongsToSelectionOrOtherCategory(it.classification.id) }
+            .filter { isRelatedToAppropriateEntity(pmd, it.relatesTo) }
+            .flatMap { it.requirementGroups }
+            .flatMap { it.requirements }
+            .associateBy { it.id }
+
+        val responsesToCriteriaRequirements = bid.requirementResponses
+            .filter { it.requirement.id in criteriaRequirements }
+            .filter {
+                val dataType = criteriaRequirements.getValue(it.requirement.id).dataType
+                it.value.matchesDateType(dataType)
+            }
+
+        val coefficientRates = getCoefficientRates(responsesToCriteriaRequirements, conversionsByRelatedItem)
+
+        return bid.value.calculateWeightedValue(coefficientRates)
     }
 
-    private fun Money.calculateWeightedValue(coefficientRates: List<CoefficientRate>): Money =
-        if (coefficientRates.isNotEmpty()) {
-            val amount = coefficientRates.fold(this.amount, { acc, rate -> acc.multiply(rate.rate) })
-                .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
-            Money(amount = amount, currency = this.currency)
-        } else
-            this
-
-    private fun getCoefficients(
-        bid: CreateAwardsAuctionEndData.Bid,
-        conversionsByRelatedItem: Map<String, CreateAwardsAuctionEndData.Conversion>
-    ): List<CoefficientRate> = bid.requirementResponses
+    private fun getCoefficientRates(
+        responsesToCriteriaRequirements: List<CreateAwardsData.Bid.RequirementResponse>,
+        conversionsByRelatedItem: Map<String, CreateAwardsData.Conversion>
+    ) = responsesToCriteriaRequirements
         .asSequence()
         .flatMap { response ->
             conversionsByRelatedItem[response.requirement.id.toString()]
@@ -2938,6 +2949,99 @@ class AwardServiceImpl(
                 ?: emptySequence()
         }
         .toList()
+
+    private fun isRelatedToAppropriateEntity(
+        pmd: ProcurementMethod,
+        relatesTo: CriteriaRelatesTo
+    ) = when (pmd) {
+        ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+        ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+        ProcurementMethod.SV, ProcurementMethod.TEST_SV ->
+            when (relatesTo) {
+                CriteriaRelatesTo.ITEM,
+                CriteriaRelatesTo.LOT,
+                CriteriaRelatesTo.TENDER,
+                CriteriaRelatesTo.TENDERER -> true
+            }
+        ProcurementMethod.CF, ProcurementMethod.TEST_CF,
+        ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
+        ProcurementMethod.OF, ProcurementMethod.TEST_OF,
+        ProcurementMethod.RT, ProcurementMethod.TEST_RT, ->
+            when (relatesTo) {
+                CriteriaRelatesTo.ITEM,
+                CriteriaRelatesTo.LOT,
+                CriteriaRelatesTo.TENDER -> true
+                CriteriaRelatesTo.TENDERER -> false
+            }
+        ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+        ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+        ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+        ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+        ProcurementMethod.IP, ProcurementMethod.TEST_IP,
+        ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+        ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(INVALID_PMD)
+    }
+
+    private fun belongsToSelectionOrOtherCategory(classificationId: String) =
+        (classificationId.startsWith("CRITERION.SELECTION.")
+            || classificationId.startsWith("CRITERION.OTHER."))
+
+    private fun RequirementRsValue.matchesDateType(dataType: DataType) =
+        when (dataType) {
+            DataType.BOOLEAN -> this is RequirementRsValue.AsBoolean
+            DataType.INTEGER -> this is RequirementRsValue.AsInteger
+            DataType.NUMBER -> this is RequirementRsValue.AsNumber
+            DataType.STRING -> this is RequirementRsValue.AsString
+        }
+
+    private fun Money.calculateWeightedValue(coefficientRates: List<CoefficientRate>): Money =
+        if (coefficientRates.isNotEmpty()) {
+            val amount = coefficientRates.fold(this.amount, { acc, rate -> acc.multiply(rate.rate) })
+                .setScale(Money.AVAILABLE_SCALE, RoundingMode.HALF_UP)
+            Money(amount = amount, currency = this.currency)
+        } else
+            this
+
+    private fun getCoefficients(
+        data: CreateAwardsAuctionEndData,
+        bid: CreateAwardsAuctionEndData.Bid,
+        conversionsByRelatedItem: Map<String, CreateAwardsAuctionEndData.Conversion>,
+        pmd: ProcurementMethod
+    ): List<CoefficientRate> {
+
+        val criteriaRequirements = data.criteria
+            .asSequence()
+            .filter { belongsToSelectionOrOtherCategory(it.classification.id) }
+            .filter { isRelatedToAppropriateEntity(pmd, it.relatesTo) }
+            .flatMap { it.requirementGroups }
+            .flatMap { it.requirements }
+            .associateBy { it.id }
+
+        val responsesToCriteriaRequirements = bid.requirementResponses
+            .filter { it.requirement.id in criteriaRequirements }
+            .filter {
+                val dataType = criteriaRequirements.getValue(it.requirement.id).dataType
+                it.value.matchesDateType(dataType)
+            }
+
+        return responsesToCriteriaRequirements
+            .asSequence()
+            .flatMap { response ->
+                conversionsByRelatedItem[response.requirement.id.toString()]
+                    ?.let { conversion ->
+                        conversion.coefficients
+                            .asSequence()
+                            .filter { coefficient ->
+                                compare(coefficient.value, response.value)
+                            }
+                            .map { coefficient ->
+                                coefficient.coefficient
+                            }
+                    }
+                    ?: emptySequence()
+            }
+            .toList()
+    }
 
     private fun compare(coef: CoefficientValue, req: RequirementRsValue): Boolean {
         return when (req) {
