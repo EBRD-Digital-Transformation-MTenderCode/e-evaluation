@@ -475,5 +475,18 @@ fun CreateAwardsRequest.convert(): CreateAwardsData = CreateAwardsData(
                     )
                 }
             )
-        }.orEmpty()
+        }.orEmpty(),
+    items = this.items
+        .mapIfNotEmpty { item ->
+            CreateAwardsData.Item(
+                id = item.id,
+                relatedLot = item.relatedLot
+            )
+        }
+        .orThrow {
+            ErrorException(
+                error = ErrorType.IS_EMPTY,
+                message = "The items list is empty."
+            )
+        }
 )
