@@ -20,21 +20,17 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.failure
 import com.procurement.evaluation.infrastructure.repository.CassandraContainer
-import com.procurement.evaluation.infrastructure.repository.CassandraContainerInteractor
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
-import com.procurement.evaluation.utils.readFile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.Container
 import java.util.*
 
 class CassandraAwardRepositoryIT {
@@ -51,10 +47,7 @@ class CassandraAwardRepositoryIT {
         private const val JSON_DATA = """ {"award": "data"} """
         private const val UPDATED_JSON_DATA = """ {"award": "updated data"} """
 
-        private val initialScripts = readFile("docs/data.cql")
-
         private var container: CassandraTestContainer = CassandraContainer.container
-        private val containerInteractor: CassandraContainerInteractor = CassandraContainerInteractor(container)
 
         private val poolingOptions = PoolingOptions()
             .setMaxConnectionsPerHost(HostDistance.LOCAL, 1)
@@ -65,15 +58,6 @@ class CassandraAwardRepositoryIT {
             .withPoolingOptions(poolingOptions)
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
-
-        private fun createKeyspace(): Container.ExecResult = containerInteractor.cqlsh(initialScripts)
-
-        @BeforeAll
-        @JvmStatic
-        internal fun init() {
-            createKeyspace()
-        }
-
     }
 
     private var session: Session = spy(cluster.connect())

@@ -17,35 +17,28 @@ import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.failure
 import com.procurement.evaluation.infrastructure.extension.cassandra.toCassandraTimestamp
 import com.procurement.evaluation.infrastructure.repository.CassandraContainer
-import com.procurement.evaluation.infrastructure.repository.CassandraContainerInteractor
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
-import com.procurement.evaluation.utils.readFile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.Container
 import java.time.LocalDateTime
 
 class CassandraAwardPeriodRepositoryIT {
     companion object {
-
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286")!!
         private val OCID = Ocid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286-AC-1545606113365")!!
         private val START_DATE = LocalDateTime.now()
 
-        private val initialScripts = readFile("docs/data.cql")
-
         private var container: CassandraTestContainer = CassandraContainer.container
-        private val containerInteractor: CassandraContainerInteractor = CassandraContainerInteractor(container)
 
         private val poolingOptions = PoolingOptions()
             .setMaxConnectionsPerHost(HostDistance.LOCAL, 1)
+
         private val cluster = Cluster.builder()
             .addContactPoints(container.contractPoint)
             .withPort(container.port)
@@ -53,14 +46,6 @@ class CassandraAwardPeriodRepositoryIT {
             .withPoolingOptions(poolingOptions)
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
-
-        private fun createKeyspace(): Container.ExecResult = containerInteractor.cqlsh(initialScripts)
-
-        @BeforeAll
-        @JvmStatic
-        internal fun init() {
-            createKeyspace()
-        }
 
     }
 

@@ -17,18 +17,14 @@ import com.procurement.evaluation.infrastructure.api.v1.CommandTypeV1
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.infrastructure.handler.HistoryRepository
 import com.procurement.evaluation.infrastructure.repository.CassandraContainer
-import com.procurement.evaluation.infrastructure.repository.CassandraContainerInteractor
 import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
 import com.procurement.evaluation.infrastructure.repository.Database
-import com.procurement.evaluation.utils.readFile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.Container
 import java.util.*
 
 class CassandraHistoryRepositoryIT {
@@ -37,10 +33,8 @@ class CassandraHistoryRepositoryIT {
         private val COMMAND_ID: CommandId = CommandId(UUID.randomUUID().toString())
         private val ACTION: Action = CommandTypeV1.AWARDS_CANCELLATION
         private const val JSON_DATA: String = """{"tender": {"title" : "Tender-Title"}}"""
-        private val initialScripts = readFile("docs/data.cql")
 
         private val container: CassandraTestContainer = CassandraContainer.container
-        private val containerInteractor: CassandraContainerInteractor = CassandraContainerInteractor(container)
 
         private val poolingOptions = PoolingOptions()
             .setMaxConnectionsPerHost(HostDistance.LOCAL, 1)
@@ -52,15 +46,6 @@ class CassandraHistoryRepositoryIT {
             .withPoolingOptions(poolingOptions)
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
-
-        private fun createKeyspace(): Container.ExecResult = containerInteractor.cqlsh(initialScripts)
-
-        @BeforeAll
-        @JvmStatic
-        internal fun init() {
-            createKeyspace()
-        }
-
     }
 
     private val session: Session = spy(cluster.connect())
