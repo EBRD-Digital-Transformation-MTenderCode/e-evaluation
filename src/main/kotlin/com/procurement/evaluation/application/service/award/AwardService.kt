@@ -2909,10 +2909,16 @@ class AwardServiceImpl(
         pmd: ProcurementMethod
     ): Money {
 
+        val lot = bid.relatedLots.first()
+        val itemsOfLot = data.items
+            .filter { item -> item.relatedLot == lot }
+            .toSetBy { it.id }
+
         val criteriaRequirements = data.criteria
             .asSequence()
             .filter { belongsToSelectionOrOtherCategory(it.classification.id) }
-            .filter { isRelatedToAppropriateEntity(pmd, it.relatesTo) }
+            .filter { isRelatedToAppropriateEntityType(pmd, it.relatesTo) }
+            .filter { isRelatedToMatchingEntity(it, lot, itemsOfLot)}
             .flatMap { it.requirementGroups }
             .flatMap { it.requirements }
             .associateBy { it.id }
@@ -2927,6 +2933,17 @@ class AwardServiceImpl(
         val coefficientRates = getCoefficientRates(responsesToCriteriaRequirements, conversionsByRelatedItem)
 
         return bid.value.calculateWeightedValue(coefficientRates)
+    }
+
+    private fun isRelatedToMatchingEntity(
+        criterion: CreateAwardsData.Criterion,
+        lot: String,
+        itemsOfLot: Set<String>
+    ) = when (criterion.relatesTo) {
+        CriteriaRelatesTo.TENDER,
+        CriteriaRelatesTo.TENDERER -> true
+        CriteriaRelatesTo.LOT -> criterion.relatedItem == lot
+        CriteriaRelatesTo.ITEM -> criterion.relatedItem in itemsOfLot
     }
 
     private fun getCoefficientRates(
@@ -2950,7 +2967,7 @@ class AwardServiceImpl(
         }
         .toList()
 
-    private fun isRelatedToAppropriateEntity(
+    private fun isRelatedToAppropriateEntityType(
         pmd: ProcurementMethod,
         relatesTo: CriteriaRelatesTo
     ) = when (pmd) {
@@ -3012,7 +3029,7 @@ class AwardServiceImpl(
         val criteriaRequirements = data.criteria
             .asSequence()
             .filter { belongsToSelectionOrOtherCategory(it.classification.id) }
-            .filter { isRelatedToAppropriateEntity(pmd, it.relatesTo) }
+            .filter { isRelatedToAppropriateEntityType(pmd, it.relatesTo) }
             .flatMap { it.requirementGroups }
             .flatMap { it.requirements }
             .associateBy { it.id }
