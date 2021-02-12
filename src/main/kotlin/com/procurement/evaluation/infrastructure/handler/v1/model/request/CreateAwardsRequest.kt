@@ -44,7 +44,9 @@ data class CreateAwardsRequest(
     @param:JsonProperty("lots") @field:JsonProperty("lots") val lots: List<Lot>,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @field:JsonProperty("criteria") @param:JsonProperty("criteria") val criteria: List<Criterion>?
+    @field:JsonProperty("criteria") @param:JsonProperty("criteria") val criteria: List<Criterion>?,
+
+    @param:JsonProperty("items") @field:JsonProperty("items") val items: List<Item>
 ) {
     data class Conversion(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
@@ -488,4 +490,9 @@ data class CreateAwardsRequest(
             @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String
         )
     }
+
+    data class Item(
+        @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+        @param:JsonProperty("relatedLot") @field:JsonProperty("relatedLot") val relatedLot: String
+    )
 }

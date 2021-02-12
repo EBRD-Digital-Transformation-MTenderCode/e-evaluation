@@ -25,8 +25,9 @@ data class CreateAwardsData(
     val conversions: List<Conversion>,
     val bids: List<Bid>,
     val lots: List<Lot>,
-    val criteria: List<Criterion>
-) {
+    val criteria: List<Criterion>,
+    val items: List<Item>
+    ) {
     data class Conversion(
         val id: String,
         val relatesTo: ConversionsRelatesTo,
@@ -351,4 +352,9 @@ data class CreateAwardsData(
              val scheme: String
         )
     }
+
+    data class Item(
+        val id: String,
+        val relatedLot: String
+    )
 }
