@@ -1,4 +1,4 @@
-package com.procurement.evaluation.infrastructure.repository
+package com.procurement.evaluation.infrastructure.repository.award
 
 import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.BoundStatement
@@ -9,6 +9,7 @@ import com.datastax.driver.core.PoolingOptions
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.querybuilder.QueryBuilder
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
@@ -18,7 +19,9 @@ import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
 import com.procurement.evaluation.domain.model.Owner
 import com.procurement.evaluation.failure
-import com.procurement.evaluation.infrastructure.repository.award.CassandraAwardRepository
+import com.procurement.evaluation.infrastructure.repository.CassandraContainer
+import com.procurement.evaluation.infrastructure.repository.CassandraTestContainer
+import com.procurement.evaluation.infrastructure.repository.Database
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import org.junit.jupiter.api.AfterEach
@@ -27,16 +30,9 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.*
 
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class CassandraAwardRepositoryIT {
     companion object {
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1546004674286")!!
@@ -50,37 +46,27 @@ class CassandraAwardRepositoryIT {
         private val UPDATED_AWARD_STATUS_DETAILS = AwardStatusDetails.UNSUCCESSFUL
         private const val JSON_DATA = """ {"award": "data"} """
         private const val UPDATED_JSON_DATA = """ {"award": "updated data"} """
-    }
 
-    @Autowired
-    private lateinit var container: CassandraTestContainer
+        private var container: CassandraTestContainer = CassandraContainer.container
 
-    private lateinit var session: Session
-    private lateinit var awardRepository: AwardRepository
-
-    @BeforeEach
-    fun init() {
-        val poolingOptions = PoolingOptions()
+        private val poolingOptions = PoolingOptions()
             .setMaxConnectionsPerHost(HostDistance.LOCAL, 1)
-        val cluster = Cluster.builder()
+        private val cluster = Cluster.builder()
             .addContactPoints(container.contractPoint)
             .withPort(container.port)
             .withoutJMXReporting()
             .withPoolingOptions(poolingOptions)
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
-
-        session = spy(cluster.connect())
-
-        createKeyspace()
-        createTable()
-
-        awardRepository = CassandraAwardRepository(session)
     }
+
+    private var session: Session = spy(cluster.connect())
+    private var awardRepository: AwardRepository = CassandraAwardRepository(session)
 
     @AfterEach
     fun clean() {
-        dropKeyspace()
+        clearTables()
+        clearInvocations(session)
     }
 
     @Test
@@ -358,30 +344,10 @@ class CassandraAwardRepositoryIT {
         assertTrue(failure.exception is RuntimeException)
     }
 
-    private fun createKeyspace() {
-        session.execute("CREATE KEYSPACE ${Database.KEYSPACE} WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
+    private fun clearTables() {
+        session.execute("TRUNCATE ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME}")
     }
 
-    private fun dropKeyspace() {
-        session.execute("DROP KEYSPACE ${Database.KEYSPACE};")
-    }
-
-    private fun createTable() {
-        session.execute(
-            """
-                CREATE TABLE IF NOT EXISTS ${Database.KEYSPACE}.${Database.Awards.TABLE_NAME} (
-                    cpid           TEXT,
-                    ocid           TEXT,
-                    token_entity   TEXT,
-                    status         TEXT,
-                    status_details TEXT,
-                    owner          TEXT,
-                    json_data      TEXT,
-                    PRIMARY KEY (cpid, ocid, token_entity)
-                  );
-            """
-        )
-    }
 
     private fun expectedFundedAward() = AwardEntity(
         cpid = CPID,
