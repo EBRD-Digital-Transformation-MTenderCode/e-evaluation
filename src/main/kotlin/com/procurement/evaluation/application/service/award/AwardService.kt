@@ -1960,6 +1960,8 @@ class AwardServiceImpl(
                 .onFailure { return it }
         }
 
+        ValidateAwardDataRules.Mdm.validate(params)
+            .onFailure { return it }
 
         return Validated.ok()
     }
