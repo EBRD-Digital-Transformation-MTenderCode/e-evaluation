@@ -14,7 +14,8 @@ data class ValidateAwardDataRequest(
     @field:JsonProperty("ocid") @param:JsonProperty("ocid") val ocid: String,
     @field:JsonProperty("operationType") @param:JsonProperty("operationType") val operationType: String,
     @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender,
-    @field:JsonProperty("awards") @param:JsonProperty("awards") val awards: List<Award>
+    @field:JsonProperty("awards") @param:JsonProperty("awards") val awards: List<Award>,
+    @param:JsonProperty("mdm") @field:JsonProperty("mdm") val mdm: Mdm
 ) {
     data class Tender(
         @field:JsonProperty("lots") @param:JsonProperty("lots") val lots: List<Lot>
@@ -303,6 +304,15 @@ data class ValidateAwardDataRequest(
             @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
 
             @field:JsonProperty("documentType") @param:JsonProperty("documentType") val documentType: String
+        )
+    }
+
+    data class Mdm(
+        @param:JsonProperty("registrationSchemes") @field:JsonProperty("registrationSchemes") val registrationSchemes: List<RegistrationScheme>
+    ) {
+        data class RegistrationScheme(
+            @param:JsonProperty("country") @field:JsonProperty("country") val country: String,
+            @param:JsonProperty("schemes") @field:JsonProperty("schemes") val schemes: List<String>
         )
     }
 }
