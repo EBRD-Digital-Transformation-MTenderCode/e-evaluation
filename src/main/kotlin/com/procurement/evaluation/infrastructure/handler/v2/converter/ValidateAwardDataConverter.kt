@@ -2,6 +2,7 @@ package com.procurement.evaluation.infrastructure.handler.v2.converter
 
 import com.procurement.evaluation.application.model.award.validate.ValidateAwardDataParams
 import com.procurement.evaluation.application.model.award.validate.ValidateAwardDataParams.Tender
+import com.procurement.evaluation.domain.util.extension.mapResult
 import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.infrastructure.handler.v2.model.request.ValidateAwardDataRequest
 import com.procurement.evaluation.lib.functional.Result
@@ -15,8 +16,18 @@ fun ValidateAwardDataRequest.convert(): Result<ValidateAwardDataParams, DataErro
         tender = tender.convert().onFailure { return it },
         awards = awards.map {
             it.convert().onFailure { fail -> return fail }
-        }
+        },
+        mdm = mdm.convert().onFailure { return it }
     )
+
+private fun ValidateAwardDataRequest.Mdm.convert(): Result<ValidateAwardDataParams.Mdm, DataErrors> =
+    ValidateAwardDataParams.Mdm.tryCreate(
+        registrationSchemes.mapResult { it.convert() }
+            .onFailure { fail -> return fail }
+    )
+
+private fun ValidateAwardDataRequest.Mdm.RegistrationScheme.convert(): Result<ValidateAwardDataParams.Mdm.RegistrationScheme, DataErrors> =
+    ValidateAwardDataParams.Mdm.RegistrationScheme.tryCreate(country = country, schemes = schemes)
 
 fun ValidateAwardDataRequest.Tender.convert(): Result<Tender, DataErrors> =
     Tender.tryCreate(lots = lots.map { it.convert() })
