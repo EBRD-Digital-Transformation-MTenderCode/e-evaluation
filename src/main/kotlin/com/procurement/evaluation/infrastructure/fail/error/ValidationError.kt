@@ -149,5 +149,10 @@ sealed class ValidationError(
             numberError = "4.8.17",
             description = "Duplicated ids in awards.documents array."
         )
+
+        class SupplierSchemeNotFound(supplierId: String, scheme: String, country: String): ValidationError(
+            numberError = "4.8.18",
+            description = "Scheme '$scheme' of supplier '$supplierId' not found in registration schemes for country '$country'."
+        )
     }
 }

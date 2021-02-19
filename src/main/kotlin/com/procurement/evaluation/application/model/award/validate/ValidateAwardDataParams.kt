@@ -1,5 +1,6 @@
 package com.procurement.evaluation.application.model.award.validate
 
+import com.procurement.evaluation.application.model.notEmptyRule
 import com.procurement.evaluation.application.model.parseCpid
 import com.procurement.evaluation.application.model.parseDate
 import com.procurement.evaluation.application.model.parseEnum
@@ -13,6 +14,7 @@ import com.procurement.evaluation.infrastructure.fail.error.DataErrors
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.Result.Companion.failure
 import com.procurement.evaluation.lib.functional.asSuccess
+import com.procurement.evaluation.lib.functional.validate
 import com.procurement.evaluation.lib.toSetBy
 import com.procurement.evaluation.model.dto.ocds.BusinessFunctionType
 import com.procurement.evaluation.model.dto.ocds.DocumentType
@@ -25,7 +27,8 @@ class ValidateAwardDataParams private constructor(
     val ocid: Ocid,
     val operationType: OperationType2,
     val tender: Tender,
-    val awards: List<Award>
+    val awards: List<Award>,
+    val mdm: Mdm
 ) {
     companion object {
         private val allowedOperationTypes = OperationType2.allowedElements
@@ -53,7 +56,8 @@ class ValidateAwardDataParams private constructor(
             ocid: String,
             operationType: String,
             tender: Tender,
-            awards: List<Award>
+            awards: List<Award>,
+            mdm: Mdm
         ): Result<ValidateAwardDataParams, DataErrors> {
             val parsedCpid = parseCpid(cpid)
                 .onFailure { return it }
@@ -77,7 +81,8 @@ class ValidateAwardDataParams private constructor(
                 ocid = parsedOcid,
                 operationType = parsedOperationType,
                 tender = tender,
-                awards = awards
+                awards = awards,
+                mdm = mdm
             ).asSuccess()
         }
     }
@@ -611,6 +616,33 @@ class ValidateAwardDataParams private constructor(
                         description = description,
                         documentType = parsedDocumentType
                     ).asSuccess()
+                }
+            }
+        }
+    }
+
+    class Mdm private constructor(
+        val registrationSchemes: List<RegistrationScheme>
+    ) {
+        companion object {
+            const val REGISTRATION_SCHEMES_ATTRIBUTE = "mdm.registrationSchemes"
+            fun tryCreate(registrationSchemes: List<RegistrationScheme>): Result<Mdm, DataErrors> {
+                registrationSchemes.validate(notEmptyRule(REGISTRATION_SCHEMES_ATTRIBUTE))
+                    .onFailure { return it }
+                return Mdm(registrationSchemes).asSuccess()
+            }
+        }
+
+        class RegistrationScheme private constructor(
+            val country: String,
+            val schemes: List<String>
+        ) {
+            companion object {
+                const val SCHEMES_ATTRIBUTE = "mdm.registrationSchemes.schemes"
+                fun tryCreate(schemes: List<String>, country: String): Result<RegistrationScheme, DataErrors> {
+                    schemes.validate(notEmptyRule(SCHEMES_ATTRIBUTE))
+                        .onFailure { return it }
+                    return RegistrationScheme(country, schemes).asSuccess()
                 }
             }
         }

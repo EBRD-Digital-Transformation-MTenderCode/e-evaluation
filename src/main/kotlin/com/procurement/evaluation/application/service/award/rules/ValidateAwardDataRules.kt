@@ -222,6 +222,29 @@ object ValidateAwardDataRules {
         }
     }
 
+    object Mdm{
+        fun validate(params: ValidateAwardDataParams): Validated<Failure>{
+            val schemesByCountry = params.mdm.registrationSchemes.associateBy(
+                keySelector = { it.country },
+                valueTransform = { it.schemes.toSet() }
+            )
+            params.awards
+                .flatMap { award -> award.suppliers }
+                .forEach { supplier ->
+                    val country = supplier.address.addressDetails.country.id
+                    val supplierScheme = supplier.identifier.scheme
+                    val schemes = schemesByCountry[country].orEmpty()
+                    if(supplierScheme !in schemes)
+                        return ValidationError.ValidateAwardData.SupplierSchemeNotFound(
+                            supplierId = supplier.id, scheme = supplierScheme, country = country
+                        ).asValidationError()
+
+                }
+
+            return Validated.ok()
+        }
+    }
+
     fun isIdsUniq(ids: List<String>): Boolean = ids.size == ids.toSet().size
 
     fun isIdentifiersUniq(identifiers: List<Pair<String, String>>): Boolean {
