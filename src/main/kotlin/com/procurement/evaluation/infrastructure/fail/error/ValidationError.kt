@@ -155,4 +155,11 @@ sealed class ValidationError(
             description = "Scheme '$scheme' of supplier '$supplierId' not found in registration schemes for country '$country'."
         )
     }
+
+    object DoConsideration {
+        class UnknownAwards(awardIds: Collection<String>) : ValidationError(
+            numberError = "4.14.1",
+            description = "Award(s) by id(s) '${awardIds.joinToString()}' not found."
+        )
+    }
 }
