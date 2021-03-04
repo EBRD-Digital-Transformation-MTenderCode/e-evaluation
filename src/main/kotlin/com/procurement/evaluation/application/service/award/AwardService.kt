@@ -5,6 +5,7 @@ import com.procurement.evaluation.application.model.award.access.CheckAccessToAw
 import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateErrors
 import com.procurement.evaluation.application.model.award.check.state.CheckAwardStateParams
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
+import com.procurement.evaluation.application.model.award.consideration.DoConsiderationParams
 import com.procurement.evaluation.application.model.award.create.CreateAwardParams
 import com.procurement.evaluation.application.model.award.find.FindAwardsForProtocolParams
 import com.procurement.evaluation.application.model.award.get.GetAwardByIdsParams
@@ -18,6 +19,7 @@ import com.procurement.evaluation.application.model.award.update.UpdateAwardPara
 import com.procurement.evaluation.application.model.award.validate.ValidateAwardDataParams
 import com.procurement.evaluation.application.repository.award.AwardRepository
 import com.procurement.evaluation.application.repository.award.model.AwardEntity
+import com.procurement.evaluation.application.repository.award.model.AwardEntityFull
 import com.procurement.evaluation.application.repository.period.AwardPeriodRepository
 import com.procurement.evaluation.application.service.GenerationService
 import com.procurement.evaluation.application.service.RulesService
@@ -68,6 +70,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.converter.toDomain
 import com.procurement.evaluation.infrastructure.handler.v2.model.request.UpdateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.DoConsiderationResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.FindAwardsForProtocolResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardByIdsResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
@@ -184,12 +187,15 @@ interface AwardService {
     fun closeAwardPeriod(params: CloseAwardPeriodParams): Result<CloseAwardPeriodResult, Failure>
 
     fun startAwardPeriod(params: StartAwardPeriodParams): Result<StartAwardPeriodResultV2, Failure>
+
+    fun doConsideration(params: DoConsiderationParams): Result<DoConsiderationResult, Failure>
 }
 
 @Service
 class AwardServiceImpl(
     private val generationService: GenerationService,
     private val awardRepository: AwardRepository,
+    private val awardManagementService: AwardManagementService,
     private val awardPeriodRepository: AwardPeriodRepository,
     private val transform: Transform,
     private val rulesService: RulesService
@@ -2122,6 +2128,45 @@ class AwardServiceImpl(
         )
 
         return success(response)
+    }
+
+    override fun doConsideration(params: DoConsiderationParams):Result<DoConsiderationResult, Failure> {
+        val awardEntitiesById = awardManagementService.find(cpid = params.cpid, ocid = params.ocid)
+            .onFailure { return it}
+            .associateBy { it.award.id }
+
+        val awardIdsReceived = params.awards.toSetBy { it.id }
+        val unknownAwards = awardIdsReceived - awardEntitiesById.keys
+
+        if (unknownAwards.isNotEmpty())
+            return ValidationError.DoConsideration.UnknownAwards(unknownAwards).asFailure()
+
+        val updatedEntities = awardEntitiesById.mapValues { (awardId, entity) ->
+            if (awardId in awardIdsReceived)
+                AwardEntityFull.create(
+                    cpid = entity.cpid,
+                    ocid = entity.ocid,
+                    owner = entity.owner,
+                    award = entity.award.copy(statusDetails = AwardStatusDetails.CONSIDERATION)
+                )
+            else entity
+        }
+
+        awardManagementService.update(params.cpid, updatedEntities.values)
+            .onFailure { return it }
+
+       return awardIdsReceived
+            .map { id ->
+                val award = updatedEntities.getValue(id).award
+                DoConsiderationResult.Award(
+                    id = award.id,
+                    status = award.status,
+                    statusDetails = award.statusDetails,
+                    relatedBid = award.relatedBid
+                )
+            }
+           .let { DoConsiderationResult(it) }
+           .asSuccess()
     }
 
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
