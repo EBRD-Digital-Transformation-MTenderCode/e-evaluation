@@ -6,7 +6,6 @@ import com.procurement.evaluation.application.repository.award.model.AwardEntity
 import com.procurement.evaluation.application.service.Transform
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
-import com.procurement.evaluation.domain.util.extension.mapResult
 import com.procurement.evaluation.infrastructure.fail.Failure
 import com.procurement.evaluation.lib.functional.Result
 import com.procurement.evaluation.lib.functional.asSuccess
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Service
 
 interface AwardManagementService {
     fun find(cpid: Cpid, ocid: Ocid): Result<List<AwardEntityFull>, Failure>
-    fun update(cpid: Cpid, awards: List<AwardEntityFull>): Result<Boolean, Failure>
+    fun update(cpid: Cpid, awards: Collection<AwardEntityFull>): Result<Boolean, Failure>
 }
 
 @Service
@@ -39,8 +38,8 @@ class AwardManagementServiceImpl(
                 )
             }.asSuccess()
 
-    override fun update(cpid: Cpid, awards: List<AwardEntityFull>): Result<Boolean, Failure> {
-        val updatedAwards = awards.mapResult { AwardEntity.create(it, transform) }.onFailure { return it }
+    override fun update(cpid: Cpid, awards: Collection<AwardEntityFull>): Result<Boolean, Failure> {
+        val updatedAwards = awards.map { AwardEntity.create(it, transform).onFailure { return it } }
         return awardRepository.update(cpid = cpid, updatedAwards = updatedAwards)
     }
 }
