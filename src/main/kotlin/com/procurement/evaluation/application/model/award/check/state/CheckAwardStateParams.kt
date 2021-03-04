@@ -26,6 +26,7 @@ class CheckAwardStateParams private constructor(
         val allowedOperationTypes = OperationType2.allowedElements
             .filter {
                 when (it) {
+                    OperationType2.AWARD_CONSIDERATION,
                     OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
                     OperationType2.PCR_PROTOCOL,
                     OperationType2.UPDATE_AWARD -> true
