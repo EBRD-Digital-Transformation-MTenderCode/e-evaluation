@@ -26,6 +26,7 @@ class CheckAwardStateParams private constructor(
         val allowedOperationTypes = OperationType2.allowedElements
             .filter {
                 when (it) {
+                    OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
                     OperationType2.PCR_PROTOCOL,
                     OperationType2.UPDATE_AWARD -> true
 
@@ -33,7 +34,6 @@ class CheckAwardStateParams private constructor(
                     OperationType2.CREATE_AWARD,
                     OperationType2.CREATE_PCR,
                     OperationType2.CREATE_SUBMISSION,
-                    OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
                     OperationType2.LOT_CANCELLATION,
                     OperationType2.SUBMISSION_PERIOD_END,
                     OperationType2.TENDER_CANCELLATION,
