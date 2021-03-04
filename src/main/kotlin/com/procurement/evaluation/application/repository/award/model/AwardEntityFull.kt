@@ -16,7 +16,7 @@ class AwardEntityFull private constructor(
     val status: AwardStatus,
     val statusDetails: AwardStatusDetails,
     val owner: Owner?,
-    val jsonData: Award
+    val award: Award
 ) {
     companion object {
         fun create(cpid: Cpid, ocid: Ocid, owner: Owner? = null, award: Award) =
