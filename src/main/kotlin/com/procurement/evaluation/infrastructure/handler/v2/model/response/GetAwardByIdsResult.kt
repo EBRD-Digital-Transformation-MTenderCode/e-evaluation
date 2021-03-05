@@ -51,7 +51,10 @@ data class GetAwardByIdsResult(
         @field:JsonProperty("documents") @param:JsonProperty("documents") val documents: List<Document>?,
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
-        @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<String>?
+        @field:JsonProperty("relatedLots") @param:JsonProperty("relatedLots") val relatedLots: List<String>?,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @field:JsonProperty("relatedBid") @param:JsonProperty("relatedBid") val relatedBid: String?
     ) {
         data class Value(
             @JsonDeserialize(using = AmountDeserializer::class)
@@ -331,7 +334,8 @@ data class GetAwardByIdsResult(
                 value = award.value!!.fromDomain(),
                 suppliers = award.suppliers.orEmpty().map { it.fromDomain() },
                 documents = award.documents?.map { it.fromDomain() },
-                relatedLots = award.relatedLots
+                relatedLots = award.relatedLots,
+                relatedBid = award.relatedBid
             )
 
         fun Value.fromDomain(): Award.Value =
