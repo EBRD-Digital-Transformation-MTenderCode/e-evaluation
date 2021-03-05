@@ -42,6 +42,7 @@ object CheckAwardsStateRules {
             }
 
             OperationType2.APPLY_QUALIFICATION_PROTOCOL,
+            OperationType2.AWARD_CONSIDERATION,
             OperationType2.CREATE_PCR,
             OperationType2.CREATE_AWARD,
             OperationType2.CREATE_SUBMISSION,

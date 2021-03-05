@@ -38,6 +38,7 @@ class ValidateAwardDataParams private constructor(
                     OperationType2.UPDATE_AWARD -> true
 
                     OperationType2.APPLY_QUALIFICATION_PROTOCOL,
+                    OperationType2.AWARD_CONSIDERATION,
                     OperationType2.CREATE_PCR,
                     OperationType2.CREATE_SUBMISSION,
                     OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
