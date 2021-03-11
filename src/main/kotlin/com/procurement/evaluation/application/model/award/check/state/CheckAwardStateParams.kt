@@ -51,6 +51,8 @@ class CheckAwardStateParams private constructor(
                     ProcurementMethodDetails.OT, ProcurementMethodDetails.TEST_OT,
                     ProcurementMethodDetails.MV, ProcurementMethodDetails.TEST_MV,
                     ProcurementMethodDetails.SV, ProcurementMethodDetails.TEST_SV,
+                    ProcurementMethodDetails.GPA, ProcurementMethodDetails.TEST_GPA,
+                    ProcurementMethodDetails.RT, ProcurementMethodDetails.TEST_RT,
                     ProcurementMethodDetails.CD, ProcurementMethodDetails.TEST_CD,
                     ProcurementMethodDetails.CF, ProcurementMethodDetails.TEST_CF,
                     ProcurementMethodDetails.DA, ProcurementMethodDetails.TEST_DA,
@@ -59,8 +61,6 @@ class CheckAwardStateParams private constructor(
                     ProcurementMethodDetails.NP, ProcurementMethodDetails.TEST_NP,
                     ProcurementMethodDetails.OF, ProcurementMethodDetails.TEST_OF -> true
 
-                    ProcurementMethodDetails.GPA, ProcurementMethodDetails.TEST_GPA,
-                    ProcurementMethodDetails.RT, ProcurementMethodDetails.TEST_RT,
                     ProcurementMethodDetails.FA, ProcurementMethodDetails.TEST_FA,
                     ProcurementMethodDetails.OP, ProcurementMethodDetails.TEST_OP -> false
                 }
