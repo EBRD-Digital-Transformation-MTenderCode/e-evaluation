@@ -13,6 +13,8 @@ import com.procurement.evaluation.model.dto.ocds.Award
 object CheckAwardsStateRules {
     fun filterAwards(storedAwards: List<Award>, params: CheckAwardStateParams): Result<List<Award>, Failure> {
         when (params.operationType) {
+            OperationType2.AWARD_CONSIDERATION,
+            OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
             OperationType2.UPDATE_AWARD -> {
                 if (params.awards.isEmpty())
                     return CheckAwardStateErrors.MissingAwardsAttribute().asFailure()
@@ -44,7 +46,6 @@ object CheckAwardsStateRules {
             OperationType2.CREATE_PCR,
             OperationType2.CREATE_AWARD,
             OperationType2.CREATE_SUBMISSION,
-            OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
             OperationType2.LOT_CANCELLATION,
             OperationType2.SUBMISSION_PERIOD_END,
             OperationType2.TENDER_CANCELLATION,

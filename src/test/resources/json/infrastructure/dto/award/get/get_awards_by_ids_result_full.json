@@ -185,7 +185,8 @@
           "description": "string",
           "documentType": "awardNotice"
         }
-      ]
+      ],
+      "relatedBid": "string"
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "awards": [
+    {
+      "id": "string",
+      "status": "pending",
+      "statusDetails": "consideration",
+      "relatedBid": "string"
+    }
+  ]
+}

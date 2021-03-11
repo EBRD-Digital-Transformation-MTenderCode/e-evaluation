@@ -30,6 +30,7 @@ class CreateUnsuccessfulAwardsParams private constructor(
                     OperationType2.SUBMISSION_PERIOD_END,
                     OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION -> true
 
+                    OperationType2.AWARD_CONSIDERATION,
                     OperationType2.CREATE_AWARD,
                     OperationType2.CREATE_PCR,
                     OperationType2.CREATE_SUBMISSION,

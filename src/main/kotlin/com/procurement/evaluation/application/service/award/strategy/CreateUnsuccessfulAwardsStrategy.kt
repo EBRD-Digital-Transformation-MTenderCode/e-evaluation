@@ -104,6 +104,7 @@ class CreateUnsuccessfulAwardsStrategy(
             OperationType2.SUBMISSION_PERIOD_END -> AwardStatusDetails.LACK_OF_SUBMISSIONS.asSuccess()
             OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION -> AwardStatusDetails.LOT_CANCELLED.asSuccess()
 
+            OperationType2.AWARD_CONSIDERATION,
             OperationType2.CREATE_AWARD,
             OperationType2.CREATE_PCR,
             OperationType2.CREATE_SUBMISSION,

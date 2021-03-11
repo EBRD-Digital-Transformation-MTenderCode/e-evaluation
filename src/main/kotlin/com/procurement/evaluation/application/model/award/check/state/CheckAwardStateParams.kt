@@ -26,6 +26,8 @@ class CheckAwardStateParams private constructor(
         val allowedOperationTypes = OperationType2.allowedElements
             .filter {
                 when (it) {
+                    OperationType2.AWARD_CONSIDERATION,
+                    OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
                     OperationType2.PCR_PROTOCOL,
                     OperationType2.UPDATE_AWARD -> true
 
@@ -33,7 +35,6 @@ class CheckAwardStateParams private constructor(
                     OperationType2.CREATE_AWARD,
                     OperationType2.CREATE_PCR,
                     OperationType2.CREATE_SUBMISSION,
-                    OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
                     OperationType2.LOT_CANCELLATION,
                     OperationType2.SUBMISSION_PERIOD_END,
                     OperationType2.TENDER_CANCELLATION,
@@ -47,6 +48,11 @@ class CheckAwardStateParams private constructor(
         private val allowedPmd = ProcurementMethodDetails.allowedElements
             .filter {
                 when (it) {
+                    ProcurementMethodDetails.OT, ProcurementMethodDetails.TEST_OT,
+                    ProcurementMethodDetails.MV, ProcurementMethodDetails.TEST_MV,
+                    ProcurementMethodDetails.SV, ProcurementMethodDetails.TEST_SV,
+                    ProcurementMethodDetails.GPA, ProcurementMethodDetails.TEST_GPA,
+                    ProcurementMethodDetails.RT, ProcurementMethodDetails.TEST_RT,
                     ProcurementMethodDetails.CD, ProcurementMethodDetails.TEST_CD,
                     ProcurementMethodDetails.CF, ProcurementMethodDetails.TEST_CF,
                     ProcurementMethodDetails.DA, ProcurementMethodDetails.TEST_DA,
@@ -55,11 +61,6 @@ class CheckAwardStateParams private constructor(
                     ProcurementMethodDetails.NP, ProcurementMethodDetails.TEST_NP,
                     ProcurementMethodDetails.OF, ProcurementMethodDetails.TEST_OF -> true
 
-                    ProcurementMethodDetails.GPA, ProcurementMethodDetails.TEST_GPA,
-                    ProcurementMethodDetails.RT, ProcurementMethodDetails.TEST_RT,
-                    ProcurementMethodDetails.OT, ProcurementMethodDetails.TEST_OT,
-                    ProcurementMethodDetails.MV, ProcurementMethodDetails.TEST_MV,
-                    ProcurementMethodDetails.SV, ProcurementMethodDetails.TEST_SV,
                     ProcurementMethodDetails.FA, ProcurementMethodDetails.TEST_FA,
                     ProcurementMethodDetails.OP, ProcurementMethodDetails.TEST_OP -> false
                 }
