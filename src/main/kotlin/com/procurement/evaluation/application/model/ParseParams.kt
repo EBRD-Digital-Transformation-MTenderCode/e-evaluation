@@ -39,12 +39,12 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
             )
         )
 
-fun parseAwardId(value: String): Result<AwardId, DataErrors.Validation.DataFormatMismatch> =
+fun parseAwardId(value: String, attributeName: String = "awardId"): Result<AwardId, DataErrors.Validation.DataFormatMismatch> =
     value.tryAwardId()
         .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
-                    name = "awardId",
+                    name = attributeName,
                     expectedFormat = "uuid",
                     actualValue = value
                 )

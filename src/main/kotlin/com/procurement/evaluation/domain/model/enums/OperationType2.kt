@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 enum class OperationType2(@JsonValue override val key: String) : EnumElementProvider.Key {
 
     APPLY_QUALIFICATION_PROTOCOL("applyQualificationProtocol"),
+    AWARD_CONSIDERATION("awardConsideration"),
     CREATE_AWARD("createAward"),
     CREATE_PCR("createPcr"),
     CREATE_SUBMISSION("createSubmission"),
