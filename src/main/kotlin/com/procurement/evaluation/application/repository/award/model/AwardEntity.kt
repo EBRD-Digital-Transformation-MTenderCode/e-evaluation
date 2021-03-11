@@ -34,7 +34,7 @@ data class AwardEntity(
                 status = awardEntityFull.status,
                 statusDetails = awardEntityFull.statusDetails,
                 owner = awardEntityFull.owner,
-                jsonData = transform.trySerialization(awardEntityFull).onFailure { return it }
+                jsonData = transform.trySerialization(awardEntityFull.award).onFailure { return it }
             ).asSuccess()
     }
 
