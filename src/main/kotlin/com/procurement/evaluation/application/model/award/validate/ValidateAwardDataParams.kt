@@ -28,7 +28,7 @@ class ValidateAwardDataParams private constructor(
     val operationType: OperationType2,
     val tender: Tender,
     val awards: List<Award>,
-    val mdm: Mdm
+    val mdm: Mdm?
 ) {
     companion object {
         private val allowedOperationTypes = OperationType2.allowedElements
@@ -58,7 +58,7 @@ class ValidateAwardDataParams private constructor(
             operationType: String,
             tender: Tender,
             awards: List<Award>,
-            mdm: Mdm
+            mdm: Mdm?
         ): Result<ValidateAwardDataParams, DataErrors> {
             val parsedCpid = parseCpid(cpid)
                 .onFailure { return it }

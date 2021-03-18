@@ -1966,8 +1966,9 @@ class AwardServiceImpl(
                 .onFailure { return it }
         }
 
-        ValidateAwardDataRules.Mdm.validate(params)
-            .onFailure { return it }
+        if (ValidateAwardDataRules.Mdm.inNeedOfValidation(params.operationType))
+            ValidateAwardDataRules.Mdm.validate(params)
+                .onFailure { return it }
 
         return Validated.ok()
     }
