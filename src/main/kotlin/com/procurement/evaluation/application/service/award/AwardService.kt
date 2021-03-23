@@ -2182,8 +2182,10 @@ class AwardServiceImpl(
             .onFailure { return it }
             .filter { it.award.relatesToOneOfLots(lotIds) }
 
-        if (awardEntities.isEmpty())
-            return ValidationError.FinalizeAward.AwardsRelatedToLotsNotFound().asFailure()
+        val lotsWithoutRelatedAwards = lotIds - awardEntities.flatMap { it.award.relatedLots }.toSet()
+
+        if (lotsWithoutRelatedAwards.isNotEmpty())
+            return ValidationError.FinalizeAward.AwardsRelatedToLotsNotFound(lotsWithoutRelatedAwards).asFailure()
 
         val updatedAwardEntities = awardEntities.map { entity ->
             if (entity.status == AwardStatus.PENDING && entity.statusDetails == AwardStatusDetails.ACTIVE) {
