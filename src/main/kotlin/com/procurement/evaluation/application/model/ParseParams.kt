@@ -8,6 +8,8 @@ import com.procurement.evaluation.domain.model.award.AwardId
 import com.procurement.evaluation.domain.model.award.tryAwardId
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider
 import com.procurement.evaluation.domain.model.enums.EnumElementProvider.Companion.keysAsStrings
+import com.procurement.evaluation.domain.model.lot.LotId
+import com.procurement.evaluation.domain.model.lot.tryLotId
 import com.procurement.evaluation.domain.model.tryOwner
 import com.procurement.evaluation.domain.model.tryToken
 import com.procurement.evaluation.domain.util.extension.toLocalDateTime
@@ -41,6 +43,19 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
 
 fun parseAwardId(value: String, attributeName: String = "awardId"): Result<AwardId, DataErrors.Validation.DataFormatMismatch> =
     value.tryAwardId()
+        .onFailure {
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = attributeName,
+                    expectedFormat = "uuid",
+                    actualValue = value
+                )
+            )
+        }
+        .asSuccess()
+
+fun parseLotId(value: String, attributeName: String): Result<LotId, DataErrors.Validation.DataFormatMismatch> =
+    value.tryLotId()
         .onFailure {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
