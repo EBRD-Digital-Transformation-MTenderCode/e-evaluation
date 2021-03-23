@@ -7,6 +7,7 @@ import com.procurement.evaluation.application.model.award.check.state.CheckAward
 import com.procurement.evaluation.application.model.award.close.awardperiod.CloseAwardPeriodParams
 import com.procurement.evaluation.application.model.award.consideration.DoConsiderationParams
 import com.procurement.evaluation.application.model.award.create.CreateAwardParams
+import com.procurement.evaluation.application.model.award.finalize.FinalizeAwardsParams
 import com.procurement.evaluation.application.model.award.find.FindAwardsForProtocolParams
 import com.procurement.evaluation.application.model.award.get.GetAwardByIdsParams
 import com.procurement.evaluation.application.model.award.requirement.response.AddRequirementResponseParams
@@ -71,6 +72,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.model.request.Update
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CloseAwardPeriodResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.CreateAwardResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.DoConsiderationResult
+import com.procurement.evaluation.infrastructure.handler.v2.model.response.FinalizeAwardsResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.FindAwardsForProtocolResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardByIdsResult
 import com.procurement.evaluation.infrastructure.handler.v2.model.response.GetAwardStateByIdsResult
@@ -189,6 +191,8 @@ interface AwardService {
     fun startAwardPeriod(params: StartAwardPeriodParams): Result<StartAwardPeriodResultV2, Failure>
 
     fun doConsideration(params: DoConsiderationParams): Result<DoConsiderationResult, Failure>
+
+    fun finalizeAwards(params: FinalizeAwardsParams): Result<FinalizeAwardsResult, Failure>
 }
 
 @Service
@@ -1685,6 +1689,7 @@ class AwardServiceImpl(
             )
 
             AwardStatusDetails.AWAITING,
+            AwardStatusDetails.BASED_ON_HUMAN_DECISION,
             AwardStatusDetails.CONSIDERATION,
             AwardStatusDetails.EMPTY,
             AwardStatusDetails.LACK_OF_QUALIFICATIONS,
@@ -2168,6 +2173,49 @@ class AwardServiceImpl(
             }
            .let { DoConsiderationResult(it) }
            .asSuccess()
+    }
+
+    override fun finalizeAwards(params: FinalizeAwardsParams): Result<FinalizeAwardsResult, Failure> {
+        val lotIds = params.tender.lots.toSetBy { it.id.toString() }
+
+        val awardEntities = awardManagementService.find(cpid = params.cpid, ocid = params.ocid)
+            .onFailure { return it }
+            .filter { it.award.relatesToOneOfLots(lotIds) }
+
+        val lotsWithoutRelatedAwards = lotIds - awardEntities.flatMap { it.award.relatedLots }.toSet()
+
+        if (lotsWithoutRelatedAwards.isNotEmpty())
+            return ValidationError.FinalizeAward.AwardsRelatedToLotsNotFound(lotsWithoutRelatedAwards).asFailure()
+
+        val updatedAwardEntities = awardEntities.map { entity ->
+            if (entity.status == AwardStatus.PENDING && entity.statusDetails == AwardStatusDetails.ACTIVE) {
+                entity.updateState(AwardStatus.ACTIVE, AwardStatusDetails.BASED_ON_HUMAN_DECISION)
+            } else if (entity.status == AwardStatus.PENDING && entity.statusDetails == AwardStatusDetails.UNSUCCESSFUL) {
+                entity.updateState(AwardStatus.UNSUCCESSFUL, AwardStatusDetails.BASED_ON_HUMAN_DECISION)
+            } else entity
+        }
+
+        awardManagementService.update(params.cpid, updatedAwardEntities)
+            .onFailure { return it }
+
+        return generateResult(updatedAwardEntities).asSuccess()
+    }
+
+    private fun generateResult(updatedAwardEntities: List<AwardEntityFull>): FinalizeAwardsResult =
+        FinalizeAwardsResult(awards = updatedAwardEntities.map { awardEntity ->
+            FinalizeAwardsResult.Award(
+                id = awardEntity.award.id,
+                status = awardEntity.status,
+                statusDetails = awardEntity.statusDetails,
+                relatedBid = awardEntity.award.relatedBid
+            )
+        })
+
+    private fun Award.relatesToOneOfLots(lotIds: Set<String>) = lotIds.contains(relatedLots.firstOrNull())
+
+    private fun AwardEntityFull.updateState(status: AwardStatus, statusDetails: AwardStatusDetails): AwardEntityFull {
+        val updatedAward = award.copy(status = status, statusDetails = statusDetails)
+        return AwardEntityFull.create(cpid, ocid, owner, updatedAward)
     }
 
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
