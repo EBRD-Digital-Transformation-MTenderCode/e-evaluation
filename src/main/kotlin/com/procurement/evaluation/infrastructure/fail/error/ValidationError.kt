@@ -167,4 +167,11 @@ sealed class ValidationError(
             description = "Award(s) by id(s) '${awardIds.joinToString()}' not found."
         )
     }
+
+    object FinalizeAward{
+        class AwardsRelatedToLotsNotFound() : ValidationError(
+            numberError = "4.15.1",
+            description = "No award related to lots was found."
+        )
+    }
 }
