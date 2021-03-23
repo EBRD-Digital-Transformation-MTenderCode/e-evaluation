@@ -13,6 +13,7 @@ import com.procurement.evaluation.infrastructure.handler.v2.CloseAwardPeriodHand
 import com.procurement.evaluation.infrastructure.handler.v2.CreateAwardHandler
 import com.procurement.evaluation.infrastructure.handler.v2.CreateUnsuccessfulAwardsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.DoConsiderationHandler
+import com.procurement.evaluation.infrastructure.handler.v2.FinalizeAwardsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.FindAwardsForProtocolHandler
 import com.procurement.evaluation.infrastructure.handler.v2.GetAwardByIdsHandler
 import com.procurement.evaluation.infrastructure.handler.v2.GetAwardStateByIdsHandler
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service
 class CommandServiceV2(
     private val logger: Logger,
     private val doConsiderationHandler: DoConsiderationHandler,
+    private val finalizeAwardsHandler: FinalizeAwardsHandler,
     private val getAwardStateByIdsHandler: GetAwardStateByIdsHandler,
     private val getAwardByIdsHandler: GetAwardByIdsHandler,
     private val findAwardsForProtocolHandler: FindAwardsForProtocolHandler,
@@ -43,6 +45,7 @@ class CommandServiceV2(
 
     fun execute(descriptor: CommandDescriptor): ApiResponseV2 = when (descriptor.action) {
         CommandTypeV2.DO_CONSIDERATION -> doConsiderationHandler.handle(descriptor)
+        CommandTypeV2.FINALIZE_AWARDS -> finalizeAwardsHandler.handle(descriptor)
         CommandTypeV2.GET_AWARD_STATES_BY_IDS -> getAwardStateByIdsHandler.handle(descriptor)
         CommandTypeV2.GET_AWARD_BY_IDS -> getAwardByIdsHandler.handle(descriptor)
         CommandTypeV2.FIND_AWARDS_FOR_PROTOCOL -> findAwardsForProtocolHandler.handle(descriptor)
