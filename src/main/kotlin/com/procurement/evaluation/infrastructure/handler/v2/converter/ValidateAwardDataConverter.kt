@@ -17,7 +17,7 @@ fun ValidateAwardDataRequest.convert(): Result<ValidateAwardDataParams, DataErro
         awards = awards.map {
             it.convert().onFailure { fail -> return fail }
         },
-        mdm = mdm.convert().onFailure { return it }
+        mdm = mdm?.convert()?.onFailure { return it }
     )
 
 private fun ValidateAwardDataRequest.Mdm.convert(): Result<ValidateAwardDataParams.Mdm, DataErrors> =
