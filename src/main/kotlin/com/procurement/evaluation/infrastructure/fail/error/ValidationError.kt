@@ -154,12 +154,24 @@ sealed class ValidationError(
             numberError = "4.8.18",
             description = "Scheme '$scheme' of supplier '$supplierId' not found in registration schemes for country '$country'."
         )
+
+        class MdmIsMissing(): ValidationError(
+            numberError = "4.8.19",
+            description = "Mdm must be present in request."
+        )
     }
 
     object DoConsideration {
         class UnknownAwards(awardIds: Collection<String>) : ValidationError(
             numberError = "4.14.1",
             description = "Award(s) by id(s) '${awardIds.joinToString()}' not found."
+        )
+    }
+
+    object FinalizeAward{
+        class AwardsRelatedToLotsNotFound(lots: Collection<String>) : ValidationError(
+            numberError = "4.15.1",
+            description = "No award related to lot(s) '${lots.joinToString()}' was found."
         )
     }
 }

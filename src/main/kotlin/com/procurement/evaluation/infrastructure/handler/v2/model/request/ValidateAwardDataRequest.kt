@@ -15,7 +15,9 @@ data class ValidateAwardDataRequest(
     @field:JsonProperty("operationType") @param:JsonProperty("operationType") val operationType: String,
     @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender,
     @field:JsonProperty("awards") @param:JsonProperty("awards") val awards: List<Award>,
-    @param:JsonProperty("mdm") @field:JsonProperty("mdm") val mdm: Mdm
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @param:JsonProperty("mdm") @field:JsonProperty("mdm") val mdm: Mdm?
 ) {
     data class Tender(
         @field:JsonProperty("lots") @param:JsonProperty("lots") val lots: List<Lot>

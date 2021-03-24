@@ -224,7 +224,26 @@ object ValidateAwardDataRules {
     }
 
     object Mdm{
+        fun inNeedOfValidation(operationType: OperationType2) = when (operationType) {
+            OperationType2.CREATE_AWARD -> true
+            OperationType2.AWARD_CONSIDERATION,
+            OperationType2.APPLY_QUALIFICATION_PROTOCOL,
+            OperationType2.CREATE_PCR,
+            OperationType2.CREATE_SUBMISSION,
+            OperationType2.DECLARE_NON_CONFLICT_OF_INTEREST,
+            OperationType2.LOT_CANCELLATION,
+            OperationType2.PCR_PROTOCOL,
+            OperationType2.SUBMISSION_PERIOD_END,
+            OperationType2.TENDER_CANCELLATION,
+            OperationType2.TENDER_OR_LOT_AMENDMENT_CANCELLATION,
+            OperationType2.TENDER_OR_LOT_AMENDMENT_CONFIRMATION,
+            OperationType2.UPDATE_AWARD -> false
+        }
+
         fun validate(params: ValidateAwardDataParams): Validated<Failure>{
+            if (params.mdm == null)
+                return ValidationError.ValidateAwardData.MdmIsMissing().asValidationError()
+
             val schemesByCountry = params.mdm.registrationSchemes.associateBy(
                 keySelector = { it.country },
                 valueTransform = { it.schemes.toSet() }

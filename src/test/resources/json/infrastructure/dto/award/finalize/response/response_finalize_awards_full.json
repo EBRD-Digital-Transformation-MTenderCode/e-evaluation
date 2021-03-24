@@ -1,0 +1,10 @@
+{
+  "awards": [
+    {
+      "id": "string",
+      "status": "unsuccessful",
+      "statusDetails": "basedOnHumanDecision",
+      "relatedBid": "string"
+    }
+  ]
+}
