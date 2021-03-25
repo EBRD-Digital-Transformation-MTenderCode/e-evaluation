@@ -47,7 +47,7 @@ data class CreateAwardsData(
         val id: String,
         val date: LocalDateTime,
         val status: BidStatusType,
-        val statusDetails: BidStatusDetailsType,
+        val statusDetails: BidStatusDetailsType?,
         val tenderers: List<Tenderer>,
         val value: Money,
         val documents: List<Document>,
