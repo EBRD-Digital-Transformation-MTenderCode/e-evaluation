@@ -79,7 +79,10 @@ data class CreateAwardsRequest(
         @param:JsonProperty("date") @field:JsonProperty("date") val date: LocalDateTime,
 
         @param:JsonProperty("status") @field:JsonProperty("status") val status: BidStatusType,
-        @param:JsonProperty("statusDetails") @field:JsonProperty("statusDetails") val statusDetails: BidStatusDetailsType,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @param:JsonProperty("statusDetails") @field:JsonProperty("statusDetails") val statusDetails: BidStatusDetailsType?,
+
         @param:JsonProperty("tenderers") @field:JsonProperty("tenderers") val tenderers: List<Tenderer>,
 
         @JsonDeserialize(using = MoneyDeserializer::class)
