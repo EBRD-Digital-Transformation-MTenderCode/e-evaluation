@@ -31,7 +31,6 @@
       "id": "123e4567-e89b-12d3-a456-426655440000",
       "date": "2019-03-02T08:00:00Z",
       "status": "pending",
-      "statusDetails": "valid",
       "tenderers": [
         {
           "id": "bid[0].tenderers[0].id",
