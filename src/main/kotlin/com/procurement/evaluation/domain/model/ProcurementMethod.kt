@@ -16,6 +16,7 @@ enum class ProcurementMethod(@JsonValue val value: String) {
     OF("selective"),
     OP("selective"),
     OT("open"),
+    RFQ("open"),
     RT("selective"),
     SV("open"),
     TEST_CD("selective"),
@@ -30,6 +31,7 @@ enum class ProcurementMethod(@JsonValue val value: String) {
     TEST_OF("selective"),
     TEST_OP("selective"),
     TEST_OT("open"),
+    TEST_RFQ("open"),
     TEST_RT("selective"),
     TEST_SV("open");
 

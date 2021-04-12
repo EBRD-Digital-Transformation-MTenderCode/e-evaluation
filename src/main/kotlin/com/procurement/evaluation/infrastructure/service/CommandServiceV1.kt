@@ -410,7 +410,8 @@ class CommandServiceV1(
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
                     ProcurementMethod.CF, ProcurementMethod.TEST_CF,
                     ProcurementMethod.OF, ProcurementMethod.TEST_OF,
-                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP,
+                    ProcurementMethod.RFQ, ProcurementMethod.TEST_RFQ -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
             CommandTypeV1.GET_WINNING_AWARD -> {
@@ -523,6 +524,7 @@ class CommandServiceV1(
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
                     ProcurementMethod.OF, ProcurementMethod.TEST_OF,
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.RFQ, ProcurementMethod.TEST_RFQ,
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV -> {
                         val context = StartAwardPeriodContext(
@@ -560,6 +562,7 @@ class CommandServiceV1(
                     ProcurementMethod.OF, ProcurementMethod.TEST_OF,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.RFQ, ProcurementMethod.TEST_RFQ,
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV -> {
                         val context = CreateUnsuccessfulAwardsContext(

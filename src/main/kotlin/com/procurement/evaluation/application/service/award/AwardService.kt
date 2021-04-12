@@ -825,7 +825,8 @@ class AwardServiceImpl(
         when (stage) {
             Stage.EV,
             Stage.TP,
-            Stage.PC -> {
+            Stage.PC,
+            Stage.RQ -> {
                 when (statusDetails) {
                     AwardStatusDetails.UNSUCCESSFUL,
                     AwardStatusDetails.ACTIVE,
@@ -873,7 +874,8 @@ class AwardServiceImpl(
         when (stage) {
             Stage.EV,
             Stage.TP,
-            Stage.NP -> {
+            Stage.NP,
+            Stage.RQ -> {
                 val lots = award.relatedLots.toSet()
                 val relatedAwards = awardRepository.findBy(cpid = context.cpid, ocid = context.ocid)
                     .orThrow { it.exception }
@@ -1133,6 +1135,7 @@ class AwardServiceImpl(
             Stage.FS,
             Stage.PC,
             Stage.PN,
+            Stage.RQ,
             Stage.TP -> Unit
         }
     }
@@ -2295,7 +2298,8 @@ class AwardServiceImpl(
     private fun getAwardForActiveStatusDetails(stage: Stage, awards: Collection<Award>): Award? {
         when (stage) {
             Stage.EV,
-            Stage.TP -> {
+            Stage.TP,
+            Stage.RQ -> {
                 val awardsByStatusDetails: Map<AwardStatusDetails, List<Award>> = awards.groupBy { it.statusDetails }
                 val existsConsideration = awardsByStatusDetails.existsConsideration
                 val existsAwaiting = awardsByStatusDetails.existsAwaiting
@@ -3069,7 +3073,8 @@ class AwardServiceImpl(
     ) = when (pmd) {
         ProcurementMethod.OT, ProcurementMethod.TEST_OT,
         ProcurementMethod.MV, ProcurementMethod.TEST_MV,
-        ProcurementMethod.SV, ProcurementMethod.TEST_SV ->
+        ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+        ProcurementMethod.RFQ, ProcurementMethod.TEST_RFQ ->
             when (relatesTo) {
                 CriteriaRelatesTo.ITEM,
                 CriteriaRelatesTo.LOT,
