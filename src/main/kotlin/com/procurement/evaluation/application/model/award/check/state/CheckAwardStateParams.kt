@@ -59,7 +59,8 @@ class CheckAwardStateParams private constructor(
                     ProcurementMethodDetails.DC, ProcurementMethodDetails.TEST_DC,
                     ProcurementMethodDetails.IP, ProcurementMethodDetails.TEST_IP,
                     ProcurementMethodDetails.NP, ProcurementMethodDetails.TEST_NP,
-                    ProcurementMethodDetails.OF, ProcurementMethodDetails.TEST_OF -> true
+                    ProcurementMethodDetails.OF, ProcurementMethodDetails.TEST_OF,
+                    ProcurementMethodDetails.RFQ, ProcurementMethodDetails.TEST_RFQ -> true
 
                     ProcurementMethodDetails.FA, ProcurementMethodDetails.TEST_FA,
                     ProcurementMethodDetails.OP, ProcurementMethodDetails.TEST_OP -> false
