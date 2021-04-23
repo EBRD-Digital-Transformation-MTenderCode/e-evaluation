@@ -18,6 +18,7 @@ enum class ProcurementMethodDetails(@JsonValue override val key: String) : EnumE
     OF("OF"),
     OP("OP"),
     OT("OT"),
+    RFQ("RFQ"),
     RT("RT"),
     SV("SV"),
     TEST_CD("TEST_CD"),
@@ -32,6 +33,7 @@ enum class ProcurementMethodDetails(@JsonValue override val key: String) : EnumE
     TEST_OF("TEST_OF"),
     TEST_OP("TEST_OP"),
     TEST_OT("TEST_OT"),
+    TEST_RFQ("TEST_RFQ"),
     TEST_RT("TEST_RT"),
     TEST_SV("TEST_SV");
 
