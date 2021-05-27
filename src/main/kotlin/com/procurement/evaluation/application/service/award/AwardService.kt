@@ -2179,16 +2179,16 @@ class AwardServiceImpl(
     }
 
     override fun finalizeAwards(params: FinalizeAwardsParams): Result<FinalizeAwardsResult, Failure> {
-        val lotIds = params.tender.lots.toSetBy { it.id.toString() }
+        val receivedAwardIds = params.contracts.toSetBy { it.awardId.toString() }
 
-        val awardEntities = awardManagementService.find(cpid = params.cpid, ocid = params.ocid)
-            .onFailure { return it }
-            .filter { it.award.relatesToOneOfLots(lotIds) }
+        val awardEntities = awardManagementService
+            .find(cpid = params.cpid, ocid = params.ocid).onFailure { return it }
+            .filter { it.award.id in receivedAwardIds }
 
-        val lotsWithoutRelatedAwards = lotIds - awardEntities.flatMap { it.award.relatedLots }.toSet()
+        val missingAwards = receivedAwardIds - awardEntities.map { it.award.id }
 
-        if (lotsWithoutRelatedAwards.isNotEmpty())
-            return ValidationError.FinalizeAward.AwardsRelatedToLotsNotFound(lotsWithoutRelatedAwards).asFailure()
+        if (missingAwards.isNotEmpty())
+            return ValidationError.FinalizeAward.AwardsRelatedToLotsNotFound(missingAwards).asFailure()
 
         val updatedAwardEntities = awardEntities.map { entity ->
             if (entity.status == AwardStatus.PENDING && entity.statusDetails == AwardStatusDetails.ACTIVE) {
@@ -2213,8 +2213,6 @@ class AwardServiceImpl(
                 relatedBid = awardEntity.award.relatedBid
             )
         })
-
-    private fun Award.relatesToOneOfLots(lotIds: Set<String>) = lotIds.contains(relatedLots.firstOrNull())
 
     private fun AwardEntityFull.updateState(status: AwardStatus, statusDetails: AwardStatusDetails): AwardEntityFull {
         val updatedAward = award.copy(status = status, statusDetails = statusDetails)
