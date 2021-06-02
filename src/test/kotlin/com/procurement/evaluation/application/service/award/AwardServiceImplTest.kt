@@ -28,6 +28,7 @@ import com.procurement.evaluation.model.dto.ocds.Award
 import com.procurement.evaluation.model.dto.ocds.AwardStatus
 import com.procurement.evaluation.model.dto.ocds.AwardStatusDetails
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -193,21 +194,19 @@ internal class AwardServiceImplTest {
             )
             val actual = awardService.finalizeAwards(getParams()) as Result.Failure
             val expectedErrorCode = "VR-4.15.1"
-            val expectedErrorMessage = "No award related to lot(s) '$LOT_ID_2' was found."
 
             assertEquals(expectedErrorCode, actual.reason.code)
-            assertEquals(expectedErrorMessage, actual.reason.description)
+            assertTrue(actual.reason.description.contains(AWARD_ID_2))
         }
 
         private fun getParams() = FinalizeAwardsParams(
             cpid = CPID,
             ocid = OCID,
-            tender = FinalizeAwardsParams.Tender(
+            contracts =
                 listOf(
-                    FinalizeAwardsParams.Tender.Lot(LOT_ID_1),
-                    FinalizeAwardsParams.Tender.Lot(LOT_ID_2)
+                    FinalizeAwardsParams.Contract(id = "1", awardId = AwardId.fromString(AWARD_ID)),
+                    FinalizeAwardsParams.Contract(id = "2", awardId= AwardId.fromString(AWARD_ID_2))
                 )
-            )
         )
 
         private fun stubAwardEntity(id: String, lotId: String, status: AwardStatus, statusDetails: AwardStatusDetails) =

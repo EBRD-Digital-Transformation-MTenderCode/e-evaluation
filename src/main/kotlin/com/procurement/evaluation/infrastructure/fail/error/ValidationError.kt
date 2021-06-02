@@ -169,9 +169,9 @@ sealed class ValidationError(
     }
 
     object FinalizeAward{
-        class AwardsRelatedToLotsNotFound(lots: Collection<String>) : ValidationError(
+        class AwardsRelatedToLotsNotFound(awardIds: Collection<String>) : ValidationError(
             numberError = "4.15.1",
-            description = "No award related to lot(s) '${lots.joinToString()}' was found."
+            description = "No award by award id '${awardIds.joinToString()}' was found."
         )
     }
 }

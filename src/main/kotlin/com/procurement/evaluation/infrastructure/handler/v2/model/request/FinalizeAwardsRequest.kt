@@ -6,13 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class FinalizeAwardsRequest(
     @param:JsonProperty("cpid") @field:JsonProperty("cpid") val cpid: String,
     @param:JsonProperty("ocid") @field:JsonProperty("ocid") val ocid: String,
-    @param:JsonProperty("tender") @field:JsonProperty("tender") val tender: Tender
+    @field:JsonProperty("contracts") @param:JsonProperty("contracts") val contracts: List<Contract>
 ) {
-    data class Tender(
-        @param:JsonProperty("lots") @field:JsonProperty("lots") val lots: List<Lot>
-    ) {
-        data class Lot(
-            @param:JsonProperty("id") @field:JsonProperty("id") val id: String
-        )
-    }
+    data class Contract(
+        @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
+        @field:JsonProperty("awardId") @param:JsonProperty("awardId") val awardId: String
+    )
 }
