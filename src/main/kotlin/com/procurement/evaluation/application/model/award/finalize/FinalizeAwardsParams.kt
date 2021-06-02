@@ -2,18 +2,15 @@ package com.procurement.evaluation.application.model.award.finalize
 
 import com.procurement.evaluation.domain.model.Cpid
 import com.procurement.evaluation.domain.model.Ocid
-import com.procurement.evaluation.domain.model.lot.LotId
+import com.procurement.evaluation.domain.model.award.AwardId
 
 data class FinalizeAwardsParams(
     val cpid: Cpid,
     val ocid: Ocid,
-    val tender: Tender
+    val contracts: List<Contract>
 ) {
-    data class Tender(
-        val lots: List<Lot>
-    ) {
-        data class Lot(
-            val id: LotId
-        )
-    }
+    data class Contract(
+        val id: String,
+        val awardId: AwardId
+    )
 }
