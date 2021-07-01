@@ -866,6 +866,7 @@ class AwardServiceImpl(
             Stage.FS,
             Stage.FE,
             Stage.EI,
+            Stage.PO,
             Stage.AC -> throw ErrorException(error = INVALID_STAGE)
         }
     }
@@ -894,12 +895,14 @@ class AwardServiceImpl(
                 if (isNotAcceptableStatusDetails(relatedAwards))
                     throw ErrorException(error = ALREADY_HAVE_ACTIVE_AWARDS)
             }
+            
             Stage.AC,
             Stage.EI,
             Stage.FE,
             Stage.FS,
+            Stage.PC,
             Stage.PN,
-            Stage.PC -> Unit
+            Stage.PO -> Unit
         }
     }
 
@@ -1135,6 +1138,7 @@ class AwardServiceImpl(
             Stage.FS,
             Stage.PC,
             Stage.PN,
+            Stage.PO,
             Stage.RQ,
             Stage.TP -> Unit
         }
@@ -2322,12 +2326,14 @@ class AwardServiceImpl(
                     .first { it.statusDetails == AwardStatusDetails.EMPTY }
                     .copy(statusDetails = AwardStatusDetails.AWAITING)
             }
-            Stage.PN,
-            Stage.FS,
-            Stage.FE,
-            Stage.EI,
+            
             Stage.AC,
-            Stage.NP -> throw ErrorException(INVALID_STAGE)
+            Stage.EI,
+            Stage.FE,
+            Stage.FS,
+            Stage.NP,
+            Stage.PN,
+            Stage.PO -> throw ErrorException(INVALID_STAGE)
         }
     }
 
